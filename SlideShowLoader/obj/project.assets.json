@@ -1,0 +1,103 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.7.2": {
+      "SlideShowInterfaces/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/SlideShowInterfaces.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SlideShowInterfaces.dll": {}
+        }
+      },
+      "SlideShowLogging/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/SlideShowLogging.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SlideShowLogging.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SlideShowInterfaces/1.0.0": {
+      "type": "project",
+      "path": "../SlideShowInterfaces/SlideShowInterfaces.vbproj",
+      "msbuildProject": "../SlideShowInterfaces/SlideShowInterfaces.vbproj"
+    },
+    "SlideShowLogging/1.0.0": {
+      "type": "project",
+      "path": "../SlideShowLogging/SlideShowLogging.vbproj",
+      "msbuildProject": "../SlideShowLogging/SlideShowLogging.vbproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.7.2": [
+      "SlideShowInterfaces >= 1.0.0",
+      "SlideShowLogging >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Arne\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
+      "projectName": "SlideShowLoader",
+      "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
+      "packagesPath": "C:\\Users\\Arne\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Arne\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net472"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net472": {
+          "targetAlias": "net472",
+          "projectReferences": {
+            "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
+              "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj"
+            },
+            "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj": {
+              "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      }
+    },
+    "frameworks": {
+      "net472": {
+        "targetAlias": "net472",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

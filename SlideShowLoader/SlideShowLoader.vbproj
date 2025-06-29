@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>SlideShowLoader</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SlideShowInterfaces\SlideShowInterfaces.vbproj" />
+    <ProjectReference Include="..\SlideShowLogging\SlideShowLogging.vbproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.AssemblyInfoInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.AssemblyInfo.vb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Debug\net472\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideSho.E5F27EA2.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Debug\net472\SlideShowLoader.sourcelink.json

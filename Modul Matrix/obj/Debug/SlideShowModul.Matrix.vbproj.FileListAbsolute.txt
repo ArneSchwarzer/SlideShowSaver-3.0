@@ -1,0 +1,32 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\Modul Matrix.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\Modul Matrix.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\Modul Matrix.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowBildauswahl.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowBildauswahl.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\SlideShowModul.Matrix.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul_Matrix.frmModulMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul_Matrix.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul_Matrix.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\SlideShowModul.Matrix.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\SlideShowModul.Matrix.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\SlideSho.63CEB9E3.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul Matrix.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul Matrix.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul Matrix.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Matrix.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Matrix.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Matrix.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\taglib-sharp.dll

@@ -1,0 +1,10 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowShader.SchwarzWeiß.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowShader.SchwarzWeiß.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowShader.SchwarzWeiß.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.pdb
