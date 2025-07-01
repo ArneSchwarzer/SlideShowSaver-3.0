@@ -45,7 +45,7 @@ Public Class InterfaceDeclarations
         Function MemorizeModulSettings(uc As UserControl) As Object
         Sub ApplyModulSettings(settings As Object)
         Sub GetModulSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetModulDefaultSettings(uc As UserControl)
+        Sub GetModulRegistryOrDefaultSettings(uc As UserControl)
 
         ' --- Info-Kommunikation ---
         Sub AttentionShaderGewechselt(shaderName As String)
@@ -81,7 +81,7 @@ Public Class InterfaceDeclarations
         Function MemorizeTransitionSettings(uc As UserControl) As Object
         Sub ApplyTransitionSettings(settings As Object)
         Sub GetTransitionSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetTransitionDefaultSettings(uc As UserControl)
+        Sub GetTransitionRegistryOrDefaultSettings(uc As UserControl)
 
         ' --- Info-Kommunikation ---
         Sub AttentionShaderGewechselt(shaderName As String)
@@ -111,7 +111,7 @@ Public Class InterfaceDeclarations
         Function MemorizeShaderSettings(uc As UserControl) As Object
         Sub ApplyShaderSettings(settings As Object)
         Sub GetShaderSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetShaderDefaultSettings(uc As UserControl)
+        Sub GetShaderRegistryOrDefaultSettings(uc As UserControl)
 
         ' --- Info-Kommunikation
         Sub CheckYourSettings()

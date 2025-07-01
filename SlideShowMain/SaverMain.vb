@@ -10,7 +10,7 @@ Module SaverMain
     ' -- Initialisierung von globalen Variablen --
 
     'Für den Fallback-Saver
-    Public fallbackInstanz As frmFallbackSaver = Nothing
+    Public fallbackInstanz As frmFallbackSaver
     Public fallbackIsActive As Boolean = False
     Public fallbackPaused As Boolean = False
 
@@ -58,7 +58,8 @@ Module SaverMain
         'Hallo sagen
         LogHandling.LogInfo("SlideShowSaver 3.0 Framework wurde gestartet")
 
-        'MCP initialisieren
+        'Fallbackserver instanzieren und MCP initialisieren
+        fallbackInstanz = New frmFallbackSaver()
         Try
             If masterControlProgram Is Nothing Then
                 masterControlProgram = New frmSaverMain()

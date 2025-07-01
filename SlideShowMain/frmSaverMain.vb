@@ -200,23 +200,25 @@ Public Class frmSaverMain
 
         Dim neuesModul As String
 
-        If modulReihenfolge = "In Reihenfolge" Then
-            neuesModul = ListHandling.GetNextAlphabeticItemName(listOfEnabledModules, activeModule.ModulName.ToString)
-        Else
-            'entspricht automatisch "Zufällig" und "Zufällig bei Start", da letzteres den trmMain
-            'ja eh schon (in IniAndReinitialize()) abschaltet .
-            neuesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
-        End If
-
-        AktuellesModulAuswählen(neuesModul)
-
         If fallbackIsActive Then
             fallbackInstanz.Show()
             LogHandling.LogInfo("Neues Modul gestartet: Fallbacksaver")
         Else
+
+            If modulReihenfolge = "In Reihenfolge" Then
+                neuesModul = ListHandling.GetNextAlphabeticItemName(listOfEnabledModules, activeModule.ModulName.ToString)
+            Else
+                'entspricht automatisch "Zufällig" und "Zufällig bei Start", da letzteres den trmMain
+                'ja eh schon (in IniAndReinitialize()) abschaltet .
+                neuesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
+            End If
+
+            AktuellesModulAuswählen(neuesModul)
             activeModule.StartModul(Screen.PrimaryScreen)
             LogHandling.LogInfo("Neues Modul gestartet: " & activeModule.ModulName.ToString)
+
         End If
+
     End Sub
 
     Private Sub openOptionsDialog()
@@ -236,6 +238,11 @@ Public Class frmSaverMain
             IniAndReinitialize()
             LegitimeListeErstellen()
 
+            If listOfEnabledModules.Count = 0 Then
+                fallbackIsActive = True
+                fallbackPaused = False
+            End If
+
             'Und prüfen ob das aktuelle Modul weiterlaufen darf oder nicht
             If aktivesModulLebensberechtigungPrüfen() = False Then
                 WechselLogik()
@@ -243,7 +250,9 @@ Public Class frmSaverMain
 
             'Der Bildauswahl und dem Modul befehlen, frische Settings zu laden
             BildauswahlMain.CheckYourSettings()
-            activeModule.CheckYourSettings()
+            If activeModule IsNot Nothing Then
+                activeModule.CheckYourSettings()
+            End If
 
         End If
 

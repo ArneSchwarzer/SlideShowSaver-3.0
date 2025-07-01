@@ -1,6 +1,7 @@
 ﻿Imports System.Reflection
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports SlideShowLogging
 
 Public Class ConversionHandling
 
@@ -30,32 +31,41 @@ Public Class ConversionHandling
     ''' <summary>
     ''' Wandelt ein Dictionary(Of String, String) zurück in eine Struktur des Typs T.
     ''' </summary>
-    Public Shared Function DictionaryZuStruktur(Of T As New)(dict As Dictionary(Of String, String)) As T
-        Dim struktur As New T
+    Public Shared Function DictionaryZuStruktur(Of T As Structure)(dict As Dictionary(Of String, String)) As T
+        Dim boxed As Object = New T()
         Dim felder As FieldInfo() = GetType(T).GetFields(BindingFlags.Instance Or BindingFlags.Public)
 
         For Each feld In felder
             If dict.ContainsKey(feld.Name) Then
                 Try
                     Dim typ = feld.FieldType
+                    Dim quellwert = dict(feld.Name)
+                    LogHandling.LogDebug("Konvertiere: Feld=" & feld.Name & ", Typ=" & typ.Name & ", Wert='" & quellwert & "'")
+
                     If typ = GetType(List(Of String)) Then
                         Dim list As New List(Of String)
-                        If Not String.IsNullOrEmpty(dict(feld.Name)) Then
-                            list = dict(feld.Name).Split(";"c).ToList()
+                        If Not String.IsNullOrEmpty(quellwert) Then
+                            list = quellwert.Split(";"c).ToList()
                         End If
-                        feld.SetValue(struktur, list)
+                        feld.SetValue(boxed, list)
+
                     Else
-                        Dim konvertiert = Convert.ChangeType(dict(feld.Name), typ)
-                        feld.SetValue(struktur, konvertiert)
+                        Dim konvertiert = Convert.ChangeType(quellwert, typ)
+                        feld.SetValue(boxed, konvertiert)
                     End If
-                Catch
-                    ' Konvertierungsfehler ignorieren
+
+                Catch ex As Exception
+                    LogHandling.LogError("DictionaryZuStruktur - Konvertierungsfehler bei Feld '" & feld.Name & "': " & ex.Message)
                 End Try
             End If
         Next
 
-        Return struktur
+        Return CType(boxed, T)
     End Function
+
+
+
+
 
     ''' <summary>
     ''' Liest die Werte von Standard-UI-Controls aus und schreibt sie in ein Dictionary.

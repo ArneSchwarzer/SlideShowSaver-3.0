@@ -102,7 +102,7 @@ Public Class ModulMain
         DictionaryZuUserControl(uc, dict)
     End Sub
 
-    Public Sub GetModulDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulDefaultSettings
+    Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
         Dim defaults As New ModulSettings_Matrix With {
             .HighlightTexte = New List(Of String) From {"Follow the white rabbit", "Wake up, Neo"},
             .SzenendauerSekunden = 20

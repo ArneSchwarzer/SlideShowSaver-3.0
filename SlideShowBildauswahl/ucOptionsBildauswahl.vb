@@ -230,17 +230,17 @@ Public Class ucOptionsBildauswahl
             End If
 
             'In die Liste eintragen
-            If Not lstWhiteList.Items.Contains(myTag) Then
-                lstWhiteList.Items.Add(myTag)
+            If Not lstBlackList.Items.Contains(myTag) Then
+                lstBlackList.Items.Add(myTag)
             End If
 
             'Button-Status setzen
-            If lstWhiteList.Items.Count > 0 Then
-                btnWhiteListListeLöschen.Enabled = True
-                btnWhiteListLöschen.Enabled = (lstWhiteList.SelectedIndex >= 0)
+            If lstBlackList.Items.Count > 0 Then
+                btnBlackListListeLöschen.Enabled = True
+                btnBlackListLöschen.Enabled = (lstBlackList.SelectedIndex >= 0)
             Else
-                btnWhiteListLöschen.Enabled = False
-                btnWhiteListListeLöschen.Enabled = False
+                btnBlackListLöschen.Enabled = False
+                btnBlackListListeLöschen.Enabled = False
             End If
 
         End If

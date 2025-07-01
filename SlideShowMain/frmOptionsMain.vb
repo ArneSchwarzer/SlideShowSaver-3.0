@@ -34,14 +34,14 @@ Public Class frmOptionsMain
 
     'Sonstiges
     Private uc As UserControl
-
-
     Private modulSettingsZwischenspeicher As New Dictionary(Of String, Object)
 
 
     Private Sub frmOptionsMain_Load(sender As Object, e As EventArgs) Handles Me.Load
 #Region "Header frmOptionMain_Load"
         Dim defaultsMain As New Dictionary(Of String, String)
+        Dim anzahlMarkierteModule As Integer
+
         defaultsMain = GetMainDefaultSettings()
 
         Me.TopMost = True
@@ -94,7 +94,7 @@ Public Class frmOptionsMain
 
         'Combobox cmbModulwechsel
         cmbModulwechsel.SelectedItem = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaultsMain)
-        If cmbModulwechsel.SelectedIndex = 0 Then
+        If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start
             lblNtrkDauerModulwechsel.Enabled = False
             lblDauerModuswechsel.Enabled = False
             trkDauerModulwechsel.Enabled = False
@@ -106,7 +106,8 @@ Public Class frmOptionsMain
 
         'Label lblKeineModule
 #Region "Label 'Keine Module'"
-        KeineModuleLabelLogik()
+        anzahlMarkierteModule = clbModule.CheckedItems.Count
+        KeineModuleLabelLogik(anzahlMarkierteModule)
 #End Region
 
         'Checklistbox clbTransitionsModule
@@ -167,23 +168,15 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub clbModule_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbModule.ItemCheck
-        Dim anzahlMarkierteModule As Integer
-
         Try
-            anzahlMarkierteModule = clbModule.CheckedItems.Count
-            If e.NewValue = CheckState.Unchecked Then
-                anzahlMarkierteModule -= 1
-            ElseIf e.NewValue = CheckState.Checked Then
-                anzahlMarkierteModule += 1
-            End If
-
-            'Label lblKeineModule
-            KeineModuleLabelLogik()
+            ' BeginInvoke wartet auf aktualisierten CheckedState – kein Korrekturterm nötig!
+            BeginInvoke(Sub()
+                            Dim anzahlMarkierteModule As Integer = clbModule.CheckedItems.Count
+                            KeineModuleLabelLogik(anzahlMarkierteModule)
+                        End Sub)
         Catch ex As Exception
             LogHandling.LogError("Fehler in clbModule_ItemCheck: " & ex.Message.ToString)
         End Try
-
-
     End Sub
 
     Private Sub btnAbbrechen_Click(sender As Object, e As EventArgs) Handles btnAbbrechen.Click
@@ -191,12 +184,17 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub clbModule_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbModule.SelectedIndexChanged
+        'Wechselt den Inhalt der tpModul gemäß dem gerade selektieren Modul
+        Dim currentSettings As New Object
+        Dim modulName As String
+        Dim restoreSettings As Object = Nothing
+
         Try
             ' Vorheriges Modul sichern
             If aktuellGeladenesModul IsNot Nothing Then
                 uc = TryCast(tpModul.Controls(0), UserControl)
                 If uc IsNot Nothing Then
-                    Dim currentSettings = aktuellGeladenesModul.MemorizeModulSettings(uc)
+                    currentSettings = aktuellGeladenesModul.MemorizeModulSettings(uc)
                     modulSettingsZwischenspeicher(aktuellGeladenesModul.ModulName) = currentSettings
                 End If
                 aktuellGeladenesModul.StopModul()
@@ -206,7 +204,7 @@ Public Class frmOptionsMain
 
             ' Neues Modul laden
             If clbModule.SelectedItem IsNot Nothing Then
-                Dim modulName As String = clbModule.SelectedItem.ToString()
+                modulName = clbModule.SelectedItem.ToString()
                 aktuellGeladenesModul = ModulByNameLoader.LadeModulNachName(modulName)
 
                 If aktuellGeladenesModul IsNot Nothing Then
@@ -218,13 +216,11 @@ Public Class frmOptionsMain
                     If Not tabOptions.TabPages.Contains(tpModul) Then tabOptions.TabPages.Add(tpModul)
 
                     'Einstellungen anwenden
-                    Dim restoreSettings As Object = Nothing
                     If modulSettingsZwischenspeicher.ContainsKey(modulName) Then
                         restoreSettings = modulSettingsZwischenspeicher(modulName)
-
                         aktuellGeladenesModul.GetModulSettings(uc, restoreSettings)
                     Else
-                        aktuellGeladenesModul.GetModulDefaultSettings(uc)
+                        aktuellGeladenesModul.GetModulRegistryOrDefaultSettings(uc)
                     End If
 
                     'Ggf. Bildauswahl aktivieren...
@@ -236,7 +232,6 @@ Public Class frmOptionsMain
                         tabOptions.TabPages.Remove(tpBildauswahl)
                     End If
 
-
                 End If
             End If
         Catch ex As Exception
@@ -245,9 +240,7 @@ Public Class frmOptionsMain
 
     End Sub
 
-    Private Sub KeineModuleLabelLogik()
-        Dim anzahlMarkierteModule As Integer = clbModule.CheckedItems.Count
-
+    Private Sub KeineModuleLabelLogik(anzahlMarkierteModule As Integer)
         If clbModule.Items.Count = 0 Then
             lblKeineModule.Text = "Keine Module geladen, spiele Bouncing Logo"
             lblKeineModule.Visible = True
@@ -257,8 +250,8 @@ Public Class frmOptionsMain
             trkDauerModulwechsel.Visible = False
             lblNtrkDauerModulwechsel.Visible = False
             lblDauerModuswechsel.Visible = False
-        ElseIf anzahlMarkierteModule <= 1 Then
 
+        ElseIf anzahlMarkierteModule <= 1 Then
             If anzahlMarkierteModule = 0 Then
                 lblKeineModule.Text = "Keine Module ausgewählt, spiele Bouncing Logo"
                 lblKeineModule.Visible = True
@@ -272,6 +265,7 @@ Public Class frmOptionsMain
             trkDauerModulwechsel.Visible = False
             lblNtrkDauerModulwechsel.Visible = False
             lblDauerModuswechsel.Visible = False
+
         Else
             lblKeineModule.Visible = False
             cmbModulwechsel.Enabled = True
@@ -286,13 +280,15 @@ Public Class frmOptionsMain
                 lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
             End If
         End If
-
     End Sub
 
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
         Dim uc As UserControl
         Dim bildauswahlSettings As New Dictionary(Of String, String)
+        Dim restoreSettings As Object = Nothing
+        Dim modul As ISlideShowModul = Nothing
 
+#Region "Main Settings speichern"
         ' === Main Settings ===
         markierteModule = GetCheckedItemsAsString(clbModule)
         markierteTransitionen = GetCheckedItemsAsString(clbTransitionsModule)
@@ -306,7 +302,8 @@ Public Class frmOptionsMain
 
         LogHandling.LogDebug("Registry-Einträge für Main-Settings geschrieben.")
 
-
+#End Region
+#Region "Bildauswahl Settings speichern"
         ' === Bildauswahl Settings ===
         uc = TryCast(tpBildauswahl.Controls(0), UserControl)
         If uc IsNot Nothing Then
@@ -315,7 +312,8 @@ Public Class frmOptionsMain
 
         BildauswahlMain.WriteBildauswahlSettingsToRegistry(bildauswahlSettings)
 
-
+#End Region
+#Region "Modul Settings speichern"
         ' === Modul Setting ===
 
         ' Sicherstellen, dass das aktive Modul seine Settings vorher aktualisiert
@@ -327,23 +325,27 @@ Public Class frmOptionsMain
             End If
         End If
 
-        ' Speicher-Schleife: Alle bekannten Module anwenden lassen
+        ' Speicher-Schleife: Alle Module aus dem modulSettingsZwischenspeicher ihre Settings speichern lassen
         For Each modulName In modulSettingsZwischenspeicher.Keys
-            Dim modul = ModulByNameLoader.LadeModulNachName(modulName)
+            modul = ModulByNameLoader.LadeModulNachName(modulName)
             If modul IsNot Nothing Then
+
                 uc = modul.GetModulOptionsDialog()
-                Dim restoreSettings As Object = Nothing
+
                 If modulSettingsZwischenspeicher.ContainsKey(modulName) Then
                     restoreSettings = modulSettingsZwischenspeicher(modulName)
                     aktuellGeladenesModul.GetModulSettings(uc, restoreSettings)
                 Else
-                    aktuellGeladenesModul.GetModulDefaultSettings(uc)
+                    aktuellGeladenesModul.GetModulRegistryOrDefaultSettings(uc)
                 End If
+
                 If uc IsNot Nothing Then
                     modul.ApplyModulSettings(modulSettingsZwischenspeicher(modulName))
                 End If
+
             End If
         Next
+#End Region
 
         ' === Transition Settings ===
 
@@ -362,7 +364,7 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub cmbModulwechsel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbModulwechsel.SelectedIndexChanged
-        If cmbModulwechsel.SelectedIndex = 0 Then
+        If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start --> Kein Modulwechsel während der Laufzeit
             lblNtrkDauerModulwechsel.Enabled = False
             lblDauerModuswechsel.Enabled = False
             trkDauerModulwechsel.Enabled = False

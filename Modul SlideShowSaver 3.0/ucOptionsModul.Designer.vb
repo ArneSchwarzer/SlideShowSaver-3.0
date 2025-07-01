@@ -29,13 +29,13 @@ Partial Class ucOptionsModul
         Me.lblAnzeigedauer = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.clbTransitions = New System.Windows.Forms.CheckedListBox()
-        Me.Label3 = New System.Windows.Forms.Label()
+        Me.lblNcmbEffektauswahl = New System.Windows.Forms.Label()
         Me.cmbEffektauswahl = New System.Windows.Forms.ComboBox()
         Me.chkBildinformationen = New System.Windows.Forms.CheckBox()
         Me.clbShader = New System.Windows.Forms.CheckedListBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.cmbShaderauswahl = New System.Windows.Forms.ComboBox()
-        Me.Label5 = New System.Windows.Forms.Label()
+        Me.lblNcmbShaderauswahl = New System.Windows.Forms.Label()
         Me.lblModulname = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         CType(Me.trbAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -54,7 +54,7 @@ Partial Class ucOptionsModul
         '
         Me.cmbBildauswahl.FormattingEnabled = True
         Me.cmbBildauswahl.Items.AddRange(New Object() {"Zufallsbild", "Zufallsverzeichnis"})
-        Me.cmbBildauswahl.Location = New System.Drawing.Point(500, 97)
+        Me.cmbBildauswahl.Location = New System.Drawing.Point(500, 92)
         Me.cmbBildauswahl.Name = "cmbBildauswahl"
         Me.cmbBildauswahl.Size = New System.Drawing.Size(361, 49)
         Me.cmbBildauswahl.TabIndex = 1
@@ -102,25 +102,24 @@ Partial Class ucOptionsModul
         'clbTransitions
         '
         Me.clbTransitions.FormattingEnabled = True
-        Me.clbTransitions.Items.AddRange(New Object() {"Direkter Übergang (Cut)"})
         Me.clbTransitions.Location = New System.Drawing.Point(29, 343)
         Me.clbTransitions.Name = "clbTransitions"
         Me.clbTransitions.Size = New System.Drawing.Size(832, 180)
         Me.clbTransitions.TabIndex = 6
         '
-        'Label3
+        'lblNcmbEffektauswahl
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(29, 529)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(243, 41)
-        Me.Label3.TabIndex = 7
-        Me.Label3.Text = "Effektreihenfolge"
+        Me.lblNcmbEffektauswahl.AutoSize = True
+        Me.lblNcmbEffektauswahl.Location = New System.Drawing.Point(29, 529)
+        Me.lblNcmbEffektauswahl.Name = "lblNcmbEffektauswahl"
+        Me.lblNcmbEffektauswahl.Size = New System.Drawing.Size(243, 41)
+        Me.lblNcmbEffektauswahl.TabIndex = 7
+        Me.lblNcmbEffektauswahl.Text = "Effektreihenfolge"
         '
         'cmbEffektauswahl
         '
         Me.cmbEffektauswahl.FormattingEnabled = True
-        Me.cmbEffektauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig bei Bildwechsel", "In Reihenfolge bei Start", "In Reihenfolge bei Bildwechsel"})
+        Me.cmbEffektauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge"})
         Me.cmbEffektauswahl.Location = New System.Drawing.Point(500, 529)
         Me.cmbEffektauswahl.Name = "cmbEffektauswahl"
         Me.cmbEffektauswahl.Size = New System.Drawing.Size(361, 49)
@@ -156,20 +155,20 @@ Partial Class ucOptionsModul
         'cmbShaderauswahl
         '
         Me.cmbShaderauswahl.FormattingEnabled = True
-        Me.cmbShaderauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig bei Bildwechsel", "In Reihenfolge bei Start", "In Reihenfolge bei Bildwechsel"})
+        Me.cmbShaderauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge"})
         Me.cmbShaderauswahl.Location = New System.Drawing.Point(500, 878)
         Me.cmbShaderauswahl.Name = "cmbShaderauswahl"
         Me.cmbShaderauswahl.Size = New System.Drawing.Size(361, 49)
         Me.cmbShaderauswahl.TabIndex = 13
         '
-        'Label5
+        'lblNcmbShaderauswahl
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(29, 878)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(261, 41)
-        Me.Label5.TabIndex = 12
-        Me.Label5.Text = "Shaderreihenfolge"
+        Me.lblNcmbShaderauswahl.AutoSize = True
+        Me.lblNcmbShaderauswahl.Location = New System.Drawing.Point(29, 878)
+        Me.lblNcmbShaderauswahl.Name = "lblNcmbShaderauswahl"
+        Me.lblNcmbShaderauswahl.Size = New System.Drawing.Size(261, 41)
+        Me.lblNcmbShaderauswahl.TabIndex = 12
+        Me.lblNcmbShaderauswahl.Text = "Shaderreihenfolge"
         '
         'lblModulname
         '
@@ -197,12 +196,12 @@ Partial Class ucOptionsModul
         Me.Controls.Add(Me.lblModulname)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.cmbShaderauswahl)
-        Me.Controls.Add(Me.Label5)
+        Me.Controls.Add(Me.lblNcmbShaderauswahl)
         Me.Controls.Add(Me.clbShader)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.chkBildinformationen)
         Me.Controls.Add(Me.cmbEffektauswahl)
-        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.lblNcmbEffektauswahl)
         Me.Controls.Add(Me.clbTransitions)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.lblAnzeigedauer)
@@ -227,13 +226,13 @@ Partial Class ucOptionsModul
     Friend WithEvents lblAnzeigedauer As Windows.Forms.Label
     Friend WithEvents Label2 As Windows.Forms.Label
     Friend WithEvents clbTransitions As Windows.Forms.CheckedListBox
-    Friend WithEvents Label3 As Windows.Forms.Label
+    Friend WithEvents lblNcmbEffektauswahl As Windows.Forms.Label
     Friend WithEvents cmbEffektauswahl As Windows.Forms.ComboBox
     Friend WithEvents chkBildinformationen As Windows.Forms.CheckBox
     Friend WithEvents clbShader As Windows.Forms.CheckedListBox
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents cmbShaderauswahl As Windows.Forms.ComboBox
-    Friend WithEvents Label5 As Windows.Forms.Label
+    Friend WithEvents lblNcmbShaderauswahl As Windows.Forms.Label
     Friend WithEvents lblModulname As Windows.Forms.Label
     Friend WithEvents Label6 As Windows.Forms.Label
 End Class

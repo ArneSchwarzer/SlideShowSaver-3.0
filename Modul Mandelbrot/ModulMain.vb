@@ -119,7 +119,7 @@ Public Class ModulMain
         DictionaryZuUserControl(uc, dict)
     End Sub
 
-    Public Sub GetModulDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulDefaultSettings
+    Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
         Dim defaults As New ModulSettings_Mandelbrot With {
             .Farbverlauf = "Regenbogen",
             .GradientAnimieren = False,

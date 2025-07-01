@@ -75,7 +75,7 @@ Namespace My.Resources
         '''</summary>
         Friend ReadOnly Property SlideShowSaver_Splash() As System.Drawing.Bitmap
             Get
-                Dim obj As Object = ResourceManager.GetObject("SlideShowSaver-Splash", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("SlideShowSaver_Splash", resourceCulture)
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property

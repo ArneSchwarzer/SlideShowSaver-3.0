@@ -27,6 +27,8 @@ Partial Class frmPauseModusOverlay
         Me.btnPausePause = New System.Windows.Forms.Button()
         Me.btnPauseForward = New System.Windows.Forms.Button()
         Me.chkPauseMarkPicture = New System.Windows.Forms.CheckBox()
+        Me.cmbBewertungKorrigieren = New System.Windows.Forms.ComboBox()
+        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
         'lblPauseAnzahl
@@ -47,7 +49,7 @@ Partial Class frmPauseModusOverlay
         Me.btnPauseBack.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPauseBack.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPauseBack.Location = New System.Drawing.Point(25, 100)
-        Me.btnPauseBack.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPauseBack.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPauseBack.Name = "btnPauseBack"
         Me.btnPauseBack.Size = New System.Drawing.Size(150, 150)
         Me.btnPauseBack.TabIndex = 1
@@ -59,7 +61,7 @@ Partial Class frmPauseModusOverlay
         Me.btnPausePause.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPausePause.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPausePause.Location = New System.Drawing.Point(221, 100)
-        Me.btnPausePause.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPausePause.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPausePause.Name = "btnPausePause"
         Me.btnPausePause.Size = New System.Drawing.Size(150, 150)
         Me.btnPausePause.TabIndex = 2
@@ -71,7 +73,7 @@ Partial Class frmPauseModusOverlay
         Me.btnPauseForward.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPauseForward.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPauseForward.Location = New System.Drawing.Point(416, 100)
-        Me.btnPauseForward.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnPauseForward.Margin = New System.Windows.Forms.Padding(4)
         Me.btnPauseForward.Name = "btnPauseForward"
         Me.btnPauseForward.Size = New System.Drawing.Size(150, 150)
         Me.btnPauseForward.TabIndex = 3
@@ -82,28 +84,54 @@ Partial Class frmPauseModusOverlay
         Me.chkPauseMarkPicture.AutoSize = True
         Me.chkPauseMarkPicture.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.chkPauseMarkPicture.ForeColor = System.Drawing.SystemColors.ButtonHighlight
-        Me.chkPauseMarkPicture.Location = New System.Drawing.Point(208, 284)
-        Me.chkPauseMarkPicture.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.chkPauseMarkPicture.Location = New System.Drawing.Point(32, 365)
+        Me.chkPauseMarkPicture.Margin = New System.Windows.Forms.Padding(4)
         Me.chkPauseMarkPicture.Name = "chkPauseMarkPicture"
         Me.chkPauseMarkPicture.Size = New System.Drawing.Size(179, 40)
         Me.chkPauseMarkPicture.TabIndex = 4
         Me.chkPauseMarkPicture.Text = "Markieren"
         Me.chkPauseMarkPicture.UseVisualStyleBackColor = True
         '
+        'cmbBewertungKorrigieren
+        '
+        Me.cmbBewertungKorrigieren.BackColor = System.Drawing.Color.Black
+        Me.cmbBewertungKorrigieren.ForeColor = System.Drawing.SystemColors.ButtonHighlight
+        Me.cmbBewertungKorrigieren.FormattingEnabled = True
+        Me.cmbBewertungKorrigieren.Location = New System.Drawing.Point(221, 287)
+        Me.cmbBewertungKorrigieren.Name = "cmbBewertungKorrigieren"
+        Me.cmbBewertungKorrigieren.Size = New System.Drawing.Size(345, 49)
+        Me.cmbBewertungKorrigieren.TabIndex = 5
+        '
+        'CheckBox1
+        '
+        Me.CheckBox1.AutoSize = True
+        Me.CheckBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CheckBox1.ForeColor = System.Drawing.SystemColors.ButtonHighlight
+        Me.CheckBox1.Location = New System.Drawing.Point(32, 293)
+        Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4)
+        Me.CheckBox1.Name = "CheckBox1"
+        Me.CheckBox1.Size = New System.Drawing.Size(172, 40)
+        Me.CheckBox1.TabIndex = 6
+        Me.CheckBox1.Text = "Bewerten"
+        Me.CheckBox1.UseVisualStyleBackColor = True
+        '
         'frmPauseModusOverlay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
-        Me.ClientSize = New System.Drawing.Size(599, 351)
+        Me.ClientSize = New System.Drawing.Size(599, 438)
+        Me.Controls.Add(Me.CheckBox1)
+        Me.Controls.Add(Me.cmbBewertungKorrigieren)
         Me.Controls.Add(Me.chkPauseMarkPicture)
         Me.Controls.Add(Me.btnPauseForward)
         Me.Controls.Add(Me.btnPausePause)
         Me.Controls.Add(Me.btnPauseBack)
         Me.Controls.Add(Me.lblPauseAnzahl)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
+        Me.ForeColor = System.Drawing.SystemColors.ButtonHighlight
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmPauseModusOverlay"
         Me.Opacity = 0.5R
         Me.Text = "PauseModusControl"
@@ -117,4 +145,6 @@ Partial Class frmPauseModusOverlay
     Friend WithEvents btnPausePause As Windows.Forms.Button
     Friend WithEvents btnPauseForward As Windows.Forms.Button
     Friend WithEvents chkPauseMarkPicture As Windows.Forms.CheckBox
+    Friend WithEvents cmbBewertungKorrigieren As Windows.Forms.ComboBox
+    Friend WithEvents CheckBox1 As Windows.Forms.CheckBox
 End Class

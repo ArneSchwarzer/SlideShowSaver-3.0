@@ -230,9 +230,8 @@ Public Class BildauswahlMain
 
     End Function
 
-    Public Shared Function GetPictures(n As Integer, Optional correctOrientation As Boolean = True, Optional targetDir As String = "") As List(Of Image)
-        ' n Bilder werden gemäß den Einstellungen zufällig geladen. Die Liste der Bilder ist unsortiert.
-        ' Die Bilder werden gemäß MetaDaten korrekt ausgerichtet, solange der optionale Parameter correctOrientation nicht FALSE ist.
+    Public Shared Function GetPictures(n As Integer, Optional targetDir As String = "") As List(Of String)
+        ' Die Pfade von n Bildern werden gemäß den Einstellungen zufällig geladen. Die Liste der Bilder ist unsortiert.
         ' Ein optionales targetDir beschränkt die Suche auf ebendieses.
 
         Dim suchVerzeichnisse As New List(Of String)
@@ -240,7 +239,7 @@ Public Class BildauswahlMain
         Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
         Dim bilderListe As List(Of String)
         Dim bild As String
-        Dim ergebnisListe As New List(Of Image)
+        Dim ergebnisListe As New List(Of String)
         Dim extension As String
         Dim i As Integer = 0
 
@@ -264,12 +263,7 @@ Public Class BildauswahlMain
                 If Not CheckIfLegalFile(bild) Then Continue While
             End If
 
-            ' Bild laden und ggf. ausrichten
-            If correctOrientation AndAlso exifFormate.Contains(extension) Then
-                ergebnisListe.Add(CorrectPictureOrientation(bild))
-            Else
-                ergebnisListe.Add(New Bitmap(bild))
-            End If
+            ergebnisListe.Add(bild)
 
             i += 1
         End While
@@ -278,17 +272,16 @@ Public Class BildauswahlMain
 
     End Function
 
-    Public Shared Function GetPicturesByDirectory(Optional correctOrientation As Boolean = True, Optional targetDir As String = "") As List(Of Image)
-        ' Alle Bilder eines zufällig bestimmten Verzeichnisses werden gemäß den Einstellungen geladen
+    Public Shared Function GetPicturesByDirectory(Optional targetDir As String = "") As List(Of String)
+        ' Die Pfade aller Bilder eines zufällig bestimmten Verzeichnisses werden gemäß den Einstellungen erstellt
         ' Die Liste der Bilder ist alphabetisch sortiert.
-        ' Die Bilder werden korrekt gemäß MetaDaten ausgerichtet, solange der optionale Parameter correctOrientation nicht False ist.
-        ' Ein optionales targetDir gibt alle gemäß Einstellungen legitimen Bilder ebendieses Verzeichnisses aus
+        ' Ein optionales targetDir gibt die Pfade aller gemäß Einstellungen legitimen Bilder ebendieses Verzeichnisses aus.
 
         Dim dateiTypen As New List(Of String) From {"*.bmp", "*.jpg", "*.jpeg", "*.png"}
         Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
         Dim listOfFiles As New List(Of String)
         Dim gefundeneDateien As String()
-        Dim ergebnisListe As New List(Of Image)
+        Dim ergebnisListe As New List(Of String)
         Dim extension As String
 
         ' Zielverzeichnis initialisieren
@@ -313,7 +306,7 @@ Public Class BildauswahlMain
             extension = Path.GetExtension(bild).ToLower()
 
             If Not exifFormate.Contains(extension) OrElse CheckIfLegalFile(bild) Then
-                ergebnisListe.Add(New Bitmap(bild))
+                ergebnisListe.Add(bild)
             End If
         Next
 
@@ -321,6 +314,20 @@ Public Class BildauswahlMain
 
     End Function
 
+    Public Shared Function GetPictureByName(bild As String, Optional correctOrientation As Boolean = True) As Image
+        'Gibt ein Bild gemäß des angegebenen Parameters "pfad" zurück. Eine Legitimations-Prüfung findet NICHT statt.
+        'Falls nicht durch den Bool "correctOrientation" unterdrückt, wird das Bild gemäß seiner EXIF-Daten gedreht.
+        Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
+        Dim extension As String
+
+        extension = Path.GetExtension(bild).ToLower()
+        If correctOrientation AndAlso exifFormate.Contains(extension) Then
+            Return (CorrectPictureOrientation(bild))
+        Else
+            Return (New Bitmap(bild))
+        End If
+
+    End Function
     Public Shared Function CorrectPictureOrientation(pfad As String) As Image
         ' Dreht und Spiegelt ein Bild gemäß seiner EXIF Daten
 

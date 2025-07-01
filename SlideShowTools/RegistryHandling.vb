@@ -9,7 +9,7 @@ Public Class RegistryHandling
     ' --- Konstanten für Registry-Pfade ---
     Public Const SLIDESHOWMAIN_PATH As String = ""
     Public Const SLIDESHOWBILDAUSWAHL_PATH As String = "Bildauswahl\"
-    Public Const SLIDESHOWMODUL_PATH As String = "Module\"
+    Public Const SLIDESHOWMODULBASE_PATH As String = "Module\"
     Public Const SLIDESHOWTRANSITION_PATH As String = "Transition\"
     Public Const SLIDESHOWSHADER_PATH As String = "Shader\"
 
