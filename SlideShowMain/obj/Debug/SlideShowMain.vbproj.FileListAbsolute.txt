@@ -32,3 +32,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Modul Slid
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLoader.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLoader.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmFallbackSaver.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.xml

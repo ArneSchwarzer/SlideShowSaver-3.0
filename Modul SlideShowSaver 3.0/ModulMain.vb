@@ -10,7 +10,9 @@ Public Class ModulMain
     ' Variablen, Konstanten, ENUMs etc. deklarieren.
     Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
     Private Const SLIDESHOWMODULFULL_PATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
-    Private sssScreen As frmModulMain
+    Public Shared sssScreen As frmModulMain
+    Private sssPause As frmPauseModusOverlay
+    Public Shared sssInfo As frmPictureInfo
     Private zwischenspeicherSettings As ModulSettings_SlideShowSaver_3_0
 
     'Übersetzungstabelle UC <--> Settings
@@ -83,6 +85,7 @@ Public Class ModulMain
         'Initialisiert und startet das eigentliche Modul
 
         sssScreen = New frmModulMain()
+        sssPause = New frmPauseModusOverlay()
         CheckYourSettings()
         RaiseEvent ModulStateChanged("Running")
 
@@ -91,12 +94,28 @@ Public Class ModulMain
     End Sub
 
     Public Sub StopModul() Implements ISlideShowModul.StopModul
+        'Räumt auf und meldet, das der Schoner ordungsgemäß beendet wurde
+
+        If sssInfo IsNot Nothing AndAlso Not sssInfo.IsDisposed Then
+            sssInfo.Close()
+            sssInfo.Dispose()
+            sssInfo = Nothing
+        End If
+
+        If sssPause IsNot Nothing AndAlso Not sssPause.IsDisposed Then
+            sssPause.Close()
+            sssPause.Dispose()
+            sssPause = Nothing
+        End If
+
         If sssScreen IsNot Nothing AndAlso Not sssScreen.IsDisposed Then
             sssScreen.Close()
             sssScreen.Dispose()
             sssScreen = Nothing
         End If
+
         RaiseEvent ModulStateChanged("Stopped")
+
     End Sub
 
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
@@ -277,7 +296,16 @@ Public Class ModulMain
 
         ReadModulSettingsFromRegistry()
 
-        'Timer gemäß der neuen Anzeigedauer setzen, alles Andere regelt die Form automatisch. Stop/Start, um die
+        If aktuelleSettings.BildInfoAnzeigen Then
+            sssInfo = New frmPictureInfo()
+            sssInfo.Show()
+        ElseIf sssInfo IsNot Nothing Then
+            sssInfo.Close()
+            sssInfo.Dispose()
+            sssInfo = Nothing
+        End If
+
+        'Timer gemäß der neuen Anzeigedauer setzen. Stop/Start, um die
         'Änderungen sofort wirken zu lassen (falls z.B. die Anzeigedauer von 2m auf 20s zurückgesetzt wurde,
         'möchte der Benutzer keine 2 Minuten warten, bis die Änderung greift).
 

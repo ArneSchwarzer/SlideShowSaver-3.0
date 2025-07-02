@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class ucOptionsBildauswahl
     Inherits System.Windows.Forms.UserControl
 
     'UserControl überschreibt den Löschvorgang, um die Komponentenliste zu bereinigen.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class ucOptionsBildauswahl
     'Hinweis: Die folgende Prozedur ist für den Windows Form-Designer erforderlich.
     'Das Bearbeiten ist mit dem Windows Form-Designer möglich.  
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.lstVerzeichnisse = New System.Windows.Forms.ListBox()
@@ -44,8 +44,6 @@ Partial Class ucOptionsBildauswahl
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
         Me.rdoJugendfrei = New System.Windows.Forms.RadioButton()
         Me.cmbBewertung = New System.Windows.Forms.ComboBox()
-        Me.lblHinweisLabel = New System.Windows.Forms.Label()
-        Me.lblHinweistext = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'Label1
@@ -63,7 +61,7 @@ Partial Class ucOptionsBildauswahl
         Me.lstVerzeichnisse.ItemHeight = 41
         Me.lstVerzeichnisse.Location = New System.Drawing.Point(26, 57)
         Me.lstVerzeichnisse.Name = "lstVerzeichnisse"
-        Me.lstVerzeichnisse.Size = New System.Drawing.Size(765, 209)
+        Me.lstVerzeichnisse.Size = New System.Drawing.Size(765, 291)
         Me.lstVerzeichnisse.TabIndex = 1
         '
         'btnVerzeichnisHinzufügen
@@ -98,7 +96,7 @@ Partial Class ucOptionsBildauswahl
         '
         Me.btnWhiteListListeLöschen.BackgroundImage = Global.SlideShowBildauswahl.My.Resources.Resources.Trashbin
         Me.btnWhiteListListeLöschen.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.btnWhiteListListeLöschen.Location = New System.Drawing.Point(380, 663)
+        Me.btnWhiteListListeLöschen.Location = New System.Drawing.Point(380, 543)
         Me.btnWhiteListListeLöschen.Name = "btnWhiteListListeLöschen"
         Me.btnWhiteListListeLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnWhiteListListeLöschen.TabIndex = 7
@@ -106,7 +104,7 @@ Partial Class ucOptionsBildauswahl
         '
         'btnWhiteListLöschen
         '
-        Me.btnWhiteListLöschen.Location = New System.Drawing.Point(380, 603)
+        Me.btnWhiteListLöschen.Location = New System.Drawing.Point(380, 483)
         Me.btnWhiteListLöschen.Name = "btnWhiteListLöschen"
         Me.btnWhiteListLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnWhiteListLöschen.TabIndex = 6
@@ -115,7 +113,7 @@ Partial Class ucOptionsBildauswahl
         '
         'btnWhiteListHinzufügen
         '
-        Me.btnWhiteListHinzufügen.Location = New System.Drawing.Point(380, 543)
+        Me.btnWhiteListHinzufügen.Location = New System.Drawing.Point(380, 423)
         Me.btnWhiteListHinzufügen.Name = "btnWhiteListHinzufügen"
         Me.btnWhiteListHinzufügen.Size = New System.Drawing.Size(50, 50)
         Me.btnWhiteListHinzufügen.TabIndex = 5
@@ -126,7 +124,7 @@ Partial Class ucOptionsBildauswahl
         '
         Me.btnBlackListListeLöschen.BackgroundImage = Global.SlideShowBildauswahl.My.Resources.Resources.Trashbin
         Me.btnBlackListListeLöschen.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.btnBlackListListeLöschen.Location = New System.Drawing.Point(812, 663)
+        Me.btnBlackListListeLöschen.Location = New System.Drawing.Point(812, 543)
         Me.btnBlackListListeLöschen.Name = "btnBlackListListeLöschen"
         Me.btnBlackListListeLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnBlackListListeLöschen.TabIndex = 10
@@ -134,7 +132,7 @@ Partial Class ucOptionsBildauswahl
         '
         'btnBlackListLöschen
         '
-        Me.btnBlackListLöschen.Location = New System.Drawing.Point(812, 603)
+        Me.btnBlackListLöschen.Location = New System.Drawing.Point(812, 483)
         Me.btnBlackListLöschen.Name = "btnBlackListLöschen"
         Me.btnBlackListLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnBlackListLöschen.TabIndex = 9
@@ -143,7 +141,7 @@ Partial Class ucOptionsBildauswahl
         '
         'btnBlackListHinzufügen
         '
-        Me.btnBlackListHinzufügen.Location = New System.Drawing.Point(812, 543)
+        Me.btnBlackListHinzufügen.Location = New System.Drawing.Point(812, 423)
         Me.btnBlackListHinzufügen.Name = "btnBlackListHinzufügen"
         Me.btnBlackListHinzufügen.Size = New System.Drawing.Size(50, 50)
         Me.btnBlackListHinzufügen.TabIndex = 8
@@ -153,7 +151,7 @@ Partial Class ucOptionsBildauswahl
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(26, 500)
+        Me.Label2.Location = New System.Drawing.Point(26, 380)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(152, 41)
         Me.Label2.TabIndex = 11
@@ -163,24 +161,24 @@ Partial Class ucOptionsBildauswahl
         '
         Me.lstWhiteList.FormattingEnabled = True
         Me.lstWhiteList.ItemHeight = 41
-        Me.lstWhiteList.Location = New System.Drawing.Point(26, 544)
+        Me.lstWhiteList.Location = New System.Drawing.Point(26, 424)
         Me.lstWhiteList.Name = "lstWhiteList"
-        Me.lstWhiteList.Size = New System.Drawing.Size(337, 209)
+        Me.lstWhiteList.Size = New System.Drawing.Size(337, 291)
         Me.lstWhiteList.TabIndex = 12
         '
         'lstBlackList
         '
         Me.lstBlackList.FormattingEnabled = True
         Me.lstBlackList.ItemHeight = 41
-        Me.lstBlackList.Location = New System.Drawing.Point(454, 543)
+        Me.lstBlackList.Location = New System.Drawing.Point(454, 423)
         Me.lstBlackList.Name = "lstBlackList"
-        Me.lstBlackList.Size = New System.Drawing.Size(337, 209)
+        Me.lstBlackList.Size = New System.Drawing.Size(337, 291)
         Me.lstBlackList.TabIndex = 13
         '
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(454, 500)
+        Me.Label3.Location = New System.Drawing.Point(454, 380)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(142, 41)
         Me.Label3.TabIndex = 14
@@ -257,34 +255,10 @@ Partial Class ucOptionsBildauswahl
         Me.cmbBewertung.Size = New System.Drawing.Size(330, 49)
         Me.cmbBewertung.TabIndex = 21
         '
-        'lblHinweisLabel
-        '
-        Me.lblHinweisLabel.AutoSize = True
-        Me.lblHinweisLabel.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
-        Me.lblHinweisLabel.Location = New System.Drawing.Point(35, 316)
-        Me.lblHinweisLabel.Name = "lblHinweisLabel"
-        Me.lblHinweisLabel.Size = New System.Drawing.Size(130, 41)
-        Me.lblHinweisLabel.TabIndex = 22
-        Me.lblHinweisLabel.Text = "Hinweis"
-        '
-        'lblHinweistext
-        '
-        Me.lblHinweistext.AutoSize = True
-        Me.lblHinweistext.Location = New System.Drawing.Point(171, 316)
-        Me.lblHinweistext.MaximumSize = New System.Drawing.Size(700, 0)
-        Me.lblHinweistext.Name = "lblHinweistext"
-        Me.lblHinweistext.Size = New System.Drawing.Size(660, 164)
-        Me.lblHinweistext.TabIndex = 23
-        Me.lblHinweistext.Text = "Die untenstehenden Filterkriterien funktionieren ausschließlich für JPEG-Dateien." &
-    " Die anderen  darstellbaren Bildformate (BMP, PNG) werden ungefiltert angezeigt." &
-    ""
-        '
         'ucOptionsBildauswahl
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.lblHinweistext)
-        Me.Controls.Add(Me.lblHinweisLabel)
         Me.Controls.Add(Me.cmbBewertung)
         Me.Controls.Add(Me.rdoJugendfrei)
         Me.Controls.Add(Me.rdoLingerie)
@@ -338,6 +312,4 @@ Partial Class ucOptionsBildauswahl
     Friend WithEvents rdoLingerie As Windows.Forms.RadioButton
     Friend WithEvents rdoJugendfrei As Windows.Forms.RadioButton
     Friend WithEvents cmbBewertung As Windows.Forms.ComboBox
-    Friend WithEvents lblHinweisLabel As Windows.Forms.Label
-    Friend WithEvents lblHinweistext As Windows.Forms.Label
 End Class

@@ -25,6 +25,7 @@ Partial Class frmModulMain
         Me.components = New System.ComponentModel.Container()
         Me.tmrModul = New System.Windows.Forms.Timer(Me.components)
         Me.picBildAnzeige = New System.Windows.Forms.PictureBox()
+        Me.lblInitializing = New System.Windows.Forms.Label()
         CType(Me.picBildAnzeige, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -40,12 +41,25 @@ Partial Class frmModulMain
         Me.picBildAnzeige.TabIndex = 0
         Me.picBildAnzeige.TabStop = False
         '
+        'lblInitializing
+        '
+        Me.lblInitializing.AutoSize = True
+        Me.lblInitializing.BackColor = System.Drawing.Color.Transparent
+        Me.lblInitializing.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblInitializing.ForeColor = System.Drawing.Color.Snow
+        Me.lblInitializing.Location = New System.Drawing.Point(746, 694)
+        Me.lblInitializing.Name = "lblInitializing"
+        Me.lblInitializing.Size = New System.Drawing.Size(937, 72)
+        Me.lblInitializing.TabIndex = 1
+        Me.lblInitializing.Text = "SlideShowSaver 3.0 wird gestartet..."
+        '
         'frmModulMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(1967, 1210)
+        Me.Controls.Add(Me.lblInitializing)
         Me.Controls.Add(Me.picBildAnzeige)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
@@ -53,9 +67,11 @@ Partial Class frmModulMain
         Me.Text = "ModulMain"
         CType(Me.picBildAnzeige, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
+        Me.PerformLayout()
 
     End Sub
 
     Friend WithEvents tmrModul As Windows.Forms.Timer
     Friend WithEvents picBildAnzeige As Windows.Forms.PictureBox
+    Friend WithEvents lblInitializing As Windows.Forms.Label
 End Class

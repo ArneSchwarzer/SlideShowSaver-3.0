@@ -10,7 +10,8 @@ Public Class frmModulMain
     'Variablendeklaration
     Private Shared aktuellesBild As Image
     Private Shared neuesBild As Image
-    Private Shared bildPfad As String
+    Public Shared bildPfad As String = Nothing
+    Private Shared initialePfade As New List(Of String)
     Private Shared aktuellesVerzeichnis As New List(Of String)
     Private Shared aktuellesVerzeichnisCounter As Integer
     Private Shared listeDerZuletztAngezeigtenBilder As New List(Of String)
@@ -19,31 +20,47 @@ Public Class frmModulMain
         FormsHandling.InitialFormPreparation(Me, Color.Black)
         Me.TopMost = False
 
+        'Bitte warten Label anzeigen
+        lblInitializing.Left = (Me.Width - lblInitializing.Width) \ 2
+        lblInitializing.Top = (Me.Height - lblInitializing.Height) \ 2
+        lblInitializing.Visible = True
+
         'picBildAnzeige initialisieren
         picBildAnzeige.Dock = DockStyle.Fill
         picBildAnzeige.SizeMode = PictureBoxSizeMode.Zoom ' oder StretchImage, wenn du willst, dass das Bild verzerrt wird
         picBildAnzeige.BackColor = Color.Transparent
 
+    End Sub
+
+    Private Sub frmModulMain_Shown(sender As Object, e As EventArgs) Handles Me.Shown
+
+
         'erstes Bild Laden
         If ModulMain.aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
             Do
                 aktuellesVerzeichnis = GetPicturesByDirectory()
-            Loop Until aktuellesVerzeichnis.Count > 0
-
-            aktuellesVerzeichnisCounter = 0
-            bildPfad = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
+            Loop Until aktuellesVerzeichnis.Count > 1 'Das initiale Verzeichnis mus mindestens 2 legitime Bilder haben, später reicht auch eines
+            initialePfade = aktuellesVerzeichnis 'Nur die ersten beiden Bilder werden gebraucht, aber sonst gibt es eine "Out of Bounds"-Exception
+            initialePfade(0) = aktuellesVerzeichnis(0)
+            initialePfade(1) = aktuellesVerzeichnis(1)
+            aktuellesVerzeichnisCounter = 1
         Else
-            bildPfad = GetPictures(1).Item(0)
+            initialePfade = GetPictures(2)
         End If
 
-        aktuellesBild = GetPictureByName(bildPfad)
+
+        aktuellesBild = GetPictureByName(initialePfade(0))
+        neuesBild = GetPictureByName(initialePfade(1))
 
         'Shader anwenden, sobald implementiert
         'aktuellesBild = aktuellerShader.RunShader(aktuellesBild)
 
+        lblInitializing.Visible = False
         picBildAnzeige.Image = aktuellesBild
         picBildAnzeige.Refresh()
-
+        If ModulMain.aktuelleSettings.BildInfoAnzeigen AndAlso ModulMain.sssInfo IsNot Nothing Then
+            ModulMain.sssInfo.RefreshLabels(initialePfade(0))
+        End If
     End Sub
 
     Private Sub frmModulMain_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
@@ -64,12 +81,28 @@ Public Class frmModulMain
             listeDerZuletztAngezeigtenBilder.RemoveAt(0)
         End If
 
-        'Neues Bild laden. Wichtig später für Transitionen, um selbigen auch 2 Bilder zur Verfügung stellen zu können.
+        'Jetzt die Transition aufrufen, sobald implementiert
+        'aktuelleTransition.RunTransition(aktuellesBild, neuesBild)
+
+        aktuellesBild = neuesBild
+        picBildAnzeige.Image = aktuellesBild
+        picBildAnzeige.Refresh()
+        If ModulMain.aktuelleSettings.BildInfoAnzeigen AndAlso ModulMain.sssInfo IsNot Nothing Then
+
+            If bildPfad IsNot Nothing Then
+                ModulMain.sssInfo.RefreshLabels(bildPfad)
+            Else
+                ModulMain.sssInfo.RefreshLabels(initialePfade(1))
+            End If
+
+        End If
+
+        'Neues Bild laden. Da dies nach dem Anzeigen des neuen Bildes geschieht, hat ein evtl. Shader einen tmrMain-Tick Zeit...
         If ModulMain.aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
 
             aktuellesVerzeichnisCounter += 1
 
-            If aktuellesVerzeichnisCounter = aktuellesVerzeichnis.Count Then
+            If aktuellesVerzeichnisCounter >= aktuellesVerzeichnis.Count Then
 
                 aktuellesVerzeichnisCounter = 0
                 Do
@@ -87,16 +120,9 @@ Public Class frmModulMain
         End If
 
         neuesBild = GetPictureByName(bildPfad)
-
         'Jetzt Shader anwenden, sobald implementiert
         'aktuellerShader.RunShader(neuesBild)
 
-        'Jetzt die Transition aufrufen, sobald implementiert
-        'aktuelleTransition.RunTransition(aktuellesBild, neuesBild)
-
-        aktuellesBild = neuesBild
-        picBildAnzeige.Image = aktuellesBild
-        picBildAnzeige.Refresh()
-
     End Sub
+
 End Class

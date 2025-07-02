@@ -24,6 +24,7 @@ Partial Class frmPictureInfo
     Private Sub InitializeComponent()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Label16 = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
         Me.lblAutor = New System.Windows.Forms.Label()
         Me.lblErstellungsdatum = New System.Windows.Forms.Label()
@@ -49,8 +50,7 @@ Partial Class frmPictureInfo
         Me.Label10 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.lblBewertung = New System.Windows.Forms.Label()
-        Me.Label16 = New System.Windows.Forms.Label()
+        Me.slbBewertung = New StarControlLibrary.SterneAnzeigeLabel()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
@@ -68,7 +68,7 @@ Partial Class frmPictureInfo
         'GroupBox1
         '
         Me.GroupBox1.BackColor = System.Drawing.Color.Transparent
-        Me.GroupBox1.Controls.Add(Me.lblBewertung)
+        Me.GroupBox1.Controls.Add(Me.slbBewertung)
         Me.GroupBox1.Controls.Add(Me.Label16)
         Me.GroupBox1.Controls.Add(Me.lblTags)
         Me.GroupBox1.Controls.Add(Me.lblAutor)
@@ -85,6 +85,15 @@ Partial Class frmPictureInfo
         Me.GroupBox1.Size = New System.Drawing.Size(903, 517)
         Me.GroupBox1.TabIndex = 1
         Me.GroupBox1.TabStop = False
+        '
+        'Label16
+        '
+        Me.Label16.AutoSize = True
+        Me.Label16.Location = New System.Drawing.Point(17, 276)
+        Me.Label16.Name = "Label16"
+        Me.Label16.Size = New System.Drawing.Size(161, 41)
+        Me.Label16.TabIndex = 10
+        Me.Label16.Text = "Bewertung"
         '
         'lblTags
         '
@@ -329,24 +338,15 @@ Partial Class frmPictureInfo
         Me.Label3.TabIndex = 4
         Me.Label3.Text = "Kamera"
         '
-        'lblBewertung
+        'slbBewertung
         '
-        Me.lblBewertung.AutoSize = True
-        Me.lblBewertung.Location = New System.Drawing.Point(286, 276)
-        Me.lblBewertung.MaximumSize = New System.Drawing.Size(580, 123)
-        Me.lblBewertung.Name = "lblBewertung"
-        Me.lblBewertung.Size = New System.Drawing.Size(161, 41)
-        Me.lblBewertung.TabIndex = 11
-        Me.lblBewertung.Text = "Bewertung"
-        '
-        'Label16
-        '
-        Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(17, 276)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(161, 41)
-        Me.Label16.TabIndex = 10
-        Me.Label16.Text = "Bewertung"
+        Me.slbBewertung.BackColor = System.Drawing.Color.Black
+        Me.slbBewertung.Bewertung = 0
+        Me.slbBewertung.Location = New System.Drawing.Point(293, 287)
+        Me.slbBewertung.Name = "slbBewertung"
+        Me.slbBewertung.Size = New System.Drawing.Size(150, 30)
+        Me.slbBewertung.TabIndex = 12
+        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
         '
         'frmPictureInfo
         '
@@ -405,6 +405,6 @@ Partial Class frmPictureInfo
     Friend WithEvents lblObjektiv As Windows.Forms.Label
     Friend WithEvents lblBrennweite As Windows.Forms.Label
     Friend WithEvents lblKamera As Windows.Forms.Label
-    Friend WithEvents lblBewertung As Windows.Forms.Label
     Friend WithEvents Label16 As Windows.Forms.Label
+    Friend WithEvents slbBewertung As StarControlLibrary.SterneAnzeigeLabel
 End Class

@@ -27,9 +27,7 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.Blenden
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.Überblenden", "Transition Überblenden\SlideShowTransition.Überblenden.vbproj", "{136EF778-9383-42F3-B4E4-36149597413E}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.Wischen", "Transition Wischen\SlideShowTransition.Wischen.vbproj", "{ADEA4346-99E0-4F91-BC53-7CA5EF033695}"
-EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.Schieben", "Transition Schieben\SlideShowTransition.Schieben.vbproj", "{F85F5868-A132-4222-A672-D4800354E424}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.SchiebenWischen", "Transition Schieben\SlideShowTransition.SchiebenWischen.vbproj", "{F85F5868-A132-4222-A672-D4800354E424}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowLogging", "SlideShowLogging\SlideShowLogging.vbproj", "{4DE43745-D2CE-442C-ACC5-49E2BCB0C87F}"
 EndProject
@@ -42,8 +40,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shader", "Shader", "{78FC98FE-5E50-4C27-AA6C-21D2578EAC68}"
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "SlideShowLoader", "SlideShowLoader\SlideShowLoader.vbproj", "{19B1A160-9BD1-45EF-9544-96C967E8C17C}"
-EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Slideshowsaver", "..\Slideshowsaver\Slideshowsaver\Slideshowsaver.vbproj", "{E9BD1D90-AB5B-4204-AE39-2E38ECC68646}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,10 +87,6 @@ Global
 		{136EF778-9383-42F3-B4E4-36149597413E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{136EF778-9383-42F3-B4E4-36149597413E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{136EF778-9383-42F3-B4E4-36149597413E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ADEA4346-99E0-4F91-BC53-7CA5EF033695}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADEA4346-99E0-4F91-BC53-7CA5EF033695}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADEA4346-99E0-4F91-BC53-7CA5EF033695}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADEA4346-99E0-4F91-BC53-7CA5EF033695}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F85F5868-A132-4222-A672-D4800354E424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F85F5868-A132-4222-A672-D4800354E424}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85F5868-A132-4222-A672-D4800354E424}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,10 +103,6 @@ Global
 		{19B1A160-9BD1-45EF-9544-96C967E8C17C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19B1A160-9BD1-45EF-9544-96C967E8C17C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19B1A160-9BD1-45EF-9544-96C967E8C17C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9BD1D90-AB5B-4204-AE39-2E38ECC68646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E9BD1D90-AB5B-4204-AE39-2E38ECC68646}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E9BD1D90-AB5B-4204-AE39-2E38ECC68646}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E9BD1D90-AB5B-4204-AE39-2E38ECC68646}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,7 +114,6 @@ Global
 		{9D801C10-D6D3-4988-895E-F9F5E9A14EC1} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{73EA1E37-DA42-4E50-BDF2-967200A8AD30} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{136EF778-9383-42F3-B4E4-36149597413E} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
-		{ADEA4346-99E0-4F91-BC53-7CA5EF033695} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{F85F5868-A132-4222-A672-D4800354E424} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{04352863-CB3F-4427-91F3-64FC7C19D25D} = {78FC98FE-5E50-4C27-AA6C-21D2578EAC68}
 	EndGlobalSection

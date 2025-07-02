@@ -22,3 +22,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\Sli
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowInterfaces.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.frmInputBildauswahl.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.frmMessageBildauswahl.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\XmpCore.xml

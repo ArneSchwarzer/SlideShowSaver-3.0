@@ -15,3 +15,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\obj\Debug\SlideSho.
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.xml

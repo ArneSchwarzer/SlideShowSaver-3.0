@@ -10,13 +10,13 @@
         "projectName": "SlideShowInterfaces",
         "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
         "frameworks": {
-          "net472": {
+          "net48": {
             "projectReferences": {}
           }
         }
       },
       "frameworks": {
-        "net472": {}
+        "net48": {}
       }
     },
     "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {
@@ -37,7 +37,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net472"
+          "net48"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -45,8 +45,8 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net472": {
-            "targetAlias": "net472",
+          "net48": {
+            "targetAlias": "net48",
             "projectReferences": {
               "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
                 "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj"
@@ -69,8 +69,8 @@
         }
       },
       "frameworks": {
-        "net472": {
-          "targetAlias": "net472",
+        "net48": {
+          "targetAlias": "net48",
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
         }
       }
