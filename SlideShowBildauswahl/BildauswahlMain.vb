@@ -33,7 +33,7 @@ Public Class BildauswahlMain
         defaults("WhiteListTags") = "" 'Liste der Tags in der White-List (durch Semikola getrennt)
         defaults("BlackListTags") = "Extern; 18+; Akt; Anna_Akt; Kiki_Akt; Daphne_Akt; Sirenen_Akt" 'Liste der Tags in der Black-List (durch Semikola getrennt)
         defaults("Altersfreigabe") = "Lingerie" 'Stufe der Altersfreigabe
-        defaults("Bewertung") = "4 Sterne" 'Minimale Bewertung
+        defaults("Bewertung") = "4" 'Minimale Bewertung
 
         Return defaults
 
@@ -55,7 +55,7 @@ Public Class BildauswahlMain
         translatedDictionary.Add("Verzeichnisse", settings("lstVerzeichnisse"))
         translatedDictionary.Add("WhiteListTags", settings("lstWhiteList"))
         translatedDictionary.Add("BlackListTags", settings("lstBlackList"))
-        translatedDictionary.Add("Bewertung", settings("cmbBewertung"))
+        translatedDictionary.Add("Bewertung", settings("sbcBewertung").ToString)
 
         If settings("rdo18") = True Then
             translatedDictionary.Add("Altersfreigabe", "18+")
@@ -126,22 +126,7 @@ Public Class BildauswahlMain
 
         'Bewertung
         tempRegVal = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", defaults)
-        Select Case tempRegVal
-            Case "5 Sterne"
-                settings.Bewertung = 5
-            Case "4 Sterne"
-                settings.Bewertung = 4
-            Case "3 Sterne"
-                settings.Bewertung = 3
-            Case "2 Sterne"
-                settings.Bewertung = 2
-            Case "1 Stern"
-                settings.Bewertung = 1
-            Case "Keine Beschränkung"
-                settings.Bewertung = 0
-            Case Else
-                settings.Bewertung = 4
-        End Select
+        settings.Bewertung = CInt(tempRegVal)
 
         Return settings
 

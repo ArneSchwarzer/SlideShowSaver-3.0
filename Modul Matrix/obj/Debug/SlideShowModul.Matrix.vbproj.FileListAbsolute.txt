@@ -30,3 +30,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowSh
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\taglib-sharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\StarControlLibrary.dll

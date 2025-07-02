@@ -5,6 +5,7 @@ Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowLoader
 Imports SlideShowTools.ListHandling
+Imports System.Windows.Forms
 
 
 Public Class ucOptionsModul
@@ -13,7 +14,7 @@ Public Class ucOptionsModul
 
     Private Shared minuten As Integer
     Private Shared sekunden As Integer
-    
+
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
         Dim transitionInfos As List(Of SlideShowTransitionInfo)
         Dim shaderInfos As List(Of SlideShowShaderInfo)
@@ -44,13 +45,12 @@ Public Class ucOptionsModul
             Function(m) m.TransitionName
             )
 
+        If clbTransitions.Items.Count = 1 Then
+            clbTransitions.SetItemCheckState(0, CheckState.Checked)
+        End If
+
         'cmbEffektauswahl
-        If clbTransitions.Items.Count = 0 Then
-            cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
-            cmbEffektauswahl.Enabled = False
-            lblNcmbEffektauswahl.Enabled = False
-            clbTransitions.Enabled = False
-        ElseIf clbTransitions.CheckedItems.Count = 1 Then
+        If clbTransitions.CheckedItems.Count = 1 Then
             cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
             cmbEffektauswahl.Enabled = False
             lblNcmbEffektauswahl.Enabled = False
@@ -77,13 +77,12 @@ Public Class ucOptionsModul
             Function(m) m.ShaderName
             )
 
+        If clbShader.Items.Count = 1 Then
+            clbShader.SetItemCheckState(0, CheckState.Checked)
+        End If
+
         'cmbShader
-        If clbShader.Items.Count = 0 Then
-            cmbShaderauswahl.SelectedIndex = 0 'Zufällig bei Start
-            cmbShaderauswahl.Enabled = False
-            lblNcmbShaderauswahl.Enabled = False
-            clbShader.Enabled = False
-        ElseIf clbShader.CheckedItems.Count = 1 Then
+        If clbShader.CheckedItems.Count = 1 Then
             cmbShaderauswahl.SelectedIndex = 0 'Zufällig bei Start
             cmbShaderauswahl.Enabled = False
             lblNcmbShaderauswahl.Enabled = False

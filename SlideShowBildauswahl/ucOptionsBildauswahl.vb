@@ -14,7 +14,7 @@ Public Class ucOptionsBildauswahl
     Private blacklistByReg As String
     Private blacklistListe As List(Of String)
     Private altersfreigabe As String
-    Private bewertung As String
+    Private bewertung As Integer
 
     Private Sub ucOptionsBildauswahl_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Settings einlesen und setzten
@@ -50,8 +50,8 @@ Public Class ucOptionsBildauswahl
             btnBlackListListeLöschen.Enabled = False
         End If
 
-        bewertung = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", defaults)
-        cmbBewertung.SelectedItem = bewertung
+        bewertung = CInt(ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", defaults))
+        sbcBewertung.Bewertung = bewertung
 
         altersfreigabe = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", defaults)
         Select Case altersfreigabe

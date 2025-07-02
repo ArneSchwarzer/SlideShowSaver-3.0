@@ -43,7 +43,7 @@ Partial Class ucOptionsBildauswahl
         Me.rdoAkt = New System.Windows.Forms.RadioButton()
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
         Me.rdoJugendfrei = New System.Windows.Forms.RadioButton()
-        Me.cmbBewertung = New System.Windows.Forms.ComboBox()
+        Me.sbcBewertung = New StarControlLibrary.SterneBewertungControl()
         Me.SuspendLayout()
         '
         'Label1
@@ -246,20 +246,20 @@ Partial Class ucOptionsBildauswahl
         Me.rdoJugendfrei.Text = "Jugendfrei"
         Me.rdoJugendfrei.UseVisualStyleBackColor = True
         '
-        'cmbBewertung
+        'sbcBewertung
         '
-        Me.cmbBewertung.FormattingEnabled = True
-        Me.cmbBewertung.Items.AddRange(New Object() {"5 Sterne", "4 Sterne", "3 Sterne", "2 Sterne", "1 Stern", "Keine Beschränkung"})
-        Me.cmbBewertung.Location = New System.Drawing.Point(461, 807)
-        Me.cmbBewertung.Name = "cmbBewertung"
-        Me.cmbBewertung.Size = New System.Drawing.Size(330, 49)
-        Me.cmbBewertung.TabIndex = 21
+        Me.sbcBewertung.Bewertung = 0
+        Me.sbcBewertung.Location = New System.Drawing.Point(461, 809)
+        Me.sbcBewertung.Name = "sbcBewertung"
+        Me.sbcBewertung.Size = New System.Drawing.Size(241, 43)
+        Me.sbcBewertung.TabIndex = 21
+        Me.sbcBewertung.Text = "SterneBewertungControl1"
         '
         'ucOptionsBildauswahl
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.cmbBewertung)
+        Me.Controls.Add(Me.sbcBewertung)
         Me.Controls.Add(Me.rdoJugendfrei)
         Me.Controls.Add(Me.rdoLingerie)
         Me.Controls.Add(Me.rdoAkt)
@@ -311,5 +311,5 @@ Partial Class ucOptionsBildauswahl
     Friend WithEvents rdoAkt As Windows.Forms.RadioButton
     Friend WithEvents rdoLingerie As Windows.Forms.RadioButton
     Friend WithEvents rdoJugendfrei As Windows.Forms.RadioButton
-    Friend WithEvents cmbBewertung As Windows.Forms.ComboBox
+    Friend WithEvents sbcBewertung As StarControlLibrary.SterneBewertungControl
 End Class

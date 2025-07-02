@@ -9,6 +9,7 @@ Imports SlideShowBildauswahl
 Imports SlideShowTools.CursorHandling
 Imports SlideShowLogging
 Imports SlideShowTools
+Imports StarControlLibrary
 
 
 Public Class frmOptionsMain
@@ -310,7 +311,16 @@ Public Class frmOptionsMain
         ' === Bildauswahl Settings ===
         uc = TryCast(tpBildauswahl.Controls(0), UserControl)
         If uc IsNot Nothing Then
+
             bildauswahlSettings = ConversionHandling.UserControlZuDictionary(uc)
+
+            'ConversionHandling.UserControlZuDictionary kennt (noch ;-) kein SterneBewertungsControl, also erst
+            'einmal hier per Hand...
+            Dim control = TryCast(uc.Controls("sbcBewertung"), SterneBewertungControl)
+            If control IsNot Nothing Then
+                bildauswahlSettings.Add("sbcBewertung", control.Bewertung.ToString())
+            End If
+
         End If
 
         BildauswahlMain.WriteBildauswahlSettingsToRegistry(bildauswahlSettings)
