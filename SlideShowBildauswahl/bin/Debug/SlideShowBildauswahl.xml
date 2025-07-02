@@ -39,6 +39,7 @@ SlideShowBildauswahl
  <param name="img">Das zu drehende Originalbild.</param>
  <param name="angle">Der Rotationswinkel in Grad (im Uhrzeigersinn, negative Werte gegen den Uhrzeigersinn).</param>
  <returns>Ein neues Image-Objekt, das um angle Grad rotiert wurde. Transparente Ränder werden gesetzt.</returns>
+ 
 </member>
 </members>
 </doc>

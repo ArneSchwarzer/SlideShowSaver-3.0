@@ -24,6 +24,7 @@ Partial Class frmPictureInfo
     Private Sub InitializeComponent()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.slbBewertung = New StarControlLibrary.SterneAnzeigeLabel()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
         Me.lblAutor = New System.Windows.Forms.Label()
@@ -50,7 +51,7 @@ Partial Class frmPictureInfo
         Me.Label10 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.slbBewertung = New StarControlLibrary.SterneAnzeigeLabel()
+        Me.lblBewertung = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
@@ -68,6 +69,7 @@ Partial Class frmPictureInfo
         'GroupBox1
         '
         Me.GroupBox1.BackColor = System.Drawing.Color.Transparent
+        Me.GroupBox1.Controls.Add(Me.lblBewertung)
         Me.GroupBox1.Controls.Add(Me.slbBewertung)
         Me.GroupBox1.Controls.Add(Me.Label16)
         Me.GroupBox1.Controls.Add(Me.lblTags)
@@ -82,14 +84,24 @@ Partial Class frmPictureInfo
         Me.GroupBox1.Controls.Add(Me.Label4)
         Me.GroupBox1.Location = New System.Drawing.Point(13, 136)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(903, 517)
+        Me.GroupBox1.Size = New System.Drawing.Size(903, 538)
         Me.GroupBox1.TabIndex = 1
         Me.GroupBox1.TabStop = False
+        '
+        'slbBewertung
+        '
+        Me.slbBewertung.BackColor = System.Drawing.Color.Black
+        Me.slbBewertung.Bewertung = 0
+        Me.slbBewertung.Location = New System.Drawing.Point(293, 326)
+        Me.slbBewertung.Name = "slbBewertung"
+        Me.slbBewertung.Size = New System.Drawing.Size(150, 30)
+        Me.slbBewertung.TabIndex = 12
+        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
         '
         'Label16
         '
         Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(17, 276)
+        Me.Label16.Location = New System.Drawing.Point(17, 315)
         Me.Label16.Name = "Label16"
         Me.Label16.Size = New System.Drawing.Size(161, 41)
         Me.Label16.TabIndex = 10
@@ -98,7 +110,7 @@ Partial Class frmPictureInfo
         'lblTags
         '
         Me.lblTags.AutoSize = True
-        Me.lblTags.Location = New System.Drawing.Point(286, 372)
+        Me.lblTags.Location = New System.Drawing.Point(286, 411)
         Me.lblTags.MaximumSize = New System.Drawing.Size(580, 123)
         Me.lblTags.Name = "lblTags"
         Me.lblTags.Size = New System.Drawing.Size(243, 41)
@@ -108,7 +120,7 @@ Partial Class frmPictureInfo
         'lblAutor
         '
         Me.lblAutor.AutoSize = True
-        Me.lblAutor.Location = New System.Drawing.Point(286, 324)
+        Me.lblAutor.Location = New System.Drawing.Point(286, 363)
         Me.lblAutor.MaximumSize = New System.Drawing.Size(580, 123)
         Me.lblAutor.Name = "lblAutor"
         Me.lblAutor.Size = New System.Drawing.Size(92, 41)
@@ -118,7 +130,7 @@ Partial Class frmPictureInfo
         'lblErstellungsdatum
         '
         Me.lblErstellungsdatum.AutoSize = True
-        Me.lblErstellungsdatum.Location = New System.Drawing.Point(286, 228)
+        Me.lblErstellungsdatum.Location = New System.Drawing.Point(286, 267)
         Me.lblErstellungsdatum.MaximumSize = New System.Drawing.Size(580, 123)
         Me.lblErstellungsdatum.Name = "lblErstellungsdatum"
         Me.lblErstellungsdatum.Size = New System.Drawing.Size(247, 41)
@@ -147,7 +159,7 @@ Partial Class frmPictureInfo
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(17, 372)
+        Me.Label8.Location = New System.Drawing.Point(17, 411)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(243, 41)
         Me.Label8.TabIndex = 4
@@ -156,7 +168,7 @@ Partial Class frmPictureInfo
         'Label7
         '
         Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(17, 324)
+        Me.Label7.Location = New System.Drawing.Point(17, 363)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(92, 41)
         Me.Label7.TabIndex = 3
@@ -165,7 +177,7 @@ Partial Class frmPictureInfo
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(17, 228)
+        Me.Label6.Location = New System.Drawing.Point(17, 267)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(247, 41)
         Me.Label6.TabIndex = 2
@@ -215,14 +227,14 @@ Partial Class frmPictureInfo
         Me.GroupBox2.Controls.Add(Me.Label9)
         Me.GroupBox2.Location = New System.Drawing.Point(949, 136)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(470, 517)
+        Me.GroupBox2.Size = New System.Drawing.Size(485, 538)
         Me.GroupBox2.TabIndex = 3
         Me.GroupBox2.TabStop = False
         '
         'lblBlende
         '
         Me.lblBlende.AutoSize = True
-        Me.lblBlende.Location = New System.Drawing.Point(215, 228)
+        Me.lblBlende.Location = New System.Drawing.Point(215, 267)
         Me.lblBlende.Name = "lblBlende"
         Me.lblBlende.Size = New System.Drawing.Size(109, 41)
         Me.lblBlende.TabIndex = 12
@@ -231,7 +243,7 @@ Partial Class frmPictureInfo
         'lblISO
         '
         Me.lblISO.AutoSize = True
-        Me.lblISO.Location = New System.Drawing.Point(215, 324)
+        Me.lblISO.Location = New System.Drawing.Point(215, 363)
         Me.lblISO.Name = "lblISO"
         Me.lblISO.Size = New System.Drawing.Size(65, 41)
         Me.lblISO.TabIndex = 11
@@ -240,7 +252,7 @@ Partial Class frmPictureInfo
         'lblVerschlusszeit
         '
         Me.lblVerschlusszeit.AutoSize = True
-        Me.lblVerschlusszeit.Location = New System.Drawing.Point(215, 276)
+        Me.lblVerschlusszeit.Location = New System.Drawing.Point(215, 315)
         Me.lblVerschlusszeit.Name = "lblVerschlusszeit"
         Me.lblVerschlusszeit.Size = New System.Drawing.Size(202, 41)
         Me.lblVerschlusszeit.TabIndex = 10
@@ -249,7 +261,7 @@ Partial Class frmPictureInfo
         'lblObjektiv
         '
         Me.lblObjektiv.AutoSize = True
-        Me.lblObjektiv.Location = New System.Drawing.Point(215, 92)
+        Me.lblObjektiv.Location = New System.Drawing.Point(215, 131)
         Me.lblObjektiv.MaximumSize = New System.Drawing.Size(245, 82)
         Me.lblObjektiv.Name = "lblObjektiv"
         Me.lblObjektiv.Size = New System.Drawing.Size(128, 41)
@@ -259,7 +271,7 @@ Partial Class frmPictureInfo
         'lblBrennweite
         '
         Me.lblBrennweite.AutoSize = True
-        Me.lblBrennweite.Location = New System.Drawing.Point(215, 172)
+        Me.lblBrennweite.Location = New System.Drawing.Point(215, 211)
         Me.lblBrennweite.Name = "lblBrennweite"
         Me.lblBrennweite.Size = New System.Drawing.Size(166, 41)
         Me.lblBrennweite.TabIndex = 8
@@ -278,7 +290,7 @@ Partial Class frmPictureInfo
         'Label15
         '
         Me.Label15.AutoSize = True
-        Me.Label15.Location = New System.Drawing.Point(7, 228)
+        Me.Label15.Location = New System.Drawing.Point(7, 267)
         Me.Label15.Name = "Label15"
         Me.Label15.Size = New System.Drawing.Size(109, 41)
         Me.Label15.TabIndex = 6
@@ -287,7 +299,7 @@ Partial Class frmPictureInfo
         'Label13
         '
         Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(7, 324)
+        Me.Label13.Location = New System.Drawing.Point(7, 363)
         Me.Label13.Name = "Label13"
         Me.Label13.Size = New System.Drawing.Size(65, 41)
         Me.Label13.TabIndex = 4
@@ -296,7 +308,7 @@ Partial Class frmPictureInfo
         'Label12
         '
         Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(7, 276)
+        Me.Label12.Location = New System.Drawing.Point(7, 315)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(202, 41)
         Me.Label12.TabIndex = 3
@@ -305,7 +317,7 @@ Partial Class frmPictureInfo
         'Label11
         '
         Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(7, 92)
+        Me.Label11.Location = New System.Drawing.Point(7, 131)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(128, 41)
         Me.Label11.TabIndex = 2
@@ -314,7 +326,7 @@ Partial Class frmPictureInfo
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(7, 172)
+        Me.Label10.Location = New System.Drawing.Point(7, 211)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(166, 41)
         Me.Label10.TabIndex = 1
@@ -338,15 +350,14 @@ Partial Class frmPictureInfo
         Me.Label3.TabIndex = 4
         Me.Label3.Text = "Kamera"
         '
-        'slbBewertung
+        'lblBewertung
         '
-        Me.slbBewertung.BackColor = System.Drawing.Color.Black
-        Me.slbBewertung.Bewertung = 0
-        Me.slbBewertung.Location = New System.Drawing.Point(293, 287)
-        Me.slbBewertung.Name = "slbBewertung"
-        Me.slbBewertung.Size = New System.Drawing.Size(150, 30)
-        Me.slbBewertung.TabIndex = 12
-        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
+        Me.lblBewertung.AutoSize = True
+        Me.lblBewertung.Location = New System.Drawing.Point(286, 315)
+        Me.lblBewertung.Name = "lblBewertung"
+        Me.lblBewertung.Size = New System.Drawing.Size(30, 41)
+        Me.lblBewertung.TabIndex = 13
+        Me.lblBewertung.Text = "-"
         '
         'frmPictureInfo
         '
@@ -407,4 +418,5 @@ Partial Class frmPictureInfo
     Friend WithEvents lblKamera As Windows.Forms.Label
     Friend WithEvents Label16 As Windows.Forms.Label
     Friend WithEvents slbBewertung As StarControlLibrary.SterneAnzeigeLabel
+    Friend WithEvents lblBewertung As Windows.Forms.Label
 End Class

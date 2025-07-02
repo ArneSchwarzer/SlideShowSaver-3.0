@@ -16,7 +16,7 @@ Imports System.Reflection
 <Assembly: System.Reflection.AssemblyCompanyAttribute("SlideShowLoader"),  _
  Assembly: System.Reflection.AssemblyConfigurationAttribute("Debug"),  _
  Assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0"),  _
- Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7fe42169cb9ed53bb525b7f1018b4b57a10e4ce4"),  _
+ Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3186d93482eff220fd809f43767db36309cb51bb"),  _
  Assembly: System.Reflection.AssemblyProductAttribute("SlideShowLoader"),  _
  Assembly: System.Reflection.AssemblyTitleAttribute("SlideShowLoader"),  _
  Assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")> 

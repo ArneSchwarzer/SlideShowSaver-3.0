@@ -233,6 +233,8 @@ Public Class frmSaverMain
         End Try
 
         'OptionsDialog aufrufen inklusive Prüfung, ob der Dialog über den OK-Button geschlossen wurde
+        Application.DoEvents()
+        Threading.Thread.Sleep(100)
         If optionsDialog.ShowDialog() = DialogResult.OK Then
             'Alles Re-Initialisieren
             IniAndReinitialize()

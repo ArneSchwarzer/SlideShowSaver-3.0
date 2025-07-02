@@ -31,6 +31,7 @@ Public Class ucOptionsModul
 
         'clbTransitions
         clbTransitions.Items.Clear()
+        clbTransitions.Items.Add("Direkter Übergang (Cut)")
         For Each transitionInfo In transitionInfos
             clbTransitions.Items.Add(transitionInfo)
         Next
@@ -63,6 +64,7 @@ Public Class ucOptionsModul
 
         'clbShader
         clbShader.Items.Clear()
+        clbShader.Items.Add("Originalbild")
         For Each shaderInfo In shaderInfos
             clbShader.Items.Add(shaderInfo)
         Next

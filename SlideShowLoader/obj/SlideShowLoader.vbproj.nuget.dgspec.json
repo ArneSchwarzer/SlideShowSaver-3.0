@@ -81,13 +81,13 @@
         "projectName": "SlideShowLogging",
         "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
         "frameworks": {
-          "net472": {
+          "net48": {
             "projectReferences": {}
           }
         }
       },
       "frameworks": {
-        "net472": {}
+        "net48": {}
       }
     }
   }

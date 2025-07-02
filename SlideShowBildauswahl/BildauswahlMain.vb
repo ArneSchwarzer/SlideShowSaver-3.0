@@ -29,7 +29,7 @@ Public Class BildauswahlMain
 
         Dim defaults As New Dictionary(Of String, String)
 
-        defaults("Verzeichnisse") = "D:\Arbeitsverzeichnis;D:\Eigene Bilder;J:\Bilder" 'Liste der Verzeichnisse (durch Semikola getrennt) 
+        defaults("Verzeichnisse") = "D:\Arbeits- und Sortierbereich;D:\Eigene Bilder;J:\Bilder" 'Liste der Verzeichnisse (durch Semikola getrennt) 
         defaults("WhiteListTags") = "" 'Liste der Tags in der White-List (durch Semikola getrennt)
         defaults("BlackListTags") = "Extern; 18+; Akt; Anna_Akt; Kiki_Akt; Daphne_Akt; Sirenen_Akt" 'Liste der Tags in der Black-List (durch Semikola getrennt)
         defaults("Altersfreigabe") = "Lingerie" 'Stufe der Altersfreigabe
@@ -56,6 +56,7 @@ Public Class BildauswahlMain
         translatedDictionary.Add("WhiteListTags", settings("lstWhiteList"))
         translatedDictionary.Add("BlackListTags", settings("lstBlackList"))
         translatedDictionary.Add("Bewertung", settings("cmbBewertung"))
+
         If settings("rdo18") = True Then
             translatedDictionary.Add("Altersfreigabe", "18+")
         End If
@@ -148,25 +149,82 @@ Public Class BildauswahlMain
 
     Public Shared Function CreateFileList(verzeichnisse As List(Of String), endungen As List(Of String)) As List(Of String)
         'Liest alle Dateien (komplette Dateipfade) mit den in "endungen" angegebenen Dateiendungen aus der Liste der in
-        '"verzeichnisse" angegebenen Verzeichnisse (und deren Unterverzichnisse) und gibt sie als Liste zurück
+        '"verzeichnisse" angegebenen Verzeichnisse (und deren Unterverzichnisse) und gibt sie als Liste zurück.
+        '
+        'ACHTUNG! Diese Version ist auf 'Blattverzeichnisse' hin optimiert. D.h. es wird immer nur das letzte Unterverzeichnis
+        'eines Dateipades berücksichtigt. Dies bedingt eine Dateistruktur, in der keine Bilddateien in Verzeichnissen
+        'gefunden werden, in denen auch noch weitere Unterordner vorhanden sind! Dies dient zur Optimierung des Suchvorgangs
+        'auf die Verzeichnisstruktur des Authors dieser Software.
+        '
+        'Eine "klassische" Verzeichnissuche, die auch Dateien in solchen Ordnern findet in denen Dateien und Unterordner
+        'gemeinsam liegen ist auskommentiert am Ende der Funktion zu finden.
 
         Dim listOfFiles As New List(Of String)
-        Dim basefolder As String
-        Dim endung As String
-        Dim gefundeneDateien As String()
 
-        For Each endung In endungen
-            For Each basefolder In verzeichnisse
+        For Each verzeichnis In verzeichnisse
+
+            If Not Directory.Exists(verzeichnis) Then
+                ' Verzeichnis existiert nicht, logge und überspringe
+                LogHandling.LogError("Verzeichnis nicht gefunden: " & verzeichnis)
+                Continue For
+            End If
+
+            Dim unterverzeichnisse As String() = {}
+            Try
+                unterverzeichnisse = Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
+            Catch ex As Exception
+                LogHandling.LogError("Fehler beim Durchsuchen von Unterverzeichnissen in '" & verzeichnis & "': " & ex.Message)
+                Continue For
+            End Try
+
+            ' Füge das Hauptverzeichnis zur Liste hinzu
+            Dim alleVerzeichnisse = New List(Of String) From {verzeichnis}
+            alleVerzeichnisse.AddRange(unterverzeichnisse)
+
+            For Each pfad In alleVerzeichnisse
+                Dim subdirs() As String = {}
                 Try
-                    gefundeneDateien = Directory.GetFiles(basefolder, endung, SearchOption.AllDirectories)
-                    listOfFiles.AddRange(gefundeneDateien)
+                    subdirs = Directory.GetDirectories(pfad)
                 Catch ex As Exception
-                    LogHandling.LogError("SlideShowBildauswahl meldet ein Problem bei der Erstellung der Dateiliste: " & ex.ToString)
+                    LogHandling.LogError("Fehler beim Abrufen von Unterverzeichnissen in '" & pfad & "': " & ex.Message)
+                    Continue For
                 End Try
+
+                ' Nur wenn keine Unterverzeichnisse existieren => Blattverzeichnis
+                If subdirs.Length = 0 Then
+                    Try
+                        Dim files = Directory.GetFiles(pfad, "*.*", SearchOption.TopDirectoryOnly).
+                            Where(Function(f) endungen.Any(Function(ext) f.EndsWith(ext, StringComparison.OrdinalIgnoreCase))).
+                            ToList()
+                        listOfFiles.AddRange(files)
+                    Catch ex As Exception
+                        LogHandling.LogError("Fehler beim Durchsuchen von Dateien in '" & pfad & "': " & ex.Message)
+                    End Try
+                End If
             Next
         Next
 
         Return listOfFiles
+
+        ' === Klassische Suchfunktion ===
+
+        'Dim listOfFiles As New List(Of String)
+        'Dim basefolder As String
+        'Dim endung As String
+        'Dim gefundeneDateien As String()
+
+        'For Each endung In endungen
+        '    For Each basefolder In verzeichnisse
+        '        Try
+        '            gefundeneDateien = Directory.GetFiles(basefolder, endung, SearchOption.AllDirectories)
+        '            listOfFiles.AddRange(gefundeneDateien)
+        '        Catch ex As Exception
+        '            LogHandling.LogError("SlideShowBildauswahl meldet ein Problem bei der Erstellung der Dateiliste: " & ex.ToString)
+        '        End Try
+        '    Next
+        'Next
+
+        'Return listOfFiles
 
     End Function
 
@@ -235,7 +293,7 @@ Public Class BildauswahlMain
         ' Ein optionales targetDir beschränkt die Suche auf ebendieses.
 
         Dim suchVerzeichnisse As New List(Of String)
-        Dim dateiTypen As New List(Of String) From {"*.bmp", "*.jpg", "*.jpeg", "*.png"}
+        Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
         Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
         Dim bilderListe As List(Of String)
         Dim bild As String
@@ -367,6 +425,7 @@ Public Class BildauswahlMain
     ''' <param name="img">Das zu drehende Originalbild.</param>
     ''' <param name="angle">Der Rotationswinkel in Grad (im Uhrzeigersinn, negative Werte gegen den Uhrzeigersinn).</param>
     ''' <returns>Ein neues Image-Objekt, das um angle Grad rotiert wurde. Transparente Ränder werden gesetzt.</returns>
+    ''' 
     Public Shared Function RotateImage(img As Image, angle As Single) As Image
         Dim originalWidth As Integer
         Dim originalHeight As Integer

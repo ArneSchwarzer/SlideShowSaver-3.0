@@ -11,9 +11,11 @@ Public Class ModulMain
     Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
     Private Const SLIDESHOWMODULFULL_PATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
     Public Shared sssScreen As frmModulMain
-    Private sssPause As frmPauseModusOverlay
+    Public Shared sssPause As frmPauseModusOverlay
     Public Shared sssInfo As frmPictureInfo
     Private zwischenspeicherSettings As ModulSettings_SlideShowSaver_3_0
+    Public Shared pauseIsActive As Boolean = False
+
 
     'Übersetzungstabelle UC <--> Settings
     Private Shared ReadOnly translationTable As New Dictionary(Of String, String) From {
@@ -85,11 +87,11 @@ Public Class ModulMain
         'Initialisiert und startet das eigentliche Modul
 
         sssScreen = New frmModulMain()
-        sssPause = New frmPauseModusOverlay()
         CheckYourSettings()
         RaiseEvent ModulStateChanged("Running")
 
         sssScreen.Show()
+        'ZStackingSSS()
 
     End Sub
 
@@ -119,7 +121,18 @@ Public Class ModulMain
     End Sub
 
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
-        ' Keine Pausefunktion in diesem Beispiel
+        ' Startet den Pause-Modus des Moduls
+
+        sssScreen.tmrModul.Stop()
+
+        If sssPause Is Nothing Then
+            sssPause = New frmPauseModusOverlay()
+        End If
+
+        pauseIsActive = True
+        sssPause.Show()
+        RaiseEvent ModulStateChanged("Pause")
+
     End Sub
 
     ' === Optionen / Settings ===
@@ -305,6 +318,8 @@ Public Class ModulMain
             sssInfo = Nothing
         End If
 
+        'ZStackingSSS()
+
         'Timer gemäß der neuen Anzeigedauer setzen. Stop/Start, um die
         'Änderungen sofort wirken zu lassen (falls z.B. die Anzeigedauer von 2m auf 20s zurückgesetzt wurde,
         'möchte der Benutzer keine 2 Minuten warten, bis die Änderung greift).
@@ -321,4 +336,28 @@ Public Class ModulMain
 
     ' === Interne Funktionen ===
 
+    Public Sub ZStackingSSS()
+        'Sortiert die Fenster von SlideShowSaver 3.0 
+        If sssScreen IsNot Nothing Then
+            If Not sssScreen.Visible Then
+                sssScreen.Show()
+            End If
+            sssScreen.BringToFront()
+        End If
+
+        If aktuelleSettings.BildInfoAnzeigen AndAlso sssInfo IsNot Nothing Then
+            If Not sssInfo.Visible Then
+                sssInfo.Show()
+            End If
+            sssInfo.BringToFront()
+        End If
+
+        If pauseIsActive AndAlso sssPause IsNot Nothing Then
+            If Not sssPause.Visible Then
+                sssPause.Show()
+            End If
+            sssInfo.BringToFront()
+        End If
+
+    End Sub
 End Class

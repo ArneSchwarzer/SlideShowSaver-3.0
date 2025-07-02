@@ -20,10 +20,10 @@ Public Class frmModulMain
         FormsHandling.InitialFormPreparation(Me, Color.Black)
         Me.TopMost = False
 
-        'Bitte warten Label anzeigen
+        'Bitte warten Label vorbereiten
         lblInitializing.Left = (Me.Width - lblInitializing.Width) \ 2
         lblInitializing.Top = (Me.Height - lblInitializing.Height) \ 2
-        lblInitializing.Visible = True
+
 
         'picBildAnzeige initialisieren
         picBildAnzeige.Dock = DockStyle.Fill
@@ -34,6 +34,8 @@ Public Class frmModulMain
 
     Private Sub frmModulMain_Shown(sender As Object, e As EventArgs) Handles Me.Shown
 
+        'Bitte warten Label anzeigen
+        lblInitializing.Visible = True
 
         'erstes Bild Laden
         If ModulMain.aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
@@ -58,7 +60,9 @@ Public Class frmModulMain
         lblInitializing.Visible = False
         picBildAnzeige.Image = aktuellesBild
         picBildAnzeige.Refresh()
-        If ModulMain.aktuelleSettings.BildInfoAnzeigen AndAlso ModulMain.sssInfo IsNot Nothing Then
+
+        'Bildinfo aktualisieren
+        If ModulMain.aktuelleSettings.BildInfoAnzeigen Then
             ModulMain.sssInfo.RefreshLabels(initialePfade(0))
         End If
     End Sub
@@ -87,14 +91,13 @@ Public Class frmModulMain
         aktuellesBild = neuesBild
         picBildAnzeige.Image = aktuellesBild
         picBildAnzeige.Refresh()
-        If ModulMain.aktuelleSettings.BildInfoAnzeigen AndAlso ModulMain.sssInfo IsNot Nothing Then
 
+        If ModulMain.aktuelleSettings.BildInfoAnzeigen Then
             If bildPfad IsNot Nothing Then
                 ModulMain.sssInfo.RefreshLabels(bildPfad)
             Else
                 ModulMain.sssInfo.RefreshLabels(initialePfade(1))
             End If
-
         End If
 
         'Neues Bild laden. Da dies nach dem Anzeigen des neuen Bildes geschieht, hat ein evtl. Shader einen tmrMain-Tick Zeit...

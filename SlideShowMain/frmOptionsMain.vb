@@ -45,9 +45,12 @@ Public Class frmOptionsMain
         defaultsMain = GetMainDefaultSettings()
 
         Me.TopMost = True
+        Me.BringToFront()
+
         isInputLocked = True
-        ' Weil Cursor.Hide ein Stack ist...
         optionsDialogIsActive = True
+
+        ' Weil Cursor.Hide ein Stack ist...
         CursorPowerShow()
 
 
