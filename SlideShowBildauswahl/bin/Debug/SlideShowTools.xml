@@ -128,5 +128,25 @@ SlideShowTools
  </summary>
  <param name="clb">Die CheckedListBox, auf der ToolTips angezeigt werden sollen</param>
 </member>
+<member name="M:SlideShowTools.XmlHandling.LadeWerteliste(System.String,System.String,System.String)">
+ <summary>
+ Lädt alle Werte eines bestimmten Attributs aus einer XML-Datei.
+ </summary>
+</member>
+<member name="M:SlideShowTools.XmlHandling.SpeichereWerteliste(System.String,System.Collections.Generic.IEnumerable{System.String},System.String,System.String,System.String)">
+ <summary>
+ Speichert eine Liste von Strings als XML-Datei mit gegebenem Element- und Attributnamen.
+ </summary>
+</member>
+<member name="M:SlideShowTools.XmlHandling.WertelisteEnthält(System.String,System.String,System.String,System.String)">
+ <summary>
+ Prüft, ob ein bestimmter Wert in der XML-Werteliste bereits existiert.
+ </summary>
+</member>
+<member name="M:SlideShowTools.XmlHandling.WertInXmlEintragenOderEntfernen(System.String,System.String,System.String,System.String,System.String,System.Boolean)">
+ <summary>
+ Fügt einen Wert zur XML-Werteliste hinzu oder entfernt ihn, je nach Parameter.
+ </summary>
+</member>
 </members>
 </doc>

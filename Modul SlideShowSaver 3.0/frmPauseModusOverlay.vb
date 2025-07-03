@@ -1,8 +1,12 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
 Imports SlideShowTools.CursorHandling
+Imports SlideShowTools.XmlHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports TagLib
+Imports System.IO
+Imports SlideShowTools
+Imports SlideShowLogging
 
 Public Class frmPauseModusOverlay
 
@@ -13,11 +17,14 @@ Public Class frmPauseModusOverlay
     Private bild As Image
     Private meineInstanz As ModulMain = TryCast(ModulMain.activeModuleInstanz, ModulMain)
     Private pauseInfoScreen As frmPictureInfo = Nothing
-
-    'Hier ggf. eine Variable um die Liste "Markierte Fotos.xml" zwischenzuspeichern und manipulieren zu können.
+    Private tagLibFile As TagLib.Jpeg.File
+    Private xmlPfad As String = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "SlideShowSaver 3.0\Module\SlideShowSaver 3.0\Markierte Fotos.xml"
+            )
+    Private markierteFotos As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
     Private Sub frmPauseModusOverlay_Load(sender As Object, e As EventArgs) Handles Me.Load
-        Dim tagLibFile As TagLib.Jpeg.File
         Dim screen As Screen = Screen.FromControl(Me)
 
         Me.Top = 0
@@ -46,6 +53,7 @@ Public Class frmPauseModusOverlay
         'Weil Cursor.Hide() ein Stack ist und ich ein Feigling bin...
         CursorPowerShow()
 
+        'Listen und Variablen setzen
         If meineInstanz IsNot Nothing Then
             anzeigeListe = meineInstanz.sssScreen.listeDerZuletztAngezeigtenBilder
         End If
@@ -53,17 +61,29 @@ Public Class frmPauseModusOverlay
         indexListe = anzeigeListe.Count
         bildPfad = anzeigeListe(indexListe - 1)
 
-        'Hier die Liste „Markierte Fotos.xml“ aus dem Unterverzeichnis „/SlideShowSaver 3.0/Module/SlideShowSaver“
-        'des Dokumenten-Ordners des Benutzers laden. Prüfen, ob "bildPfad" in der Liste vorkommt, falls ja
-        'chkPauseMarkPicture auf checked setzten, sonst auf unchecked.
+        markierteFotos = New HashSet(Of String)(XmlHandling.LadeWerteliste(xmlPfad, "Foto", "Pfad"))
 
+        'ChkPauseMarkPicture setzen
+        If markierteFotos.Contains(bildPfad) Then
+            chkPauseMarkPicture.Checked = True
+        Else
+            chkPauseMarkPicture.Checked = False
+        End If
+
+        'Labels anpassen
         lblPauseAnzahl.Text = "Bild " & indexListe & " von " & anzeigeListe.Count
         lblOptionsDialogDisabled.Visible = False
 
-        tagLibFile = TagLib.File.Create(bildPfad)
-        sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
-        tagLibFile.Dispose()
+        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        Try
+            tagLibFile = TagLib.File.Create(bildPfad)
+            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
+            tagLibFile.Dispose()
+        Catch ex As Exception
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+        End Try
 
+        'Steuerelemente & Timer einrichten
         sbcBewerten.Visible = False
         chkBewerten.Checked = False
 
@@ -85,7 +105,6 @@ Public Class frmPauseModusOverlay
 
         pauseInfoScreen.RefreshLabels(bildPfad)
         pauseInfoScreen.Refresh()
-
 
     End Sub
 
@@ -120,8 +139,8 @@ Public Class frmPauseModusOverlay
 
     Private Sub frmPauseModusOverlay_Closed(sender As Object, e As EventArgs) Handles Me.Closed
 
-        'Hier die geladene Liste „Markierte Fotos.xml“ aus dem Unterverzeichnis „/SlideShowSaver 3.0/Module/SlideShowSaver“
-        'des Dokumenten-Ordners des Benutzers wieder speichern.
+        'Liste der markierten Fotos wieder zurückspeichern
+        XmlHandling.SpeichereWerteliste(xmlPfad, markierteFotos, "Markierungen", "Foto", "Pfad")
 
         If pauseInfoScreen IsNot Nothing Then
             pauseInfoScreen.Close()
@@ -130,9 +149,6 @@ Public Class frmPauseModusOverlay
         End If
 
         Cursor.Hide()
-
-
-
 
     End Sub
 
@@ -165,19 +181,40 @@ Public Class frmPauseModusOverlay
         Dim taglibFile As TagLib.Jpeg.File
 
         If Not String.IsNullOrEmpty(bildPfad) Then
-            taglibFile = TagLib.File.Create(bildPfad)
-            taglibFile.ImageTag.Rating = sbcBewerten.Bewertung
-            taglibFile.Dispose()
+            Try
+                ' Bild aus der PictureBox entfernen
+                If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen.picBildAnzeige.Image IsNot Nothing Then
+                    meineInstanz.sssScreen.picBildAnzeige.Image.Dispose()
+                    meineInstanz.sssScreen.picBildAnzeige.Image = Nothing
+                End If
+
+                ' Tag schreiben
+                taglibFile = TagLib.File.Create(bildPfad)
+                taglibFile.ImageTag.Rating = sbcBewerten.Bewertung
+                taglibFile.Save()
+                taglibFile.Dispose()
+
+                ' Bild wieder neu einladen (nach dem Speichern)
+                bild = GetPictureByName(bildPfad)
+                meineInstanz.sssScreen.picBildAnzeige.Image = bild
+                meineInstanz.sssScreen.Refresh()
+
+            Catch ex As Exception
+                LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen der Bewertung für Bild " & bildPfad & ": " & ex.ToString)
+            End Try
         End If
 
     End Sub
 
+
     Private Sub chkPauseMarkPicture_CheckStateChanged(sender As Object, e As EventArgs) Handles chkPauseMarkPicture.CheckStateChanged
 
-        'Hier die Werte in der Liste "Markierte Fotos.xml" anpassen:
-        '
-        'Wenn ein Bild in der Liste ist und der Checked-Status ist auf "unmarkiert" gesetzt worden, dann das Bild aus Liste löschen.
-        'Wenn ein Bild nicht in der Liste ist und der Checked-Statur ist auf "markiert" gesetzt worden, dann das Bild in die Liste eintragen.
+        'Hier die Werte in der Liste "Markierte Fotos.xml" anpassen
+        If chkPauseMarkPicture.CheckState Then
+            markierteFotos.Add(bildPfad)
+        Else
+            markierteFotos.Remove(bildPfad)
+        End If
 
     End Sub
 
@@ -192,6 +229,20 @@ Public Class frmPauseModusOverlay
             btnPauseBack.Enabled = False
         End If
 
+        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        Try
+            tagLibFile = TagLib.File.Create(bildPfad)
+            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
+            tagLibFile.Dispose()
+        Catch ex As Exception
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+        End Try
+
+        'Zum Schutz vor unabsichtlichem Ändern der Bewertung eines Bildes
+        chkBewerten.Checked = False
+        sbcBewerten.Visible = False
+
+        'Restliche Controls anpassen
         lblPauseAnzahl.Text = "Bild " & indexListe & " von " & anzeigeListe.Count
         btnPauseForward.BackgroundImage = My.Resources.Vor_Transparent
         btnPauseForward.BackgroundImageLayout = ImageLayout.Zoom
@@ -199,6 +250,14 @@ Public Class frmPauseModusOverlay
 
         bildPfad = anzeigeListe(indexListe - 1)
 
+        'Markiert Status setzen
+        If markierteFotos.Contains(bildPfad) Then
+            chkPauseMarkPicture.Checked = True
+        Else
+            chkPauseMarkPicture.Checked = False
+        End If
+
+        'Bild anzeigen
         If meineInstanz IsNot Nothing Then
             bild = GetPictureByName(bildPfad)
             meineInstanz.sssScreen.picBildAnzeige.Image = bild
@@ -221,6 +280,20 @@ Public Class frmPauseModusOverlay
             btnPauseForward.Enabled = False
         End If
 
+        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        Try
+            tagLibFile = TagLib.File.Create(bildPfad)
+            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
+            tagLibFile.Dispose()
+        Catch ex As Exception
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+        End Try
+
+        'Zum Schutz vor unabsichtlichem Ändern der Bewertung eines Bildes
+        chkBewerten.Checked = False
+        sbcBewerten.Visible = False
+
+        'Restliche Controls anpassen
         lblPauseAnzahl.Text = "Bild " & indexListe & " von " & anzeigeListe.Count
         btnPauseBack.BackgroundImage = My.Resources.Zurück_Transparent
         btnPauseBack.BackgroundImageLayout = ImageLayout.Zoom
@@ -228,6 +301,14 @@ Public Class frmPauseModusOverlay
 
         bildPfad = anzeigeListe(indexListe - 1)
 
+        'Markiert Status setzen
+        If markierteFotos.Contains(bildPfad) Then
+            chkPauseMarkPicture.Checked = True
+        Else
+            chkPauseMarkPicture.Checked = False
+        End If
+
+        'Bild anzeigen
         If meineInstanz IsNot Nothing Then
             bild = GetPictureByName(bildPfad)
             meineInstanz.sssScreen.picBildAnzeige.Image = bild
