@@ -38,18 +38,20 @@ Partial Class ucUnderConstruction
         Me.Panel1.Controls.Add(Me.Label3)
         Me.Panel1.Controls.Add(Me.Label2)
         Me.Panel1.Controls.Add(Me.Label1)
-        Me.Panel1.Location = New System.Drawing.Point(3, 3)
+        Me.Panel1.Location = New System.Drawing.Point(1, 1)
+        Me.Panel1.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(1552, 1117)
+        Me.Panel1.Size = New System.Drawing.Size(665, 501)
         Me.Panel1.TabIndex = 6
         '
         'PictureBox1
         '
         Me.PictureBox1.Image = Global.Modul_SlideShowSaver_3._0.My.Resources.Resources.SlideShowSaver_Splash
-        Me.PictureBox1.Location = New System.Drawing.Point(0, 434)
-        Me.PictureBox1.MinimumSize = New System.Drawing.Size(1550, 0)
+        Me.PictureBox1.Location = New System.Drawing.Point(0, 195)
+        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
+        Me.PictureBox1.MinimumSize = New System.Drawing.Size(664, 0)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(1550, 615)
+        Me.PictureBox1.Size = New System.Drawing.Size(664, 276)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.PictureBox1.TabIndex = 5
         Me.PictureBox1.TabStop = False
@@ -59,10 +61,11 @@ Partial Class ucUnderConstruction
         Me.Label3.AutoSize = True
         Me.Label3.Font = New System.Drawing.Font("Segoe UI", 24.0!, System.Drawing.FontStyle.Bold)
         Me.Label3.ForeColor = System.Drawing.Color.Red
-        Me.Label3.Location = New System.Drawing.Point(0, 256)
-        Me.Label3.MinimumSize = New System.Drawing.Size(1550, 0)
+        Me.Label3.Location = New System.Drawing.Point(0, 115)
+        Me.Label3.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
+        Me.Label3.MinimumSize = New System.Drawing.Size(664, 0)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(1550, 96)
+        Me.Label3.Size = New System.Drawing.Size(695, 96)
         Me.Label3.TabIndex = 5
         Me.Label3.Text = "SlideShowSaver 3.0"
         Me.Label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -72,12 +75,13 @@ Partial Class ucUnderConstruction
         Me.Label2.AutoSize = True
         Me.Label2.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
         Me.Label2.ForeColor = System.Drawing.Color.Red
-        Me.Label2.Location = New System.Drawing.Point(0, 131)
-        Me.Label2.MinimumSize = New System.Drawing.Size(1550, 0)
+        Me.Label2.Location = New System.Drawing.Point(0, 59)
+        Me.Label2.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
+        Me.Label2.MinimumSize = New System.Drawing.Size(664, 0)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(1550, 72)
+        Me.Label2.Size = New System.Drawing.Size(1456, 72)
         Me.Label2.TabIndex = 5
-        Me.Label2.Text = "Hier entsteht gerade das neue Bildschirmschomer-Modul"
+        Me.Label2.Text = "Hier entsteht gerade das neue Bildschirmschoner-Modul"
         Me.Label2.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'Label1
@@ -86,22 +90,24 @@ Partial Class ucUnderConstruction
         Me.Label1.BackColor = System.Drawing.Color.Transparent
         Me.Label1.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
         Me.Label1.ForeColor = System.Drawing.Color.Red
-        Me.Label1.Location = New System.Drawing.Point(0, 43)
-        Me.Label1.MinimumSize = New System.Drawing.Size(1550, 0)
+        Me.Label1.Location = New System.Drawing.Point(0, 19)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
+        Me.Label1.MinimumSize = New System.Drawing.Size(664, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(1550, 72)
+        Me.Label1.Size = New System.Drawing.Size(664, 72)
         Me.Label1.TabIndex = 5
         Me.Label1.Text = "! Under Construction !"
         Me.Label1.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'ucUnderConstruction
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(14.0!, 29.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Transparent
         Me.Controls.Add(Me.Panel1)
+        Me.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
         Me.Name = "ucUnderConstruction"
-        Me.Size = New System.Drawing.Size(1562, 1124)
+        Me.Size = New System.Drawing.Size(669, 504)
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()

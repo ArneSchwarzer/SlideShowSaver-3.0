@@ -10,9 +10,10 @@ Public Class ModulMain
     ' Variablen, Konstanten, ENUMs etc. deklarieren.
     Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
     Private Const SLIDESHOWMODULFULL_PATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
-    Public Shared sssScreen As frmModulMain
+    Public Shared Property activeModuleInstanz As ISlideShowModul
+    Public Shared Property sssScreen As frmModulMain
     Public Shared sssPause As frmPauseModusOverlay
-    Public Shared sssInfo As frmPictureInfo
+    Public Shared Property sssInfo As frmPictureInfo
     Private zwischenspeicherSettings As ModulSettings_SlideShowSaver_3_0
     Public Shared pauseIsActive As Boolean = False
 
@@ -85,9 +86,14 @@ Public Class ModulMain
     ' === Start/Stop/Pause ===
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
         'Initialisiert und startet das eigentliche Modul
+        activeModuleInstanz = Me
 
-        sssScreen = New frmModulMain()
+        If sssScreen Is Nothing Then
+            sssScreen = New frmModulMain()
+        End If
+
         CheckYourSettings()
+
         RaiseEvent ModulStateChanged("Running")
 
         sssScreen.Show()
@@ -98,19 +104,19 @@ Public Class ModulMain
     Public Sub StopModul() Implements ISlideShowModul.StopModul
         'Räumt auf und meldet, das der Schoner ordungsgemäß beendet wurde
 
-        If sssInfo IsNot Nothing AndAlso Not sssInfo.IsDisposed Then
+        If sssInfo IsNot Nothing Then
             sssInfo.Close()
             sssInfo.Dispose()
             sssInfo = Nothing
         End If
 
-        If sssPause IsNot Nothing AndAlso Not sssPause.IsDisposed Then
+        If sssPause IsNot Nothing Then
             sssPause.Close()
             sssPause.Dispose()
             sssPause = Nothing
         End If
 
-        If sssScreen IsNot Nothing AndAlso Not sssScreen.IsDisposed Then
+        If sssScreen IsNot Nothing Then
             sssScreen.Close()
             sssScreen.Dispose()
             sssScreen = Nothing
@@ -123,6 +129,7 @@ Public Class ModulMain
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
         ' Startet den Pause-Modus des Moduls
 
+        RaiseEvent ModulStateChanged("Pause")
         sssScreen.tmrModul.Stop()
 
         If sssPause Is Nothing Then
@@ -130,8 +137,13 @@ Public Class ModulMain
         End If
 
         pauseIsActive = True
-        sssPause.Show()
-        RaiseEvent ModulStateChanged("Pause")
+        If sssPause.ShowDialog() = DialogResult.OK Then
+            sssPause.Dispose()
+            sssPause = Nothing
+            CheckYourSettings()
+            RaiseEvent ModulStateChanged("Running")
+        End If
+
 
     End Sub
 
@@ -310,7 +322,9 @@ Public Class ModulMain
         ReadModulSettingsFromRegistry()
 
         If aktuelleSettings.BildInfoAnzeigen Then
-            sssInfo = New frmPictureInfo()
+            If sssInfo Is Nothing Then
+                sssInfo = New frmPictureInfo()
+            End If
             sssInfo.Show()
         ElseIf sssInfo IsNot Nothing Then
             sssInfo.Close()
@@ -360,4 +374,5 @@ Public Class ModulMain
         End If
 
     End Sub
+
 End Class

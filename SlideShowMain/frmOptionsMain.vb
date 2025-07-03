@@ -321,6 +321,10 @@ Public Class frmOptionsMain
                 bildauswahlSettings.Add("sbcBewertung", control.Bewertung.ToString())
             End If
 
+            'Aufräumen
+            uc.Dispose()
+            uc = Nothing
+
         End If
 
         BildauswahlMain.WriteBildauswahlSettingsToRegistry(bildauswahlSettings)
@@ -335,6 +339,11 @@ Public Class frmOptionsMain
             If uc IsNot Nothing Then
                 Dim currentSettings = aktuellGeladenesModul.MemorizeModulSettings(uc)
                 modulSettingsZwischenspeicher(aktuellGeladenesModul.ModulName) = currentSettings
+
+                'Aufräumen
+                uc.Dispose()
+                uc = Nothing
+
             End If
         End If
 
@@ -347,14 +356,25 @@ Public Class frmOptionsMain
 
                 If modulSettingsZwischenspeicher.ContainsKey(modulName) Then
                     restoreSettings = modulSettingsZwischenspeicher(modulName)
-                    aktuellGeladenesModul.GetModulSettings(uc, restoreSettings)
+                    modul.GetModulSettings(uc, restoreSettings)
                 Else
-                    aktuellGeladenesModul.GetModulRegistryOrDefaultSettings(uc)
+                    modul.GetModulRegistryOrDefaultSettings(uc)
                 End If
 
                 If uc IsNot Nothing Then
                     modul.ApplyModulSettings(modulSettingsZwischenspeicher(modulName))
                 End If
+
+                'Aufräumen
+                uc.Dispose()
+                uc = Nothing
+
+                'Das aktuelle Modul muss ja weiterleben!
+                If modul.ModulName <> aktuellGeladenesModul.ModulName Then
+                    modul.StopModul()
+                    modul = Nothing
+                End If
+
 
             End If
         Next

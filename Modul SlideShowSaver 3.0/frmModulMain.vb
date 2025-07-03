@@ -14,7 +14,7 @@ Public Class frmModulMain
     Private Shared initialePfade As New List(Of String)
     Private Shared aktuellesVerzeichnis As New List(Of String)
     Private Shared aktuellesVerzeichnisCounter As Integer
-    Private Shared listeDerZuletztAngezeigtenBilder As New List(Of String)
+    Public Shared listeDerZuletztAngezeigtenBilder As New List(Of String)
 
     Private Sub frmModuleMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         FormsHandling.InitialFormPreparation(Me, Color.Black)
@@ -54,6 +54,9 @@ Public Class frmModulMain
         aktuellesBild = GetPictureByName(initialePfade(0))
         neuesBild = GetPictureByName(initialePfade(1))
 
+        listeDerZuletztAngezeigtenBilder.Add(initialePfade(0))
+        listeDerZuletztAngezeigtenBilder.Add(initialePfade(1))
+
         'Shader anwenden, sobald implementiert
         'aktuellesBild = aktuellerShader.RunShader(aktuellesBild)
 
@@ -79,12 +82,6 @@ Public Class frmModulMain
 
     Private Sub tmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
 
-        'Liste der letzten 10 Bilder befüllen und ggf. das erste Element wieder aus der Liste löschen.
-        listeDerZuletztAngezeigtenBilder.Add(bildPfad)
-        If listeDerZuletztAngezeigtenBilder.Count > 10 Then
-            listeDerZuletztAngezeigtenBilder.RemoveAt(0)
-        End If
-
         'Jetzt die Transition aufrufen, sobald implementiert
         'aktuelleTransition.RunTransition(aktuellesBild, neuesBild)
 
@@ -97,6 +94,15 @@ Public Class frmModulMain
                 ModulMain.sssInfo.RefreshLabels(bildPfad)
             Else
                 ModulMain.sssInfo.RefreshLabels(initialePfade(1))
+            End If
+            ModulMain.sssInfo.Refresh()
+        End If
+
+        'Liste der letzten 10 Bilder befüllen und ggf. das erste Element wieder aus der Liste löschen.
+        If bildPfad IsNot Nothing Then
+            listeDerZuletztAngezeigtenBilder.Add(bildPfad)
+            If listeDerZuletztAngezeigtenBilder.Count > 10 Then
+                listeDerZuletztAngezeigtenBilder.RemoveAt(0)
             End If
         End If
 

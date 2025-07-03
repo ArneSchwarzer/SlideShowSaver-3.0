@@ -22,13 +22,16 @@ Partial Class frmPauseModusOverlay
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.lblPauseAnzahl = New System.Windows.Forms.Label()
         Me.btnPauseBack = New System.Windows.Forms.Button()
         Me.btnPausePause = New System.Windows.Forms.Button()
         Me.btnPauseForward = New System.Windows.Forms.Button()
         Me.chkPauseMarkPicture = New System.Windows.Forms.CheckBox()
-        Me.cmbBewertungKorrigieren = New System.Windows.Forms.ComboBox()
-        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
+        Me.chkBewerten = New System.Windows.Forms.CheckBox()
+        Me.sbcBewerten = New StarControlLibrary.SterneBewertungControl()
+        Me.lblOptionsDialogDisabled = New System.Windows.Forms.Label()
+        Me.tmrWarnLabelAnzeige = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
         '
         'lblPauseAnzahl
@@ -92,37 +95,54 @@ Partial Class frmPauseModusOverlay
         Me.chkPauseMarkPicture.Text = "Markieren"
         Me.chkPauseMarkPicture.UseVisualStyleBackColor = True
         '
-        'cmbBewertungKorrigieren
+        'chkBewerten
         '
-        Me.cmbBewertungKorrigieren.BackColor = System.Drawing.Color.Black
-        Me.cmbBewertungKorrigieren.ForeColor = System.Drawing.SystemColors.ButtonHighlight
-        Me.cmbBewertungKorrigieren.FormattingEnabled = True
-        Me.cmbBewertungKorrigieren.Location = New System.Drawing.Point(221, 287)
-        Me.cmbBewertungKorrigieren.Name = "cmbBewertungKorrigieren"
-        Me.cmbBewertungKorrigieren.Size = New System.Drawing.Size(345, 49)
-        Me.cmbBewertungKorrigieren.TabIndex = 5
+        Me.chkBewerten.AutoSize = True
+        Me.chkBewerten.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkBewerten.ForeColor = System.Drawing.SystemColors.ButtonHighlight
+        Me.chkBewerten.Location = New System.Drawing.Point(32, 293)
+        Me.chkBewerten.Margin = New System.Windows.Forms.Padding(4)
+        Me.chkBewerten.Name = "chkBewerten"
+        Me.chkBewerten.Size = New System.Drawing.Size(172, 40)
+        Me.chkBewerten.TabIndex = 6
+        Me.chkBewerten.Text = "Bewerten"
+        Me.chkBewerten.UseVisualStyleBackColor = True
         '
-        'CheckBox1
+        'sbcBewerten
         '
-        Me.CheckBox1.AutoSize = True
-        Me.CheckBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.CheckBox1.ForeColor = System.Drawing.SystemColors.ButtonHighlight
-        Me.CheckBox1.Location = New System.Drawing.Point(32, 293)
-        Me.CheckBox1.Margin = New System.Windows.Forms.Padding(4)
-        Me.CheckBox1.Name = "CheckBox1"
-        Me.CheckBox1.Size = New System.Drawing.Size(172, 40)
-        Me.CheckBox1.TabIndex = 6
-        Me.CheckBox1.Text = "Bewerten"
-        Me.CheckBox1.UseVisualStyleBackColor = True
+        Me.sbcBewerten.Bewertung = 0
+        Me.sbcBewerten.Location = New System.Drawing.Point(371, 293)
+        Me.sbcBewerten.Name = "sbcBewerten"
+        Me.sbcBewerten.Size = New System.Drawing.Size(195, 40)
+        Me.sbcBewerten.TabIndex = 7
+        Me.sbcBewerten.Text = "SterneBewertungControl1"
+        '
+        'lblOptionsDialogDisabled
+        '
+        Me.lblOptionsDialogDisabled.AutoSize = True
+        Me.lblOptionsDialogDisabled.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
+        Me.lblOptionsDialogDisabled.ForeColor = System.Drawing.Color.Red
+        Me.lblOptionsDialogDisabled.Location = New System.Drawing.Point(18, 409)
+        Me.lblOptionsDialogDisabled.MaximumSize = New System.Drawing.Size(580, 0)
+        Me.lblOptionsDialogDisabled.Name = "lblOptionsDialogDisabled"
+        Me.lblOptionsDialogDisabled.Size = New System.Drawing.Size(575, 82)
+        Me.lblOptionsDialogDisabled.TabIndex = 8
+        Me.lblOptionsDialogDisabled.Text = "Im PauseModus ist kein Options-Dialog  aufrufbar"
+        Me.lblOptionsDialogDisabled.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        '
+        'tmrWarnLabelAnzeige
+        '
+        Me.tmrWarnLabelAnzeige.Interval = 3000
         '
         'frmPauseModusOverlay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
-        Me.ClientSize = New System.Drawing.Size(599, 438)
-        Me.Controls.Add(Me.CheckBox1)
-        Me.Controls.Add(Me.cmbBewertungKorrigieren)
+        Me.ClientSize = New System.Drawing.Size(599, 499)
+        Me.Controls.Add(Me.lblOptionsDialogDisabled)
+        Me.Controls.Add(Me.sbcBewerten)
+        Me.Controls.Add(Me.chkBewerten)
         Me.Controls.Add(Me.chkPauseMarkPicture)
         Me.Controls.Add(Me.btnPauseForward)
         Me.Controls.Add(Me.btnPausePause)
@@ -145,6 +165,8 @@ Partial Class frmPauseModusOverlay
     Friend WithEvents btnPausePause As Windows.Forms.Button
     Friend WithEvents btnPauseForward As Windows.Forms.Button
     Friend WithEvents chkPauseMarkPicture As Windows.Forms.CheckBox
-    Friend WithEvents cmbBewertungKorrigieren As Windows.Forms.ComboBox
-    Friend WithEvents CheckBox1 As Windows.Forms.CheckBox
+    Friend WithEvents chkBewerten As Windows.Forms.CheckBox
+    Friend WithEvents sbcBewerten As StarControlLibrary.SterneBewertungControl
+    Friend WithEvents lblOptionsDialogDisabled As Windows.Forms.Label
+    Friend WithEvents tmrWarnLabelAnzeige As Windows.Forms.Timer
 End Class

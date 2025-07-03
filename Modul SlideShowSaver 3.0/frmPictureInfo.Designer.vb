@@ -22,8 +22,9 @@ Partial Class frmPictureInfo
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.lblTitel = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.lblBewertung = New System.Windows.Forms.Label()
         Me.slbBewertung = New StarControlLibrary.SterneAnzeigeLabel()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
@@ -51,20 +52,21 @@ Partial Class frmPictureInfo
         Me.Label10 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.lblBewertung = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
-        'Label1
+        'lblTitel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
-        Me.Label1.Location = New System.Drawing.Point(1, 9)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(493, 72)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Bildinformationen"
+        Me.lblTitel.AutoSize = True
+        Me.lblTitel.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblTitel.Location = New System.Drawing.Point(1, 9)
+        Me.lblTitel.MinimumSize = New System.Drawing.Size(1457, 0)
+        Me.lblTitel.Name = "lblTitel"
+        Me.lblTitel.Size = New System.Drawing.Size(1457, 72)
+        Me.lblTitel.TabIndex = 0
+        Me.lblTitel.Text = "Bildinformationen"
+        Me.lblTitel.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'GroupBox1
         '
@@ -87,6 +89,15 @@ Partial Class frmPictureInfo
         Me.GroupBox1.Size = New System.Drawing.Size(903, 538)
         Me.GroupBox1.TabIndex = 1
         Me.GroupBox1.TabStop = False
+        '
+        'lblBewertung
+        '
+        Me.lblBewertung.AutoSize = True
+        Me.lblBewertung.Location = New System.Drawing.Point(286, 315)
+        Me.lblBewertung.Name = "lblBewertung"
+        Me.lblBewertung.Size = New System.Drawing.Size(30, 41)
+        Me.lblBewertung.TabIndex = 13
+        Me.lblBewertung.Text = "-"
         '
         'slbBewertung
         '
@@ -141,11 +152,12 @@ Partial Class frmPictureInfo
         '
         Me.lblDateipfad.AutoSize = True
         Me.lblDateipfad.Location = New System.Drawing.Point(286, 92)
-        Me.lblDateipfad.MaximumSize = New System.Drawing.Size(580, 123)
+        Me.lblDateipfad.MaximumSize = New System.Drawing.Size(580, 205)
         Me.lblDateipfad.Name = "lblDateipfad"
-        Me.lblDateipfad.Size = New System.Drawing.Size(147, 41)
+        Me.lblDateipfad.Size = New System.Drawing.Size(579, 164)
         Me.lblDateipfad.TabIndex = 6
-        Me.lblDateipfad.Text = "Dateipfad"
+        Me.lblDateipfad.Text = "C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module C:\U" &
+    "sers\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module"
         '
         'lblDateiname
         '
@@ -234,7 +246,7 @@ Partial Class frmPictureInfo
         'lblBlende
         '
         Me.lblBlende.AutoSize = True
-        Me.lblBlende.Location = New System.Drawing.Point(215, 267)
+        Me.lblBlende.Location = New System.Drawing.Point(215, 311)
         Me.lblBlende.Name = "lblBlende"
         Me.lblBlende.Size = New System.Drawing.Size(109, 41)
         Me.lblBlende.TabIndex = 12
@@ -243,7 +255,7 @@ Partial Class frmPictureInfo
         'lblISO
         '
         Me.lblISO.AutoSize = True
-        Me.lblISO.Location = New System.Drawing.Point(215, 363)
+        Me.lblISO.Location = New System.Drawing.Point(215, 407)
         Me.lblISO.Name = "lblISO"
         Me.lblISO.Size = New System.Drawing.Size(65, 41)
         Me.lblISO.TabIndex = 11
@@ -252,7 +264,7 @@ Partial Class frmPictureInfo
         'lblVerschlusszeit
         '
         Me.lblVerschlusszeit.AutoSize = True
-        Me.lblVerschlusszeit.Location = New System.Drawing.Point(215, 315)
+        Me.lblVerschlusszeit.Location = New System.Drawing.Point(215, 359)
         Me.lblVerschlusszeit.Name = "lblVerschlusszeit"
         Me.lblVerschlusszeit.Size = New System.Drawing.Size(202, 41)
         Me.lblVerschlusszeit.TabIndex = 10
@@ -261,7 +273,7 @@ Partial Class frmPictureInfo
         'lblObjektiv
         '
         Me.lblObjektiv.AutoSize = True
-        Me.lblObjektiv.Location = New System.Drawing.Point(215, 131)
+        Me.lblObjektiv.Location = New System.Drawing.Point(215, 175)
         Me.lblObjektiv.MaximumSize = New System.Drawing.Size(245, 82)
         Me.lblObjektiv.Name = "lblObjektiv"
         Me.lblObjektiv.Size = New System.Drawing.Size(128, 41)
@@ -271,7 +283,7 @@ Partial Class frmPictureInfo
         'lblBrennweite
         '
         Me.lblBrennweite.AutoSize = True
-        Me.lblBrennweite.Location = New System.Drawing.Point(215, 211)
+        Me.lblBrennweite.Location = New System.Drawing.Point(215, 255)
         Me.lblBrennweite.Name = "lblBrennweite"
         Me.lblBrennweite.Size = New System.Drawing.Size(166, 41)
         Me.lblBrennweite.TabIndex = 8
@@ -290,7 +302,7 @@ Partial Class frmPictureInfo
         'Label15
         '
         Me.Label15.AutoSize = True
-        Me.Label15.Location = New System.Drawing.Point(7, 267)
+        Me.Label15.Location = New System.Drawing.Point(7, 311)
         Me.Label15.Name = "Label15"
         Me.Label15.Size = New System.Drawing.Size(109, 41)
         Me.Label15.TabIndex = 6
@@ -299,7 +311,7 @@ Partial Class frmPictureInfo
         'Label13
         '
         Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(7, 363)
+        Me.Label13.Location = New System.Drawing.Point(7, 407)
         Me.Label13.Name = "Label13"
         Me.Label13.Size = New System.Drawing.Size(65, 41)
         Me.Label13.TabIndex = 4
@@ -308,7 +320,7 @@ Partial Class frmPictureInfo
         'Label12
         '
         Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(7, 315)
+        Me.Label12.Location = New System.Drawing.Point(7, 359)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(202, 41)
         Me.Label12.TabIndex = 3
@@ -317,7 +329,7 @@ Partial Class frmPictureInfo
         'Label11
         '
         Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(7, 131)
+        Me.Label11.Location = New System.Drawing.Point(7, 175)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(128, 41)
         Me.Label11.TabIndex = 2
@@ -326,7 +338,7 @@ Partial Class frmPictureInfo
         'Label10
         '
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(7, 211)
+        Me.Label10.Location = New System.Drawing.Point(7, 255)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(166, 41)
         Me.Label10.TabIndex = 1
@@ -350,15 +362,6 @@ Partial Class frmPictureInfo
         Me.Label3.TabIndex = 4
         Me.Label3.Text = "Kamera"
         '
-        'lblBewertung
-        '
-        Me.lblBewertung.AutoSize = True
-        Me.lblBewertung.Location = New System.Drawing.Point(286, 315)
-        Me.lblBewertung.Name = "lblBewertung"
-        Me.lblBewertung.Size = New System.Drawing.Size(30, 41)
-        Me.lblBewertung.TabIndex = 13
-        Me.lblBewertung.Text = "-"
-        '
         'frmPictureInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
@@ -369,7 +372,7 @@ Partial Class frmPictureInfo
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.GroupBox1)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.lblTitel)
         Me.Cursor = System.Windows.Forms.Cursors.Default
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.ForeColor = System.Drawing.Color.Snow
@@ -378,7 +381,7 @@ Partial Class frmPictureInfo
         Me.Name = "frmPictureInfo"
         Me.Opacity = 0.5R
         Me.ShowInTaskbar = False
-        Me.Text = "PictureInfo"
+        Me.Text = "7"
         Me.TopMost = True
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
@@ -389,7 +392,7 @@ Partial Class frmPictureInfo
 
     End Sub
 
-    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents lblTitel As Windows.Forms.Label
     Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents Label2 As Windows.Forms.Label

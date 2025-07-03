@@ -221,32 +221,36 @@ Public Class BildauswahlMain
         Dim checkBlacklist As Boolean = True 'Wird während des Test ggf. auf 'False' gesetzt
         Dim checkBewertung As Boolean = False
 
+        Try
+            tagLibFile = TagLib.File.Create(bild)
 
-        tagLibFile = TagLib.File.Create(bild)
+            'Check #1: Bewertung
+            If tagLibFile.ImageTag.Rating >= aktuelleSettings.Bewertung Then checkBewertung = True
 
-        'Check #1: Bewertung
-        If tagLibFile.ImageTag.Rating >= aktuelleSettings.Bewertung Then checkBewertung = True
+            'Check #2: White-List
+            If aktuelleSettings.WhiteListTags.Count = 0 Then
+                checkWhitelist = True
+            Else
+                For Each includeTag As String In aktuelleSettings.WhiteListTags
+                    If tagLibFile.ImageTag.Keywords.Contains(includeTag) Then
+                        checkWhitelist = True
+                    End If
+                Next
+            End If
 
-        'Check #2: White-List
-        If aktuelleSettings.WhiteListTags.Count = 0 Then
-            checkWhitelist = True
-        Else
-            For Each includeTag As String In aktuelleSettings.WhiteListTags
-                If tagLibFile.ImageTag.Keywords.Contains(includeTag) Then
-                    checkWhitelist = True
+            'Check #3: Black-List (enthält Prüfung der Altersfreigabe-Stufe)
+            For Each excludeTag As String In aktuelleSettings.BlackListTags
+                If tagLibFile.ImageTag.Keywords.Contains(excludeTag) Then
+                    checkBlacklist = False
                 End If
             Next
-        End If
 
-        'Check #3: Black-List (enthält Prüfung der Altersfreigabe-Stufe)
-        For Each excludeTag As String In aktuelleSettings.BlackListTags
-            If tagLibFile.ImageTag.Keywords.Contains(excludeTag) Then
-                checkBlacklist = False
-            End If
-        Next
+            'Aufräumen
+            tagLibFile.Dispose()
 
-        'Aufräumen
-        tagLibFile.Dispose()
+        Catch ex As Exception
+            LogHandling.LogError("SlideShowBildauswahl.CheckIfLegalFile(" & bild & ") - Problem mit tagLibFile: " & ex.Message)
+        End Try
 
         'Checks überstanden?
         If checkBewertung And checkWhitelist And checkBlacklist Then
@@ -371,6 +375,7 @@ Public Class BildauswahlMain
         End If
 
     End Function
+
     Public Shared Function CorrectPictureOrientation(pfad As String) As Image
         ' Dreht und Spiegelt ein Bild gemäß seiner EXIF Daten
 

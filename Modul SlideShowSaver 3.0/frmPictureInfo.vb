@@ -62,7 +62,20 @@ Public Class frmPictureInfo
                 ' ========== Erstellungsdatum, Blende, Verschlusszeit, ISO, Brennweite ==========
                 Dim subIfd = directories.OfType(Of ExifSubIfdDirectory)().FirstOrDefault()
                 If subIfd IsNot Nothing Then
-                    lblErstellungsdatum.Text = subIfd.GetDescription(ExifDirectoryBase.TagDateTimeOriginal)
+                    Dim rawDate As String = subIfd.GetDescription(ExifDirectoryBase.TagDateTimeOriginal)
+
+                    If Not String.IsNullOrEmpty(rawDate) Then
+                        ' Beispiel: "2022:11:05 15:34:12"
+                        Dim parsedDate As DateTime
+                        If DateTime.TryParseExact(rawDate, "yyyy:MM:dd HH:mm:ss", Nothing, Globalization.DateTimeStyles.None, parsedDate) Then
+                            lblErstellungsdatum.Text = parsedDate.ToString("dd.MM.yyyy HH:mm:ss")
+                        Else
+                            lblErstellungsdatum.Text = rawDate ' Fallback
+                        End If
+                    Else
+                        lblErstellungsdatum.Text = "-"
+                    End If
+
                     lblBlende.Text = subIfd.GetDescription(ExifDirectoryBase.TagFNumber)
                     lblVerschlusszeit.Text = subIfd.GetDescription(ExifDirectoryBase.TagExposureTime)
                     lblISO.Text = subIfd.GetDescription(ExifDirectoryBase.TagIsoEquivalent)
@@ -85,7 +98,27 @@ Public Class frmPictureInfo
                 ' ========== IPTC: Autor, Bewertung, Tags ==========
                 Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
                 If iptc IsNot Nothing Then
-                    lblAutor.Text = iptc.GetDescription(IptcDirectory.TagByLine)
+                    Dim autor As String = iptc.GetDescription(IptcDirectory.TagByLine)
+
+                    If Not String.IsNullOrWhiteSpace(autor) Then
+                        Dim worte = autor.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
+
+                        ' Wir suchen das Muster A B A B (oder mehrfache Wiederholung)
+                        If worte.Length >= 2 AndAlso worte.Length Mod 2 = 0 Then
+                            Dim halb = worte.Length \ 2
+                            Dim ersterTeil = String.Join(" ", worte.Take(halb))
+                            Dim zweiterTeil = String.Join(" ", worte.Skip(halb))
+                            If ersterTeil = zweiterTeil Then
+                                lblAutor.Text = ersterTeil
+                            Else
+                                lblAutor.Text = autor ' Keine Wiederholung → zeige Original
+                            End If
+                        Else
+                            lblAutor.Text = autor ' ungerade Anzahl → keine Dopplung möglich
+                        End If
+                    Else
+                        lblAutor.Text = "-"
+                    End If
 
                     Dim rating As Integer
                     rating = tagLibFile.ImageTag.Rating

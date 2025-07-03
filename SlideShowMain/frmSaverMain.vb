@@ -48,7 +48,13 @@ Public Class frmSaverMain
 
         'Auswahl des ersten Moduls (oder des FallbackSavers)
         If listOfEnabledModules.Count > 0 Then
-            erstesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
+            If modulReihenfolge = "In Reihenfolge" Then
+                erstesModul = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespieltesModul")
+                erstesModul = ListHandling.GetNextAlphabeticItemName(listOfEnabledModules, erstesModul)
+            Else
+                erstesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
+            End If
+
             AktuellesModulAuswählen(erstesModul)
         Else
             fallbackIsActive = True
@@ -213,6 +219,12 @@ Public Class frmSaverMain
                 neuesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
             End If
 
+            'Aktuelles Modul aufräumen
+            If activeModule IsNot Nothing Then
+                activeModule.StopModul()
+                activeModule = Nothing
+            End If
+
             AktuellesModulAuswählen(neuesModul)
             activeModule.StartModul(Screen.PrimaryScreen)
             LogHandling.LogInfo("Neues Modul gestartet: " & activeModule.ModulName.ToString)
@@ -236,6 +248,12 @@ Public Class frmSaverMain
         Application.DoEvents()
         Threading.Thread.Sleep(100)
         If optionsDialog.ShowDialog() = DialogResult.OK Then
+
+            If optionsDialog IsNot Nothing Then
+                optionsDialog.Dispose()
+                optionsDialog = Nothing
+            End If
+
             'Alles Re-Initialisieren
             IniAndReinitialize()
             LegitimeListeErstellen()
@@ -267,10 +285,23 @@ Public Class frmSaverMain
 
         CursorHandling.CursorPowerShow()
 
-        If fallbackIsActive Then
-            fallbackInstanz.Close()
-        Else
+        ' Instanzen aufrämen
+        If activeModule IsNot Nothing Then
+            WriteToRegistry(SLIDESHOWMAIN_PATH & "LetztgespieltesModul", activeModule.ModulName.ToString)
             activeModule.StopModul()
+            activeModule = Nothing
+        End If
+
+        If optionsDialog IsNot Nothing Then
+            optionsDialog.Close()
+            optionsDialog.Dispose()
+            optionsDialog = Nothing
+        End If
+
+        If fallbackInstanz IsNot Nothing Then
+            fallbackInstanz.Close()
+            fallbackInstanz.Dispose()
+            fallbackInstanz = Nothing
         End If
 
         Application.Exit()

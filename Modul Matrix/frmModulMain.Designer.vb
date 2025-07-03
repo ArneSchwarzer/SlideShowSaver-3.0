@@ -71,9 +71,9 @@ Partial Class frmModulMain
         Me.Label2.ForeColor = System.Drawing.Color.Lime
         Me.Label2.Location = New System.Drawing.Point(42, 149)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(1472, 72)
+        Me.Label2.Size = New System.Drawing.Size(1456, 72)
         Me.Label2.TabIndex = 5
-        Me.Label2.Text = "Hier entsteht gerade das neue Bildschirmschomer-Modul"
+        Me.Label2.Text = "Hier entsteht gerade das neue Bildschirmschoner-Modul"
         '
         'Label1
         '
