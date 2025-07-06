@@ -75,9 +75,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CheckedListBoxHandling.vb" />
+    <Compile Include="ColorHandling.vb" />
     <Compile Include="ConversionHandling.vb" />
     <Compile Include="CursorHandling.vb" />
     <Compile Include="FormsHandling.vb" />
+    <Compile Include="GraphicsSizeModeHandling.vb" />
     <Compile Include="KeyAndMouseHandling.vb" />
     <Compile Include="ListHandling.vb" />
     <Compile Include="RegistryHandling.vb" />

@@ -3,33 +3,39 @@
 Imports SlideShowTools.ToolTipHandling
 Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowInterfaces.InfoHandling
+Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
 Imports SlideShowTools.ListHandling
 Imports System.Windows.Forms
+Imports SlideShowInterfaces
+Imports Modul_SlideShowSaver_3
 
 
 Public Class ucOptionsModul
 
     'Variablendeklaration
+    Private transitionInfos As List(Of SlideShowTransitionInfo)
+    Private shaderInfos As List(Of SlideShowShaderInfo)
+    Private markierteTransitions As List(Of String)
+    Private markierteShader As List(Of String)
+
+    Private meineInstanz As ModulMain = TryCast(ModulMain.activeModuleInstanz, ModulMain)
 
     Private Shared minuten As Integer
     Private Shared sekunden As Integer
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
-        Dim transitionInfos As List(Of SlideShowTransitionInfo)
-        Dim shaderInfos As List(Of SlideShowShaderInfo)
-        Dim markierteTransitions As List(Of String)
-        Dim markierteShader As List(Of String)
 
         'Initialisieren
         transitionInfos = TransitionListLoader.LadeTransitionInfoListe()
-        shaderInfos = ShaderListLoader.LadeShaderInfoListe
+        shaderInfos = ShaderListLoader.LadeShaderInfoListe()
         markierteTransitions = ModulMain.aktuelleSettings.Transitionseffekte
         markierteShader = ModulMain.aktuelleSettings.Shader
 
         'cmbBildauswahl
         cmbBildauswahl.SelectedItem = ModulMain.aktuelleSettings.Bildauswahl
 
+#Region "clbTransitions Initialisierung"
         'clbTransitions
         clbTransitions.Items.Clear()
         clbTransitions.Items.Add("Direkter Übergang (Cut)")
@@ -61,10 +67,10 @@ Public Class ucOptionsModul
             lblNcmbEffektauswahl.Enabled = True
             clbTransitions.Enabled = True
         End If
+#End Region
 
         'clbShader
         clbShader.Items.Clear()
-        clbShader.Items.Add("Originalbild")
         For Each shaderInfo In shaderInfos
             clbShader.Items.Add(shaderInfo)
         Next
@@ -77,9 +83,6 @@ Public Class ucOptionsModul
             Function(m) m.ShaderName
             )
 
-        If clbShader.Items.Count = 1 Then
-            clbShader.SetItemCheckState(0, CheckState.Checked)
-        End If
 
         'cmbShader
         If clbShader.CheckedItems.Count = 1 Then
@@ -125,6 +128,23 @@ Public Class ucOptionsModul
             End If
         Else
             lblAnzeigedauer.Text = sekunden.ToString & "s"
+        End If
+
+    End Sub
+
+    Private Sub clbShader_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbShader.SelectedIndexChanged
+        'Beauftragt fmrOptionsMain den ucOptionsShader zu wechseln
+
+        If clbShader.SelectedItem IsNot Nothing Then
+            meineInstanz.AttentionShaderGewechselt(clbShader.SelectedItem.ToString)
+        End If
+
+    End Sub
+
+    Private Sub clbTransitions_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitions.SelectedIndexChanged
+
+        If clbTransitions.SelectedItem IsNot Nothing Then
+            meineInstanz.AttentionTransitionGewechselt(clbTransitions.SelectedItem.ToString)
         End If
 
     End Sub

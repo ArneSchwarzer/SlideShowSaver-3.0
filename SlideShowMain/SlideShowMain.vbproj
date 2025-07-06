@@ -180,6 +180,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Splashscreen.png" />
+    <None Include="Resources\Flagge China sw.png" />
+    <None Include="Resources\Flagge China.png" />
+    <None Include="Resources\Flagge Deutschland sw.png" />
+    <None Include="Resources\Flagge Deutschland.png" />
+    <None Include="Resources\flagge Frankreich sw.png" />
+    <None Include="Resources\flagge Frankreich.png" />
+    <None Include="Resources\Flagge GB sw.png" />
+    <None Include="Resources\Flagge GB.png" />
+    <None Include="Resources\Flagge Indien sw.png" />
+    <None Include="Resources\Flagge Indien.png" />
+    <None Include="Resources\Flagge Klingonen sw.png" />
+    <None Include="Resources\Flagge Klingonen.png" />
+    <None Include="Resources\Flagge Polen sw.png" />
+    <None Include="Resources\Flagge Polen.png" />
+    <None Include="Resources\Flagge Russland sw.png" />
+    <None Include="Resources\Flagge Russland.png" />
+    <None Include="Resources\Flagge Spanien sw.png" />
+    <None Include="Resources\Flagge Spanien.png" />
     <Content Include="screensaver_icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +220,10 @@
     <ProjectReference Include="..\SlideShowLogging\SlideShowLogging.vbproj">
       <Project>{4de43745-d2ce-442c-acc5-49e2bcb0c87f}</Project>
       <Name>SlideShowLogging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SlideShowSprachen\SlideShowSprachen.vbproj">
+      <Project>{42be216e-94a0-4d14-9e45-5c3fcf0f1cce}</Project>
+      <Name>SlideShowSprachen</Name>
     </ProjectReference>
     <ProjectReference Include="..\SlideShowTools\SlideShowTools.vbproj">
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>

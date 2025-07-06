@@ -10,7 +10,7 @@ Imports SlideShowTools.CursorHandling
 Imports SlideShowLogging
 Imports SlideShowTools
 Imports StarControlLibrary
-
+Imports SlideShowSprachen
 
 Public Class frmOptionsMain
 
@@ -42,6 +42,9 @@ Public Class frmOptionsMain
 #Region "Header frmOptionMain_Load"
         Dim defaultsMain As New Dictionary(Of String, String)
         Dim anzahlMarkierteModule As Integer
+
+        AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+        AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
 
         defaultsMain = GetMainDefaultSettings()
 
@@ -147,6 +150,11 @@ Public Class frmOptionsMain
         chkMultiMonitor.Visible = False 'Solange noch kein MultiMonitor Support implementiert ist
         chkMultiMonitor.Checked = False
 
+        'Sprachauswahl-Leiste laden
+        uc = New ucFlaggenstreifen()
+        uc.Dock = DockStyle.Fill
+        pnlLanguages.Controls.Add(uc)
+
         'Tabpages - Da bei Aufruf des Dialogs noch kein Modul ausgewählt ist, erst einmal alle ausblenden
 
         'Bildauswahl vorladen
@@ -234,6 +242,16 @@ Public Class frmOptionsMain
                     '...oder deaktivieren
                     If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl = False Then
                         tabOptions.TabPages.Remove(tpBildauswahl)
+                    End If
+
+                    'Ggf. Shader deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZuShader()
+                    If aktuellGeladenesModul.ModulNutztShader = False Then
+                        tabOptions.TabPages.Remove(tpShader)
+                    End If
+
+                    'Ggf. Transitions deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZUTransition()
+                    If aktuellGeladenesModul.ModulNutztTransitions = False Then
+                        tabOptions.TabPages.Remove(tpTransitions)
                     End If
 
                 End If
@@ -407,4 +425,87 @@ Public Class frmOptionsMain
             trkDauerModulwechsel.Enabled = True
         End If
     End Sub
+
+    Private Sub Modul_BitteWechseleZuShader(shaderName As String)
+        If activeModule.ModulNutztShader Then
+            Try
+                ' Vorhandene Controls in tpShader löschen
+                If tpShader.Controls.Count > 0 Then
+                    Dim altesUC As Control = tpShader.Controls(0)
+                    tpShader.Controls.Remove(altesUC)
+                    altesUC.Dispose()
+                    altesUC = Nothing
+                End If
+
+                ' Shader laden (Dummy-Instanz)
+                Dim shaderInstanz As ISlideShowShader = ShaderByNameLoader.LadeShaderNachName(shaderName)
+
+                If shaderInstanz IsNot Nothing Then
+                    Dim ucShader As UserControl = shaderInstanz.GetShaderOptionsDialog()
+
+                    If ucShader IsNot Nothing Then
+                        ucShader.Dock = DockStyle.Fill
+                        tpShader.Controls.Add(ucShader)
+
+                        ' Shader-Einstellungen aus Registry oder Default laden
+                        shaderInstanz.GetShaderRegistryOrDefaultSettings(ucShader)
+                    Else
+                        LogHandling.LogWarn("Shader '" & shaderName & "' hat kein Options-UserControl geliefert.")
+                    End If
+                Else
+                    LogHandling.LogWarn("Shader '" & shaderName & "' konnte nicht geladen werden.")
+                End If
+
+            Catch ex As Exception
+                LogHandling.LogError("Fehler beim Umschalten auf Shader '" & shaderName & "': " & ex.Message)
+            End Try
+
+            If Not tabOptions.TabPages.Contains(tpShader) Then
+                tabOptions.TabPages.Add(tpShader)
+            End If
+
+        End If
+
+    End Sub
+
+    Private Sub Modul_BitteWechseleZuTransition(transitionName As String)
+        If activeModule.ModulNutztTransitions Then
+            Try
+                ' Vorhandene Controls in tpTransition löschen
+                If tpTransitions.Controls.Count > 0 Then
+                    Dim altesUC As Control = tpTransitions.Controls(0)
+                    tpTransitions.Controls.Remove(altesUC)
+                    altesUC.Dispose()
+                    altesUC = Nothing
+                End If
+
+                ' Transition laden (Dummy-Instanz)
+                Dim transitionInstanz As ISlideShowTransition = TransitionByNameLoader.LadeTransitionNachName(transitionName)
+
+                If transitionInstanz IsNot Nothing Then
+                    Dim ucTransition As UserControl = transitionInstanz.GetTransitionOptionsDialog()
+
+                    If ucTransition IsNot Nothing Then
+                        ucTransition.Dock = DockStyle.Fill
+                        tpTransitions.Controls.Add(ucTransition)
+
+                        ' Einstellungen aus Registry oder Default laden
+                        transitionInstanz.GetTransitionRegistryOrDefaultSettings(ucTransition)
+                    Else
+                        LogHandling.LogWarn("Transition '" & transitionName & "' hat kein Options-UserControl geliefert.")
+                    End If
+                Else
+                    LogHandling.LogWarn("Transition '" & transitionName & "' konnte nicht geladen werden.")
+                End If
+
+            Catch ex As Exception
+                LogHandling.LogError("Fehler beim Umschalten auf Transition '" & transitionName & "': " & ex.Message)
+            End Try
+
+            If Not tabOptions.TabPages.Contains(tpTransitions) Then
+                tabOptions.TabPages.Add(tpTransitions)
+            End If
+        End If
+    End Sub
+
 End Class

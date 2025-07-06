@@ -22,6 +22,96 @@ SlideShowMain
   Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
 </summary>
 </member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_China">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_China_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Deutschland">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Deutschland_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.flagge_Frankreich">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.flagge_Frankreich_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_GB">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_GB_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Indien">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Indien_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Klingonen">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Klingonen_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Polen">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Polen_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Russland">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Russland_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Spanien">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowMain.My.Resources.Resources.Flagge_Spanien_sw">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
 <member name="P:SlideShowMain.My.Resources.Resources.Flying_Kitchen_Aid_Logo_Transparent">
 <summary>
   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.

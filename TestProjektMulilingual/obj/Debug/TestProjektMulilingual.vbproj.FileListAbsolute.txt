@@ -1,0 +1,13 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\bin\Debug\TestProjektMulilingual.exe.config
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\bin\Debug\TestProjektMulilingual.exe
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\bin\Debug\TestProjektMulilingual.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\bin\Debug\TestProjektMulilingual.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.ucLanguageSelector.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.exe
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\TestProjektMulilingual\obj\Debug\TestProjektMulilingual.Form1.resources

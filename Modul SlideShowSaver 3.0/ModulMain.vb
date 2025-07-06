@@ -9,7 +9,7 @@ Public Class ModulMain
 
     ' Variablen, Konstanten, ENUMs etc. deklarieren.
     Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
-    Private Const SLIDESHOWMODULFULL_PATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
+    Public Const SLIDESHOWMODUL_SSS_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
     Public Shared Property activeModuleInstanz As ISlideShowModul
     Public Shared Property sssScreen As frmModulMain
     Public Shared sssPause As frmPauseModusOverlay
@@ -153,6 +153,7 @@ Public Class ModulMain
         'Liefert der frmOptionsMain das leere UC zum Einbau in die Modul-Tabpage.
 
         Return New ucOptionsModul()
+
     End Function
 
     Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
@@ -192,13 +193,13 @@ Public Class ModulMain
         End If
 
         '...und ab dafür...
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "Bildauswahl", zwischenspeicherSettings.Bildauswahl)
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "Anzeigedauer", zwischenspeicherSettings.Anzeigedauer.ToString)
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "Transitionseffekte", JoinSemicolonList(zwischenspeicherSettings.Transitionseffekte))
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "TransitionsReihenfolge", zwischenspeicherSettings.TransitionsReihenfolge)
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "Shader", JoinSemicolonList(zwischenspeicherSettings.Shader))
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "ShaderReihenfolge", zwischenspeicherSettings.ShaderReihenfolge)
-        WriteToRegistry(SLIDESHOWMODULFULL_PATH & "BildInfoAnzeigen", zwischenspeicherSettings.BildInfoAnzeigen.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", zwischenspeicherSettings.Bildauswahl)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", zwischenspeicherSettings.Anzeigedauer.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte", JoinSemicolonList(zwischenspeicherSettings.Transitionseffekte))
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "TransitionsReihenfolge", zwischenspeicherSettings.TransitionsReihenfolge)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Shader", JoinSemicolonList(zwischenspeicherSettings.Shader))
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", zwischenspeicherSettings.ShaderReihenfolge)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", zwischenspeicherSettings.BildInfoAnzeigen.ToString)
 
     End Sub
 
@@ -262,7 +263,7 @@ Public Class ModulMain
 
     End Sub
 
-    Public Function GetModulDefaultSettings() As Dictionary(Of String, String)
+    Public Shared Function GetModulDefaultSettings() As Dictionary(Of String, String)
         Dim defaultModulSettings As New Dictionary(Of String, String)
         'Liefert die Default-Werte des Moduls
 
@@ -285,19 +286,19 @@ Public Class ModulMain
 
         defaults = GetModulDefaultSettings()
 
-        aktuelleSettings.Bildauswahl = ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "Bildauswahl", defaults)
-        aktuelleSettings.Anzeigedauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "Anzeigedauer", defaults))
+        aktuelleSettings.Bildauswahl = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", defaults)
+        aktuelleSettings.Anzeigedauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", defaults))
         'Temporäre Sicherheitsmaßnahme
         If aktuelleSettings.Anzeigedauer < 5 Then
             aktuelleSettings.Anzeigedauer = 20 'Auf Default setzen
         End If
-        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "Transitionseffekte", defaults)
+        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte", defaults)
         aktuelleSettings.Transitionseffekte = SplitSemicolonList(tempRegVal)
-        aktuelleSettings.TransitionsReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "TransitionsReihenfolge", defaults)
-        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "Shader", defaults)
+        aktuelleSettings.TransitionsReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "TransitionsReihenfolge", defaults)
+        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Shader", defaults)
         aktuelleSettings.Shader = SplitSemicolonList(tempRegVal)
-        aktuelleSettings.ShaderReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "ShaderReihenfolge", defaults)
-        If ReadFromRegOrDefaults(SLIDESHOWMODULFULL_PATH & "BildInfoAnzeigen", defaults) = "True" Then
+        aktuelleSettings.ShaderReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", defaults)
+        If ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", defaults) = "True" Then
             aktuelleSettings.BildInfoAnzeigen = True
         Else
             aktuelleSettings.BildInfoAnzeigen = False
@@ -309,11 +310,15 @@ Public Class ModulMain
     ' === Info-Kommunikation ===
 
     Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowModul.AttentionShaderGewechselt
-        ' Noch keine Reaktion nötig
+
+        RaiseEvent PleaseChangeToShader(shaderName)
+
     End Sub
 
     Public Sub AttentionTransitionGewechselt(transitionName As String) Implements ISlideShowModul.AttentionTransitionGewechselt
-        ' Noch keine Reaktion nötig
+
+        RaiseEvent PleaseChangeToTransition(transitionName)
+
     End Sub
 
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
@@ -332,7 +337,7 @@ Public Class ModulMain
             sssInfo = Nothing
         End If
 
-        'ZStackingSSS()
+        sssScreen.LegitimeShaderListeErstellen()
 
         'Timer gemäß der neuen Anzeigedauer setzen. Stop/Start, um die
         'Änderungen sofort wirken zu lassen (falls z.B. die Anzeigedauer von 2m auf 20s zurückgesetzt wurde,

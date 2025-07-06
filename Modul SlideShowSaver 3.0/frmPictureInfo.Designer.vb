@@ -98,6 +98,7 @@ Partial Class frmPictureInfo
         Me.lblBewertung.Size = New System.Drawing.Size(30, 41)
         Me.lblBewertung.TabIndex = 13
         Me.lblBewertung.Text = "-"
+        Me.lblBewertung.Visible = False
         '
         'slbBewertung
         '
@@ -154,10 +155,9 @@ Partial Class frmPictureInfo
         Me.lblDateipfad.Location = New System.Drawing.Point(286, 92)
         Me.lblDateipfad.MaximumSize = New System.Drawing.Size(580, 205)
         Me.lblDateipfad.Name = "lblDateipfad"
-        Me.lblDateipfad.Size = New System.Drawing.Size(579, 164)
+        Me.lblDateipfad.Size = New System.Drawing.Size(147, 41)
         Me.lblDateipfad.TabIndex = 6
-        Me.lblDateipfad.Text = "C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module C:\U" &
-    "sers\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module"
+        Me.lblDateipfad.Text = "Dateipfad"
         '
         'lblDateiname
         '

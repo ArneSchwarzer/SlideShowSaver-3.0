@@ -1,0 +1,21 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\Transition Zoom.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\Transition Zoom.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\Transition Zoom.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\bin\Debug\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\SlideShowTransition.Zoom.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\Transition_Zoom.frmTransition.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\Transition_Zoom.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\SlideShowTransition.Zoom.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\SlideShowTransition.Zoom.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\SlideSho.F19D0F45.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\Transition Zoom.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\Transition Zoom.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Transition Zoom\obj\Debug\Transition Zoom.pdb

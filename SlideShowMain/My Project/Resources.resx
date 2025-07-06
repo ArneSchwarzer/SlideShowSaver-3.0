@@ -118,6 +118,60 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Flagge_China" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge China.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_China_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge China sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Deutschland" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Deutschland.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Deutschland_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Deutschland sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="flagge_Frankreich" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\flagge Frankreich.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="flagge_Frankreich_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\flagge Frankreich sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_GB" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge GB.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_GB_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge GB sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Indien" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Indien.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Indien_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Indien sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Klingonen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Klingonen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Klingonen_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Klingonen sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Polen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Polen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Polen_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Polen sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Russland" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Russland.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Russland_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Russland sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Spanien" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Spanien.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Flagge_Spanien_sw" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flagge Spanien sw.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Flying Kitchen-Aid Logo Transparent" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Flying Kitchen-Aid Logo Transparent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

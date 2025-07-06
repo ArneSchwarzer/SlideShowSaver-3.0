@@ -46,6 +46,7 @@ Partial Class frmOptionsMain
         Me.tpShader = New System.Windows.Forms.TabPage()
         Me.btnOK = New System.Windows.Forms.Button()
         Me.btnAbbrechen = New System.Windows.Forms.Button()
+        Me.pnlLanguages = New System.Windows.Forms.Panel()
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
         CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -285,7 +286,7 @@ Partial Class frmOptionsMain
         '
         'btnOK
         '
-        Me.btnOK.Location = New System.Drawing.Point(555, 1211)
+        Me.btnOK.Location = New System.Drawing.Point(565, 1288)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(185, 71)
         Me.btnOK.TabIndex = 2
@@ -294,18 +295,26 @@ Partial Class frmOptionsMain
         '
         'btnAbbrechen
         '
-        Me.btnAbbrechen.Location = New System.Drawing.Point(753, 1211)
+        Me.btnAbbrechen.Location = New System.Drawing.Point(763, 1288)
         Me.btnAbbrechen.Name = "btnAbbrechen"
         Me.btnAbbrechen.Size = New System.Drawing.Size(185, 71)
         Me.btnAbbrechen.TabIndex = 3
         Me.btnAbbrechen.Text = "Abbrechen"
         Me.btnAbbrechen.UseVisualStyleBackColor = True
         '
+        'pnlLanguages
+        '
+        Me.pnlLanguages.Location = New System.Drawing.Point(26, 1198)
+        Me.pnlLanguages.Name = "pnlLanguages"
+        Me.pnlLanguages.Size = New System.Drawing.Size(922, 84)
+        Me.pnlLanguages.TabIndex = 4
+        '
         'frmOptionsMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(979, 1298)
+        Me.ClientSize = New System.Drawing.Size(979, 1371)
+        Me.Controls.Add(Me.pnlLanguages)
         Me.Controls.Add(Me.btnAbbrechen)
         Me.Controls.Add(Me.btnOK)
         Me.Controls.Add(Me.tabOptions)
@@ -347,4 +356,5 @@ Partial Class frmOptionsMain
     Friend WithEvents clbTransitionsModule As CheckedListBox
     Friend WithEvents lblNclbTransitionsModule As Label
     Friend WithEvents lblKeineTransitionsModule As Label
+    Friend WithEvents pnlLanguages As Panel
 End Class

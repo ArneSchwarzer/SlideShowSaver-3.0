@@ -55,7 +55,7 @@ Public Class BildauswahlMain
         translatedDictionary.Add("Verzeichnisse", settings("lstVerzeichnisse"))
         translatedDictionary.Add("WhiteListTags", settings("lstWhiteList"))
         translatedDictionary.Add("BlackListTags", settings("lstBlackList"))
-        translatedDictionary.Add("Bewertung", settings("sbcBewertung").ToString)
+        translatedDictionary.Add("Bewertung", settings("sbcBewertung"))
 
         If settings("rdo18") = True Then
             translatedDictionary.Add("Altersfreigabe", "18+")

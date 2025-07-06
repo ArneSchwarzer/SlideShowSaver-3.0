@@ -8,3 +8,8 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\D
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideShowShader.SchwarzWeiß.ucOptionsShader.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiß\obj\Debug\SlideSho.D0122CD8.Up2Date

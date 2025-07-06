@@ -73,7 +73,7 @@ Public Class InterfaceDeclarations
         Event PleaseChangeToShader(shaderName As String)
 
         ' --- Ausführung ---
-        Sub RunTransition(oldImage As Image, newImage As Image, targetGraphics As Graphics, durationMs As Integer)
+        Sub RunTransition(oldImage As Image, picBoxModeOld As PictureBoxSizeMode, newImage As Image, picBoxModeNew As PictureBoxSizeMode, targetGraphics As Graphics, Optional clientSize As Size = Nothing, Optional durationMs As Integer = 0)
         Sub StopTransition()
 
         ' --- Optionen/Dialoghandling ---

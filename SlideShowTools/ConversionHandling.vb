@@ -101,10 +101,8 @@ Public Class ConversionHandling
             ElseIf TypeOf ctrl Is CheckedListBox Then
                 Dim clb = DirectCast(ctrl, CheckedListBox)
                 Dim checkedList As New List(Of String)
-                For i As Integer = 0 To clb.Items.Count - 1
-                    If clb.GetItemChecked(i) Then
-                        checkedList.Add(clb.Items(i).ToString())
-                    End If
+                For i As Integer = 0 To clb.CheckedItems.Count - 1
+                    checkedList.Add(clb.CheckedItems(i).ToString())
                 Next
                 dict(ctrl.Name) = String.Join(";", checkedList)
 
