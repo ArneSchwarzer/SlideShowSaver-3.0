@@ -23,7 +23,7 @@ Public Class ucOptionsTransition
                 Case "SO"
                     tbtVSO.Checked = True
                 Case "S"
-                    tbtVSO.Checked = True
+                    tbtVS.Checked = True
                 Case "SW"
                     tbtVSW.Checked = True
                 Case "W"

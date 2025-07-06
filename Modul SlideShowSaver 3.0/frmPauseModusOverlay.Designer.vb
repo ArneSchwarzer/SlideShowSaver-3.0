@@ -29,9 +29,9 @@ Partial Class frmPauseModusOverlay
         Me.btnPauseForward = New System.Windows.Forms.Button()
         Me.chkPauseMarkPicture = New System.Windows.Forms.CheckBox()
         Me.chkBewerten = New System.Windows.Forms.CheckBox()
-        Me.sbcBewerten = New StarControlLibrary.SterneBewertungControl()
         Me.lblOptionsDialogDisabled = New System.Windows.Forms.Label()
         Me.tmrWarnLabelAnzeige = New System.Windows.Forms.Timer(Me.components)
+        Me.sbcBewerten = New MyControlsLibrary.SterneBewertungControl()
         Me.SuspendLayout()
         '
         'lblPauseAnzahl
@@ -108,15 +108,6 @@ Partial Class frmPauseModusOverlay
         Me.chkBewerten.Text = "Bewerten"
         Me.chkBewerten.UseVisualStyleBackColor = True
         '
-        'sbcBewerten
-        '
-        Me.sbcBewerten.Bewertung = 0
-        Me.sbcBewerten.Location = New System.Drawing.Point(371, 293)
-        Me.sbcBewerten.Name = "sbcBewerten"
-        Me.sbcBewerten.Size = New System.Drawing.Size(195, 40)
-        Me.sbcBewerten.TabIndex = 7
-        Me.sbcBewerten.Text = "SterneBewertungControl1"
-        '
         'lblOptionsDialogDisabled
         '
         Me.lblOptionsDialogDisabled.AutoSize = True
@@ -134,14 +125,23 @@ Partial Class frmPauseModusOverlay
         '
         Me.tmrWarnLabelAnzeige.Interval = 3000
         '
+        'sbcBewerten
+        '
+        Me.sbcBewerten.Bewertung = 0
+        Me.sbcBewerten.Location = New System.Drawing.Point(308, 293)
+        Me.sbcBewerten.Name = "sbcBewerten"
+        Me.sbcBewerten.Size = New System.Drawing.Size(258, 54)
+        Me.sbcBewerten.TabIndex = 9
+        Me.sbcBewerten.Text = "SterneBewertungControl1"
+        '
         'frmPauseModusOverlay
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(599, 499)
-        Me.Controls.Add(Me.lblOptionsDialogDisabled)
         Me.Controls.Add(Me.sbcBewerten)
+        Me.Controls.Add(Me.lblOptionsDialogDisabled)
         Me.Controls.Add(Me.chkBewerten)
         Me.Controls.Add(Me.chkPauseMarkPicture)
         Me.Controls.Add(Me.btnPauseForward)
@@ -166,7 +166,7 @@ Partial Class frmPauseModusOverlay
     Friend WithEvents btnPauseForward As Windows.Forms.Button
     Friend WithEvents chkPauseMarkPicture As Windows.Forms.CheckBox
     Friend WithEvents chkBewerten As Windows.Forms.CheckBox
-    Friend WithEvents sbcBewerten As StarControlLibrary.SterneBewertungControl
     Friend WithEvents lblOptionsDialogDisabled As Windows.Forms.Label
     Friend WithEvents tmrWarnLabelAnzeige As Windows.Forms.Timer
+    Friend WithEvents sbcBewerten As MyControlsLibrary.SterneBewertungControl
 End Class

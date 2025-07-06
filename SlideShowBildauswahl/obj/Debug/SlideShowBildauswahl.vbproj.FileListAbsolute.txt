@@ -27,3 +27,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\Xmp
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\MetadataExtractor.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\XmpCore.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\StarControlLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\MyControlsLibrary.dll

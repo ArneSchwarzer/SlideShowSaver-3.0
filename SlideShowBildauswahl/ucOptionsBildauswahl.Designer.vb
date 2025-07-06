@@ -43,7 +43,7 @@ Partial Class ucOptionsBildauswahl
         Me.rdoAkt = New System.Windows.Forms.RadioButton()
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
         Me.rdoJugendfrei = New System.Windows.Forms.RadioButton()
-        Me.sbcBewertung = New StarControlLibrary.SterneBewertungControl()
+        Me.sbcBewertung = New MyControlsLibrary.SterneBewertungControl()
         Me.SuspendLayout()
         '
         'lblNlstVerzeichnisse
@@ -257,9 +257,9 @@ Partial Class ucOptionsBildauswahl
         'sbcBewertung
         '
         Me.sbcBewertung.Bewertung = 0
-        Me.sbcBewertung.Location = New System.Drawing.Point(461, 809)
+        Me.sbcBewertung.Location = New System.Drawing.Point(461, 807)
         Me.sbcBewertung.Name = "sbcBewertung"
-        Me.sbcBewertung.Size = New System.Drawing.Size(241, 43)
+        Me.sbcBewertung.Size = New System.Drawing.Size(213, 45)
         Me.sbcBewertung.TabIndex = 21
         Me.sbcBewertung.Text = "SterneBewertungControl1"
         '
@@ -319,5 +319,5 @@ Partial Class ucOptionsBildauswahl
     Friend WithEvents rdoAkt As Windows.Forms.RadioButton
     Friend WithEvents rdoLingerie As Windows.Forms.RadioButton
     Friend WithEvents rdoJugendfrei As Windows.Forms.RadioButton
-    Friend WithEvents sbcBewertung As StarControlLibrary.SterneBewertungControl
+    Friend WithEvents sbcBewertung As MyControlsLibrary.SterneBewertungControl
 End Class

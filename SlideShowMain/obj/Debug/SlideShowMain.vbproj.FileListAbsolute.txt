@@ -40,3 +40,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\StarContro
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MyControlsLibrary.dll

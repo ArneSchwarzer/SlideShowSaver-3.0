@@ -22,10 +22,8 @@ Partial Class frmPictureInfo
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.lblTitel = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.lblBewertung = New System.Windows.Forms.Label()
-        Me.slbBewertung = New StarControlLibrary.SterneAnzeigeLabel()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
         Me.lblAutor = New System.Windows.Forms.Label()
@@ -52,27 +50,16 @@ Partial Class frmPictureInfo
         Me.Label10 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
+        Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
-        'lblTitel
-        '
-        Me.lblTitel.AutoSize = True
-        Me.lblTitel.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
-        Me.lblTitel.Location = New System.Drawing.Point(1, 9)
-        Me.lblTitel.MinimumSize = New System.Drawing.Size(1457, 0)
-        Me.lblTitel.Name = "lblTitel"
-        Me.lblTitel.Size = New System.Drawing.Size(1457, 72)
-        Me.lblTitel.TabIndex = 0
-        Me.lblTitel.Text = "Bildinformationen"
-        Me.lblTitel.TextAlign = System.Drawing.ContentAlignment.TopCenter
-        '
         'GroupBox1
         '
         Me.GroupBox1.BackColor = System.Drawing.Color.Transparent
-        Me.GroupBox1.Controls.Add(Me.lblBewertung)
         Me.GroupBox1.Controls.Add(Me.slbBewertung)
+        Me.GroupBox1.Controls.Add(Me.lblBewertung)
         Me.GroupBox1.Controls.Add(Me.Label16)
         Me.GroupBox1.Controls.Add(Me.lblTags)
         Me.GroupBox1.Controls.Add(Me.lblAutor)
@@ -99,16 +86,6 @@ Partial Class frmPictureInfo
         Me.lblBewertung.TabIndex = 13
         Me.lblBewertung.Text = "-"
         Me.lblBewertung.Visible = False
-        '
-        'slbBewertung
-        '
-        Me.slbBewertung.BackColor = System.Drawing.Color.Black
-        Me.slbBewertung.Bewertung = 0
-        Me.slbBewertung.Location = New System.Drawing.Point(293, 326)
-        Me.slbBewertung.Name = "slbBewertung"
-        Me.slbBewertung.Size = New System.Drawing.Size(150, 30)
-        Me.slbBewertung.TabIndex = 12
-        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
         '
         'Label16
         '
@@ -362,6 +339,15 @@ Partial Class frmPictureInfo
         Me.Label3.TabIndex = 4
         Me.Label3.Text = "Kamera"
         '
+        'slbBewertung
+        '
+        Me.slbBewertung.BackColor = System.Drawing.Color.Black
+        Me.slbBewertung.Location = New System.Drawing.Point(293, 315)
+        Me.slbBewertung.Name = "slbBewertung"
+        Me.slbBewertung.Size = New System.Drawing.Size(221, 45)
+        Me.slbBewertung.TabIndex = 14
+        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
+        '
         'frmPictureInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
@@ -372,7 +358,6 @@ Partial Class frmPictureInfo
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.GroupBox1)
-        Me.Controls.Add(Me.lblTitel)
         Me.Cursor = System.Windows.Forms.Cursors.Default
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.ForeColor = System.Drawing.Color.Snow
@@ -392,7 +377,6 @@ Partial Class frmPictureInfo
 
     End Sub
 
-    Friend WithEvents lblTitel As Windows.Forms.Label
     Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents Label2 As Windows.Forms.Label
@@ -420,6 +404,6 @@ Partial Class frmPictureInfo
     Friend WithEvents lblBrennweite As Windows.Forms.Label
     Friend WithEvents lblKamera As Windows.Forms.Label
     Friend WithEvents Label16 As Windows.Forms.Label
-    Friend WithEvents slbBewertung As StarControlLibrary.SterneAnzeigeLabel
     Friend WithEvents lblBewertung As Windows.Forms.Label
+    Friend WithEvents slbBewertung As MyControlsLibrary.SterneAnzeigeLabel
 End Class

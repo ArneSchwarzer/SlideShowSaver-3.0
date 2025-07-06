@@ -55,6 +55,7 @@ Partial Class frmShaderTranstionTester
         Me.btnRunTransition = New System.Windows.Forms.Button()
         Me.chbTransitionDuration = New System.Windows.Forms.CheckBox()
         Me.nudDurationMS = New System.Windows.Forms.NumericUpDown()
+        Me.Label1 = New System.Windows.Forms.Label()
         CType(Me.picShaderOriginal, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.picTest1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.picTest2, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -367,11 +368,21 @@ Partial Class frmShaderTranstionTester
         Me.nudDurationMS.Size = New System.Drawing.Size(120, 47)
         Me.nudDurationMS.TabIndex = 28
         '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(949, 119)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(683, 41)
+        Me.Label1.TabIndex = 29
+        Me.Label1.Text = "Diese Fläche können Sie für Werbezwecke mieten!"
+        '
         'frmShaderTranstionTester
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(3372, 1378)
+        Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.nudDurationMS)
         Me.Controls.Add(Me.chbTransitionDuration)
         Me.Controls.Add(Me.btnRunTransition)
@@ -450,4 +461,5 @@ Partial Class frmShaderTranstionTester
     Friend WithEvents btnRunTransition As Button
     Friend WithEvents chbTransitionDuration As CheckBox
     Friend WithEvents nudDurationMS As NumericUpDown
+    Friend WithEvents Label1 As Label
 End Class

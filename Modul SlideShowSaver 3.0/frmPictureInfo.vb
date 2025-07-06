@@ -122,7 +122,7 @@ Public Class frmPictureInfo
 
                     Dim rating As Integer
                     rating = tagLibFile.ImageTag.Rating
-                    slbBewertung.Bewertung = rating
+                    slbBewertung.bewertung = rating
 
                     Dim keywords = iptc.GetStringArray(IptcDirectory.TagKeywords)
                     lblTags.Text = If(keywords IsNot Nothing, String.Join(" | ", keywords), "")
