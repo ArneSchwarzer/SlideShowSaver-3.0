@@ -50,9 +50,9 @@ Partial Class frmSaverMain
         Me.Label1.ForeColor = System.Drawing.Color.Red
         Me.Label1.Location = New System.Drawing.Point(31, 70)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(533, 48)
+        Me.Label1.Size = New System.Drawing.Size(547, 48)
         Me.Label1.TabIndex = 1
-        Me.Label1.Text = "SlideShowSaver 3.0 Framewok"
+        Me.Label1.Text = "SlideShowSaver 3.0 Framework"
         '
         'frmSaverMain
         '

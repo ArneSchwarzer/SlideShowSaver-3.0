@@ -226,7 +226,7 @@ Public Class ucOptionsBildauswahl
         End If
 
         'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstWhiteList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
     End Sub
 
     Private Sub btnBlackListHinzufügen_Click(sender As Object, e As EventArgs) Handles btnBlackListHinzufügen.Click
@@ -267,7 +267,7 @@ Public Class ucOptionsBildauswahl
         End If
 
         'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
     End Sub
 
     Private Sub btnVerzeichnisseLöschen_Click(sender As Object, e As EventArgs) Handles btnVerzeichnisseLöschen.Click
@@ -302,7 +302,7 @@ Public Class ucOptionsBildauswahl
         End If
 
         'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstWhiteList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
 
     End Sub
 
@@ -320,7 +320,7 @@ Public Class ucOptionsBildauswahl
         End If
 
         'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
 
     End Sub
 

@@ -280,9 +280,6 @@ Public Class frmSaverMain
 
     Private Sub closeSlideShowSaver()
         '...und Schluss.
-
-        LogHandling.LogInfo("Der Bildschirmschoner wurde beendet.")
-
         CursorHandling.CursorPowerShow()
 
         ' Instanzen aufrämen
@@ -303,6 +300,8 @@ Public Class frmSaverMain
             fallbackInstanz.Dispose()
             fallbackInstanz = Nothing
         End If
+
+        LogHandling.LogInfo("Der Bildschirmschoner wurde beendet.")
 
         Application.Exit()
 

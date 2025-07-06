@@ -46,59 +46,59 @@ Public Class BildauswahlMain
 
     End Sub
 
-    Public Shared Sub WriteBildauswahlSettingsToRegistry(settings As Dictionary(Of String, String))
-        'Registry-Werte schreiben.
+    'Public Shared Sub WriteBildauswahlSettingsToRegistry(settings As Dictionary(Of String, String))
+    '    'Registry-Werte schreiben.
 
-        Dim translatedDictionary As New Dictionary(Of String, String)
+    '    Dim translatedDictionary As New Dictionary(Of String, String)
 
-        'Da das "settings" als ausgelesenes UC zurückkommt, müssen wir es erst übersetzen
-        translatedDictionary.Add("Verzeichnisse", settings("lstVerzeichnisse"))
-        translatedDictionary.Add("WhiteListTags", settings("lstWhiteList"))
-        translatedDictionary.Add("BlackListTags", settings("lstBlackList"))
-        translatedDictionary.Add("Bewertung", settings("sbcBewertung"))
+    '    'Da das "settings" als ausgelesenes UC zurückkommt, müssen wir es erst übersetzen
+    '    translatedDictionary.Add("Verzeichnisse", settings("lstVerzeichnisse"))
+    '    translatedDictionary.Add("WhiteListTags", settings("lstWhiteList"))
+    '    translatedDictionary.Add("BlackListTags", settings("lstBlackList"))
+    '    translatedDictionary.Add("Bewertung", settings("sbcBewertung"))
 
-        If settings("rdo18") = True Then
-            translatedDictionary.Add("Altersfreigabe", "18+")
-        End If
-        If settings("rdoAkt") = True Then
-            translatedDictionary.Add("Altersfreigabe", "Akt")
-        End If
-        If settings("rdoLingerie") = True Then
-            translatedDictionary.Add("Altersfreigabe", "Lingerie")
-        End If
-        If settings("rdoJugendfrei") = True Then
-            translatedDictionary.Add("Altersfreigabe", "Jugendfrei")
-        End If
+    '    If settings("rdo18") = True Then
+    '        translatedDictionary.Add("Altersfreigabe", "18+")
+    '    End If
+    '    If settings("rdoAkt") = True Then
+    '        translatedDictionary.Add("Altersfreigabe", "Akt")
+    '    End If
+    '    If settings("rdoLingerie") = True Then
+    '        translatedDictionary.Add("Altersfreigabe", "Lingerie")
+    '    End If
+    '    If settings("rdoJugendfrei") = True Then
+    '        translatedDictionary.Add("Altersfreigabe", "Jugendfrei")
+    '    End If
 
-        'Und nun ab damit in die Registry. Und ja, eine Schleife die über alle Keys des Dictionaries geht
-        'wäre hier sicherlich eleganter. Aber so finde ich es halt besser nachzuvollziehen.
+    '    'Und nun ab damit in die Registry. Und ja, eine Schleife die über alle Keys des Dictionaries geht
+    '    'wäre hier sicherlich eleganter. Aber so finde ich es halt besser nachzuvollziehen.
 
-        'Verzeichnisse
-        If translatedDictionary.ContainsKey("Verzeichnisse") Then
-            WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse", translatedDictionary("Verzeichnisse"))
-        End If
+    '    'Verzeichnisse
+    '    If translatedDictionary.ContainsKey("Verzeichnisse") Then
+    '        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse", translatedDictionary("Verzeichnisse"))
+    '    End If
 
-        'WhiteListTags
-        If translatedDictionary.ContainsKey("WhiteListTags") Then
-            WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags", translatedDictionary("WhiteListTags"))
-        End If
+    '    'WhiteListTags
+    '    If translatedDictionary.ContainsKey("WhiteListTags") Then
+    '        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags", translatedDictionary("WhiteListTags"))
+    '    End If
 
-        'BlackListTags
-        If translatedDictionary.ContainsKey("BlackListTags") Then
-            WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags", translatedDictionary("BlackListTags"))
-        End If
+    '    'BlackListTags
+    '    If translatedDictionary.ContainsKey("BlackListTags") Then
+    '        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags", translatedDictionary("BlackListTags"))
+    '    End If
 
-        'Altersfreigabe (für RadioButtons, eigentliche Prüfung der Altersfreigabe erfolgt über BlackListTags)
-        If translatedDictionary.ContainsKey("Altersfreigabe") Then
-            WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", translatedDictionary("Altersfreigabe"))
-        End If
+    '    'Altersfreigabe (für RadioButtons, eigentliche Prüfung der Altersfreigabe erfolgt über BlackListTags)
+    '    If translatedDictionary.ContainsKey("Altersfreigabe") Then
+    '        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", translatedDictionary("Altersfreigabe"))
+    '    End If
 
-        'Bewertung
-        If translatedDictionary.ContainsKey("Bewertung") Then
-            WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", translatedDictionary("Bewertung"))
-        End If
+    '    'Bewertung
+    '    If translatedDictionary.ContainsKey("Bewertung") Then
+    '        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", translatedDictionary("Bewertung"))
+    '    End If
 
-    End Sub
+    'End Sub
 
     Public Shared Function ReadBildauswahlSettingsFromRegistryOrDefauls() As BildauswahlSettings
         ' Alle Werte der Bildauswahl-Settings aus der Registry auslesen und als Struktur BildauswahlSettings zurückgeben
