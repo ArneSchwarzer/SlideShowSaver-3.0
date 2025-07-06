@@ -48,6 +48,27 @@ Public Class CheckedListBoxHandling
 
     End Sub
 
+    Public Shared Sub SaveListBoxToRegistry(lb As ListBox, regPath As String, Optional saveMarkedOnly As Boolean = True)
+        Dim einträge As New List(Of String)
+        Dim i As Integer
+        Dim clb As CheckedListBox = TryCast(lb, CheckedListBox)
+
+        If clb IsNot Nothing AndAlso saveMarkedOnly Then
+            ' Nur markierte Einträge in CheckedListBox
+            For Each item In clb.CheckedItems
+                einträge.Add(item.ToString())
+            Next
+        Else
+            ' Alle Einträge (egal ob ListBox oder CheckedListBox)
+            For i = 0 To lb.Items.Count - 1
+                einträge.Add(lb.Items(i).ToString())
+            Next
+        End If
+
+        Dim joined = String.Join(";", einträge)
+        RegistryHandling.WriteToRegistry(regPath, joined)
+    End Sub
+
 
 End Class
 

@@ -11,6 +11,7 @@ Imports SlideShowLogging
 Imports SlideShowTools
 Imports StarControlLibrary
 Imports SlideShowSprachen
+Imports System.TimeZoneInfo
 
 Public Class frmOptionsMain
 
@@ -156,12 +157,6 @@ Public Class frmOptionsMain
         pnlLanguages.Controls.Add(uc)
 
         'Tabpages - Da bei Aufruf des Dialogs noch kein Modul ausgewählt ist, erst einmal alle ausblenden
-
-        'Bildauswahl vorladen
-        uc = New ucOptionsBildauswahl()
-        uc.Dock = DockStyle.Fill
-        tpBildauswahl.Controls.Add(uc)
-
         tabOptions.TabPages.Remove(tpBildauswahl)
         tabOptions.TabPages.Remove(tpModul)
         tabOptions.TabPages.Remove(tpShader)
@@ -237,10 +232,14 @@ Public Class frmOptionsMain
 
                     'Ggf. Bildauswahl aktivieren...
                     If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl AndAlso Not tabOptions.TabPages.Contains(tpBildauswahl) Then
+                        uc = New ucOptionsBildauswahl()
+                        uc.Dock = DockStyle.Fill
+                        tpBildauswahl.Controls.Add(uc)
                         tabOptions.TabPages.Add(tpBildauswahl)
                     End If
                     '...oder deaktivieren
                     If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl = False Then
+                        tpBildauswahl.Controls.Clear()
                         tabOptions.TabPages.Remove(tpBildauswahl)
                     End If
 
@@ -325,29 +324,8 @@ Public Class frmOptionsMain
         LogHandling.LogDebug("Registry-Einträge für Main-Settings geschrieben.")
 
 #End Region
-#Region "Bildauswahl Settings speichern"
-        ' === Bildauswahl Settings ===
-        uc = TryCast(tpBildauswahl.Controls(0), UserControl)
-        If uc IsNot Nothing Then
+        'Bildauswahl-Settings auf DirectCommit umgestellt
 
-            bildauswahlSettings = ConversionHandling.UserControlZuDictionary(uc)
-
-            'ConversionHandling.UserControlZuDictionary kennt (noch ;-) kein SterneBewertungsControl, also erst
-            'einmal hier per Hand...
-            Dim control = TryCast(uc.Controls("sbcBewertung"), SterneBewertungControl)
-            If control IsNot Nothing Then
-                bildauswahlSettings.Add("sbcBewertung", control.Bewertung.ToString())
-            End If
-
-            'Aufräumen
-            uc.Dispose()
-            uc = Nothing
-
-        End If
-
-        BildauswahlMain.WriteBildauswahlSettingsToRegistry(bildauswahlSettings)
-
-#End Region
 #Region "Modul Settings speichern"
         ' === Modul Setting ===
 
@@ -469,43 +447,51 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub Modul_BitteWechseleZuTransition(transitionName As String)
-        If activeModule.ModulNutztTransitions Then
-            Try
-                ' Vorhandene Controls in tpTransition löschen
-                If tpTransitions.Controls.Count > 0 Then
-                    Dim altesUC As Control = tpTransitions.Controls(0)
-                    tpTransitions.Controls.Remove(altesUC)
-                    altesUC.Dispose()
-                    altesUC = Nothing
-                End If
 
-                ' Transition laden (Dummy-Instanz)
-                Dim transitionInstanz As ISlideShowTransition = TransitionByNameLoader.LadeTransitionNachName(transitionName)
-
-                If transitionInstanz IsNot Nothing Then
-                    Dim ucTransition As UserControl = transitionInstanz.GetTransitionOptionsDialog()
-
-                    If ucTransition IsNot Nothing Then
-                        ucTransition.Dock = DockStyle.Fill
-                        tpTransitions.Controls.Add(ucTransition)
-
-                        ' Einstellungen aus Registry oder Default laden
-                        transitionInstanz.GetTransitionRegistryOrDefaultSettings(ucTransition)
-                    Else
-                        LogHandling.LogWarn("Transition '" & transitionName & "' hat kein Options-UserControl geliefert.")
-                    End If
-                Else
-                    LogHandling.LogWarn("Transition '" & transitionName & "' konnte nicht geladen werden.")
-                End If
-
-            Catch ex As Exception
-                LogHandling.LogError("Fehler beim Umschalten auf Transition '" & transitionName & "': " & ex.Message)
-            End Try
-
-            If Not tabOptions.TabPages.Contains(tpTransitions) Then
-                tabOptions.TabPages.Add(tpTransitions)
+        Try
+            ' Vorhandene Controls in tpTransition löschen
+            If tpTransitions.Controls.Count > 0 Then
+                Dim altesUC As Control = tpTransitions.Controls(0)
+                tpTransitions.Controls.Remove(altesUC)
+                altesUC.Dispose()
+                altesUC = Nothing
             End If
+
+            ' Transition laden (Dummy-Instanz)
+            Dim transitionInstanz As ISlideShowTransition = TransitionByNameLoader.LadeTransitionNachName(transitionName)
+
+            If transitionInstanz IsNot Nothing Then
+                Dim ucTransition As UserControl = transitionInstanz.GetTransitionOptionsDialog()
+
+                If ucTransition IsNot Nothing Then
+                    ucTransition.Dock = DockStyle.Fill
+                    tpTransitions.Controls.Add(ucTransition)
+
+                    ' Einstellungen aus Registry oder Default laden
+                    transitionInstanz.GetTransitionRegistryOrDefaultSettings(ucTransition)
+                Else
+                    LogHandling.LogWarn("Transition '" & transitionName & "' hat kein Options-UserControl geliefert.")
+                End If
+            Else
+                LogHandling.LogWarn("Transition '" & transitionName & "' konnte nicht geladen werden.")
+            End If
+
+        Catch ex As Exception
+            LogHandling.LogError("Fehler beim Umschalten auf Transition '" & transitionName & "': " & ex.Message)
+        End Try
+
+        If Not tabOptions.TabPages.Contains(tpTransitions) Then
+            tabOptions.TabPages.Add(tpTransitions)
         End If
+
+
     End Sub
 
+    Private Sub clbTransitionsModule_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitionsModule.SelectedIndexChanged
+
+        If clbTransitionsModule.SelectedItem IsNot Nothing Then
+            Modul_BitteWechseleZuTransition(clbTransitionsModule.SelectedItem.ToString)
+        End If
+
+    End Sub
 End Class

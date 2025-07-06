@@ -82,7 +82,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ucOptionsShader.Designer.vb" />
+    <Compile Include="ucOptionsShader.Designer.vb">
+      <DependentUpon>ucOptionsShader.vb</DependentUpon>
+    </Compile>
     <Compile Include="ucOptionsShader.vb">
       <SubType>UserControl</SubType>
     </Compile>

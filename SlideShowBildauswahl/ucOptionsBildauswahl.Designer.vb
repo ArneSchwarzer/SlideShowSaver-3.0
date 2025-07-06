@@ -22,7 +22,7 @@ Partial Class ucOptionsBildauswahl
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.lblNlstVerzeichnisse = New System.Windows.Forms.Label()
         Me.lstVerzeichnisse = New System.Windows.Forms.ListBox()
         Me.btnVerzeichnisHinzufügen = New System.Windows.Forms.Button()
         Me.btnVerzeichnisseLöschen = New System.Windows.Forms.Button()
@@ -33,12 +33,12 @@ Partial Class ucOptionsBildauswahl
         Me.btnBlackListListeLöschen = New System.Windows.Forms.Button()
         Me.btnBlackListLöschen = New System.Windows.Forms.Button()
         Me.btnBlackListHinzufügen = New System.Windows.Forms.Button()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.lblNlstWhiteList = New System.Windows.Forms.Label()
         Me.lstWhiteList = New System.Windows.Forms.ListBox()
         Me.lstBlackList = New System.Windows.Forms.ListBox()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
+        Me.lblNlstBlakcList = New System.Windows.Forms.Label()
+        Me.lblNAltersfreigabe = New System.Windows.Forms.Label()
+        Me.lblNBewertung = New System.Windows.Forms.Label()
         Me.rdo18 = New System.Windows.Forms.RadioButton()
         Me.rdoAkt = New System.Windows.Forms.RadioButton()
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
@@ -46,14 +46,15 @@ Partial Class ucOptionsBildauswahl
         Me.sbcBewertung = New StarControlLibrary.SterneBewertungControl()
         Me.SuspendLayout()
         '
-        'Label1
+        'lblNlstVerzeichnisse
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(19, 13)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(195, 41)
-        Me.Label1.TabIndex = 0
-        Me.Label1.Text = "Verzeichnisse"
+        Me.lblNlstVerzeichnisse.AutoSize = True
+        Me.lblNlstVerzeichnisse.Location = New System.Drawing.Point(19, 13)
+        Me.lblNlstVerzeichnisse.Name = "lblNlstVerzeichnisse"
+        Me.lblNlstVerzeichnisse.Size = New System.Drawing.Size(195, 41)
+        Me.lblNlstVerzeichnisse.TabIndex = 0
+        Me.lblNlstVerzeichnisse.Tag = "lblNlstVerzeichnisse"
+        Me.lblNlstVerzeichnisse.Text = "Verzeichnisse"
         '
         'lstVerzeichnisse
         '
@@ -148,14 +149,15 @@ Partial Class ucOptionsBildauswahl
         Me.btnBlackListHinzufügen.Text = "+"
         Me.btnBlackListHinzufügen.UseVisualStyleBackColor = True
         '
-        'Label2
+        'lblNlstWhiteList
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(26, 380)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(152, 41)
-        Me.Label2.TabIndex = 11
-        Me.Label2.Text = "White-List"
+        Me.lblNlstWhiteList.AutoSize = True
+        Me.lblNlstWhiteList.Location = New System.Drawing.Point(26, 380)
+        Me.lblNlstWhiteList.Name = "lblNlstWhiteList"
+        Me.lblNlstWhiteList.Size = New System.Drawing.Size(152, 41)
+        Me.lblNlstWhiteList.TabIndex = 11
+        Me.lblNlstWhiteList.Tag = "lblNlstWhiteList"
+        Me.lblNlstWhiteList.Text = "White-List"
         '
         'lstWhiteList
         '
@@ -175,32 +177,35 @@ Partial Class ucOptionsBildauswahl
         Me.lstBlackList.Size = New System.Drawing.Size(337, 291)
         Me.lstBlackList.TabIndex = 13
         '
-        'Label3
+        'lblNlstBlakcList
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(454, 380)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(142, 41)
-        Me.Label3.TabIndex = 14
-        Me.Label3.Text = "Black-List"
+        Me.lblNlstBlakcList.AutoSize = True
+        Me.lblNlstBlakcList.Location = New System.Drawing.Point(454, 380)
+        Me.lblNlstBlakcList.Name = "lblNlstBlakcList"
+        Me.lblNlstBlakcList.Size = New System.Drawing.Size(142, 41)
+        Me.lblNlstBlakcList.TabIndex = 14
+        Me.lblNlstBlakcList.Tag = "lblNlstBlakcList"
+        Me.lblNlstBlakcList.Text = "Black-List"
         '
-        'Label4
+        'lblNAltersfreigabe
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(19, 765)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(202, 41)
-        Me.Label4.TabIndex = 15
-        Me.Label4.Text = "Altersfreigabe"
+        Me.lblNAltersfreigabe.AutoSize = True
+        Me.lblNAltersfreigabe.Location = New System.Drawing.Point(19, 765)
+        Me.lblNAltersfreigabe.Name = "lblNAltersfreigabe"
+        Me.lblNAltersfreigabe.Size = New System.Drawing.Size(202, 41)
+        Me.lblNAltersfreigabe.TabIndex = 15
+        Me.lblNAltersfreigabe.Tag = "lblNAltersfreigabe"
+        Me.lblNAltersfreigabe.Text = "Altersfreigabe"
         '
-        'Label5
+        'lblNBewertung
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(454, 765)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(161, 41)
-        Me.Label5.TabIndex = 16
-        Me.Label5.Text = "Bewertung"
+        Me.lblNBewertung.AutoSize = True
+        Me.lblNBewertung.Location = New System.Drawing.Point(454, 765)
+        Me.lblNBewertung.Name = "lblNBewertung"
+        Me.lblNBewertung.Size = New System.Drawing.Size(161, 41)
+        Me.lblNBewertung.TabIndex = 16
+        Me.lblNBewertung.Tag = "lblNBewertung"
+        Me.lblNBewertung.Text = "Bewertung"
         '
         'rdo18
         '
@@ -221,6 +226,7 @@ Partial Class ucOptionsBildauswahl
         Me.rdoAkt.Size = New System.Drawing.Size(93, 45)
         Me.rdoAkt.TabIndex = 18
         Me.rdoAkt.TabStop = True
+        Me.rdoAkt.Tag = "rdoAkt"
         Me.rdoAkt.Text = "Akt"
         Me.rdoAkt.UseVisualStyleBackColor = True
         '
@@ -232,6 +238,7 @@ Partial Class ucOptionsBildauswahl
         Me.rdoLingerie.Size = New System.Drawing.Size(154, 45)
         Me.rdoLingerie.TabIndex = 19
         Me.rdoLingerie.TabStop = True
+        Me.rdoLingerie.Tag = "rdoLingerie"
         Me.rdoLingerie.Text = "Lingerie"
         Me.rdoLingerie.UseVisualStyleBackColor = True
         '
@@ -243,6 +250,7 @@ Partial Class ucOptionsBildauswahl
         Me.rdoJugendfrei.Size = New System.Drawing.Size(188, 45)
         Me.rdoJugendfrei.TabIndex = 20
         Me.rdoJugendfrei.TabStop = True
+        Me.rdoJugendfrei.Tag = "rdoJugendfrei"
         Me.rdoJugendfrei.Text = "Jugendfrei"
         Me.rdoJugendfrei.UseVisualStyleBackColor = True
         '
@@ -264,12 +272,12 @@ Partial Class ucOptionsBildauswahl
         Me.Controls.Add(Me.rdoLingerie)
         Me.Controls.Add(Me.rdoAkt)
         Me.Controls.Add(Me.rdo18)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.lblNBewertung)
+        Me.Controls.Add(Me.lblNAltersfreigabe)
+        Me.Controls.Add(Me.lblNlstBlakcList)
         Me.Controls.Add(Me.lstBlackList)
         Me.Controls.Add(Me.lstWhiteList)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.lblNlstWhiteList)
         Me.Controls.Add(Me.btnBlackListListeLöschen)
         Me.Controls.Add(Me.btnBlackListLöschen)
         Me.Controls.Add(Me.btnBlackListHinzufügen)
@@ -280,7 +288,7 @@ Partial Class ucOptionsBildauswahl
         Me.Controls.Add(Me.btnVerzeichnisseLöschen)
         Me.Controls.Add(Me.btnVerzeichnisHinzufügen)
         Me.Controls.Add(Me.lstVerzeichnisse)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.lblNlstVerzeichnisse)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsBildauswahl"
@@ -290,7 +298,7 @@ Partial Class ucOptionsBildauswahl
 
     End Sub
 
-    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents lblNlstVerzeichnisse As Windows.Forms.Label
     Friend WithEvents lstVerzeichnisse As Windows.Forms.ListBox
     Friend WithEvents btnVerzeichnisHinzufügen As Windows.Forms.Button
     Friend WithEvents btnVerzeichnisseLöschen As Windows.Forms.Button
@@ -301,12 +309,12 @@ Partial Class ucOptionsBildauswahl
     Friend WithEvents btnBlackListListeLöschen As Windows.Forms.Button
     Friend WithEvents btnBlackListLöschen As Windows.Forms.Button
     Friend WithEvents btnBlackListHinzufügen As Windows.Forms.Button
-    Friend WithEvents Label2 As Windows.Forms.Label
+    Friend WithEvents lblNlstWhiteList As Windows.Forms.Label
     Friend WithEvents lstWhiteList As Windows.Forms.ListBox
     Friend WithEvents lstBlackList As Windows.Forms.ListBox
-    Friend WithEvents Label3 As Windows.Forms.Label
-    Friend WithEvents Label4 As Windows.Forms.Label
-    Friend WithEvents Label5 As Windows.Forms.Label
+    Friend WithEvents lblNlstBlakcList As Windows.Forms.Label
+    Friend WithEvents lblNAltersfreigabe As Windows.Forms.Label
+    Friend WithEvents lblNBewertung As Windows.Forms.Label
     Friend WithEvents rdo18 As Windows.Forms.RadioButton
     Friend WithEvents rdoAkt As Windows.Forms.RadioButton
     Friend WithEvents rdoLingerie As Windows.Forms.RadioButton
