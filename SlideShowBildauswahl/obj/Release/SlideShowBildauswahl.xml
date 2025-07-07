@@ -1,0 +1,45 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+SlideShowBildauswahl
+</name>
+</assembly>
+<members>
+<member name="T:SlideShowBildauswahl.My.Resources.Resources">
+<summary>
+  Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+</summary>
+</member>
+<member name="P:SlideShowBildauswahl.My.Resources.Resources.ResourceManager">
+<summary>
+  Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+</summary>
+</member>
+<member name="P:SlideShowBildauswahl.My.Resources.Resources.Culture">
+<summary>
+  Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+  Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+</summary>
+</member>
+<member name="P:SlideShowBildauswahl.My.Resources.Resources.Flying_Kitchen_Aid_Logo_Transparent">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:SlideShowBildauswahl.My.Resources.Resources.Trashbin">
+<summary>
+  Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="M:SlideShowBildauswahl.BildauswahlMain.RotateImage(System.Drawing.Image,System.Single)">
+ <summary>
+ Dreht ein Bild um den angegebenen Winkel angle.
+ </summary>
+ <param name="img">Das zu drehende Originalbild.</param>
+ <param name="angle">Der Rotationswinkel in Grad (im Uhrzeigersinn, negative Werte gegen den Uhrzeigersinn).</param>
+ <returns>Ein neues Image-Objekt, das um angle Grad rotiert wurde. Transparente Ränder werden gesetzt.</returns>
+ 
+</member>
+</members>
+</doc>

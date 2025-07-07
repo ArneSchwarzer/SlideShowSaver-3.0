@@ -23,3 +23,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Debug\Modul M
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Mandelbrot.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Mandelbrot.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul Mandelbrot.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Debug\Modul_Mandelbrot.ucUnderConstruction.resources

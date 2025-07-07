@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptionsShader
     Inherits System.Windows.Forms.UserControl
 
@@ -186,3 +186,10 @@ Partial Class ucOptionsShader
     Friend WithEvents rbZufall As Windows.Forms.RadioButton
     Friend WithEvents lblNModus As Windows.Forms.Label
 End Class
+
+Me.lblShadername.Tag = "langKey=lblShadername"
+Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
+Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
+Me.lblNModus.Tag = "langKey=lblNModus"
+Me.rbZufall.Tag = "langKey=rbZufall"
+Me.picFarbton.Tag = "langKey=picFarbton"

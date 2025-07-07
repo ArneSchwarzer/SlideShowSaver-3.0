@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptionsModul
     Inherits System.Windows.Forms.UserControl
 
@@ -23,7 +23,7 @@ Partial Class ucOptionsModul
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblModulname = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
+        Me.lblNModul = New System.Windows.Forms.Label()
         Me.cmbGradient = New System.Windows.Forms.ComboBox()
         Me.lblNcmbGradient = New System.Windows.Forms.Label()
         Me.chkGradientAnimieren = New System.Windows.Forms.CheckBox()
@@ -38,16 +38,18 @@ Partial Class ucOptionsModul
         Me.lblModulname.Name = "lblModulname"
         Me.lblModulname.Size = New System.Drawing.Size(186, 41)
         Me.lblModulname.TabIndex = 17
+        Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblModulname.Text = "Mandelbrot"
         '
-        'Label6
+        'lblNModul
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(29, 30)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(105, 41)
-        Me.Label6.TabIndex = 16
-        Me.Label6.Text = "Modul"
+        Me.lblNModul.AutoSize = True
+        Me.lblNModul.Location = New System.Drawing.Point(29, 30)
+        Me.lblNModul.Name = "lblNModul"
+        Me.lblNModul.Size = New System.Drawing.Size(105, 41)
+        Me.lblNModul.TabIndex = 16
+        Me.lblNModul.Tag = "langKey=lblNModul"
+        Me.lblNModul.Text = "Modul"
         '
         'cmbGradient
         '
@@ -65,6 +67,7 @@ Partial Class ucOptionsModul
         Me.lblNcmbGradient.Name = "lblNcmbGradient"
         Me.lblNcmbGradient.Size = New System.Drawing.Size(132, 41)
         Me.lblNcmbGradient.TabIndex = 18
+        Me.lblNcmbGradient.Tag = "langKey=lblNcmbGradient"
         Me.lblNcmbGradient.Text = "Gradient"
         '
         'chkGradientAnimieren
@@ -74,6 +77,7 @@ Partial Class ucOptionsModul
         Me.chkGradientAnimieren.Name = "chkGradientAnimieren"
         Me.chkGradientAnimieren.Size = New System.Drawing.Size(303, 45)
         Me.chkGradientAnimieren.TabIndex = 20
+        Me.chkGradientAnimieren.Tag = "langKey=chkGradientAnimieren"
         Me.chkGradientAnimieren.Text = "Gradient animieren"
         Me.chkGradientAnimieren.UseVisualStyleBackColor = True
         '
@@ -84,6 +88,7 @@ Partial Class ucOptionsModul
         Me.chkKoordinatenAnzeigen.Name = "chkKoordinatenAnzeigen"
         Me.chkKoordinatenAnzeigen.Size = New System.Drawing.Size(340, 45)
         Me.chkKoordinatenAnzeigen.TabIndex = 21
+        Me.chkKoordinatenAnzeigen.Tag = "langKey=chkKoordinatenAnzeigen"
         Me.chkKoordinatenAnzeigen.Text = "Koordinaten anzeigen"
         Me.chkKoordinatenAnzeigen.UseVisualStyleBackColor = True
         '
@@ -96,7 +101,7 @@ Partial Class ucOptionsModul
         Me.Controls.Add(Me.cmbGradient)
         Me.Controls.Add(Me.lblNcmbGradient)
         Me.Controls.Add(Me.lblModulname)
-        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.lblNModul)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsModul"
@@ -107,7 +112,7 @@ Partial Class ucOptionsModul
     End Sub
 
     Friend WithEvents lblModulname As Windows.Forms.Label
-    Friend WithEvents Label6 As Windows.Forms.Label
+    Friend WithEvents lblNModul As Windows.Forms.Label
     Friend WithEvents cmbGradient As Windows.Forms.ComboBox
     Friend WithEvents lblNcmbGradient As Windows.Forms.Label
     Friend WithEvents chkGradientAnimieren As Windows.Forms.CheckBox

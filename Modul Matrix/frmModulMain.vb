@@ -6,17 +6,17 @@ Imports SlideShowLogging.LogHandling
 
 Public Class frmModulMain
     Private Sub frmModuleMain_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Dim uc As UserControl
+
         FormsHandling.InitialFormPreparation(Me, Color.Black)
         Me.Text = "Modul Matrix"
         Me.TopMost = False
 
-        'Erst einmal den SplashScreen justieren & Labelfarben setzen
-        Dim colorLabels As Color = Color.Lime
-        Label1.ForeColor = colorLabels
-        Label2.ForeColor = colorLabels
-        Label3.ForeColor = colorLabels
-        Panel1.Left = (Me.ClientSize.Width - Panel1.Width) \ 2
-        Panel1.Top = (Me.ClientSize.Height - Panel1.Height) \ 2
+        uc = New ucUnderConstruction()
+        uc.Dock = DockStyle.None
+        uc.Top = (Me.Height - uc.Height) \ 2
+        uc.Left = (Me.Width - uc.Width) \ 2
+        Me.Controls.Add(uc)
     End Sub
     Private Sub frmModulMain_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
         LogDebug("SlideShowModul Matrix hat den Key: " & e.KeyValue.ToString & " empfangen. Leite Weiter an Eventhandler")

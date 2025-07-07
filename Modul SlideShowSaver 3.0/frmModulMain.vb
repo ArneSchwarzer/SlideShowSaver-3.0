@@ -97,7 +97,7 @@ Public Class frmModulMain
         'End If
 
         'Transition laden (erst einmal gefaked)
-        aktiveTransition = TransitionByNameLoader.LadeTransitionNachName("Schieben & Wischen")
+        'aktiveTransition = TransitionByNameLoader.LadeTransitionNachName("Schieben & Wischen")
 
         lblInitializing.Visible = False
         picBildAnzeige.Image = aktuellesBild
@@ -126,7 +126,7 @@ Public Class frmModulMain
         Dim gfx As Graphics = Graphics.FromHwnd(picBildAnzeige.Handle)
 
         'Jetzt die Transition aufrufen
-        aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, gfx)
+        'aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, gfx)
 
         aktuellesBild = neuesBild
         picBildAnzeige.Image = aktuellesBild

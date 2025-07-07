@@ -86,6 +86,7 @@ Public Class frmPauseModusOverlay
 
         'Steuerelemente & Timer einrichten
         sbcBewerten.Visible = False
+        sbcBewerten.EndInitialization()
         chkBewerten.Checked = False
 
         btnPauseForward.BackgroundImage = My.Resources.Vor_grau_Transparent

@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmShaderTranstionTester
     Inherits System.Windows.Forms.Form
 
@@ -463,3 +463,32 @@ Partial Class frmShaderTranstionTester
     Friend WithEvents nudDurationMS As NumericUpDown
     Friend WithEvents Label1 As Label
 End Class
+
+Me.lblTitel.Tag = "langKey=lblTitel"
+Me.lblTestbilder.Tag = "langKey=lblTestbilder"
+Me.lblOptionsdialoge.Tag = "langKey=lblOptionsdialoge"
+Me.lblTitelShader.Tag = "langKey=lblTitelShader"
+Me.lblShaderName.Tag = "langKey=lblShaderName"
+Me.lblShaderKurzbeschreibung.Tag = "langKey=lblShaderKurzbeschreibung"
+Me.lblShaderVersion.Tag = "langKey=lblShaderVersion"
+Me.lblTitelTransition.Tag = "langKey=lblTitelTransition"
+Me.lblTransitionVersion.Tag = "langKey=lblTransitionVersion"
+Me.lblTransitionKurzbeschreibung.Tag = "langKey=lblTransitionKurzbeschreibung"
+Me.lblTransitionName.Tag = "langKey=lblTransitionName"
+Me.Label1.Tag = "langKey=Label1"
+Me.rbTransitionModeManual.Tag = "langKey=rbTransitionModeManual"
+Me.rbTransitionModeLoop.Tag = "langKey=rbTransitionModeLoop"
+Me.btnRunTransition.Tag = "langKey=btnRunTransition"
+Me.chbTransitionDuration.Tag = "langKey=chbTransitionDuration"
+Me.tpShader.Tag = "langKey=tpShader"
+Me.tpTransition.Tag = "langKey=tpTransition"
+Me.tabOptionDialoge.Tag = "langKey=tabOptionDialoge"
+Me.cmbPBSizeMod1.Tag = "langKey=cmbPBSizeMod1"
+Me.cmbPBSizeMode2.Tag = "langKey=cmbPBSizeMode2"
+Me.cmbShaderAuswahl.Tag = "langKey=cmbShaderAuswahl"
+Me.cmbTransitionAuswahl.Tag = "langKey=cmbTransitionAuswahl"
+Me.picShaderOriginal.Tag = "langKey=picShaderOriginal"
+Me.picTest1.Tag = "langKey=picTest1"
+Me.picTest2.Tag = "langKey=picTest2"
+Me.picShaderAngewandt.Tag = "langKey=picShaderAngewandt"
+Me.picTransition.Tag = "langKey=picTransition"

@@ -82,3 +82,9 @@ Partial Class ucLanguageSelector
     Friend WithEvents BTN_OK As Button
     Friend WithEvents BTN_CANCEL As Button
 End Class
+
+Me.lblSprache.Tag = "langKey=lblSprache"
+Me.TITLE.Tag = "langKey=TITLE"
+Me.BTN_OK.Tag = "langKey=BTN_OK"
+Me.BTN_CANCEL.Tag = "langKey=BTN_CANCEL"
+Me.cboSprache.Tag = "langKey=cboSprache"

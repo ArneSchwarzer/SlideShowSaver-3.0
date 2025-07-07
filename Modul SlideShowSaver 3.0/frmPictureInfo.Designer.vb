@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmPictureInfo
     Inherits System.Windows.Forms.Form
 
@@ -25,18 +25,18 @@ Partial Class frmPictureInfo
         Me.grpDatei = New System.Windows.Forms.GroupBox()
         Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
         Me.lblBewertung = New System.Windows.Forms.Label()
-        Me.Label16 = New System.Windows.Forms.Label()
+        Me.LblNBewertung = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
         Me.lblAutor = New System.Windows.Forms.Label()
         Me.lblErstellungsdatum = New System.Windows.Forms.Label()
         Me.lblDateipfad = New System.Windows.Forms.Label()
         Me.lblDateiname = New System.Windows.Forms.Label()
-        Me.Label8 = New System.Windows.Forms.Label()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.lblNTags = New System.Windows.Forms.Label()
+        Me.lblNAutor = New System.Windows.Forms.Label()
+        Me.lblNErstellungsdatum = New System.Windows.Forms.Label()
+        Me.lblNDateipfad = New System.Windows.Forms.Label()
+        Me.lblNDateiname = New System.Windows.Forms.Label()
+        Me.lblNDatei = New System.Windows.Forms.Label()
         Me.grpKamera = New System.Windows.Forms.GroupBox()
         Me.lblBlende = New System.Windows.Forms.Label()
         Me.lblISO = New System.Windows.Forms.Label()
@@ -44,13 +44,13 @@ Partial Class frmPictureInfo
         Me.lblObjektiv = New System.Windows.Forms.Label()
         Me.lblBrennweite = New System.Windows.Forms.Label()
         Me.lblKamera = New System.Windows.Forms.Label()
-        Me.Label15 = New System.Windows.Forms.Label()
-        Me.Label13 = New System.Windows.Forms.Label()
-        Me.Label12 = New System.Windows.Forms.Label()
+        Me.lblNBlende = New System.Windows.Forms.Label()
+        Me.lblNISO = New System.Windows.Forms.Label()
+        Me.lblNVerschlusszeit = New System.Windows.Forms.Label()
         Me.lblNObjektiv = New System.Windows.Forms.Label()
         Me.lblNBrennweite = New System.Windows.Forms.Label()
-        Me.Label9 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
+        Me.lblNlblKamera = New System.Windows.Forms.Label()
+        Me.lblNKamera = New System.Windows.Forms.Label()
         Me.lblNBildinformationen = New System.Windows.Forms.Label()
         Me.grpDatei.SuspendLayout()
         Me.grpKamera.SuspendLayout()
@@ -61,17 +61,17 @@ Partial Class frmPictureInfo
         Me.grpDatei.BackColor = System.Drawing.Color.Transparent
         Me.grpDatei.Controls.Add(Me.slbBewertung)
         Me.grpDatei.Controls.Add(Me.lblBewertung)
-        Me.grpDatei.Controls.Add(Me.Label16)
+        Me.grpDatei.Controls.Add(Me.LblNBewertung)
         Me.grpDatei.Controls.Add(Me.lblTags)
         Me.grpDatei.Controls.Add(Me.lblAutor)
         Me.grpDatei.Controls.Add(Me.lblErstellungsdatum)
         Me.grpDatei.Controls.Add(Me.lblDateipfad)
         Me.grpDatei.Controls.Add(Me.lblDateiname)
-        Me.grpDatei.Controls.Add(Me.Label8)
-        Me.grpDatei.Controls.Add(Me.Label7)
-        Me.grpDatei.Controls.Add(Me.Label6)
-        Me.grpDatei.Controls.Add(Me.Label5)
-        Me.grpDatei.Controls.Add(Me.Label4)
+        Me.grpDatei.Controls.Add(Me.lblNTags)
+        Me.grpDatei.Controls.Add(Me.lblNAutor)
+        Me.grpDatei.Controls.Add(Me.lblNErstellungsdatum)
+        Me.grpDatei.Controls.Add(Me.lblNDateipfad)
+        Me.grpDatei.Controls.Add(Me.lblNDateiname)
         Me.grpDatei.Location = New System.Drawing.Point(13, 136)
         Me.grpDatei.Name = "grpDatei"
         Me.grpDatei.Size = New System.Drawing.Size(903, 538)
@@ -97,14 +97,15 @@ Partial Class frmPictureInfo
         Me.lblBewertung.Text = "-"
         Me.lblBewertung.Visible = False
         '
-        'Label16
+        'LblNBewertung
         '
-        Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(17, 315)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(161, 41)
-        Me.Label16.TabIndex = 10
-        Me.Label16.Text = "Bewertung"
+        Me.LblNBewertung.AutoSize = True
+        Me.LblNBewertung.Location = New System.Drawing.Point(17, 315)
+        Me.LblNBewertung.Name = "LblNBewertung"
+        Me.LblNBewertung.Size = New System.Drawing.Size(161, 41)
+        Me.LblNBewertung.TabIndex = 10
+        Me.LblNBewertung.Tag = "langKey=LblNBewertung"
+        Me.LblNBewertung.Text = "Bewertung"
         '
         'lblTags
         '
@@ -155,59 +156,65 @@ Partial Class frmPictureInfo
         Me.lblDateiname.TabIndex = 5
         Me.lblDateiname.Text = "Dateiname"
         '
-        'Label8
+        'lblNTags
         '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(17, 411)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(243, 41)
-        Me.Label8.TabIndex = 4
-        Me.Label8.Text = "Verwendete Tags"
+        Me.lblNTags.AutoSize = True
+        Me.lblNTags.Location = New System.Drawing.Point(17, 411)
+        Me.lblNTags.Name = "lblNTags"
+        Me.lblNTags.Size = New System.Drawing.Size(243, 41)
+        Me.lblNTags.TabIndex = 4
+        Me.lblNTags.Tag = "langKey=lblNTags"
+        Me.lblNTags.Text = "Verwendete Tags"
         '
-        'Label7
+        'lblNAutor
         '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(17, 363)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(92, 41)
-        Me.Label7.TabIndex = 3
-        Me.Label7.Text = "Autor"
+        Me.lblNAutor.AutoSize = True
+        Me.lblNAutor.Location = New System.Drawing.Point(17, 363)
+        Me.lblNAutor.Name = "lblNAutor"
+        Me.lblNAutor.Size = New System.Drawing.Size(92, 41)
+        Me.lblNAutor.TabIndex = 3
+        Me.lblNAutor.Tag = "langKey=lblNAutor"
+        Me.lblNAutor.Text = "Autor"
         '
-        'Label6
+        'lblNErstellungsdatum
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(17, 267)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(247, 41)
-        Me.Label6.TabIndex = 2
-        Me.Label6.Text = "Erstellungsdatum"
+        Me.lblNErstellungsdatum.AutoSize = True
+        Me.lblNErstellungsdatum.Location = New System.Drawing.Point(17, 267)
+        Me.lblNErstellungsdatum.Name = "lblNErstellungsdatum"
+        Me.lblNErstellungsdatum.Size = New System.Drawing.Size(247, 41)
+        Me.lblNErstellungsdatum.TabIndex = 2
+        Me.lblNErstellungsdatum.Tag = "langKey=lblNErstellungsdatum"
+        Me.lblNErstellungsdatum.Text = "Erstellungsdatum"
         '
-        'Label5
+        'lblNDateipfad
         '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(17, 92)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(147, 41)
-        Me.Label5.TabIndex = 1
-        Me.Label5.Text = "Dateipfad"
+        Me.lblNDateipfad.AutoSize = True
+        Me.lblNDateipfad.Location = New System.Drawing.Point(17, 92)
+        Me.lblNDateipfad.Name = "lblNDateipfad"
+        Me.lblNDateipfad.Size = New System.Drawing.Size(147, 41)
+        Me.lblNDateipfad.TabIndex = 1
+        Me.lblNDateipfad.Tag = "langKey=lblNDateipfad"
+        Me.lblNDateipfad.Text = "Dateipfad"
         '
-        'Label4
+        'lblNDateiname
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(17, 34)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(161, 41)
-        Me.Label4.TabIndex = 0
-        Me.Label4.Text = "Dateiname"
+        Me.lblNDateiname.AutoSize = True
+        Me.lblNDateiname.Location = New System.Drawing.Point(17, 34)
+        Me.lblNDateiname.Name = "lblNDateiname"
+        Me.lblNDateiname.Size = New System.Drawing.Size(161, 41)
+        Me.lblNDateiname.TabIndex = 0
+        Me.lblNDateiname.Tag = "langKey=lblNDateiname"
+        Me.lblNDateiname.Text = "Dateiname"
         '
-        'Label2
+        'lblNDatei
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(12, 101)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(87, 41)
-        Me.Label2.TabIndex = 2
-        Me.Label2.Text = "Datei"
+        Me.lblNDatei.AutoSize = True
+        Me.lblNDatei.Location = New System.Drawing.Point(12, 101)
+        Me.lblNDatei.Name = "lblNDatei"
+        Me.lblNDatei.Size = New System.Drawing.Size(87, 41)
+        Me.lblNDatei.TabIndex = 2
+        Me.lblNDatei.Tag = "langKey=lblNDatei"
+        Me.lblNDatei.Text = "Datei"
         '
         'grpKamera
         '
@@ -218,12 +225,12 @@ Partial Class frmPictureInfo
         Me.grpKamera.Controls.Add(Me.lblObjektiv)
         Me.grpKamera.Controls.Add(Me.lblBrennweite)
         Me.grpKamera.Controls.Add(Me.lblKamera)
-        Me.grpKamera.Controls.Add(Me.Label15)
-        Me.grpKamera.Controls.Add(Me.Label13)
-        Me.grpKamera.Controls.Add(Me.Label12)
+        Me.grpKamera.Controls.Add(Me.lblNBlende)
+        Me.grpKamera.Controls.Add(Me.lblNISO)
+        Me.grpKamera.Controls.Add(Me.lblNVerschlusszeit)
         Me.grpKamera.Controls.Add(Me.lblNObjektiv)
         Me.grpKamera.Controls.Add(Me.lblNBrennweite)
-        Me.grpKamera.Controls.Add(Me.Label9)
+        Me.grpKamera.Controls.Add(Me.lblNlblKamera)
         Me.grpKamera.Location = New System.Drawing.Point(949, 136)
         Me.grpKamera.Name = "grpKamera"
         Me.grpKamera.Size = New System.Drawing.Size(485, 538)
@@ -286,32 +293,35 @@ Partial Class frmPictureInfo
         Me.lblKamera.TabIndex = 7
         Me.lblKamera.Text = "Kamera"
         '
-        'Label15
+        'lblNBlende
         '
-        Me.Label15.AutoSize = True
-        Me.Label15.Location = New System.Drawing.Point(7, 311)
-        Me.Label15.Name = "Label15"
-        Me.Label15.Size = New System.Drawing.Size(109, 41)
-        Me.Label15.TabIndex = 6
-        Me.Label15.Text = "Blende"
+        Me.lblNBlende.AutoSize = True
+        Me.lblNBlende.Location = New System.Drawing.Point(7, 311)
+        Me.lblNBlende.Name = "lblNBlende"
+        Me.lblNBlende.Size = New System.Drawing.Size(109, 41)
+        Me.lblNBlende.TabIndex = 6
+        Me.lblNBlende.Tag = "langKey=lblNBlende"
+        Me.lblNBlende.Text = "Blende"
         '
-        'Label13
+        'lblNISO
         '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(7, 407)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(65, 41)
-        Me.Label13.TabIndex = 4
-        Me.Label13.Text = "ISO"
+        Me.lblNISO.AutoSize = True
+        Me.lblNISO.Location = New System.Drawing.Point(7, 407)
+        Me.lblNISO.Name = "lblNISO"
+        Me.lblNISO.Size = New System.Drawing.Size(65, 41)
+        Me.lblNISO.TabIndex = 4
+        Me.lblNISO.Tag = "langKey=lblNISO"
+        Me.lblNISO.Text = "ISO"
         '
-        'Label12
+        'lblNVerschlusszeit
         '
-        Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(7, 359)
-        Me.Label12.Name = "Label12"
-        Me.Label12.Size = New System.Drawing.Size(202, 41)
-        Me.Label12.TabIndex = 3
-        Me.Label12.Text = "Verschlusszeit"
+        Me.lblNVerschlusszeit.AutoSize = True
+        Me.lblNVerschlusszeit.Location = New System.Drawing.Point(7, 359)
+        Me.lblNVerschlusszeit.Name = "lblNVerschlusszeit"
+        Me.lblNVerschlusszeit.Size = New System.Drawing.Size(202, 41)
+        Me.lblNVerschlusszeit.TabIndex = 3
+        Me.lblNVerschlusszeit.Tag = "langKey=lblNVerschlusszeit"
+        Me.lblNVerschlusszeit.Text = "Verschlusszeit"
         '
         'lblNObjektiv
         '
@@ -333,23 +343,25 @@ Partial Class frmPictureInfo
         Me.lblNBrennweite.Tag = "lblNBrennweite"
         Me.lblNBrennweite.Text = "Brennweite"
         '
-        'Label9
+        'lblNlblKamera
         '
-        Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(7, 34)
-        Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(117, 41)
-        Me.Label9.TabIndex = 0
-        Me.Label9.Text = "Kamera"
+        Me.lblNlblKamera.AutoSize = True
+        Me.lblNlblKamera.Location = New System.Drawing.Point(7, 34)
+        Me.lblNlblKamera.Name = "lblNlblKamera"
+        Me.lblNlblKamera.Size = New System.Drawing.Size(117, 41)
+        Me.lblNlblKamera.TabIndex = 0
+        Me.lblNlblKamera.Tag = "langKey=lblNlblKamera"
+        Me.lblNlblKamera.Text = "Kamera"
         '
-        'Label3
+        'lblNKamera
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(942, 101)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(117, 41)
-        Me.Label3.TabIndex = 4
-        Me.Label3.Text = "Kamera"
+        Me.lblNKamera.AutoSize = True
+        Me.lblNKamera.Location = New System.Drawing.Point(942, 101)
+        Me.lblNKamera.Name = "lblNKamera"
+        Me.lblNKamera.Size = New System.Drawing.Size(117, 41)
+        Me.lblNKamera.TabIndex = 4
+        Me.lblNKamera.Tag = "langKey=lblNKamera"
+        Me.lblNKamera.Text = "Kamera"
         '
         'lblNBildinformationen
         '
@@ -371,9 +383,9 @@ Partial Class frmPictureInfo
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(1459, 698)
         Me.Controls.Add(Me.lblNBildinformationen)
-        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.lblNKamera)
         Me.Controls.Add(Me.grpKamera)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.lblNDatei)
         Me.Controls.Add(Me.grpDatei)
         Me.Cursor = System.Windows.Forms.Cursors.Default
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
@@ -395,32 +407,32 @@ Partial Class frmPictureInfo
     End Sub
 
     Friend WithEvents grpDatei As Windows.Forms.GroupBox
-    Friend WithEvents Label4 As Windows.Forms.Label
-    Friend WithEvents Label2 As Windows.Forms.Label
+    Friend WithEvents lblNDateiname As Windows.Forms.Label
+    Friend WithEvents lblNDatei As Windows.Forms.Label
     Friend WithEvents grpKamera As Windows.Forms.GroupBox
-    Friend WithEvents Label3 As Windows.Forms.Label
+    Friend WithEvents lblNKamera As Windows.Forms.Label
     Friend WithEvents lblDateiname As Windows.Forms.Label
     Friend WithEvents lblDateipfad As Windows.Forms.Label
-    Friend WithEvents Label8 As Windows.Forms.Label
-    Friend WithEvents Label7 As Windows.Forms.Label
-    Friend WithEvents Label6 As Windows.Forms.Label
-    Friend WithEvents Label5 As Windows.Forms.Label
+    Friend WithEvents lblNTags As Windows.Forms.Label
+    Friend WithEvents lblNAutor As Windows.Forms.Label
+    Friend WithEvents lblNErstellungsdatum As Windows.Forms.Label
+    Friend WithEvents lblNDateipfad As Windows.Forms.Label
     Friend WithEvents lblTags As Windows.Forms.Label
     Friend WithEvents lblAutor As Windows.Forms.Label
     Friend WithEvents lblErstellungsdatum As Windows.Forms.Label
-    Friend WithEvents Label15 As Windows.Forms.Label
-    Friend WithEvents Label13 As Windows.Forms.Label
-    Friend WithEvents Label12 As Windows.Forms.Label
+    Friend WithEvents lblNBlende As Windows.Forms.Label
+    Friend WithEvents lblNISO As Windows.Forms.Label
+    Friend WithEvents lblNVerschlusszeit As Windows.Forms.Label
     Friend WithEvents lblNObjektiv As Windows.Forms.Label
     Friend WithEvents lblNBrennweite As Windows.Forms.Label
-    Friend WithEvents Label9 As Windows.Forms.Label
+    Friend WithEvents lblNlblKamera As Windows.Forms.Label
     Friend WithEvents lblBlende As Windows.Forms.Label
     Friend WithEvents lblISO As Windows.Forms.Label
     Friend WithEvents lblVerschlusszeit As Windows.Forms.Label
     Friend WithEvents lblObjektiv As Windows.Forms.Label
     Friend WithEvents lblBrennweite As Windows.Forms.Label
     Friend WithEvents lblKamera As Windows.Forms.Label
-    Friend WithEvents Label16 As Windows.Forms.Label
+    Friend WithEvents LblNBewertung As Windows.Forms.Label
     Friend WithEvents lblBewertung As Windows.Forms.Label
     Friend WithEvents slbBewertung As MyControlsLibrary.SterneAnzeigeLabel
     Friend WithEvents lblNBildinformationen As Windows.Forms.Label

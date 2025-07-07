@@ -1,0 +1,23 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\SlideShowModul.Mandelbrot.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul_Mandelbrot.frmModulMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul_Mandelbrot.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul_Mandelbrot.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul_Mandelbrot.ucUnderConstruction.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\SlideShowModul.Mandelbrot.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\SlideShowModul.Mandelbrot.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\Modul Mandelbrot.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\Modul Mandelbrot.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\Modul Mandelbrot.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\bin\Release\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\SlideSho.BB51445E.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul Mandelbrot.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul Mandelbrot.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Mandelbrot\obj\Release\Modul Mandelbrot.pdb

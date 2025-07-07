@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucUnderConstruction
     Inherits System.Windows.Forms.UserControl
 
@@ -24,9 +24,9 @@ Partial Class ucUnderConstruction
     Private Sub InitializeComponent()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.lblModulname = New System.Windows.Forms.Label()
+        Me.lblHierEntsteht = New System.Windows.Forms.Label()
+        Me.lblUnderConstruction = New System.Windows.Forms.Label()
         Me.Panel1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -35,79 +35,82 @@ Partial Class ucUnderConstruction
         '
         Me.Panel1.BackColor = System.Drawing.Color.Transparent
         Me.Panel1.Controls.Add(Me.PictureBox1)
-        Me.Panel1.Controls.Add(Me.Label3)
-        Me.Panel1.Controls.Add(Me.Label2)
-        Me.Panel1.Controls.Add(Me.Label1)
-        Me.Panel1.Location = New System.Drawing.Point(1, 1)
-        Me.Panel1.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
+        Me.Panel1.Controls.Add(Me.lblModulname)
+        Me.Panel1.Controls.Add(Me.lblHierEntsteht)
+        Me.Panel1.Controls.Add(Me.lblUnderConstruction)
+        Me.Panel1.Location = New System.Drawing.Point(2, 2)
+        Me.Panel1.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(665, 501)
+        Me.Panel1.Size = New System.Drawing.Size(1552, 1118)
         Me.Panel1.TabIndex = 6
         '
         'PictureBox1
         '
         Me.PictureBox1.Image = Global.Modul_SlideShowSaver_3._0.My.Resources.Resources.SlideShowSaver_Splash
-        Me.PictureBox1.Location = New System.Drawing.Point(0, 195)
-        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
-        Me.PictureBox1.MinimumSize = New System.Drawing.Size(664, 0)
+        Me.PictureBox1.Location = New System.Drawing.Point(0, 435)
+        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.PictureBox1.MinimumSize = New System.Drawing.Size(1549, 0)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(664, 276)
+        Me.PictureBox1.Size = New System.Drawing.Size(1549, 616)
         Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.PictureBox1.TabIndex = 5
         Me.PictureBox1.TabStop = False
         '
-        'Label3
+        'lblModulname
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Font = New System.Drawing.Font("Segoe UI", 24.0!, System.Drawing.FontStyle.Bold)
-        Me.Label3.ForeColor = System.Drawing.Color.Red
-        Me.Label3.Location = New System.Drawing.Point(0, 115)
-        Me.Label3.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
-        Me.Label3.MinimumSize = New System.Drawing.Size(664, 0)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(695, 96)
-        Me.Label3.TabIndex = 5
-        Me.Label3.Text = "SlideShowSaver 3.0"
-        Me.Label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Me.lblModulname.AutoSize = True
+        Me.lblModulname.Font = New System.Drawing.Font("Segoe UI", 24.0!, System.Drawing.FontStyle.Bold)
+        Me.lblModulname.ForeColor = System.Drawing.Color.Red
+        Me.lblModulname.Location = New System.Drawing.Point(0, 257)
+        Me.lblModulname.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblModulname.MinimumSize = New System.Drawing.Size(1549, 0)
+        Me.lblModulname.Name = "lblModulname"
+        Me.lblModulname.Size = New System.Drawing.Size(1549, 96)
+        Me.lblModulname.TabIndex = 5
+        Me.lblModulname.Tag = "langKey=lblModulname"
+        Me.lblModulname.Text = "SlideShowSaver 3.0"
+        Me.lblModulname.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
-        'Label2
+        'lblHierEntsteht
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
-        Me.Label2.ForeColor = System.Drawing.Color.Red
-        Me.Label2.Location = New System.Drawing.Point(0, 59)
-        Me.Label2.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
-        Me.Label2.MinimumSize = New System.Drawing.Size(664, 0)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(1456, 72)
-        Me.Label2.TabIndex = 5
-        Me.Label2.Text = "Hier entsteht gerade das neue Bildschirmschoner-Modul"
-        Me.Label2.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.lblHierEntsteht.AutoSize = True
+        Me.lblHierEntsteht.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblHierEntsteht.ForeColor = System.Drawing.Color.Red
+        Me.lblHierEntsteht.Location = New System.Drawing.Point(0, 132)
+        Me.lblHierEntsteht.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblHierEntsteht.MinimumSize = New System.Drawing.Size(1549, 0)
+        Me.lblHierEntsteht.Name = "lblHierEntsteht"
+        Me.lblHierEntsteht.Size = New System.Drawing.Size(1549, 72)
+        Me.lblHierEntsteht.TabIndex = 5
+        Me.lblHierEntsteht.Tag = "langKey=lblHierEntsteht"
+        Me.lblHierEntsteht.Text = "Hier entsteht gerade das neue Bildschirmschoner-Modul"
+        Me.lblHierEntsteht.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
-        'Label1
+        'lblUnderConstruction
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.BackColor = System.Drawing.Color.Transparent
-        Me.Label1.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
-        Me.Label1.ForeColor = System.Drawing.Color.Red
-        Me.Label1.Location = New System.Drawing.Point(0, 19)
-        Me.Label1.Margin = New System.Windows.Forms.Padding(1, 0, 1, 0)
-        Me.Label1.MinimumSize = New System.Drawing.Size(664, 0)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(664, 72)
-        Me.Label1.TabIndex = 5
-        Me.Label1.Text = "! Under Construction !"
-        Me.Label1.TextAlign = System.Drawing.ContentAlignment.TopCenter
+        Me.lblUnderConstruction.AutoSize = True
+        Me.lblUnderConstruction.BackColor = System.Drawing.Color.Transparent
+        Me.lblUnderConstruction.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblUnderConstruction.ForeColor = System.Drawing.Color.Red
+        Me.lblUnderConstruction.Location = New System.Drawing.Point(0, 42)
+        Me.lblUnderConstruction.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblUnderConstruction.MinimumSize = New System.Drawing.Size(1549, 0)
+        Me.lblUnderConstruction.Name = "lblUnderConstruction"
+        Me.lblUnderConstruction.Size = New System.Drawing.Size(1549, 72)
+        Me.lblUnderConstruction.TabIndex = 5
+        Me.lblUnderConstruction.Tag = "langKey=lblUnderConstruction"
+        Me.lblUnderConstruction.Text = "! Under Construction !"
+        Me.lblUnderConstruction.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'ucUnderConstruction
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(14.0!, 29.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Transparent
         Me.Controls.Add(Me.Panel1)
-        Me.Margin = New System.Windows.Forms.Padding(1, 1, 1, 1)
+        Me.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.Name = "ucUnderConstruction"
-        Me.Size = New System.Drawing.Size(669, 504)
+        Me.Size = New System.Drawing.Size(1561, 1124)
         Me.Panel1.ResumeLayout(False)
         Me.Panel1.PerformLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
@@ -117,7 +120,7 @@ Partial Class ucUnderConstruction
 
     Friend WithEvents Panel1 As Windows.Forms.Panel
     Friend WithEvents PictureBox1 As Windows.Forms.PictureBox
-    Friend WithEvents Label3 As Windows.Forms.Label
-    Friend WithEvents Label2 As Windows.Forms.Label
-    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents lblModulname As Windows.Forms.Label
+    Friend WithEvents lblHierEntsteht As Windows.Forms.Label
+    Friend WithEvents lblUnderConstruction As Windows.Forms.Label
 End Class

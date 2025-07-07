@@ -1,0 +1,36 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\SlideShowModul.SlideShowSaver_3_0.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.frmModulMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.frmPictureInfo.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.frmPauseModusOverlay.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul_SlideShowSaver_3._0.ucUnderConstruction.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\SlideShowModul.SlideShowSaver_3_0.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\SlideShowModul.SlideShowSaver_3_0.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\Modul SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowBildauswahl.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\taglib-sharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowBildauswahl.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Release\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\SlideSho.A12CC809.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Release\Modul SlideShowSaver 3.0.pdb

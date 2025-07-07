@@ -53,8 +53,10 @@ Public Class ucOptionsBildauswahl
             btnBlackListListeLöschen.Enabled = False
         End If
 
+        'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
         bewertung = CInt(ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", defaults))
         sbcBewertung.Bewertung = bewertung
+        sbcBewertung.EndInitialization()
 
         altersfreigabe = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", defaults)
         Select Case altersfreigabe

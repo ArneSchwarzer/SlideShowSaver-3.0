@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class ucOptionsModul
     Inherits System.Windows.Forms.UserControl
 
@@ -23,7 +23,7 @@ Partial Class ucOptionsModul
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblModulname = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
+        Me.lblNlblModulname = New System.Windows.Forms.Label()
         Me.btnHighlighttextListeLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextHinzufügen = New System.Windows.Forms.Button()
@@ -46,15 +46,16 @@ Partial Class ucOptionsModul
         Me.lblModulname.TabIndex = 17
         Me.lblModulname.Text = "Matrix"
         '
-        'Label6
+        'lblNlblModulname
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(33, 65)
-        Me.Label6.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(105, 41)
-        Me.Label6.TabIndex = 16
-        Me.Label6.Text = "Modul"
+        Me.lblNlblModulname.AutoSize = True
+        Me.lblNlblModulname.Location = New System.Drawing.Point(33, 65)
+        Me.lblNlblModulname.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblNlblModulname.Name = "lblNlblModulname"
+        Me.lblNlblModulname.Size = New System.Drawing.Size(105, 41)
+        Me.lblNlblModulname.TabIndex = 16
+        Me.lblNlblModulname.Tag = "langKey=lblNlblModulname"
+        Me.lblNlblModulname.Text = "Modul"
         '
         'btnHighlighttextListeLöschen
         '
@@ -153,7 +154,7 @@ Partial Class ucOptionsModul
         Me.Controls.Add(Me.btnHighlighttextHinzufügen)
         Me.Controls.Add(Me.lstHiglightTexte)
         Me.Controls.Add(Me.lblModulname)
-        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.lblNlblModulname)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsModul"
@@ -165,7 +166,7 @@ Partial Class ucOptionsModul
     End Sub
 
     Friend WithEvents lblModulname As Windows.Forms.Label
-    Friend WithEvents Label6 As Windows.Forms.Label
+    Friend WithEvents lblNlblModulname As Windows.Forms.Label
     Friend WithEvents btnHighlighttextListeLöschen As Windows.Forms.Button
     Friend WithEvents btnHighlighttextLöschen As Windows.Forms.Button
     Friend WithEvents btnHighlighttextHinzufügen As Windows.Forms.Button

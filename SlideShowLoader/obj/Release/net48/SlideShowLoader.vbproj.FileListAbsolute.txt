@@ -1,0 +1,17 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\bin\Release\net48\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.AssemblyInfoInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.AssemblyInfo.vb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.sourcelink.json
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideSho.E5F27EA2.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowLoader\obj\Release\net48\SlideShowLoader.pdb

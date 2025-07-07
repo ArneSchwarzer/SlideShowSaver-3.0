@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmPauseModusOverlay
     Inherits System.Windows.Forms.Form
 
@@ -44,6 +44,7 @@ Partial Class frmPauseModusOverlay
         Me.lblPauseAnzahl.Name = "lblPauseAnzahl"
         Me.lblPauseAnzahl.Size = New System.Drawing.Size(314, 55)
         Me.lblPauseAnzahl.TabIndex = 0
+        Me.lblPauseAnzahl.Tag = "lblPauseAnzahl"
         Me.lblPauseAnzahl.Text = "Bild 3 von 10"
         '
         'btnPauseBack
@@ -105,6 +106,7 @@ Partial Class frmPauseModusOverlay
         Me.chkBewerten.Name = "chkBewerten"
         Me.chkBewerten.Size = New System.Drawing.Size(172, 40)
         Me.chkBewerten.TabIndex = 6
+        Me.chkBewerten.Tag = "chkBewerten"
         Me.chkBewerten.Text = "Bewerten"
         Me.chkBewerten.UseVisualStyleBackColor = True
         '
@@ -132,6 +134,7 @@ Partial Class frmPauseModusOverlay
         Me.sbcBewerten.Name = "sbcBewerten"
         Me.sbcBewerten.Size = New System.Drawing.Size(258, 54)
         Me.sbcBewerten.TabIndex = 9
+        Me.sbcBewerten.Tag = "STYLE_KLINGON; STYLE_MATRIX"
         Me.sbcBewerten.Text = "SterneBewertungControl1"
         '
         'frmPauseModusOverlay

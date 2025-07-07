@@ -31,3 +31,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowSh
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\SlideShowShader.SchwarzWeiß.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\bin\Debug\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul Matrix\obj\Debug\Modul_Matrix.ucUnderConstruction.resources

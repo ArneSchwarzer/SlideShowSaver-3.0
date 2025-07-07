@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptionsTransition
     Inherits System.Windows.Forms.UserControl
 
@@ -305,3 +305,13 @@ Partial Class ucOptionsTransition
     Friend WithEvents rbWischen As Windows.Forms.RadioButton
     Friend WithEvents rbSchieben As Windows.Forms.RadioButton
 End Class
+
+Me.lblShadername.Tag = "langKey=lblShadername"
+Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
+Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+Me.lblKeineRichtungInfo.Tag = "langKey=lblKeineRichtungInfo"
+Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
+Me.lblNModus.Tag = "langKey=lblNModus"
+Me.rbZufall.Tag = "langKey=rbZufall"
+Me.rbWischen.Tag = "langKey=rbWischen"
+Me.rbSchieben.Tag = "langKey=rbSchieben"

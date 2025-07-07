@@ -1,0 +1,43 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.frmFallbackSaver.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.frmOptionsMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.frmSaverMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.frmSplashscreen.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowMain.exe.config
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowMain.exe
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowMain.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowMain.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowBildauswahl.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowSprachen.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\StarControlLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\taglib-sharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\Modul SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowBildauswahl.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowSprachen.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowSprachen.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Release\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideSho.FA570C1C.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.exe
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Release\SlideShowMain.pdb

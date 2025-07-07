@@ -2,13 +2,16 @@
 
 Imports SlideShowTools.ToolTipHandling
 Imports SlideShowTools.CheckedListBoxHandling
+Imports SlideShowTools.RegistryHandling
+Imports Modul_SlideShowSaver_3
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
 Imports SlideShowTools.ListHandling
 Imports System.Windows.Forms
 Imports SlideShowInterfaces
-Imports Modul_SlideShowSaver_3
+Imports SlideShowTools
+
 
 
 Public Class ucOptionsModul
@@ -130,6 +133,9 @@ Public Class ucOptionsModul
             lblAnzeigedauer.Text = sekunden.ToString & "s"
         End If
 
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", trbAnzeigedauer.Value.ToString)
+
     End Sub
 
     Private Sub clbShader_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbShader.SelectedIndexChanged
@@ -139,6 +145,9 @@ Public Class ucOptionsModul
             meineInstanz.AttentionShaderGewechselt(clbShader.SelectedItem.ToString)
         End If
 
+        'DirectCommit
+        CheckedListBoxHandling.SaveListBoxToRegistry(clbShader, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Shader")
+
     End Sub
 
     Private Sub clbTransitions_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitions.SelectedIndexChanged
@@ -146,6 +155,37 @@ Public Class ucOptionsModul
         If clbTransitions.SelectedItem IsNot Nothing Then
             meineInstanz.AttentionTransitionGewechselt(clbTransitions.SelectedItem.ToString)
         End If
+
+        'DirectCommit
+        CheckedListBoxHandling.SaveListBoxToRegistry(clbTransitions, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte")
+
+    End Sub
+
+    Private Sub chkBildinformationen_CheckedChanged(sender As Object, e As EventArgs) Handles chkBildinformationen.CheckedChanged
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", chkBildinformationen.Checked.ToString)
+
+    End Sub
+
+    Private Sub cmbBildauswahl_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbBildauswahl.SelectedIndexChanged
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", cmbBildauswahl.SelectedItem.ToString)
+
+    End Sub
+
+    Private Sub cmbEffektauswahl_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbEffektauswahl.SelectedIndexChanged
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "TransitionsReihenfolge", cmbEffektauswahl.SelectedItem.ToString)
+
+    End Sub
+
+    Private Sub cmbShaderauswahl_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbShaderauswahl.SelectedIndexChanged
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", cmbShaderauswahl.SelectedItem.ToString)
 
     End Sub
 End Class

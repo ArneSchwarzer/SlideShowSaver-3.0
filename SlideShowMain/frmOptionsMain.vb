@@ -324,57 +324,9 @@ Public Class frmOptionsMain
         LogHandling.LogDebug("Registry-Einträge für Main-Settings geschrieben.")
 
 #End Region
-        'Bildauswahl-Settings auf DirectCommit umgestellt
+        'Bildauswahl Settings auf DirectCommit umgestellt
 
-#Region "Modul Settings speichern"
-        ' === Modul Setting ===
-
-        ' Sicherstellen, dass das aktive Modul seine Settings vorher aktualisiert
-        If aktuellGeladenesModul IsNot Nothing Then
-            uc = TryCast(tpModul.Controls(0), UserControl)
-            If uc IsNot Nothing Then
-                Dim currentSettings = aktuellGeladenesModul.MemorizeModulSettings(uc)
-                modulSettingsZwischenspeicher(aktuellGeladenesModul.ModulName) = currentSettings
-
-                'Aufräumen
-                uc.Dispose()
-                uc = Nothing
-
-            End If
-        End If
-
-        ' Speicher-Schleife: Alle Module aus dem modulSettingsZwischenspeicher ihre Settings speichern lassen
-        For Each modulName In modulSettingsZwischenspeicher.Keys
-            modul = ModulByNameLoader.LadeModulNachName(modulName)
-            If modul IsNot Nothing Then
-
-                uc = modul.GetModulOptionsDialog()
-
-                If modulSettingsZwischenspeicher.ContainsKey(modulName) Then
-                    restoreSettings = modulSettingsZwischenspeicher(modulName)
-                    modul.GetModulSettings(uc, restoreSettings)
-                Else
-                    modul.GetModulRegistryOrDefaultSettings(uc)
-                End If
-
-                If uc IsNot Nothing Then
-                    modul.ApplyModulSettings(modulSettingsZwischenspeicher(modulName))
-                End If
-
-                'Aufräumen
-                uc.Dispose()
-                uc = Nothing
-
-                'Das aktuelle Modul muss ja weiterleben!
-                If modul.ModulName <> aktuellGeladenesModul.ModulName Then
-                    modul.StopModul()
-                    modul = Nothing
-                End If
-
-
-            End If
-        Next
-#End Region
+        'Modul Settings auf DirectCommit umgestellt
 
         ' === Transition Settings ===
 

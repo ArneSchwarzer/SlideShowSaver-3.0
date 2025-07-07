@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptionsModul
     Inherits System.Windows.Forms.UserControl
 
@@ -24,20 +24,20 @@ Partial Class ucOptionsModul
     Private Sub InitializeComponent()
         Me.lblNcmbBildauswahl = New System.Windows.Forms.Label()
         Me.cmbBildauswahl = New System.Windows.Forms.ComboBox()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.lblNtrbAnzeigedauer = New System.Windows.Forms.Label()
         Me.trbAnzeigedauer = New System.Windows.Forms.TrackBar()
         Me.lblAnzeigedauer = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
+        Me.lblNUebergangseffekteBilder = New System.Windows.Forms.Label()
         Me.clbTransitions = New System.Windows.Forms.CheckedListBox()
         Me.lblNcmbEffektauswahl = New System.Windows.Forms.Label()
         Me.cmbEffektauswahl = New System.Windows.Forms.ComboBox()
         Me.chkBildinformationen = New System.Windows.Forms.CheckBox()
         Me.clbShader = New System.Windows.Forms.CheckedListBox()
-        Me.Label4 = New System.Windows.Forms.Label()
+        Me.lblNShader = New System.Windows.Forms.Label()
         Me.cmbShaderauswahl = New System.Windows.Forms.ComboBox()
         Me.lblNcmbShaderauswahl = New System.Windows.Forms.Label()
         Me.lblModulname = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
+        Me.lblNModulname = New System.Windows.Forms.Label()
         CType(Me.trbAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -59,14 +59,15 @@ Partial Class ucOptionsModul
         Me.cmbBildauswahl.Size = New System.Drawing.Size(361, 49)
         Me.cmbBildauswahl.TabIndex = 1
         '
-        'Label1
+        'lblNtrbAnzeigedauer
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(22, 161)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(201, 41)
-        Me.Label1.TabIndex = 2
-        Me.Label1.Text = "Anzeigedauer"
+        Me.lblNtrbAnzeigedauer.AutoSize = True
+        Me.lblNtrbAnzeigedauer.Location = New System.Drawing.Point(22, 161)
+        Me.lblNtrbAnzeigedauer.Name = "lblNtrbAnzeigedauer"
+        Me.lblNtrbAnzeigedauer.Size = New System.Drawing.Size(201, 41)
+        Me.lblNtrbAnzeigedauer.TabIndex = 2
+        Me.lblNtrbAnzeigedauer.Tag = "langKey=lblNtrbAnzeigedauer"
+        Me.lblNtrbAnzeigedauer.Text = "Anzeigedauer"
         '
         'trbAnzeigedauer
         '
@@ -90,14 +91,15 @@ Partial Class ucOptionsModul
         Me.lblAnzeigedauer.Text = "20 s"
         Me.lblAnzeigedauer.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'Label2
+        'lblNUebergangseffekteBilder
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(22, 299)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(382, 41)
-        Me.Label2.TabIndex = 5
-        Me.Label2.Text = "Übergangseffekte für Bilder"
+        Me.lblNUebergangseffekteBilder.AutoSize = True
+        Me.lblNUebergangseffekteBilder.Location = New System.Drawing.Point(22, 299)
+        Me.lblNUebergangseffekteBilder.Name = "lblNUebergangseffekteBilder"
+        Me.lblNUebergangseffekteBilder.Size = New System.Drawing.Size(382, 41)
+        Me.lblNUebergangseffekteBilder.TabIndex = 5
+        Me.lblNUebergangseffekteBilder.Tag = "langKey=lblNUebergangseffekteBilder"
+        Me.lblNUebergangseffekteBilder.Text = "Übergangseffekte für Bilder"
         '
         'clbTransitions
         '
@@ -143,14 +145,15 @@ Partial Class ucOptionsModul
         Me.clbShader.Size = New System.Drawing.Size(832, 224)
         Me.clbShader.TabIndex = 11
         '
-        'Label4
+        'lblNShader
         '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(22, 604)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(110, 41)
-        Me.Label4.TabIndex = 10
-        Me.Label4.Text = "Shader"
+        Me.lblNShader.AutoSize = True
+        Me.lblNShader.Location = New System.Drawing.Point(22, 604)
+        Me.lblNShader.Name = "lblNShader"
+        Me.lblNShader.Size = New System.Drawing.Size(110, 41)
+        Me.lblNShader.TabIndex = 10
+        Me.lblNShader.Tag = "langKey=lblNShader"
+        Me.lblNShader.Text = "Shader"
         '
         'cmbShaderauswahl
         '
@@ -180,33 +183,34 @@ Partial Class ucOptionsModul
         Me.lblModulname.TabIndex = 15
         Me.lblModulname.Text = "SlideShowSaver 3.0"
         '
-        'Label6
+        'lblNModulname
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(22, 29)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(105, 41)
-        Me.Label6.TabIndex = 14
-        Me.Label6.Text = "Modul"
+        Me.lblNModulname.AutoSize = True
+        Me.lblNModulname.Location = New System.Drawing.Point(22, 29)
+        Me.lblNModulname.Name = "lblNModulname"
+        Me.lblNModulname.Size = New System.Drawing.Size(105, 41)
+        Me.lblNModulname.TabIndex = 14
+        Me.lblNModulname.Tag = "lblNModulname"
+        Me.lblNModulname.Text = "Modul"
         '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.Controls.Add(Me.lblModulname)
-        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.lblNModulname)
         Me.Controls.Add(Me.cmbShaderauswahl)
         Me.Controls.Add(Me.lblNcmbShaderauswahl)
         Me.Controls.Add(Me.clbShader)
-        Me.Controls.Add(Me.Label4)
+        Me.Controls.Add(Me.lblNShader)
         Me.Controls.Add(Me.chkBildinformationen)
         Me.Controls.Add(Me.cmbEffektauswahl)
         Me.Controls.Add(Me.lblNcmbEffektauswahl)
         Me.Controls.Add(Me.clbTransitions)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.lblNUebergangseffekteBilder)
         Me.Controls.Add(Me.lblAnzeigedauer)
         Me.Controls.Add(Me.trbAnzeigedauer)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.lblNtrbAnzeigedauer)
         Me.Controls.Add(Me.cmbBildauswahl)
         Me.Controls.Add(Me.lblNcmbBildauswahl)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
@@ -221,18 +225,18 @@ Partial Class ucOptionsModul
 
     Friend WithEvents lblNcmbBildauswahl As Windows.Forms.Label
     Friend WithEvents cmbBildauswahl As Windows.Forms.ComboBox
-    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents lblNtrbAnzeigedauer As Windows.Forms.Label
     Friend WithEvents trbAnzeigedauer As Windows.Forms.TrackBar
     Friend WithEvents lblAnzeigedauer As Windows.Forms.Label
-    Friend WithEvents Label2 As Windows.Forms.Label
+    Friend WithEvents lblNUebergangseffekteBilder As Windows.Forms.Label
     Friend WithEvents clbTransitions As Windows.Forms.CheckedListBox
     Friend WithEvents lblNcmbEffektauswahl As Windows.Forms.Label
     Friend WithEvents cmbEffektauswahl As Windows.Forms.ComboBox
     Friend WithEvents chkBildinformationen As Windows.Forms.CheckBox
     Friend WithEvents clbShader As Windows.Forms.CheckedListBox
-    Friend WithEvents Label4 As Windows.Forms.Label
+    Friend WithEvents lblNShader As Windows.Forms.Label
     Friend WithEvents cmbShaderauswahl As Windows.Forms.ComboBox
     Friend WithEvents lblNcmbShaderauswahl As Windows.Forms.Label
     Friend WithEvents lblModulname As Windows.Forms.Label
-    Friend WithEvents Label6 As Windows.Forms.Label
+    Friend WithEvents lblNModulname As Windows.Forms.Label
 End Class
