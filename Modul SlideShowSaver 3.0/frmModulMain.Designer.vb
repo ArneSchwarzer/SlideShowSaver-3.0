@@ -35,9 +35,9 @@ Partial Class frmModulMain
         '
         'picBildAnzeige
         '
-        Me.picBildAnzeige.Location = New System.Drawing.Point(882, 447)
+        Me.picBildAnzeige.Location = New System.Drawing.Point(578, 147)
         Me.picBildAnzeige.Name = "picBildAnzeige"
-        Me.picBildAnzeige.Size = New System.Drawing.Size(240, 151)
+        Me.picBildAnzeige.Size = New System.Drawing.Size(1059, 671)
         Me.picBildAnzeige.TabIndex = 0
         Me.picBildAnzeige.TabStop = False
         '
@@ -47,7 +47,7 @@ Partial Class frmModulMain
         Me.lblInitializing.BackColor = System.Drawing.Color.Transparent
         Me.lblInitializing.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
         Me.lblInitializing.ForeColor = System.Drawing.Color.Snow
-        Me.lblInitializing.Location = New System.Drawing.Point(746, 694)
+        Me.lblInitializing.Location = New System.Drawing.Point(596, 489)
         Me.lblInitializing.Name = "lblInitializing"
         Me.lblInitializing.Size = New System.Drawing.Size(937, 72)
         Me.lblInitializing.TabIndex = 1

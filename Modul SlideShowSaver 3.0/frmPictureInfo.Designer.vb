@@ -22,7 +22,8 @@ Partial Class frmPictureInfo
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.grpDatei = New System.Windows.Forms.GroupBox()
+        Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
         Me.lblBewertung = New System.Windows.Forms.Label()
         Me.Label16 = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
@@ -36,7 +37,7 @@ Partial Class frmPictureInfo
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.grpKamera = New System.Windows.Forms.GroupBox()
         Me.lblBlende = New System.Windows.Forms.Label()
         Me.lblISO = New System.Windows.Forms.Label()
         Me.lblVerschlusszeit = New System.Windows.Forms.Label()
@@ -46,36 +47,45 @@ Partial Class frmPictureInfo
         Me.Label15 = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
         Me.Label12 = New System.Windows.Forms.Label()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.Label10 = New System.Windows.Forms.Label()
+        Me.lblNObjektiv = New System.Windows.Forms.Label()
+        Me.lblNBrennweite = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
-        Me.GroupBox1.SuspendLayout()
-        Me.GroupBox2.SuspendLayout()
+        Me.lblNBildinformationen = New System.Windows.Forms.Label()
+        Me.grpDatei.SuspendLayout()
+        Me.grpKamera.SuspendLayout()
         Me.SuspendLayout()
         '
-        'GroupBox1
+        'grpDatei
         '
-        Me.GroupBox1.BackColor = System.Drawing.Color.Transparent
-        Me.GroupBox1.Controls.Add(Me.slbBewertung)
-        Me.GroupBox1.Controls.Add(Me.lblBewertung)
-        Me.GroupBox1.Controls.Add(Me.Label16)
-        Me.GroupBox1.Controls.Add(Me.lblTags)
-        Me.GroupBox1.Controls.Add(Me.lblAutor)
-        Me.GroupBox1.Controls.Add(Me.lblErstellungsdatum)
-        Me.GroupBox1.Controls.Add(Me.lblDateipfad)
-        Me.GroupBox1.Controls.Add(Me.lblDateiname)
-        Me.GroupBox1.Controls.Add(Me.Label8)
-        Me.GroupBox1.Controls.Add(Me.Label7)
-        Me.GroupBox1.Controls.Add(Me.Label6)
-        Me.GroupBox1.Controls.Add(Me.Label5)
-        Me.GroupBox1.Controls.Add(Me.Label4)
-        Me.GroupBox1.Location = New System.Drawing.Point(13, 136)
-        Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(903, 538)
-        Me.GroupBox1.TabIndex = 1
-        Me.GroupBox1.TabStop = False
+        Me.grpDatei.BackColor = System.Drawing.Color.Transparent
+        Me.grpDatei.Controls.Add(Me.slbBewertung)
+        Me.grpDatei.Controls.Add(Me.lblBewertung)
+        Me.grpDatei.Controls.Add(Me.Label16)
+        Me.grpDatei.Controls.Add(Me.lblTags)
+        Me.grpDatei.Controls.Add(Me.lblAutor)
+        Me.grpDatei.Controls.Add(Me.lblErstellungsdatum)
+        Me.grpDatei.Controls.Add(Me.lblDateipfad)
+        Me.grpDatei.Controls.Add(Me.lblDateiname)
+        Me.grpDatei.Controls.Add(Me.Label8)
+        Me.grpDatei.Controls.Add(Me.Label7)
+        Me.grpDatei.Controls.Add(Me.Label6)
+        Me.grpDatei.Controls.Add(Me.Label5)
+        Me.grpDatei.Controls.Add(Me.Label4)
+        Me.grpDatei.Location = New System.Drawing.Point(13, 136)
+        Me.grpDatei.Name = "grpDatei"
+        Me.grpDatei.Size = New System.Drawing.Size(903, 538)
+        Me.grpDatei.TabIndex = 1
+        Me.grpDatei.TabStop = False
+        '
+        'slbBewertung
+        '
+        Me.slbBewertung.BackColor = System.Drawing.Color.Black
+        Me.slbBewertung.Location = New System.Drawing.Point(293, 315)
+        Me.slbBewertung.Name = "slbBewertung"
+        Me.slbBewertung.Size = New System.Drawing.Size(221, 45)
+        Me.slbBewertung.TabIndex = 14
+        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
         '
         'lblBewertung
         '
@@ -199,26 +209,26 @@ Partial Class frmPictureInfo
         Me.Label2.TabIndex = 2
         Me.Label2.Text = "Datei"
         '
-        'GroupBox2
+        'grpKamera
         '
-        Me.GroupBox2.BackColor = System.Drawing.Color.Transparent
-        Me.GroupBox2.Controls.Add(Me.lblBlende)
-        Me.GroupBox2.Controls.Add(Me.lblISO)
-        Me.GroupBox2.Controls.Add(Me.lblVerschlusszeit)
-        Me.GroupBox2.Controls.Add(Me.lblObjektiv)
-        Me.GroupBox2.Controls.Add(Me.lblBrennweite)
-        Me.GroupBox2.Controls.Add(Me.lblKamera)
-        Me.GroupBox2.Controls.Add(Me.Label15)
-        Me.GroupBox2.Controls.Add(Me.Label13)
-        Me.GroupBox2.Controls.Add(Me.Label12)
-        Me.GroupBox2.Controls.Add(Me.Label11)
-        Me.GroupBox2.Controls.Add(Me.Label10)
-        Me.GroupBox2.Controls.Add(Me.Label9)
-        Me.GroupBox2.Location = New System.Drawing.Point(949, 136)
-        Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(485, 538)
-        Me.GroupBox2.TabIndex = 3
-        Me.GroupBox2.TabStop = False
+        Me.grpKamera.BackColor = System.Drawing.Color.Transparent
+        Me.grpKamera.Controls.Add(Me.lblBlende)
+        Me.grpKamera.Controls.Add(Me.lblISO)
+        Me.grpKamera.Controls.Add(Me.lblVerschlusszeit)
+        Me.grpKamera.Controls.Add(Me.lblObjektiv)
+        Me.grpKamera.Controls.Add(Me.lblBrennweite)
+        Me.grpKamera.Controls.Add(Me.lblKamera)
+        Me.grpKamera.Controls.Add(Me.Label15)
+        Me.grpKamera.Controls.Add(Me.Label13)
+        Me.grpKamera.Controls.Add(Me.Label12)
+        Me.grpKamera.Controls.Add(Me.lblNObjektiv)
+        Me.grpKamera.Controls.Add(Me.lblNBrennweite)
+        Me.grpKamera.Controls.Add(Me.Label9)
+        Me.grpKamera.Location = New System.Drawing.Point(949, 136)
+        Me.grpKamera.Name = "grpKamera"
+        Me.grpKamera.Size = New System.Drawing.Size(485, 538)
+        Me.grpKamera.TabIndex = 3
+        Me.grpKamera.TabStop = False
         '
         'lblBlende
         '
@@ -303,23 +313,25 @@ Partial Class frmPictureInfo
         Me.Label12.TabIndex = 3
         Me.Label12.Text = "Verschlusszeit"
         '
-        'Label11
+        'lblNObjektiv
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(7, 175)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(128, 41)
-        Me.Label11.TabIndex = 2
-        Me.Label11.Text = "Objektiv"
+        Me.lblNObjektiv.AutoSize = True
+        Me.lblNObjektiv.Location = New System.Drawing.Point(7, 175)
+        Me.lblNObjektiv.Name = "lblNObjektiv"
+        Me.lblNObjektiv.Size = New System.Drawing.Size(128, 41)
+        Me.lblNObjektiv.TabIndex = 2
+        Me.lblNObjektiv.Tag = "lblNObjektiv"
+        Me.lblNObjektiv.Text = "Objektiv"
         '
-        'Label10
+        'lblNBrennweite
         '
-        Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(7, 255)
-        Me.Label10.Name = "Label10"
-        Me.Label10.Size = New System.Drawing.Size(166, 41)
-        Me.Label10.TabIndex = 1
-        Me.Label10.Text = "Brennweite"
+        Me.lblNBrennweite.AutoSize = True
+        Me.lblNBrennweite.Location = New System.Drawing.Point(7, 255)
+        Me.lblNBrennweite.Name = "lblNBrennweite"
+        Me.lblNBrennweite.Size = New System.Drawing.Size(166, 41)
+        Me.lblNBrennweite.TabIndex = 1
+        Me.lblNBrennweite.Tag = "lblNBrennweite"
+        Me.lblNBrennweite.Text = "Brennweite"
         '
         'Label9
         '
@@ -339,14 +351,18 @@ Partial Class frmPictureInfo
         Me.Label3.TabIndex = 4
         Me.Label3.Text = "Kamera"
         '
-        'slbBewertung
+        'lblNBildinformationen
         '
-        Me.slbBewertung.BackColor = System.Drawing.Color.Black
-        Me.slbBewertung.Location = New System.Drawing.Point(293, 315)
-        Me.slbBewertung.Name = "slbBewertung"
-        Me.slbBewertung.Size = New System.Drawing.Size(221, 45)
-        Me.slbBewertung.TabIndex = 14
-        Me.slbBewertung.Text = "SterneAnzeigeLabel1"
+        Me.lblNBildinformationen.AutoSize = True
+        Me.lblNBildinformationen.Font = New System.Drawing.Font("Segoe UI", 20.0!, System.Drawing.FontStyle.Bold)
+        Me.lblNBildinformationen.Location = New System.Drawing.Point(0, 10)
+        Me.lblNBildinformationen.MinimumSize = New System.Drawing.Size(1458, 0)
+        Me.lblNBildinformationen.Name = "lblNBildinformationen"
+        Me.lblNBildinformationen.Size = New System.Drawing.Size(1458, 81)
+        Me.lblNBildinformationen.TabIndex = 5
+        Me.lblNBildinformationen.Tag = "lblNBildinformationen"
+        Me.lblNBildinformationen.Text = "Bildinformationen"
+        Me.lblNBildinformationen.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'frmPictureInfo
         '
@@ -354,10 +370,11 @@ Partial Class frmPictureInfo
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(1459, 698)
+        Me.Controls.Add(Me.lblNBildinformationen)
         Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.GroupBox2)
+        Me.Controls.Add(Me.grpKamera)
         Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.GroupBox1)
+        Me.Controls.Add(Me.grpDatei)
         Me.Cursor = System.Windows.Forms.Cursors.Default
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.ForeColor = System.Drawing.Color.Snow
@@ -366,21 +383,21 @@ Partial Class frmPictureInfo
         Me.Name = "frmPictureInfo"
         Me.Opacity = 0.5R
         Me.ShowInTaskbar = False
-        Me.Text = "7"
+        Me.Text = "Modul SlideShowSaver 3.0 - Bildinfo Overlay"
         Me.TopMost = True
-        Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
-        Me.GroupBox2.ResumeLayout(False)
-        Me.GroupBox2.PerformLayout()
+        Me.grpDatei.ResumeLayout(False)
+        Me.grpDatei.PerformLayout()
+        Me.grpKamera.ResumeLayout(False)
+        Me.grpKamera.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
 
-    Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
+    Friend WithEvents grpDatei As Windows.Forms.GroupBox
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents Label2 As Windows.Forms.Label
-    Friend WithEvents GroupBox2 As Windows.Forms.GroupBox
+    Friend WithEvents grpKamera As Windows.Forms.GroupBox
     Friend WithEvents Label3 As Windows.Forms.Label
     Friend WithEvents lblDateiname As Windows.Forms.Label
     Friend WithEvents lblDateipfad As Windows.Forms.Label
@@ -394,8 +411,8 @@ Partial Class frmPictureInfo
     Friend WithEvents Label15 As Windows.Forms.Label
     Friend WithEvents Label13 As Windows.Forms.Label
     Friend WithEvents Label12 As Windows.Forms.Label
-    Friend WithEvents Label11 As Windows.Forms.Label
-    Friend WithEvents Label10 As Windows.Forms.Label
+    Friend WithEvents lblNObjektiv As Windows.Forms.Label
+    Friend WithEvents lblNBrennweite As Windows.Forms.Label
     Friend WithEvents Label9 As Windows.Forms.Label
     Friend WithEvents lblBlende As Windows.Forms.Label
     Friend WithEvents lblISO As Windows.Forms.Label
@@ -406,4 +423,5 @@ Partial Class frmPictureInfo
     Friend WithEvents Label16 As Windows.Forms.Label
     Friend WithEvents lblBewertung As Windows.Forms.Label
     Friend WithEvents slbBewertung As MyControlsLibrary.SterneAnzeigeLabel
+    Friend WithEvents lblNBildinformationen As Windows.Forms.Label
 End Class

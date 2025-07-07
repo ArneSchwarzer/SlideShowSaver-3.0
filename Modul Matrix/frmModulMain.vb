@@ -7,6 +7,7 @@ Imports SlideShowLogging.LogHandling
 Public Class frmModulMain
     Private Sub frmModuleMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         FormsHandling.InitialFormPreparation(Me, Color.Black)
+        Me.Text = "Modul Matrix"
         Me.TopMost = False
 
         'Erst einmal den SplashScreen justieren & Labelfarben setzen

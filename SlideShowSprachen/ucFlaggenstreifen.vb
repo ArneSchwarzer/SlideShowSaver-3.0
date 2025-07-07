@@ -1,6 +1,9 @@
 ﻿Imports System.Windows.Forms
 Imports SlideShowSprachen.LanguageHelper
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowSprachen.SprachSpezialHandling
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports MyControlsLibrary
 
 Public Class ucFlaggenstreifen
     Private Sub ucFlaggenstreifen_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -18,8 +21,8 @@ Public Class ucFlaggenstreifen
 
         For Each ctrl As Control In Me.Controls
             ' Sicherstellen, dass es ein Button ist UND ein Tag gesetzt ist
-            If TypeOf ctrl Is Button AndAlso ctrl.Tag IsNot Nothing Then
-                Dim btn As Button = DirectCast(ctrl, Button)
+            If TypeOf ctrl Is Windows.Forms.Button AndAlso ctrl.Tag IsNot Nothing Then
+                Dim btn As Windows.Forms.Button = DirectCast(ctrl, Windows.Forms.Button)
                 Dim isoCode As String = btn.Tag.ToString()
 
                 ' Die passende SprachInformation aus der Liste finden
@@ -27,6 +30,10 @@ Public Class ucFlaggenstreifen
 
                 ' Wenn gefunden, dann Flagge setzen
                 If sprachInfo.ISOCode IsNot Nothing Then
+
+                    'ToolTip Setzen
+                    SprachSpezialHandling.SetzeTooltipsSprache(Me, ttSprachen)
+
                     If btn.Tag.ToString = regValSprache Then
                         btn.BackgroundImage = sprachInfo.FlaggeAktiv
                         btn.BackgroundImageLayout = ImageLayout.Zoom ' Optional, damit das Bild skaliert wird
@@ -120,4 +127,5 @@ Public Class ucFlaggenstreifen
         FlaggenSetzen()
 
     End Sub
+
 End Class

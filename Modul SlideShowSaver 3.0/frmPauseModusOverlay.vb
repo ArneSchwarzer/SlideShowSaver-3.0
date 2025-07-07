@@ -27,6 +27,7 @@ Public Class frmPauseModusOverlay
     Private Sub frmPauseModusOverlay_Load(sender As Object, e As EventArgs) Handles Me.Load
         Dim screen As Screen = Screen.FromControl(Me)
 
+        Me.Text = "Modul SlideShowSaver 3.0 - Pause Overlay"
         Me.Top = 0
         Me.Left = (screen.Bounds.Width - Me.Width) \ 2
         Me.Size = New Size(Me.Size.Width, Me.Size.Height - 82)

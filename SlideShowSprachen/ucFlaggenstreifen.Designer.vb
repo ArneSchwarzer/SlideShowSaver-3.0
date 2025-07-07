@@ -22,6 +22,7 @@ Partial Class ucFlaggenstreifen
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.btnLangES = New System.Windows.Forms.Button()
         Me.btnLangRU = New System.Windows.Forms.Button()
         Me.btnLangPL = New System.Windows.Forms.Button()
@@ -31,6 +32,7 @@ Partial Class ucFlaggenstreifen
         Me.btnLangEN = New System.Windows.Forms.Button()
         Me.btnLangDE = New System.Windows.Forms.Button()
         Me.btnLangZH = New System.Windows.Forms.Button()
+        Me.ttSprachen = New System.Windows.Forms.ToolTip(Me.components)
         Me.SuspendLayout()
         '
         'btnLangES
@@ -153,4 +155,5 @@ Partial Class ucFlaggenstreifen
     Friend WithEvents btnLangEN As Windows.Forms.Button
     Friend WithEvents btnLangDE As Windows.Forms.Button
     Friend WithEvents btnLangZH As Windows.Forms.Button
+    Friend WithEvents ttSprachen As Windows.Forms.ToolTip
 End Class
