@@ -1,5 +1,6 @@
 ﻿' TagSetterTool.vb
-' VB.NET-Konsolenanwendung zum automatischen Setzen und Aktualisieren von .Tag auf sprachrelevanten Steuerelementen in *.Designer.vb-Dateien, inklusive einfachem Logging
+' VB.NET-Konsolenanwendung zum Setzen und Aktualisieren von .Tag auf sprachrelevanten Steuerelementen in *.Designer.vb-Dateien
+' sowie vollständige Ausgabe aller relevanten Controls und ihrer Tags in eine Logdatei (für Übersetzungs-CSV)
 
 Imports System.IO
 Imports System.Text.RegularExpressions
@@ -32,26 +33,40 @@ Module TagSetterTool
             Dim originalCode As String = File.ReadAllText(datei)
             Dim bearbeitetCode As String = originalCode
             Dim dateiGeaendert As Boolean = False
+            Dim logEintraegeDatei As New List(Of String)
 
-            ' Tags setzen oder aktualisieren für Standard-Controls
+            logEintraegeDatei.Add("=== " & datei & " ===")
+
+            ' Tags setzen oder erfassen für Standard-Controls
             For Each typ In steuerbareTypen
                 Dim regex = New Regex("(Me\.([a-zA-Z0-9_]+)\s*=\s*New\s*System\.Windows\.Forms\." & typ & ")", RegexOptions.Multiline)
                 For Each match In regex.Matches(bearbeitetCode)
                     Dim ctrlName As String = match.Groups(2).Value
                     Dim tagRegex = New Regex("Me\." & Regex.Escape(ctrlName) & "\.Tag\s*=\s*""langKey=.+?""")
+                    Dim tagZeile = "Me." & ctrlName & ".Tag = ""langKey=" & ctrlName & """"
 
                     If tagRegex.IsMatch(bearbeitetCode) Then
-                        bearbeitetCode = tagRegex.Replace(bearbeitetCode, "Me." & ctrlName & ".Tag = ""langKey=" & ctrlName & """")
-                        logEintraege.Add("[Update] " & Path.GetFileName(datei) & ": langKey für " & ctrlName & " aktualisiert.")
+                        ' existierende Tag-Zuweisung gefunden – ggf. aktualisieren
+                        If Not tagRegex.Match(bearbeitetCode).Value.Contains(ctrlName) Then
+                            bearbeitetCode = tagRegex.Replace(bearbeitetCode, tagZeile)
+                            logEintraegeDatei.Add("[Update] " & ctrlName & " => " & tagZeile)
+                            dateiGeaendert = True
+                            anzahlGeaendert += 1
+                        Else
+                            logEintraegeDatei.Add("[OK]     " & ctrlName & " => " & tagRegex.Match(bearbeitetCode).Value.Trim())
+                        End If
                     Else
-                        Dim tagSet As String = "Me." & ctrlName & ".Tag = ""langKey=" & ctrlName & """"
-                        If Not bearbeitetCode.Contains(tagSet) Then
-                            bearbeitetCode &= vbCrLf & tagSet
-                            logEintraege.Add("[Neu] " & Path.GetFileName(datei) & ": langKey für " & ctrlName & " hinzugefügt.")
+                        ' kein Tag vorhanden – neuen einfügen direkt nach Konstruktion
+                        Dim konstruktion = match.Value
+                        Dim pos = bearbeitetCode.IndexOf(konstruktion)
+                        If pos >= 0 Then
+                            Dim insertPos = bearbeitetCode.IndexOf(vbCrLf, pos) + 2
+                            bearbeitetCode = bearbeitetCode.Insert(insertPos, tagZeile & vbCrLf)
+                            logEintraegeDatei.Add("[Neu]    " & ctrlName & " => " & tagZeile)
+                            dateiGeaendert = True
+                            anzahlGeaendert += 1
                         End If
                     End If
-                    dateiGeaendert = True
-                    anzahlGeaendert += 1
                 Next
             Next
 
@@ -61,12 +76,24 @@ Module TagSetterTool
                 Dim ctrlName As String = match.Groups(2).Value
                 Dim styleSet As String = "Me." & ctrlName & ".Style = SlideShowControls.SterneBewertungsControl.Styles.STYLE_KLINGON"
                 If Not bearbeitetCode.Contains(styleSet) Then
-                    bearbeitetCode &= vbCrLf & styleSet
-                    logEintraege.Add("[Style] " & Path.GetFileName(datei) & ": Style für " & ctrlName & " gesetzt.")
-                    dateiGeaendert = True
-                    anzahlGeaendert += 1
+                    Dim konstruktion = match.Value
+                    Dim pos = bearbeitetCode.IndexOf(konstruktion)
+                    If pos >= 0 Then
+                        Dim insertPos = bearbeitetCode.IndexOf(vbCrLf, pos) + 2
+                        bearbeitetCode = bearbeitetCode.Insert(insertPos, styleSet & vbCrLf)
+                        logEintraegeDatei.Add("[Style]  " & ctrlName & " => " & styleSet)
+                        dateiGeaendert = True
+                        anzahlGeaendert += 1
+                    End If
+                Else
+                    logEintraegeDatei.Add("[Style✓] " & ctrlName & " => vorhanden")
                 End If
             Next
+
+            If logEintraegeDatei.Count > 1 Then
+                logEintraege.AddRange(logEintraegeDatei)
+                logEintraege.Add(String.Empty)
+            End If
 
             If dateiGeaendert AndAlso bearbeitetCode <> originalCode Then
                 File.WriteAllText(datei, bearbeitetCode)
