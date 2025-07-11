@@ -12,6 +12,8 @@ Imports SlideShowTools
 Imports StarControlLibrary
 Imports SlideShowSprachen
 Imports System.TimeZoneInfo
+Imports System.Diagnostics.Eventing.Reader
+Imports System.Runtime.InteropServices.ComTypes
 
 Public Class frmOptionsMain
 
@@ -29,10 +31,18 @@ Public Class frmOptionsMain
     'Transitionen
     Private transitionList As List(Of SlideShowTransitionInfo)
     Private markierteTransitionen As String
+    Private aktuellGeladeneTransition As ISlideShowTransition = Nothing
 
     'Shader
     Private shaderList As List(Of SlideShowShaderInfo)
     Private markierteShader As String
+    Private aktuellGedandenerShader As ISlideShowShader = Nothing
+
+    'TabOptions-Logik
+    Private tpModulIstSichtbar As Boolean = False
+    Private tpBildauswahlIstSichtbar As Boolean = False
+    Private tpTransitionsIstSichtbar As Boolean = False
+    Private tpShaderIstSichtbar As Boolean = False
 
     'Sonstiges
     Private uc As UserControl
@@ -44,8 +54,11 @@ Public Class frmOptionsMain
         Dim defaultsMain As New Dictionary(Of String, String)
         Dim anzahlMarkierteModule As Integer
 
-        AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
-        AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+        'Handler für benutzerdefinierte Events
+        If activeModule IsNot Nothing Then
+            AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+            AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+        End If
 
         defaultsMain = GetMainDefaultSettings()
 
@@ -58,7 +71,6 @@ Public Class frmOptionsMain
         ' Weil Cursor.Hide ein Stack ist...
         CursorPowerShow()
 
-
         ' Modul-Liste laden
         Dim moduleInfos = ModulListLoader.LadeModulInfoListe()
         clbModule.Items.Clear()
@@ -68,9 +80,9 @@ Public Class frmOptionsMain
         shaderList = ShaderListLoader.LadeShaderInfoListe()
 
 #End Region
-        ' --- Steuerelemente Initialisieren---
-        ' Trackbar trkDauerModulwechsel und dazugehöriges Label lblDauerModulwechsel
+
 #Region "Trackbar Initialisierung"
+        ' Trackbar trkDauerModulwechsel und dazugehöriges Label lblDauerModulwechsel
         trkDauerModulwechsel.Minimum = 1
         trkDauerModulwechsel.Maximum = 60
         trkDauerModulwechsel.Value = Integer.Parse(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaultsMain))
@@ -80,9 +92,9 @@ Public Class frmOptionsMain
             lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
         End If
 #End Region
-        ' Modulliste clbModule
-#Region "clbModule Initialisierung"
 
+#Region "clbModule Initialisierung"
+        ' Modulliste clbModule
         clbModule.Items.Clear()
         For Each modulInfo In moduleInfos
             clbModule.Items.Add(modulInfo)
@@ -100,6 +112,7 @@ Public Class frmOptionsMain
         clbModule.Sorted = True
 #End Region
 
+#Region "cmbModulWechsel Initialisierung"
         'Combobox cmbModulwechsel
         cmbModulwechsel.SelectedItem = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaultsMain)
         If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start
@@ -111,13 +124,15 @@ Public Class frmOptionsMain
             lblDauerModuswechsel.Enabled = True
             trkDauerModulwechsel.Enabled = True
         End If
+#End Region
 
-        'Label lblKeineModule
 #Region "Label 'Keine Module'"
+        'Label lblKeineModule
         anzahlMarkierteModule = clbModule.CheckedItems.Count
         KeineModuleLabelLogik(anzahlMarkierteModule)
 #End Region
 
+#Region "clbTransitionsModule Initialisieren"
         'Checklistbox clbTransitionsModule
         If transitionList.Count = 0 Then
             clbTransitionsModule.Enabled = False
@@ -143,24 +158,32 @@ Public Class frmOptionsMain
 
             clbTransitionsModule.Sorted = True
         End If
+#End Region
 
+#Region "cmbTransitionsReihenfolge für Module Initialisieren"
         'Combobox cmbTransitionsReihenfolge
         cmbTransitionsReihenfolge.SelectedItem = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", defaultsMain)
+        cmbTransitionsReihenfolge.SelectedIndex = -1
+#End Region
 
+#Region "chkMultiMonitor Initialisieren"
         'Checkbox MultiMonitor Support
         chkMultiMonitor.Visible = False 'Solange noch kein MultiMonitor Support implementiert ist
         chkMultiMonitor.Checked = False
+#End Region
 
+#Region "Sprachauswahl-Leiste laden"
         'Sprachauswahl-Leiste laden
         uc = New ucFlaggenstreifen()
         uc.Dock = DockStyle.Fill
         pnlLanguages.Controls.Add(uc)
+#End Region
 
+#Region "TabPages Initialisieren"
         'Tabpages - Da bei Aufruf des Dialogs noch kein Modul ausgewählt ist, erst einmal alle ausblenden
-        tabOptions.TabPages.Remove(tpBildauswahl)
-        tabOptions.TabPages.Remove(tpModul)
-        tabOptions.TabPages.Remove(tpShader)
-        tabOptions.TabPages.Remove(tpTransitions)
+
+        StelleTabPagesZusammen(tpModulIstSichtbar, tpBildauswahlIstSichtbar, tpTransitionsIstSichtbar, tpShaderIstSichtbar)
+#End Region
 
     End Sub
 
@@ -172,89 +195,85 @@ Public Class frmOptionsMain
             lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
         End If
 
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulDauer", trkDauerModulwechsel.Value.ToString)
+
     End Sub
 
     Private Sub clbModule_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbModule.ItemCheck
         Try
-            ' BeginInvoke wartet auf aktualisierten CheckedState – kein Korrekturterm nötig!
+            ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
+            ' nachdem der Checked-Zustand aktualisiert wurde
             BeginInvoke(Sub()
                             Dim anzahlMarkierteModule As Integer = clbModule.CheckedItems.Count
+                            Dim clb As CheckedListBox = DirectCast(sender, CheckedListBox)
+
                             KeineModuleLabelLogik(anzahlMarkierteModule)
+
+                            'Benötigt, falls zum Start kein Modul in der Liste der aktiven Module vorhanden war
+                            If activeModule IsNot Nothing Then
+                                RemoveHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+                                RemoveHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+
+                                AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+                                AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+                            End If
+
+
+                            'DirectCommit
+                            CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulAktivListe")
+
                         End Sub)
         Catch ex As Exception
             LogHandling.LogError("Fehler in clbModule_ItemCheck: " & ex.Message.ToString)
         End Try
-    End Sub
 
-    Private Sub btnAbbrechen_Click(sender As Object, e As EventArgs) Handles btnAbbrechen.Click
-        Me.Close()
     End Sub
 
     Private Sub clbModule_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbModule.SelectedIndexChanged
         'Wechselt den Inhalt der tpModul gemäß dem gerade selektieren Modul
-        Dim currentSettings As New Object
         Dim modulName As String
-        Dim restoreSettings As Object = Nothing
 
         Try
-            ' Vorheriges Modul sichern
+            ' Vorheriges Modul entladen
             If aktuellGeladenesModul IsNot Nothing Then
-                uc = TryCast(tpModul.Controls(0), UserControl)
-                If uc IsNot Nothing Then
-                    currentSettings = aktuellGeladenesModul.MemorizeModulSettings(uc)
-                    modulSettingsZwischenspeicher(aktuellGeladenesModul.ModulName) = currentSettings
-                End If
-                aktuellGeladenesModul.StopModul()
                 aktuellGeladenesModul = Nothing
                 tpModul.Controls.Clear()
             End If
 
             ' Neues Modul laden
             If clbModule.SelectedItem IsNot Nothing Then
+
+                'Modul als Dummy-Instanz laden
                 modulName = clbModule.SelectedItem.ToString()
                 aktuellGeladenesModul = ModulByNameLoader.LadeModulNachName(modulName)
 
-                If aktuellGeladenesModul IsNot Nothing Then
-                    uc = aktuellGeladenesModul.GetModulOptionsDialog()
-                    uc.Dock = DockStyle.Fill
-                    tpModul.Controls.Add(uc)
+                'TabPages aktivieren
+                tpModulIstSichtbar = True
 
-                    'TabPages aktivieren
-                    If Not tabOptions.TabPages.Contains(tpModul) Then tabOptions.TabPages.Add(tpModul)
-
-                    'Einstellungen anwenden
-                    If modulSettingsZwischenspeicher.ContainsKey(modulName) Then
-                        restoreSettings = modulSettingsZwischenspeicher(modulName)
-                        aktuellGeladenesModul.GetModulSettings(uc, restoreSettings)
-                    Else
-                        aktuellGeladenesModul.GetModulRegistryOrDefaultSettings(uc)
-                    End If
-
-                    'Ggf. Bildauswahl aktivieren...
-                    If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl AndAlso Not tabOptions.TabPages.Contains(tpBildauswahl) Then
-                        uc = New ucOptionsBildauswahl()
-                        uc.Dock = DockStyle.Fill
-                        tpBildauswahl.Controls.Add(uc)
-                        tabOptions.TabPages.Add(tpBildauswahl)
-                    End If
-                    '...oder deaktivieren
-                    If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl = False Then
-                        tpBildauswahl.Controls.Clear()
-                        tabOptions.TabPages.Remove(tpBildauswahl)
-                    End If
-
-                    'Ggf. Shader deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZuShader()
-                    If aktuellGeladenesModul.ModulNutztShader = False Then
-                        tabOptions.TabPages.Remove(tpShader)
-                    End If
-
-                    'Ggf. Transitions deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZUTransition()
-                    If aktuellGeladenesModul.ModulNutztTransitions = False Then
-                        tabOptions.TabPages.Remove(tpTransitions)
-                    End If
-
+                'Ggf. Bildauswahl aktivieren oder deaktivieren
+                If aktuellGeladenesModul.ModulNutztSlideShowBildauswahl Then
+                    tpBildauswahlIstSichtbar = True
+                Else
+                    tpBildauswahlIstSichtbar = False
                 End If
+
+                'Ggf. Shader deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZuShader()
+                If aktuellGeladenesModul.ModulNutztShader = False Then
+                    tpShaderIstSichtbar = False
+                End If
+
+                'Ggf. Transitions deaktivieren (aktivieren erfolgt über Modul_BitteWechseleZUTransition()
+                If aktuellGeladenesModul.ModulNutztTransitions = False And clbTransitionsModule.SelectedIndex < 0 Then
+                    tpTransitionsIstSichtbar = False
+                End If
+
             End If
+
+            StelleTabPagesZusammen(tpModulIstSichtbar, tpBildauswahlIstSichtbar, tpTransitionsIstSichtbar, tpShaderIstSichtbar)
+
+            'Dummny Instanz wird beim Schließen der Form gelöscht!
+
         Catch ex As Exception
             LogHandling.LogError("Fehler in clbModule_SelectedIndexChanged: " & ex.Message.ToString)
         End Try
@@ -263,9 +282,10 @@ Public Class frmOptionsMain
 
     Private Sub KeineModuleLabelLogik(anzahlMarkierteModule As Integer)
         If clbModule.Items.Count = 0 Then
+
             lblKeineModule.Text = "Keine Module geladen, spiele Bouncing Logo"
             lblKeineModule.Visible = True
-            cmbModulwechsel.SelectedIndex = 0
+            cmbModulwechsel.SelectedIndex = -1
             cmbModulwechsel.Enabled = False
             lblNcmbModulWechsel.Enabled = False
             trkDauerModulwechsel.Visible = False
@@ -273,6 +293,7 @@ Public Class frmOptionsMain
             lblDauerModuswechsel.Visible = False
 
         ElseIf anzahlMarkierteModule <= 1 Then
+
             If anzahlMarkierteModule = 0 Then
                 lblKeineModule.Text = "Keine Module ausgewählt, spiele Bouncing Logo"
                 lblKeineModule.Visible = True
@@ -280,7 +301,7 @@ Public Class frmOptionsMain
                 lblKeineModule.Visible = False
             End If
 
-            cmbModulwechsel.SelectedIndex = 0
+            cmbModulwechsel.SelectedIndex = -1
             cmbModulwechsel.Enabled = False
             lblNcmbModulWechsel.Enabled = False
             trkDauerModulwechsel.Visible = False
@@ -301,40 +322,12 @@ Public Class frmOptionsMain
                 lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
             End If
         End If
+
     End Sub
 
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
-        Dim uc As UserControl
-        Dim bildauswahlSettings As New Dictionary(Of String, String)
-        Dim restoreSettings As Object = Nothing
-        Dim modul As ISlideShowModul = Nothing
-
-#Region "Main Settings speichern"
-        ' === Main Settings ===
-        markierteModule = GetCheckedItemsAsString(clbModule)
-        markierteTransitionen = GetCheckedItemsAsString(clbTransitionsModule)
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulDauer", trkDauerModulwechsel.Value.ToString)
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulReihenfolge", cmbModulwechsel.SelectedItem.ToString)
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulAktivListe", markierteModule)
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "MultiMonitor", chkMultiMonitor.Checked.ToString)
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionListe", markierteTransitionen)
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", cmbTransitionsReihenfolge.SelectedItem.ToString)
-
-        LogHandling.LogDebug("Registry-Einträge für Main-Settings geschrieben.")
-
-#End Region
-        'Bildauswahl Settings auf DirectCommit umgestellt
-
-        'Modul Settings auf DirectCommit umgestellt
-
-        ' === Transition Settings ===
-
-        ' === Shader Settings ===
-
-        ' === ...und Schluss ===
-        Me.DialogResult = DialogResult.OK
-        Me.Close()
+        'Da DirectCommit keine 'Sonderbehandlung' des OK-Buttons notwendig
+        Close()
     End Sub
 
     Private Sub frmOptionsMain_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
@@ -354,96 +347,215 @@ Public Class frmOptionsMain
             lblDauerModuswechsel.Enabled = True
             trkDauerModulwechsel.Enabled = True
         End If
+
+        'DirectCommit
+        If cmbModulwechsel.SelectedIndex >= 0 Then
+            WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulReihenfolge", cmbModulwechsel.SelectedItem.ToString)
+        End If
+
     End Sub
 
     Private Sub Modul_BitteWechseleZuShader(shaderName As String)
+
         If activeModule.ModulNutztShader Then
             Try
-                ' Vorhandene Controls in tpShader löschen
+                'Vorhandene Controls in tpShader löschen
                 If tpShader.Controls.Count > 0 Then
-                    Dim altesUC As Control = tpShader.Controls(0)
-                    tpShader.Controls.Remove(altesUC)
-                    altesUC.Dispose()
-                    altesUC = Nothing
+                    uc = tpShader.Controls(0)
+                    tpShader.Controls.Remove(uc)
+                    uc.Dispose()
+                    uc = Nothing
                 End If
 
-                ' Shader laden (Dummy-Instanz)
-                Dim shaderInstanz As ISlideShowShader = ShaderByNameLoader.LadeShaderNachName(shaderName)
+                'Shader laden (Dummy-Instanz)
+                aktuellGedandenerShader = ShaderByNameLoader.LadeShaderNachName(shaderName)
 
-                If shaderInstanz IsNot Nothing Then
-                    Dim ucShader As UserControl = shaderInstanz.GetShaderOptionsDialog()
+                'Shader TabPage anzeigen
+                tpShaderIstSichtbar = True
+                StelleTabPagesZusammen(tpModulIstSichtbar, tpBildauswahlIstSichtbar, tpTransitionsIstSichtbar, tpShaderIstSichtbar)
 
-                    If ucShader IsNot Nothing Then
-                        ucShader.Dock = DockStyle.Fill
-                        tpShader.Controls.Add(ucShader)
-
-                        ' Shader-Einstellungen aus Registry oder Default laden
-                        shaderInstanz.GetShaderRegistryOrDefaultSettings(ucShader)
-                    Else
-                        LogHandling.LogWarn("Shader '" & shaderName & "' hat kein Options-UserControl geliefert.")
-                    End If
-                Else
-                    LogHandling.LogWarn("Shader '" & shaderName & "' konnte nicht geladen werden.")
-                End If
+                'Dummy-Instanz wird erst bei .Closed() freigegeben
 
             Catch ex As Exception
                 LogHandling.LogError("Fehler beim Umschalten auf Shader '" & shaderName & "': " & ex.Message)
             End Try
 
-            If Not tabOptions.TabPages.Contains(tpShader) Then
-                tabOptions.TabPages.Add(tpShader)
-            End If
-
         End If
 
     End Sub
 
-    Private Sub Modul_BitteWechseleZuTransition(transitionName As String)
+    Private Sub Modul_BitteWechseleZuTransition(sender As Object, transitionName As String)
 
         Try
             ' Vorhandene Controls in tpTransition löschen
             If tpTransitions.Controls.Count > 0 Then
-                Dim altesUC As Control = tpTransitions.Controls(0)
-                tpTransitions.Controls.Remove(altesUC)
-                altesUC.Dispose()
-                altesUC = Nothing
+                uc = tpTransitions.Controls(0)
+                tpTransitions.Controls.Remove(uc)
+                uc.Dispose()
+                uc = Nothing
             End If
 
             ' Transition laden (Dummy-Instanz)
-            Dim transitionInstanz As ISlideShowTransition = TransitionByNameLoader.LadeTransitionNachName(transitionName)
+            aktuellGeladeneTransition = TransitionByNameLoader.LadeTransitionNachName(transitionName)
 
-            If transitionInstanz IsNot Nothing Then
-                Dim ucTransition As UserControl = transitionInstanz.GetTransitionOptionsDialog()
+            If aktuellGeladeneTransition IsNot Nothing Then
+                'TabPage tpTransitions einschalten
+                tpTransitionsIstSichtbar = True
+                StelleTabPagesZusammen(tpModulIstSichtbar, tpBildauswahlIstSichtbar, tpTransitionsIstSichtbar, tpShaderIstSichtbar)
 
-                If ucTransition IsNot Nothing Then
-                    ucTransition.Dock = DockStyle.Fill
-                    tpTransitions.Controls.Add(ucTransition)
-
-                    ' Einstellungen aus Registry oder Default laden
-                    transitionInstanz.GetTransitionRegistryOrDefaultSettings(ucTransition)
-                Else
-                    LogHandling.LogWarn("Transition '" & transitionName & "' hat kein Options-UserControl geliefert.")
+                'Falls von Modul aufgerufen, SelectedIndex in cblTransitionsModule löschen
+                If sender IsNot clbTransitionsModule AndAlso clbTransitionsModule.SelectedItem?.ToString() <> transitionName Then
+                    clbTransitionsModule.SelectedIndex = -1
                 End If
+
+
             Else
-                LogHandling.LogWarn("Transition '" & transitionName & "' konnte nicht geladen werden.")
+                LogHandling.LogWarn("Transition '" & transitionName & "' hat kein Options-UserControl geliefert.")
             End If
+
+            'Dummy Instanz wird erst bei .Close() wieder freigegeben
 
         Catch ex As Exception
             LogHandling.LogError("Fehler beim Umschalten auf Transition '" & transitionName & "': " & ex.Message)
         End Try
-
-        If Not tabOptions.TabPages.Contains(tpTransitions) Then
-            tabOptions.TabPages.Add(tpTransitions)
-        End If
-
 
     End Sub
 
     Private Sub clbTransitionsModule_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitionsModule.SelectedIndexChanged
 
         If clbTransitionsModule.SelectedItem IsNot Nothing Then
-            Modul_BitteWechseleZuTransition(clbTransitionsModule.SelectedItem.ToString)
+            Modul_BitteWechseleZuTransition(clbTransitionsModule, clbTransitionsModule.SelectedItem.ToString)
         End If
+
+    End Sub
+
+    Private Sub chkMultiMonitor_CheckedChanged(sender As Object, e As EventArgs) Handles chkMultiMonitor.CheckedChanged
+
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWMAIN_PATH & "MultiMonitor", chkMultiMonitor.Checked.ToString)
+
+    End Sub
+
+    Private Sub clbTransitionsModule_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbTransitionsModule.ItemCheck
+        'DirectCommit für chlbModule sobald ein Eintrag gechecked/ungeschecked wird.
+
+        ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
+        ' nachdem der Checked-Zustand aktualisiert wurde
+        Dim clb As CheckedListBox = DirectCast(sender, CheckedListBox)
+
+        BeginInvoke(New MethodInvoker(Sub()
+                                          CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulTransitionsReihenfolge")
+                                      End Sub))
+
+    End Sub
+
+    Private Sub StelleTabPagesZusammen(modulSichtbar As Boolean, bildlauswahlSichtbar As Boolean, transitionSichtbar As Boolean, shaderSichtbar As Boolean)
+        'Zeigt die TabPages in der korrekten Reihenfolge an, weil das "%)=§$-TabOptions Steuerelement dafür ja leider
+        'zu blöde ist.
+        Dim aufrufendeTabPage As TabPage
+
+        aufrufendeTabPage = tabOptions.SelectedTab
+
+        'TabPages außer tpAllgemein ausschalten
+        If aufrufendeTabPage IsNot tpModul Then
+            tabOptions.TabPages.Remove(tpModul)
+        End If
+        tabOptions.TabPages.Remove(tpBildauswahl)
+        tabOptions.TabPages.Remove(tpTransitions)
+        tabOptions.TabPages.Remove(tpShader)
+
+        'Und nun in der korrekten Reihenfolge wieder einschalten
+        If aufrufendeTabPage IsNot tpModul Then
+            If modulSichtbar Then
+
+                ' Neues Modul UC laden
+                If aktuellGeladenesModul IsNot Nothing Then
+                    uc = aktuellGeladenesModul.GetModulOptionsDialog()
+                    uc.Dock = DockStyle.Fill
+                    tpModul.Controls.Add(uc)
+
+                    tabOptions.TabPages.Add(tpModul)
+                End If
+
+            Else
+                tabOptions.TabPages.Remove(tpModul)
+            End If
+        End If
+
+
+        If bildlauswahlSichtbar Then
+            uc = New ucOptionsBildauswahl()
+            uc.Dock = DockStyle.Fill
+            tpBildauswahl.Controls.Add(uc)
+
+            tabOptions.TabPages.Add(tpBildauswahl)
+        Else
+            tabOptions.TabPages.Remove(tpBildauswahl)
+        End If
+
+        If transitionSichtbar Then
+
+            If aktuellGeladeneTransition IsNot Nothing Then
+                uc = aktuellGeladeneTransition.GetTransitionOptionsDialog()
+
+                If uc IsNot Nothing Then
+                    uc.Dock = DockStyle.Fill
+                    tpTransitions.Controls.Add(uc)
+
+                    'TabPage tpTransitions einschalten
+                    tabOptions.TabPages.Add(tpTransitions)
+                Else
+                    LogHandling.LogWarn("Transition '" & aktuellGeladeneTransition.TransitionName & "' hat kein Options-UserControl geliefert.")
+                End If
+            End If
+
+        Else
+            tabOptions.TabPages.Remove(tpTransitions)
+        End If
+
+        If shaderSichtbar Then
+
+            'Neues Shader UC laden
+            If aktuellGedandenerShader IsNot Nothing Then
+                uc = aktuellGedandenerShader.GetShaderOptionsDialog()
+
+                If uc IsNot Nothing Then
+                    uc.Dock = DockStyle.Fill
+                    tpShader.Controls.Add(uc)
+
+                    'TabPage tpShader einschalten
+                    tabOptions.TabPages.Add(tpShader)
+                Else
+                    LogHandling.LogWarn("Shader '" & aktuellGedandenerShader.ShaderName & "' hat kein Options-UserControl geliefert.")
+                End If
+            End If
+        Else
+            tabOptions.TabPages.Remove(tpShader)
+        End If
+
+        tabOptions.SelectedTab = aufrufendeTabPage
+
+    End Sub
+
+    Private Sub cmbTransitionsReihenfolge_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbTransitionsReihenfolge.SelectedIndexChanged
+
+        'DirectCommit
+        If cmbModulwechsel.SelectedIndex >= 0 Then
+            WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", cmbModulwechsel.SelectedItem.ToString)
+        End If
+
+    End Sub
+
+    Private Sub frmOptionsMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        'Bei DirectCommit entspricht jedes Closed auch einem Klick auf den klassischen "OK"-Button
+
+        'Dummy-Instanzen wieder löschen
+        aktuellGeladenesModul = Nothing
+        aktuellGedandenerShader = Nothing
+        aktuellGeladeneTransition = Nothing
+
+        '...und Schluss
+        Me.DialogResult = DialogResult.OK
 
     End Sub
 End Class

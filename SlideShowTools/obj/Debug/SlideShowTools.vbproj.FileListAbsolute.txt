@@ -19,3 +19,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataE
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataExtractor.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.xml

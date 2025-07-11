@@ -26,18 +26,18 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideSho.F
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLogging.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLogging.xml
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Modul SlideShowSaver 3.0.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Modul SlideShowSaver 3.0.pdb
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Modul SlideShowSaver 3.0.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLoader.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLoader.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmFallbackSaver.resources
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.xml
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\StarControlLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.xml

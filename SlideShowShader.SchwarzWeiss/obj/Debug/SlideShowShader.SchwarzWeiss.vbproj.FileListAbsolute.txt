@@ -1,0 +1,15 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiß.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiß.ucOptionsShader.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideSho.9EFFF6A5.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\obj\Debug\SlideShowShader.SchwarzWeiss.pdb

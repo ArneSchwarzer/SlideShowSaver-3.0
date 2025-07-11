@@ -70,6 +70,10 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MetadataExtractor, Version=2.8.1.0, Culture=neutral, PublicKeyToken=b66b5ccaf776c301, processorArchitecture=MSIL">
+      <HintPath>..\packages\MetadataExtractor.2.8.1\lib\net45\MetadataExtractor.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="StarControlLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Documents\Visual Studio Libraries\StarControlLibrary.dll</HintPath>
@@ -84,6 +88,12 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="TagLibSharp, Version=2.3.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
+      <HintPath>..\packages\TagLibSharp.2.3.0\lib\net462\TagLibSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="XmpCore, Version=6.1.10.1, Culture=neutral, PublicKeyToken=961f4f366277b80e, processorArchitecture=MSIL">
+      <HintPath>..\packages\XmpCore.6.1.10.1\lib\net35\XmpCore.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -176,6 +186,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\Flying Kitchen-Aid Logo Transparent.png" />
   </ItemGroup>
   <ItemGroup>
@@ -201,10 +212,6 @@
     <Content Include="screensaver_icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Modul SlideShowSaver 3.0\SlideShowModul.SlideShowSaver_3_0.vbproj">
-      <Project>{c6ae8225-211d-421b-943a-db0646727460}</Project>
-      <Name>SlideShowModul.SlideShowSaver_3_0</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SlideShowBildauswahl\SlideShowBildauswahl.vbproj">
       <Project>{92b56712-760a-4fe2-b34b-16fd5e4f67ab}</Project>
       <Name>SlideShowBildauswahl</Name>

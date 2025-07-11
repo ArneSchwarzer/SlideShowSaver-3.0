@@ -45,7 +45,6 @@ Partial Class frmOptionsMain
         Me.tpTransitions = New System.Windows.Forms.TabPage()
         Me.tpShader = New System.Windows.Forms.TabPage()
         Me.btnOK = New System.Windows.Forms.Button()
-        Me.btnAbbrechen = New System.Windows.Forms.Button()
         Me.pnlLanguages = New System.Windows.Forms.Panel()
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
@@ -193,7 +192,7 @@ Partial Class frmOptionsMain
         Me.trkDauerModulwechsel.Name = "trkDauerModulwechsel"
         Me.trkDauerModulwechsel.Size = New System.Drawing.Size(744, 101)
         Me.trkDauerModulwechsel.TabIndex = 5
-        Me.trkDauerModulwechsel.Value = 7
+        Me.trkDauerModulwechsel.Value = 15
         '
         'lblNtrkDauerModulwechsel
         '
@@ -286,21 +285,12 @@ Partial Class frmOptionsMain
         '
         'btnOK
         '
-        Me.btnOK.Location = New System.Drawing.Point(565, 1288)
+        Me.btnOK.Location = New System.Drawing.Point(763, 1300)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(185, 71)
         Me.btnOK.TabIndex = 2
-        Me.btnOK.Text = "OK"
+        Me.btnOK.Text = "Fertig"
         Me.btnOK.UseVisualStyleBackColor = True
-        '
-        'btnAbbrechen
-        '
-        Me.btnAbbrechen.Location = New System.Drawing.Point(763, 1288)
-        Me.btnAbbrechen.Name = "btnAbbrechen"
-        Me.btnAbbrechen.Size = New System.Drawing.Size(185, 71)
-        Me.btnAbbrechen.TabIndex = 3
-        Me.btnAbbrechen.Text = "Abbrechen"
-        Me.btnAbbrechen.UseVisualStyleBackColor = True
         '
         'pnlLanguages
         '
@@ -313,9 +303,8 @@ Partial Class frmOptionsMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(979, 1371)
+        Me.ClientSize = New System.Drawing.Size(979, 1384)
         Me.Controls.Add(Me.pnlLanguages)
-        Me.Controls.Add(Me.btnAbbrechen)
         Me.Controls.Add(Me.btnOK)
         Me.Controls.Add(Me.tabOptions)
         Me.Controls.Add(Me.lblNTitel)
@@ -342,7 +331,6 @@ Partial Class frmOptionsMain
     Friend WithEvents tpBildauswahl As TabPage
     Friend WithEvents btnOK As Button
     Friend WithEvents cmbModulwechsel As ComboBox
-    Friend WithEvents btnAbbrechen As Button
     Friend WithEvents trkDauerModulwechsel As TrackBar
     Friend WithEvents lblNtrkDauerModulwechsel As Label
     Friend WithEvents lblNcmbModulWechsel As Label

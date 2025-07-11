@@ -1,0 +1,76 @@
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmModulMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmPictureInfo.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmPauseModusOverlay.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\Modul SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\taglib-sharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\SlideSho.A12CC809.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module\Modul SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucUnderConstruction.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\Modul SlideShowSaver 3.0\bin\Debug\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowModul.SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowModul.SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowModul.SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\MyControlsLibrary.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowLogging.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowTools.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\taglib-sharp.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowInterfaces.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowLoader.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowLogging.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowLogging.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowTools.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowTools.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.AssemblyReference.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmModulMain.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmPictureInfo.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.Resources.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmPauseModusOverlay.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucUnderConstruction.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.GenerateResource.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.CoreCompileInputs.cache
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideSho.A12CC809.Up2Date
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver 3.0.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver 3.0.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver 3.0.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmModulBitteWarten.resources

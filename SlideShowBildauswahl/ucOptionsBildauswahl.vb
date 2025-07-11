@@ -108,6 +108,7 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "18+")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
     End Sub
 
     Private Sub rdoAkt_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAkt.CheckedChanged
@@ -120,6 +121,7 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Akt")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
     End Sub
 
     Private Sub rdoLingerie_CheckedChanged(sender As Object, e As EventArgs) Handles rdoLingerie.CheckedChanged
@@ -134,6 +136,7 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Lingerie")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
     End Sub
 
     Private Sub rdoJugendfrei_CheckedChanged(sender As Object, e As EventArgs) Handles rdoJugendfrei.CheckedChanged
@@ -150,6 +153,7 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Jugendfrei")
+        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
     End Sub
 
     Private Sub lstVerzeichnisse_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstVerzeichnisse.SelectedIndexChanged

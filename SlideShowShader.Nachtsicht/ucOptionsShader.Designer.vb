@@ -75,7 +75,3 @@ Partial Class ucOptionsShader
     Friend WithEvents Label6 As Windows.Forms.Label
     Friend WithEvents lblNoOptions As Windows.Forms.Label
 End Class
-
-Me.lblShadername.Tag = "langKey=lblShadername"
-Me.Label6.Tag = "langKey=Label6"
-Me.lblNoOptions.Tag = "langKey=lblNoOptions"

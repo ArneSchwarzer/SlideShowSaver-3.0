@@ -1,0 +1,376 @@
+﻿Imports SlideShowInterfaces.InterfaceDeclarations
+Imports System.Windows.Forms
+Imports System.Drawing
+Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.ListHandling
+
+Public Class ModulMain
+    Implements ISlideShowModul
+
+    ' Variablen, Konstanten, ENUMs etc. deklarieren.
+    Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
+    Public Const SLIDESHOWMODUL_SSS_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
+    Public Shared Property activeModuleInstanz As ISlideShowModul
+    Public Shared Property sssScreen As frmModulMain
+    Public Shared sssInitializing As frmModulBitteWarten
+    Public Shared sssPause As frmPauseModusOverlay
+    Public Shared Property sssInfo As frmPictureInfo
+    Private zwischenspeicherSettings As ModulSettings_SlideShowSaver_3_0
+    Public Shared pauseIsActive As Boolean = False
+
+
+    'Übersetzungstabelle UC <--> Settings
+    Private Shared ReadOnly translationTable As New Dictionary(Of String, String) From {
+        {"chkBildinformationen", "BildInfoAnzeigen"},
+        {"cmbBildauswahl", "Bildauswahl"},
+        {"trbAnzeigedauer", "Anzeigedauer"},
+        {"clbShader", "Shader"},
+        {"cmbShaderauswahl", "ShaderReihenfolge"},
+        {"clbTransitions", "Transitionseffekte"},
+        {"cmbEffektauswahl", "TransitionsReihenfolge"}
+    }
+
+    ' === Struktur für die Moduloptionen ===
+    Public Structure ModulSettings_SlideShowSaver_3_0
+        Public Bildauswahl As String
+        Public Anzeigedauer As Integer
+        Public Transitionseffekte As List(Of String)
+        Public TransitionsReihenfolge As String
+        Public Shader As List(Of String)
+        Public ShaderReihenfolge As String
+        Public BildInfoAnzeigen As Boolean
+    End Structure
+
+    ' === Modul-Metadaten ===
+    Public ReadOnly Property ModulName As String Implements ISlideShowModul.ModulName
+        Get
+            Return "SlideShowSaver 3.0"
+        End Get
+    End Property
+
+    Public ReadOnly Property ModulBeschreibung As String Implements ISlideShowModul.ModulBeschreibung
+        Get
+            Return "Die klassische Diashow im neuen Gewand."
+        End Get
+    End Property
+
+    Public ReadOnly Property ModulVersion As Version Implements ISlideShowModul.ModulVersion
+        Get
+            Return New Version(1, 0, 0, 0)
+        End Get
+    End Property
+
+    Public ReadOnly Property ModulNutztSlideShowBildauswahl As Boolean Implements ISlideShowModul.ModulNutztSlideShowBildauswahl
+        Get
+            Return True
+        End Get
+    End Property
+
+    Public ReadOnly Property ModulNutztTransitions As Boolean Implements ISlideShowModul.ModulNutztTransitions
+        Get
+            Return True
+        End Get
+    End Property
+
+    Public ReadOnly Property ModulNutztShader As Boolean Implements ISlideShowModul.ModulNutztShader
+        Get
+            Return True
+        End Get
+    End Property
+
+    ' === Events ===
+    Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
+    Public Event PleaseChangeToShader(shaderName As String) Implements ISlideShowModul.PleaseChangeToShader
+    Public Event PleaseChangeToTransition(sender As Object, transitionName As String) Implements ISlideShowModul.PleaseChangeToTransition
+
+
+    ' === Start/Stop/Pause ===
+    Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
+        'Initialisiert und startet das eigentliche Modul
+        activeModuleInstanz = Me
+
+        If sssInitializing Is Nothing Then
+            sssInitializing = New frmModulBitteWarten()
+        End If
+
+        If sssScreen Is Nothing Then
+            sssScreen = New frmModulMain()
+        End If
+
+        sssInitializing.Show()
+
+        CheckYourSettings()
+
+        RaiseEvent ModulStateChanged("Running")
+
+        sssInitializing.Close()
+        sssScreen.Show()
+
+
+    End Sub
+
+    Public Sub StopModul() Implements ISlideShowModul.StopModul
+        'Räumt auf und meldet, das der Schoner ordungsgemäß beendet wurde
+
+        If sssInfo IsNot Nothing Then
+            sssInfo.Close()
+            sssInfo.Dispose()
+            sssInfo = Nothing
+        End If
+
+        If sssPause IsNot Nothing Then
+            sssPause.Close()
+            sssPause.Dispose()
+            sssPause = Nothing
+        End If
+
+        If sssScreen IsNot Nothing Then
+            sssScreen.Close()
+            sssScreen.Dispose()
+            sssScreen = Nothing
+        End If
+
+        RaiseEvent ModulStateChanged("Stopped")
+
+    End Sub
+
+    Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
+        ' Startet den Pause-Modus des Moduls
+
+        RaiseEvent ModulStateChanged("Pause")
+        sssScreen.tmrModul.Stop()
+
+        If sssPause Is Nothing Then
+            sssPause = New frmPauseModusOverlay()
+        End If
+
+        pauseIsActive = True
+        If sssPause.ShowDialog() = DialogResult.OK Then
+            sssPause.Dispose()
+            sssPause = Nothing
+            CheckYourSettings()
+            RaiseEvent ModulStateChanged("Running")
+        End If
+
+
+    End Sub
+
+    ' === Optionen / Settings ===
+
+    Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
+        'Liefert der frmOptionsMain das leere UC zum Einbau in die Modul-Tabpage.
+
+        Return New ucOptionsModul()
+
+    End Function
+
+    Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
+        'Liest die aktuellen Werte des 'eigenen' aus der frmOptionsMain aus und liefert diese als Structure zurück
+        'an die Form, damit diese sie in den internen Zwischenspeicher der frmOptionsMain einlagern kann. Benötigt,
+        'falls der Benutzer während einer Sitzung innerhalb von frmOptionsMain zwischen diversen Modulen
+        'wechselt.
+
+        Dim dict = SlideShowTools.ConversionHandling.UserControlZuDictionary(uc)
+        Dim translatedDict As New Dictionary(Of String, String)
+
+        'Wandlung der Dictionary-Keys von UC-Namen zu Registry/ModulSettings_SlideShowSaver_3_0-Namen
+        For Each schluessel In dict.Keys
+            translatedDict.Item(translationTable(schluessel)) = dict(schluessel)
+        Next
+
+        'Abgeschaltet bis der ""$§%"§$-Fehler in ConversionsHandling.DictionaryZuStruktur() gefunden wurde
+        'zwischenspeicherSettings = SlideShowTools.ConversionHandling.DictionaryZuStruktur(Of ModulSettings_SlideShowSaver_3_0)(translatedDict)
+        zwischenspeicherSettings.Bildauswahl = translatedDict("Bildauswahl")
+        zwischenspeicherSettings.Anzeigedauer = CInt(translatedDict("Anzeigedauer"))
+        zwischenspeicherSettings.Transitionseffekte = SplitSemicolonList(translatedDict("Transitionseffekte"))
+        zwischenspeicherSettings.TransitionsReihenfolge = translatedDict("TransitionsReihenfolge")
+        zwischenspeicherSettings.Shader = SplitSemicolonList(translatedDict("Shader"))
+        zwischenspeicherSettings.ShaderReihenfolge = translatedDict("ShaderReihenfolge")
+        zwischenspeicherSettings.BildInfoAnzeigen = translatedDict("BildInfoAnzeigen")
+
+        Return zwischenspeicherSettings
+
+    End Function
+
+    Public Sub ApplyModulSettings(settings As Object) Implements ISlideShowModul.ApplyModulSettings
+        'Schreibt die Settings nach Beenden der frmOptionsMain in die Registry
+
+        'Cast weil "settings" (als Teil der generischen Interface-Deklaration) vom Typ Object ist.
+        If TypeOf settings Is ModulSettings_SlideShowSaver_3_0 Then
+            zwischenspeicherSettings = CType(settings, ModulSettings_SlideShowSaver_3_0)
+        End If
+
+        '...und ab dafür...
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", zwischenspeicherSettings.Bildauswahl)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", zwischenspeicherSettings.Anzeigedauer.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte", JoinSemicolonList(zwischenspeicherSettings.Transitionseffekte))
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "TransitionsReihenfolge", zwischenspeicherSettings.TransitionsReihenfolge)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "Shader", JoinSemicolonList(zwischenspeicherSettings.Shader))
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", zwischenspeicherSettings.ShaderReihenfolge)
+        WriteToRegistry(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", zwischenspeicherSettings.BildInfoAnzeigen.ToString)
+
+    End Sub
+
+    Public Sub GetModulSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowModul.GetModulSettings
+#Region "Kommentar"
+        'Übernimmt kurzzeitig die Herrschaft über die 'eigene' UC auf der tpModul, um die aus dem Zwischenspeicher
+        'der frmOptionsMain gelieferten Werte zurückzuschreiben. Benötigt, falls der Benutzer während einer Sitzung
+        'innerhalb von frmOptionsMain zwischen diversen Modulen wechselt.
+        '
+        'ACHTUNG!!!
+        '
+        'Die verwendete Hilfsfunktion "DictionaryZuUserControl" setzt nur Werte für 'Standard'-Controls (TextBox,
+        'ComboBox, CheckBox, RadioButton, TrackBar, ListBox, CheckedListBox (Haken bei Einträgen
+        'setzen, NICHT CheckedListBox mit Einträgen befüllen). Panels und GroupBoxen werden dabei rekursiv
+        'durchlaufen. 
+        'Alle anderen Control-Typen müssen danach ggf. noch in dieser Routine 'manuell' behandelt werden.
+#End Region
+
+        Dim translatedDic As New Dictionary(Of String, String)
+        Dim dict As New Dictionary(Of String, String)
+
+        If TypeOf restoreSettings Is ModulSettings_SlideShowSaver_3_0 Then
+            dict = SlideShowTools.ConversionHandling.StrukturZuDictionary(CType(restoreSettings, ModulSettings_SlideShowSaver_3_0))
+
+            'Wandlung der Dictionary-Keys von Registry/ModulSettings_SlideShowSaver_3_0-Namen zu UC-Namen
+            For Each keyValuePair As KeyValuePair(Of String, String) In translationTable
+                'dict:             cmbStimmung | "Mir doch egal"
+                'translationTable: cmbStimmung | Stimmung
+                'translatedDic:    Stimmung    | "Mir doch egal"
+
+                If dict.ContainsKey(keyValuePair.Key) Then
+                    translatedDic(keyValuePair.Value) = dict(keyValuePair.Key)
+                End If
+            Next
+
+
+            'Werte im UserControl setzen
+            SlideShowTools.ConversionHandling.DictionaryZuUserControl(uc, translatedDic)
+
+        End If
+    End Sub
+
+    Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
+        'Übernimmt kurzzeitig die Herrschaft über die 'eigene' UC auf der tpModul von frmOptionsMain, um die in
+        'der Registry gespeicherten Werte (oder ggf. die Defaultwerte) in die UC zu schreiben. Benötigt beim
+        'initialisieren der frmOptionsMain.
+        '
+        'ACHTUNG!!!
+        '
+        'Die verwendete Hilfsfunktion "DictionaryZuUserControl" setzt nur Werte für 'Standard'-Controls (TextBox,
+        'ComboBox, CheckBox, RadioButton, TrackBar, ListBox, CheckedListBox (Haken bei Einträgen
+        'setzen, NICHT CheckedListBox mit Einträgen befüllen). Panels und GroupBoxen werden dabei rekursiv
+        'durchlaufen. 
+        'Alle anderen Control-Typen müssen danach ggf. noch in dieser Routine "manuell" befüllt werden.
+
+        Dim dict As New Dictionary(Of String, String)
+
+        ReadModulSettingsFromRegistry()
+        dict = SlideShowTools.ConversionHandling.StrukturZuDictionary(aktuelleSettings)
+        SlideShowTools.ConversionHandling.DictionaryZuUserControl(uc, dict)
+
+    End Sub
+
+    Public Shared Function GetModulDefaultSettings() As Dictionary(Of String, String)
+        Dim defaultModulSettings As New Dictionary(Of String, String)
+        'Liefert die Default-Werte des Moduls
+
+        defaultModulSettings("Bildauswahl") = "Zufallsbild"
+        defaultModulSettings("Anzeigedauer") = "20"
+        defaultModulSettings("Transistionseffekte") = ""
+        defaultModulSettings("TransitionsReihenfolge") = "Zufällig bei Start"
+        defaultModulSettings("Shader") = ""
+        defaultModulSettings("ShaderReihenfolge") = "Zufällig bei Start"
+        defaultModulSettings("BildInfoAnzeigen") = "False"
+
+        Return defaultModulSettings
+    End Function
+
+    Public Sub ReadModulSettingsFromRegistry()
+        'Liest die Settings des Moduls aus der Registry. Falls diese nicht gesetzt sind, werden Default-Werte ausgegeben.
+
+        Dim defaults As New Dictionary(Of String, String)
+        Dim tempRegVal As String
+
+        defaults = GetModulDefaultSettings()
+
+        'Modus Bildauswahl
+        aktuelleSettings.Bildauswahl = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", defaults)
+
+        'Anzeigedauer
+        aktuelleSettings.Anzeigedauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", defaults))
+
+        'Liste Transitionen
+        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte", defaults)
+        aktuelleSettings.Transitionseffekte = SplitSemicolonList(tempRegVal)
+
+        'Modus Transitionen
+        aktuelleSettings.TransitionsReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "TransitionsReihenfolge", defaults)
+
+        'Liste Shader
+        tempRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Shader", defaults)
+        aktuelleSettings.Shader = SplitSemicolonList(tempRegVal)
+
+        'Modus Shader
+        aktuelleSettings.ShaderReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", defaults)
+
+        'Modus BildInfo Anzeigen
+        If ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", defaults) = "True" Then
+            aktuelleSettings.BildInfoAnzeigen = True
+        Else
+            aktuelleSettings.BildInfoAnzeigen = False
+        End If
+
+    End Sub
+
+
+    ' === Info-Kommunikation ===
+
+    Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowModul.AttentionShaderGewechselt
+
+        RaiseEvent PleaseChangeToShader(shaderName)
+
+    End Sub
+
+    Public Sub AttentionTransitionGewechselt(sender As Object, transitionName As String) Implements ISlideShowModul.AttentionTransitionGewechselt
+
+        RaiseEvent PleaseChangeToTransition(sender, transitionName)
+
+    End Sub
+
+    Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
+        ' Re-Initalisierung der Optionen aus der Registry nachdem das MCP eine Änderung gemeldet hat.
+
+        ReadModulSettingsFromRegistry()
+
+        If aktuelleSettings.BildInfoAnzeigen Then
+            If sssInfo Is Nothing Then
+                sssInfo = New frmPictureInfo()
+            End If
+            sssInfo.Show()
+        ElseIf sssInfo IsNot Nothing Then
+            sssInfo.Close()
+            sssInfo.Dispose()
+            sssInfo = Nothing
+        End If
+
+        sssScreen.LegitimeShaderListeErstellen()
+
+        'Timer gemäß der neuen Anzeigedauer setzen. Stop/Start, um die
+        'Änderungen sofort wirken zu lassen (falls z.B. die Anzeigedauer von 2m auf 20s zurückgesetzt wurde,
+        'möchte der Benutzer keine 2 Minuten warten, bis die Änderung greift).
+
+        sssScreen.tmrModul.Stop()
+        If aktuelleSettings.Anzeigedauer > 0 Then
+            sssScreen.tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
+        Else
+            sssScreen.tmrModul.Interval = 20 * 1000 'Defaultwert, falls beim Lesen aus der Registry etwas falsch gelaufen ist
+        End If
+        sssScreen.tmrModul.Start()
+
+    End Sub
+
+    ' === Interne Funktionen ===
+
+
+End Class

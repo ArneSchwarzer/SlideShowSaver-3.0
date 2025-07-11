@@ -33,7 +33,7 @@ Public Class InterfaceDeclarations
         ' --- Events ---
         Event ModulStateChanged(newState As String)
         Event PleaseChangeToShader(shaderName As String)
-        Event PleaseChangeToTransition(transitionName As String)
+        Event PleaseChangeToTransition(sender As Object, transitionName As String)
 
         ' --- Modulsteuerung ---
         Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing)
@@ -49,7 +49,7 @@ Public Class InterfaceDeclarations
 
         ' --- Info-Kommunikation ---
         Sub AttentionShaderGewechselt(shaderName As String)
-        Sub AttentionTransitionGewechselt(transitionName As String)
+        Sub AttentionTransitionGewechselt(sender As Object, transitionName As String)
         Sub CheckYourSettings()
 
     End Interface
