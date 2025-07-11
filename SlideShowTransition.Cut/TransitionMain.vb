@@ -9,10 +9,10 @@ Public Class TransitionMain
     Implements ISlideShowTransition
 
     'Variablendeklaration
-    Private newImage As Image
-    Private newPicBoxSizeMode As PictureBoxSizeMode
-    Private targetGrapics As Graphics
-    Private clientSize As Size
+    Private newImg As Image
+    Private newPicBoxSM As PictureBoxSizeMode
+    Private renderTarget As Graphics
+    Private clntSize As Size
 
     Public ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
         Get
@@ -37,13 +37,17 @@ Public Class TransitionMain
 
     Public Sub RunTransition(oldImage As System.Drawing.Image, picBoxModeOld As Windows.Forms.PictureBoxSizeMode, newImage As System.Drawing.Image, picBoxModeNew As Windows.Forms.PictureBoxSizeMode, targetGraphics As System.Drawing.Graphics, Optional clientSize As System.Drawing.Size = Nothing, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
         'Formal noch einmal TransitionIsRunning werfen.
-        RaiseEvent TransitionIsRunning("Running")
+        RaiseEvent TransitionIsRunning(True)
 
         'Parameter in interne Variablen überführen
-        Me.newImage = newImage
-        Me.newPicBoxSizeMode = picBoxModeNew
-        Me.targetGrapics = targetGraphics
-        Me.clientSize = clientSize
+        newImg = newImage
+        newPicBoxSM = picBoxModeNew
+        renderTarget = targetGraphics
+        clntSize = clientSize
+
+        If clntSize.IsEmpty Then
+            clntSize = renderTarget.VisibleClipBounds.Size.ToSize()
+        End If
 
         'Gleich zum Ende der Transition.
         StopTransition()
@@ -54,21 +58,21 @@ Public Class TransitionMain
         'Zeichnet newImage auf den Zeichenbereich und gut
         Dim drawRect As Rectangle
         Dim targetRect As Rectangle
-        Dim bmp As New Bitmap(clientSize.Width, clientSize.Height)
+        Dim bmp As New Bitmap(clntSize.Width, clntSize.Height)
 
         'Grafik vorbereiten
-        targetRect = New Rectangle(0, 0, clientSize.Width, clientSize.Height)
-        drawRect = GetDrawRectangle(newImage.Size, targetRect, newPicBoxSizeMode)
+        targetRect = New Rectangle(0, 0, clntSize.Width, clntSize.Height)
+        drawRect = GetDrawRectangle(newImg.Size, targetRect, newPicBoxSM)
 
         Using g As Graphics = Graphics.FromImage(bmp)
             g.InterpolationMode = InterpolationMode.HighQualityBicubic
             g.Clear(Color.Black)
 
             ' Endbild gnadenlos auf den Zeichenbereich malen...
-            g.DrawImage(newImage, drawRect)
+            g.DrawImage(newImg, drawRect)
         End Using
 
-        RaiseEvent TransitionIsRunning("Stopped")
+        RaiseEvent TransitionIsRunning(False)
 
     End Sub
 

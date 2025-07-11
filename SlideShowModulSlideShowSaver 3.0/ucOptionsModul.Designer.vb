@@ -121,7 +121,7 @@ Partial Class ucOptionsModul
         'cmbEffektauswahl
         '
         Me.cmbEffektauswahl.FormattingEnabled = True
-        Me.cmbEffektauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge"})
+        Me.cmbEffektauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
         Me.cmbEffektauswahl.Location = New System.Drawing.Point(500, 529)
         Me.cmbEffektauswahl.Name = "cmbEffektauswahl"
         Me.cmbEffektauswahl.Size = New System.Drawing.Size(361, 49)
@@ -158,7 +158,7 @@ Partial Class ucOptionsModul
         'cmbShaderauswahl
         '
         Me.cmbShaderauswahl.FormattingEnabled = True
-        Me.cmbShaderauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge"})
+        Me.cmbShaderauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
         Me.cmbShaderauswahl.Location = New System.Drawing.Point(500, 878)
         Me.cmbShaderauswahl.Name = "cmbShaderauswahl"
         Me.cmbShaderauswahl.Size = New System.Drawing.Size(361, 49)

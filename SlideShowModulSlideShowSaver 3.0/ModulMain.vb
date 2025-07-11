@@ -3,19 +3,19 @@ Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowBildauswahl.BildauswahlMain
 
 Public Class ModulMain
     Implements ISlideShowModul
 
     ' Variablen, Konstanten, ENUMs etc. deklarieren.
-    Public Shared aktuelleSettings As ModulSettings_SlideShowSaver_3_0
+    Public Shared aktuelleSettings As ModulSettings_SSS_3_0
     Public Const SLIDESHOWMODUL_SSS_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
     Public Shared Property activeModuleInstanz As ISlideShowModul
     Public Shared Property sssScreen As frmModulMain
-    Public Shared sssInitializing As frmModulBitteWarten
     Public Shared sssPause As frmPauseModusOverlay
     Public Shared Property sssInfo As frmPictureInfo
-    Private zwischenspeicherSettings As ModulSettings_SlideShowSaver_3_0
+    Private zwischenspeicherSettings As ModulSettings_SSS_3_0
     Public Shared pauseIsActive As Boolean = False
 
 
@@ -31,7 +31,7 @@ Public Class ModulMain
     }
 
     ' === Struktur für die Moduloptionen ===
-    Public Structure ModulSettings_SlideShowSaver_3_0
+    Public Structure ModulSettings_SSS_3_0
         Public Bildauswahl As String
         Public Anzeigedauer As Integer
         Public Transitionseffekte As List(Of String)
@@ -89,23 +89,15 @@ Public Class ModulMain
         'Initialisiert und startet das eigentliche Modul
         activeModuleInstanz = Me
 
-        If sssInitializing Is Nothing Then
-            sssInitializing = New frmModulBitteWarten()
-        End If
-
         If sssScreen Is Nothing Then
             sssScreen = New frmModulMain()
         End If
-
-        sssInitializing.Show()
 
         CheckYourSettings()
 
         RaiseEvent ModulStateChanged("Running")
 
-        sssInitializing.Close()
         sssScreen.Show()
-
 
     End Sub
 
@@ -173,13 +165,13 @@ Public Class ModulMain
         Dim dict = SlideShowTools.ConversionHandling.UserControlZuDictionary(uc)
         Dim translatedDict As New Dictionary(Of String, String)
 
-        'Wandlung der Dictionary-Keys von UC-Namen zu Registry/ModulSettings_SlideShowSaver_3_0-Namen
+        'Wandlung der Dictionary-Keys von UC-Namen zu Registry/ModulSettings_SSS_3_0-Namen
         For Each schluessel In dict.Keys
             translatedDict.Item(translationTable(schluessel)) = dict(schluessel)
         Next
 
         'Abgeschaltet bis der ""$§%"§$-Fehler in ConversionsHandling.DictionaryZuStruktur() gefunden wurde
-        'zwischenspeicherSettings = SlideShowTools.ConversionHandling.DictionaryZuStruktur(Of ModulSettings_SlideShowSaver_3_0)(translatedDict)
+        'zwischenspeicherSettings = SlideShowTools.ConversionHandling.DictionaryZuStruktur(Of ModulSettings_SSS_3_0)(translatedDict)
         zwischenspeicherSettings.Bildauswahl = translatedDict("Bildauswahl")
         zwischenspeicherSettings.Anzeigedauer = CInt(translatedDict("Anzeigedauer"))
         zwischenspeicherSettings.Transitionseffekte = SplitSemicolonList(translatedDict("Transitionseffekte"))
@@ -196,8 +188,8 @@ Public Class ModulMain
         'Schreibt die Settings nach Beenden der frmOptionsMain in die Registry
 
         'Cast weil "settings" (als Teil der generischen Interface-Deklaration) vom Typ Object ist.
-        If TypeOf settings Is ModulSettings_SlideShowSaver_3_0 Then
-            zwischenspeicherSettings = CType(settings, ModulSettings_SlideShowSaver_3_0)
+        If TypeOf settings Is ModulSettings_SSS_3_0 Then
+            zwischenspeicherSettings = CType(settings, ModulSettings_SSS_3_0)
         End If
 
         '...und ab dafür...
@@ -229,10 +221,10 @@ Public Class ModulMain
         Dim translatedDic As New Dictionary(Of String, String)
         Dim dict As New Dictionary(Of String, String)
 
-        If TypeOf restoreSettings Is ModulSettings_SlideShowSaver_3_0 Then
-            dict = SlideShowTools.ConversionHandling.StrukturZuDictionary(CType(restoreSettings, ModulSettings_SlideShowSaver_3_0))
+        If TypeOf restoreSettings Is ModulSettings_SSS_3_0 Then
+            dict = SlideShowTools.ConversionHandling.StrukturZuDictionary(CType(restoreSettings, ModulSettings_SSS_3_0))
 
-            'Wandlung der Dictionary-Keys von Registry/ModulSettings_SlideShowSaver_3_0-Namen zu UC-Namen
+            'Wandlung der Dictionary-Keys von Registry/ModulSettings_SSS_3_0-Namen zu UC-Namen
             For Each keyValuePair As KeyValuePair(Of String, String) In translationTable
                 'dict:             cmbStimmung | "Mir doch egal"
                 'translationTable: cmbStimmung | Stimmung
@@ -277,7 +269,7 @@ Public Class ModulMain
 
         defaultModulSettings("Bildauswahl") = "Zufallsbild"
         defaultModulSettings("Anzeigedauer") = "20"
-        defaultModulSettings("Transistionseffekte") = ""
+        defaultModulSettings("Transitionseffekte") = ""
         defaultModulSettings("TransitionsReihenfolge") = "Zufällig bei Start"
         defaultModulSettings("Shader") = ""
         defaultModulSettings("ShaderReihenfolge") = "Zufällig bei Start"

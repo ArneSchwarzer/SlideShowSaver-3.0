@@ -122,6 +122,21 @@ SlideShowTools
  <param name="list">Die Quellliste</param>
  <returns>Ein String mit Semikolon-separierten Einträgen</returns>
 </member>
+<member name="T:SlideShowTools.SharedDataHandling">
+ <summary>
+ Globale Daten, die modulübergreifend von SaverMain aus bereitgestellt werden.
+ </summary>
+</member>
+<member name="P:SlideShowTools.SharedDataHandling.StartBild">
+ <summary>
+ Enthält den Screenshot vom Desktop zum Zeitpunkt des Starts von SaverMain.
+ </summary>
+</member>
+<member name="P:SlideShowTools.SharedDataHandling.StartBildWurdeVerwendet">
+ <summary>
+ Gibt an, ob ein Modul das Startbild bereits verwendet hat.
+ </summary>
+</member>
 <member name="M:SlideShowTools.ToolTipHandling.EnableToolTipsForCLB(System.Windows.Forms.CheckedListBox)">
  <summary>
  Initialisiert ToolTips für eine CheckedListBox mit SlideShowModulInfo, SlideShowTransitionInfo oder SlideShowShaderInfo.

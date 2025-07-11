@@ -11,6 +11,7 @@ Imports SlideShowTools.ListHandling
 Imports System.Windows.Forms
 Imports SlideShowInterfaces
 Imports SlideShowTools
+Imports SlideShowLogging
 
 
 
@@ -59,7 +60,9 @@ Public Class ucOptionsModul
         If clbTransitions.Items.Count = 1 Then
             clbTransitions.SetItemCheckState(0, CheckState.Checked)
         End If
+#End Region
 
+#Region "cmbEffektauswahl Initialisieren"
         'cmbEffektauswahl
         If clbTransitions.CheckedItems.Count = 1 Then
             cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
@@ -154,9 +157,6 @@ Public Class ucOptionsModul
             meineInstanz.AttentionShaderGewechselt(clbShader.SelectedItem.ToString)
         End If
 
-        'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(clbShader, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Shader")
-
     End Sub
 
     Private Sub clbTransitions_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitions.SelectedIndexChanged
@@ -164,9 +164,6 @@ Public Class ucOptionsModul
         If clbTransitions.SelectedItem IsNot Nothing Then
             meineInstanz.AttentionTransitionGewechselt(clbTransitions, clbTransitions.SelectedItem.ToString)
         End If
-
-        'DirectCommit
-        CheckedListBoxHandling.SaveListBoxToRegistry(clbTransitions, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte")
 
     End Sub
 
@@ -198,4 +195,49 @@ Public Class ucOptionsModul
 
     End Sub
 
+    Private Sub clbTransitions_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbTransitions.ItemCheck
+        Try
+            BeginInvoke(Sub()
+                            If clbTransitions.CheckedItems.Count = 1 Then
+                                cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
+                                cmbEffektauswahl.Enabled = False
+                                lblNcmbEffektauswahl.Enabled = False
+                                clbTransitions.Enabled = True
+                            Else
+                                cmbEffektauswahl.Enabled = True
+                                lblNcmbEffektauswahl.Enabled = True
+                                clbTransitions.Enabled = True
+                            End If
+
+                            'DirectCommit
+                            CheckedListBoxHandling.SaveListBoxToRegistry(clbTransitions, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Transitionseffekte")
+
+                        End Sub)
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Private Sub clbShader_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbShader.ItemCheck
+        Try
+            BeginInvoke(Sub()
+                            If clbShader.CheckedItems.Count = 1 Then
+                                cmbShaderauswahl.SelectedIndex = 0 'Zufällig bei Start
+                                cmbShaderauswahl.Enabled = False
+                                lblNcmbShaderauswahl.Enabled = False
+                                clbShader.Enabled = True
+                            Else
+                                cmbShaderauswahl.Enabled = True
+                                lblNcmbShaderauswahl.Enabled = True
+                                clbShader.Enabled = True
+                            End If
+
+                            'DirectCommit
+                            CheckedListBoxHandling.SaveListBoxToRegistry(clbShader, ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Shader")
+
+                        End Sub)
+        Catch ex As Exception
+            LogHandling.LogWarn("SSS 3.0: ucOptionsModul - Problem bei clbShader_ItemCheck: " & ex.ToString)
+        End Try
+    End Sub
 End Class

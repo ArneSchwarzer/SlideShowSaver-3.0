@@ -126,7 +126,7 @@ Partial Class frmOptionsMain
         'cmbTransitionsReihenfolge
         '
         Me.cmbTransitionsReihenfolge.FormattingEnabled = True
-        Me.cmbTransitionsReihenfolge.Items.AddRange(New Object() {"Zufällig", "Zufällig bei Start"})
+        Me.cmbTransitionsReihenfolge.Items.AddRange(New Object() {"Zufällig bei Start", "In Reihenfolge bei Start"})
         Me.cmbTransitionsReihenfolge.Location = New System.Drawing.Point(489, 889)
         Me.cmbTransitionsReihenfolge.Name = "cmbTransitionsReihenfolge"
         Me.cmbTransitionsReihenfolge.Size = New System.Drawing.Size(388, 49)

@@ -5,6 +5,7 @@ Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports System.Drawing.Drawing2D
+Imports SlideShowTools
 
 Public Class TransitionMain
     Implements ISlideShowTransition
@@ -19,6 +20,8 @@ Public Class TransitionMain
 
     Private oldImg As Image
     Private newImg As Image
+    Private oldBmpGerahmt As Bitmap
+    Private newBmpGerahmt As Bitmap
     Private oldPicBoxSizeMode As PictureBoxSizeMode
     Private newPicBoxSizeMode As PictureBoxSizeMode
     Private renderTarget As Graphics
@@ -26,8 +29,6 @@ Public Class TransitionMain
     Private bewegungNewImage As BewegungsInfos
 
     Private cltSize As Size
-    Private drawRectOld As Rectangle
-    Private drawRectNew As Rectangle
     Private targetRect As Rectangle
     Private bmp As Bitmap
     Private zeichenFlaeche As Graphics
@@ -89,14 +90,15 @@ Public Class TransitionMain
         cltSize = clientSize
 
         'Grafikobjekte initialisieren (das muss ja nun nicht bei jedem Timer-Tick passieren)
-        If clientSize.IsEmpty Then
-            clientSize = renderTarget.VisibleClipBounds.Size.ToSize()
+        If cltSize.IsEmpty Then
+            cltSize = renderTarget.VisibleClipBounds.Size.ToSize()
         End If
 
-        bmp = New Bitmap(clientSize.Width, clientSize.Height)
-        targetRect = New Rectangle(0, 0, clientSize.Width, clientSize.Height)
-        drawRectOld = GetDrawRectangle(oldImage.Size, targetRect, oldPicBoxSizeMode)
-        drawRectNew = GetDrawRectangle(newImage.Size, targetRect, newPicBoxSizeMode)
+        bmp = New Bitmap(cltSize.Width, cltSize.Height)
+        targetRect = New Rectangle(0, 0, cltSize.Width, cltSize.Height)
+
+        oldBmpGerahmt = ErzeugeGerahmtesBild(oldImg, oldPicBoxSizeMode, cltSize)
+        newBmpGerahmt = ErzeugeGerahmtesBild(newImg, newPicBoxSizeMode, cltSize)
 
         'Aktuelle Settings abholen
         GetCurrentTransitionSettings()
@@ -115,72 +117,72 @@ Public Class TransitionMain
 
         richtung = aktuelleTransitionSettings.richtungen(rnd.Next(aktuelleTransitionSettings.richtungen.Count))
 
-        'Select Case richtung
-        '    Case "NW"
-        bewegungNewImage.aktuellePositionX = -drawRectNew.Width
-        bewegungNewImage.aktuellePositionY = -drawRectNew.Height
-        bewegungNewImage.directionX = 1
-        bewegungNewImage.directionY = 1
+        Select Case richtung
+            Case "NW"
+                bewegungNewImage.aktuellePositionX = -newBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = -newBmpGerahmt.Height
+                bewegungNewImage.directionX = 1
+                bewegungNewImage.directionY = 1
 
-        bewegungOldImage.directionX = 1
-        bewegungOldImage.directionY = 1
-        '   Case "N"
-        '        bewegungNewImage.aktuellePositionX = 0
-        '        bewegungNewImage.aktuellePositionY = -drawRectNew.Height
-        '        bewegungNewImage.directionX = 0
-        '        bewegungNewImage.directionY = 1
+                bewegungOldImage.directionX = 1
+                bewegungOldImage.directionY = 1
+            Case "N"
+                bewegungNewImage.aktuellePositionX = 0
+                bewegungNewImage.aktuellePositionY = -newBmpGerahmt.Height
+                bewegungNewImage.directionX = 0
+                bewegungNewImage.directionY = 1
 
-        '        bewegungOldImage.directionX = 0
-        '        bewegungOldImage.directionY = 1
-        '    Case "NO"
-        '        bewegungNewImage.aktuellePositionX = drawRectOld.Width
-        '        bewegungNewImage.aktuellePositionY = -drawRectNew.Height
-        '        bewegungNewImage.directionX = -1
-        '        bewegungNewImage.directionY = 1
+                bewegungOldImage.directionX = 0
+                bewegungOldImage.directionY = 1
+            Case "NO"
+                bewegungNewImage.aktuellePositionX = oldBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = -newBmpGerahmt.Height
+                bewegungNewImage.directionX = -1
+                bewegungNewImage.directionY = 1
 
-        '        bewegungOldImage.directionX = -1
-        '        bewegungOldImage.directionY = 1
-        '    Case "O"
-        'bewegungNewImage.aktuellePositionX = drawRectOld.Width
-        '        bewegungNewImage.aktuellePositionY = 0
-        '        bewegungNewImage.directionX = -1
-        '        bewegungNewImage.directionY = 0
+                bewegungOldImage.directionX = -1
+                bewegungOldImage.directionY = 1
+            Case "O"
+                bewegungNewImage.aktuellePositionX = oldBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = 0
+                bewegungNewImage.directionX = -1
+                bewegungNewImage.directionY = 0
 
-        '        bewegungOldImage.directionX = -1
-        '        bewegungOldImage.directionY = 0
-        '    Case "SO"
-        '        bewegungNewImage.aktuellePositionX = drawRectOld.Width
-        '        bewegungNewImage.aktuellePositionY = drawRectOld.Height
-        '        bewegungNewImage.directionX = -1
-        '        bewegungNewImage.directionY = -1
+                bewegungOldImage.directionX = -1
+                bewegungOldImage.directionY = 0
+            Case "SO"
+                bewegungNewImage.aktuellePositionX = oldBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = oldBmpGerahmt.Height
+                bewegungNewImage.directionX = -1
+                bewegungNewImage.directionY = -1
 
-        '        bewegungOldImage.directionX = -1
-        '        bewegungOldImage.directionY = -1
-        '    Case "S"
-        '        bewegungNewImage.aktuellePositionX = 0
-        '        bewegungNewImage.aktuellePositionY = drawRectOld.Height
-        '        bewegungNewImage.directionX = 0
-        '        bewegungNewImage.directionY = -1
+                bewegungOldImage.directionX = -1
+                bewegungOldImage.directionY = -1
+            Case "S"
+                bewegungNewImage.aktuellePositionX = 0
+                bewegungNewImage.aktuellePositionY = oldBmpGerahmt.Height
+                bewegungNewImage.directionX = 0
+                bewegungNewImage.directionY = -1
 
-        '        bewegungOldImage.directionX = 0
-        '        bewegungOldImage.directionY = -1
-        '    Case "SW"
-        '        bewegungNewImage.aktuellePositionX = -drawRectNew.Width
-        '        bewegungNewImage.aktuellePositionY = drawRectOld.Height
-        '        bewegungNewImage.directionX = 1
-        '        bewegungNewImage.directionY = -1
+                bewegungOldImage.directionX = 0
+                bewegungOldImage.directionY = -1
+            Case "SW"
+                bewegungNewImage.aktuellePositionX = -newBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = oldBmpGerahmt.Height
+                bewegungNewImage.directionX = 1
+                bewegungNewImage.directionY = -1
 
-        '        bewegungOldImage.directionX = 1
-        '        bewegungOldImage.directionY = -1
-        '    Case "W"
-        '        bewegungNewImage.aktuellePositionX = -drawRectNew.Width
-        '        bewegungNewImage.aktuellePositionY = 0
-        '        bewegungNewImage.directionX = 1
-        '        bewegungNewImage.directionY = 0
+                bewegungOldImage.directionX = 1
+                bewegungOldImage.directionY = -1
+            Case "W"
+                bewegungNewImage.aktuellePositionX = -newBmpGerahmt.Width
+                bewegungNewImage.aktuellePositionY = 0
+                bewegungNewImage.directionX = 1
+                bewegungNewImage.directionY = 0
 
-        '        bewegungOldImage.directionX = 1
-        '        bewegungOldImage.directionY = 0
-        'End Select
+                bewegungOldImage.directionX = 1
+                bewegungOldImage.directionY = 0
+        End Select
 
         'Startposition des alten Bildes ist natürlich (0,0)
         bewegungOldImage.aktuellePositionX = 0
@@ -206,18 +208,22 @@ Public Class TransitionMain
         Dim distX As Integer = Math.Abs(bewegungNewImage.aktuellePositionX - endPunkt.X)
         Dim distY As Integer = Math.Abs(bewegungNewImage.aktuellePositionY - endPunkt.Y)
 
-        ' Jetzt korrekt:
+        ' Offset berechnen
         offsetX = distX / (aktuelleTransitionSettings.geschwindigkeit * fps)
         offsetY = distY / (aktuelleTransitionSettings.geschwindigkeit * fps)
-
 
         'Timer initialisieren
         If tmrAnimation Is Nothing Then tmrAnimation = New Timer()
         If tmrDuration Is Nothing Then tmrDuration = New Timer()
+
         tmrAnimation.Interval = 1000 \ fps
-        tmrDuration.Interval = If(durationMs > 0, durationMs, 999999)
         tmrAnimation.Start()
-        tmrDuration.Start()
+
+        If durationMs > 0 Then
+            tmrDuration.Interval = durationMs
+            tmrDuration.Start()
+        End If
+
 
     End Sub
     Sub StopTransition() Implements ISlideShowTransition.StopTransition
@@ -313,41 +319,62 @@ Public Class TransitionMain
 
     End Sub
 
-    Sub tmrAnimation_Tick() Handles tmrAnimation.Tick
-        ' Bewegungen berechnen
-        Dim drawPosOld As New Point(drawRectOld.X + bewegungOldImage.aktuellePositionX,
-                                drawRectOld.Y + bewegungOldImage.aktuellePositionY)
-        Dim drawPosNew As New Point(drawRectNew.X + bewegungNewImage.aktuellePositionX,
-                                drawRectNew.Y + bewegungNewImage.aktuellePositionY)
+    Private Sub tmrAnimation_Tick(sender As Object, e As EventArgs) Handles tmrAnimation.Tick
+        ' --- Positionen aktualisieren ---
+        bewegungOldImage.aktuellePositionX += CInt(offsetX) * bewegungOldImage.directionX
+        bewegungOldImage.aktuellePositionY += CInt(offsetY) * bewegungOldImage.directionY
+        bewegungNewImage.aktuellePositionX += CInt(offsetX) * bewegungNewImage.directionX
+        bewegungNewImage.aktuellePositionY += CInt(offsetY) * bewegungNewImage.directionY
 
-        ' Abbruchbedingung prüfen
-        If IstZielErreicht(endPunkt, drawRectNew.Location, 3) Then
+        ' --- Ziel erreicht? ---
+        Dim aktuellePosition As New Point(bewegungNewImage.aktuellePositionX, bewegungNewImage.aktuellePositionY)
+        If IstZielErreicht(endPunkt, aktuellePosition, Math.Max(offsetX, offsetY)) Then
             StopTransition()
             Return
         End If
 
-        ' Zeichnung in den Puffer
-        zeichenFlaeche = Graphics.FromImage(bmp)
-        zeichenFlaeche.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
-        zeichenFlaeche.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-        zeichenFlaeche.Clear(Color.Black)
-        zeichenFlaeche.DrawImage(oldImg, New Rectangle(drawPosOld, drawRectOld.Size))
-        zeichenFlaeche.DrawImage(newImg, New Rectangle(drawPosNew, drawRectNew.Size))
+        ' --- Neues Bild generieren ---
+        bmp = New Bitmap(cltSize.Width, cltSize.Height)
+        Using zeichenFlaeche As Graphics = Graphics.FromImage(bmp)
+            zeichenFlaeche.Clear(Color.Black)
 
-        ' Zeichne final auf die Ziel-Grafik
-        renderTarget.DrawImageUnscaled(bmp, 0, 0)
-        zeichenFlaeche = Nothing
+            ' Altes Bild zeichnen
+            Dim zielRectOld As New Rectangle(
+            New Point(bewegungOldImage.aktuellePositionX, bewegungOldImage.aktuellePositionY),
+            cltSize)
+            zeichenFlaeche.DrawImage(oldBmpGerahmt, zielRectOld)
 
-        ' Nächster Schritt
-        bewegungOldImage.aktuellePositionX += offsetX * bewegungOldImage.directionX
-        bewegungOldImage.aktuellePositionY += offsetY * bewegungOldImage.directionY
-        bewegungNewImage.aktuellePositionX += offsetX * bewegungNewImage.directionX
-        bewegungNewImage.aktuellePositionY += offsetY * bewegungNewImage.directionY
+            ' Neues Bild zeichnen
+            Dim zielRectNew As New Rectangle(
+            New Point(bewegungNewImage.aktuellePositionX, bewegungNewImage.aktuellePositionY),
+            cltSize)
+            zeichenFlaeche.DrawImage(newBmpGerahmt, zielRectNew)
+        End Using
+
+        ' --- Ausgabe aufs Ziel ---
+        renderTarget.DrawImage(bmp, 0, 0)
+        bmp.Dispose()
     End Sub
 
 
     Private Function IstZielErreicht(p1 As Point, p2 As Point, tolerance As Integer) As Boolean
         Return Math.Abs(p1.X - p2.X) <= tolerance AndAlso Math.Abs(p1.Y - p2.Y) <= tolerance
+    End Function
+
+    Private Function ErzeugeGerahmtesBild(bild As Image, sizeMode As PictureBoxSizeMode, zielgroesse As Size) As Bitmap
+        'Erstellt ein Bitmap mit dem Bild gemäß SizeMode mit schwarzem Rahmen in der Zielgröße
+
+        bmp = New Bitmap(zielgroesse.Width, zielgroesse.Height)
+
+        Using g As Graphics = Graphics.FromImage(bmp)
+            g.Clear(Color.Black)
+            Dim drawRect As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bild.Size, targetRect, sizeMode)
+            g.DrawImage(bild, drawRect)
+        End Using
+
+        Return bmp
+        bmp.Dispose()
+
     End Function
 
 End Class

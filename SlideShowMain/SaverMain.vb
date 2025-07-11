@@ -5,6 +5,9 @@ Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowBildauswahl.BildauswahlMain
+Imports SlideShowTools.SharedDataHandling
+Imports SlideShowTools
 
 Module SaverMain
     ' -- Initialisierung von globalen Variablen --
@@ -23,6 +26,7 @@ Module SaverMain
     Public listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Public listOfEnabledTransitions As List(Of String)
     Public activeTransition As ISlideShowTransition = Nothing
+    Private initialerScreenshot As Image = GetCurrentScreen()
 
     'Für Settings & Options-Dialog
     Public optionsDialog As frmOptionsMain = Nothing
@@ -57,6 +61,10 @@ Module SaverMain
 
         'Hallo sagen
         LogHandling.LogInfo("SlideShowSaver 3.0 Framework wurde gestartet")
+
+        'Modulen den initialen Screenshot zur Verfügung stellen
+        StartBild = initialerScreenshot
+        StartBildWurdeVerwendet = False
 
         'Fallbackserver instanzieren und MCP initialisieren
         fallbackInstanz = New frmFallbackSaver()

@@ -4,14 +4,26 @@ Imports SlideShowTools
 Imports SlideShowTools.KeyAndMouseHandling
 Imports SlideShowMain.SaverMain
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.ListHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports SlideShowLogging
 Imports SlideShowLoader
 Imports SlideShowBildauswahl
+Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowTools.SharedDataHandling
 
 
 Public Class frmSaverMain
     'Variablendeklarationen 
+
+    'Variablen für die Start-Transition
+    Private WithEvents einmaligeTransition As ISlideShowTransition
+    Private transitionBeendet As New Threading.ManualResetEventSlim(False)
+    Private startScreen As Image
+    Private startLogo As Image
+    Private picMain As PictureBox
+    Private letzteTransition As String
+    Private startTransition As String = Nothing
 
     'Default Main Settings
     Public defaults As Dictionary(Of String, String) = GetMainDefaultSettings()
@@ -36,12 +48,44 @@ Public Class frmSaverMain
         LegitimeListeErstellen()
         BildauswahlMain.CheckYourSettings() 'Bildauswahl Bescheid geben, dass es losgeht
 
+        'Transition vorbereiten
+        listOfEnabledTransitions = SplitSemicolonList(ReadFromRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionListe"))
+
+        If listOfEnabledTransitions.Count > 0 Then
+            listOfAvailableTransitions = TransitionListLoader.LadeTransitionInfoListe()
+            letzteTransition = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespieleTransition")
+
+            Select Case ReadFromRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge")
+                Case "Zufällig bei Start"
+                    Do
+                        startTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    Loop Until listOfAvailableTransitions.Any(Function(t) t.TransitionName = startTransition)
+                Case "In Reihenfolge bei Start"
+                    startTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransition)
+            End Select
+
+            picMain.Dock = DockStyle.Fill
+            picMain.SizeMode = PictureBoxSizeMode.Zoom
+            picMain.BackColor = Color.Black
+
+            If Not StartBildWurdeVerwendet Then
+                startScreen = StartBild
+            Else
+                startScreen = GetCurrentScreen()
+            End If
+
+            startLogo = My.Resources.Splashscreen
+
+        End If
+
+
     End Sub
 
     Private Sub frmSaverMain_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         'Das MCP anzeigen
 
         Dim erstesModul As String
+        Dim picMainGFX As Graphics = Nothing
 
         'MCP sagt "Hallo"
         LogHandling.LogInfo("MCP wurde gestartet.")
@@ -59,6 +103,15 @@ Public Class frmSaverMain
         Else
             fallbackIsActive = True
             fallbackPaused = False
+        End If
+
+        'Falls eine Transition ausgewählt ist, vor dem Start des ersten Moduls Start-Transition zeigen.
+        If startTransition IsNot Nothing Then
+            picMainGFX = Graphics.FromHwnd(picMain.Handle)
+            ZeigeEinmaligeStartTransition(StartBild, startLogo, picMainGFX, startTransition)
+            If transitionReihenfolge = "In Reihenfolge bei Start" Then
+                WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", startTransition)
+            End If
         End If
 
         'Das gewählte Modul anzeigen.
@@ -136,7 +189,7 @@ Public Class frmSaverMain
         modulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaults))
         modulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaults)
 
-        If modulReihenfolge <> "Zufällig bei Start" Then
+        If modulReihenfolge <> "Zufällig bei Start" AndAlso listOfEnabledModules.Count > 1 Then
             'Main Loop gemäß ModulDauer in Minuten setzten & Starten
             tmrMain.Interval = modulDauer * 60 * 1000
             tmrMain.Start()
@@ -306,4 +359,32 @@ Public Class frmSaverMain
         Application.Exit()
 
     End Sub
+
+    Private Sub ZeigeEinmaligeStartTransition(startBild As Image, zielBild As Image, g As Graphics, transition As String)
+
+        ' Transition initialisieren
+        einmaligeTransition = TransitionByNameLoader.LadeTransitionNachName(transition)
+        AddHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
+
+        ' Starten
+        einmaligeTransition.RunTransition(startBild, PictureBoxSizeMode.Zoom, zielBild,
+         PictureBoxSizeMode.CenterImage, g,
+        picMain.ClientSize, 3000)
+
+        ' Auf Beendigung warten (max. 5 Sekunden als Sicherheit)
+        transitionBeendet.Wait(5000)
+
+        ' Aufräumen
+        RemoveHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
+        einmaligeTransition = Nothing
+        transitionBeendet.Reset()
+
+    End Sub
+
+    Private Sub TransitionEinmalBeendet(state As Boolean)
+        If state = False Then
+            transitionBeendet.Set()
+        End If
+    End Sub
+
 End Class
