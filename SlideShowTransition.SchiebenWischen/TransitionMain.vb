@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowLogging.LogHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports System.Drawing.Drawing2D
 Imports SlideShowTools
@@ -103,6 +104,7 @@ Public Class TransitionMain
         'Aktuelle Settings abholen
         GetCurrentTransitionSettings()
 
+#Region "Richtungen festlegen"
         'Richtung für die Transition aussuchen und Bewegungsinfos setzen (und dabei ein paar if-then sparen... ;-)
         If aktuelleTransitionSettings.richtungen.Count = 0 Then
             aktuelleTransitionSettings.richtungen.Add("NW")
@@ -203,6 +205,7 @@ Public Class TransitionMain
             bewegungOldImage.directionX = 0
             bewegungOldImage.directionY = 0
         End If
+#End Region
 
         ' Berechne notwendige Distanz zwischen Startpunkt und Zielpunkt:
         Dim distX As Integer = Math.Abs(bewegungNewImage.aktuellePositionX - endPunkt.X)
@@ -304,15 +307,20 @@ Public Class TransitionMain
         Dim targetRect As Rectangle
 
         'Grafik vorbereiten
+        bmp = New Bitmap(cltSize.Width, cltSize.Height)
         targetRect = New Rectangle(0, 0, cltSize.Width, cltSize.Height)
-        drawRect = GetDrawRectangle(newImg.Size, targetRect, newPicBoxSizeMode)
+        drawRect = GetDrawRectangle(newBmpGerahmt.Size, targetRect, newPicBoxSizeMode)
 
-        renderTarget = Graphics.FromImage(bmp)
-        renderTarget.InterpolationMode = InterpolationMode.HighQualityBicubic
-        renderTarget.Clear(Color.Black)
+        Try
+            renderTarget = Graphics.FromImage(bmp)
+            renderTarget.InterpolationMode = InterpolationMode.HighQualityBicubic
+            renderTarget.Clear(Color.Black)
 
-        ' Endbild gnadenlos auf den Zeichenbereich malen...
-        renderTarget.DrawImage(newImg, drawRect)
+            ' Endbild gnadenlos auf den Zeichenbereich malen...
+            renderTarget.DrawImage(newBmpGerahmt, drawRect)
+        Catch ex As Exception
+            LogError("Transition Schieben & Wischen: TransitionMain.tmrDurationTick() - Fehler beim Erstellen von renderTarget: " & ex.Message)
+        End Try
 
         '...und dann raus aus der Transition.
         StopTransition()

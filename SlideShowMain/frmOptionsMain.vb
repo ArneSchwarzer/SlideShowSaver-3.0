@@ -444,7 +444,7 @@ Public Class frmOptionsMain
         Dim clb As CheckedListBox = DirectCast(sender, CheckedListBox)
 
         BeginInvoke(New MethodInvoker(Sub()
-                                          CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulTransitionsReihenfolge")
+                                          CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulTransitionListe")
                                       End Sub))
 
     End Sub

@@ -70,7 +70,7 @@ set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Schwa
 set "SOURCE4=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\bin\Debug\SlideShowShader.ToenenFaerben.dll"
 set "SOURCE5=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Originalbild\bin\Debug\SlideShowShader.Originalbild.pdb"
 set "SOURCE6=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\SlideShowShader.Nachtsicht.pdb"
-set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.pdb"
+set "SOURCE7=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.pdb"
 set "SOURCE8=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\bin\Debug\SlideShowShader.ToenenFaerben.pdb"
 
 :: Zielverzeichnis
@@ -90,10 +90,10 @@ copy /Y "%SOURCE1%" "%TARGET%\Originalbild.ssss"
 copy /Y "%SOURCE2%" "%TARGET%\Nachtsicht.ssss"
 copy /Y "%SOURCE3%" "%TARGET%\Schwarz-Weiss.ssss"
 copy /Y "%SOURCE4%" "%TARGET%\Toenen und Faerben.ssss"
-copy /Y "%SOURCE1%" "%TARGET%\Originalbild.ssss"
-copy /Y "%SOURCE2%" "%TARGET%\Nachtsicht.ssss"
-copy /Y "%SOURCE3%" "%TARGET%\Schwarz-Weiss.ssss"
-copy /Y "%SOURCE4%" "%TARGET%\Toenen und Faerben.ssss"
+copy /Y "%SOURCE5%" "%TARGET%\Originalbild.pdb"
+copy /Y "%SOURCE6%" "%TARGET%\Nachtsicht.pdb"
+copy /Y "%SOURCE7%" "%TARGET%\Schwarz-Weiss.pdb"
+copy /Y "%SOURCE8%" "%TARGET%\Toenen und Faerben.pdb"
 
 echo Shader kopiert.
 echo.

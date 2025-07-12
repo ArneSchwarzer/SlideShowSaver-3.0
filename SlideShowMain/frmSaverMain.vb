@@ -64,6 +64,7 @@ Public Class frmSaverMain
                     startTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransition)
             End Select
 
+            picMain = New PictureBox
             picMain.Dock = DockStyle.Fill
             picMain.SizeMode = PictureBoxSizeMode.Zoom
             picMain.BackColor = Color.Black
@@ -189,7 +190,7 @@ Public Class frmSaverMain
         modulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaults))
         modulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaults)
 
-        If modulReihenfolge <> "Zufällig bei Start" AndAlso listOfEnabledModules.Count > 1 Then
+        If modulReihenfolge <> "Zufällig bei Start" Then
             'Main Loop gemäß ModulDauer in Minuten setzten & Starten
             tmrMain.Interval = modulDauer * 60 * 1000
             tmrMain.Start()
