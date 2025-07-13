@@ -44,9 +44,9 @@ Public Class ShaderMain
             aktuelleSettings.Farbton = SetzeZufallsFarbe()
         End If
 
-        'Falls aktueller Modus = Zufällig, dann den tatsächlichen Modus wählen
-        If aktuelleSettings.Modus = "Zufällig" Then
-            aktuelleSettings.Modus = If(rnd.Next(1) = 0, "Färben", "Tönen")
+        'Falls aktueller ShaderModus = Zufällig, dann den tatsächlichen Modus wählen
+        If aktuelleSettings.Modus = ShaderModus.Zufaellig Then
+            aktuelleSettings.Modus = If(rnd.Next(2) = 0, ShaderModus.Toenen, ShaderModus.Faerben)
         End If
 
         'Für Modus "Färben" das Bild erst in Graustufen wandeln
@@ -164,7 +164,7 @@ Public Class ShaderMain
 
         defaultShaderSettings("Farbton") = "112, 66, 20, 255"
         defaultShaderSettings("Zufallsfarbe") = "False"
-        defaultShaderSettings("Intensität") = "35"
+        defaultShaderSettings("Intensität") = "12"
         defaultShaderSettings("Modus") = "Tönen"
 
         Return defaultShaderSettings
@@ -177,7 +177,14 @@ Public Class ShaderMain
         aktuelleSettings.Farbton = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
         aktuelleSettings.Zufallsfarbe = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", defaults))
         aktuelleSettings.Intensitaet = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults))
-        aktuelleSettings.Modus = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
+        Select Case ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
+            Case "Tönen"
+                aktuelleSettings.Modus = ShaderModus.Toenen
+            Case "Färben"
+                aktuelleSettings.Modus = ShaderModus.Faerben
+            Case "Zufall"
+                aktuelleSettings.Modus = ShaderModus.Zufaellig
+        End Select
 
     End Sub
 

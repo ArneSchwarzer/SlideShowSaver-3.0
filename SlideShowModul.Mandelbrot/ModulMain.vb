@@ -2,11 +2,14 @@
 Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowTools.ConversionHandling
+Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.RegistryHandling
 
 Public Class ModulMain
 
     Implements ISlideShowModul
+
+
 
     ' === Moduleigenschaften ===
     Public ReadOnly Property ModulName As String Implements ISlideShowModul.ModulName
@@ -53,17 +56,12 @@ Public Class ModulMain
     ' === Lokale Variablen ===
 
     'Settings
-    Private gradient As String
-    Private gradientAnimieren As Boolean
-    Private koordinatenAnzeigen As Boolean
     Private aktuelleSettings As ModulSettings_Mandelbrot
-    Private zwischenspeicherSettings As ModulSettings_Mandelbrot
-    Private dictMandelbrot As Dictionary(Of String, String)
+    Public Const SLIDESHOWMODUL_MANDELBROT_FULLPATH = SLIDESHOWMODULBASE_PATH & "Mandelbrot\"
+    Public Const nameModul As String = "Mandelbrot"
 
     'Sonstiges
     Public mandelbrotScreen As frmModulMain
-
-
 
     ' === Settings-Structure ===
     Public Structure ModulSettings_Mandelbrot
@@ -74,21 +72,27 @@ Public Class ModulMain
 
     ' === Starten ===
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
-        ' SpashScreen anzeigen
+        ' SlpashScreen anzeigen
+
         mandelbrotScreen = New frmModulMain()
         mandelbrotScreen.Show()
 
         RaiseEvent ModulStateChanged("Running")
+
     End Sub
 
     ' === Beenden ===
     Public Sub StopModul() Implements ISlideShowModul.StopModul
+        'Aufräumen und Modul beenden
+
         If mandelbrotScreen IsNot Nothing Then
             mandelbrotScreen.Close()
             mandelbrotScreen.Dispose()
             mandelbrotScreen = Nothing
         End If
+
         RaiseEvent ModulStateChanged("Stopped")
+
     End Sub
 
     ' === Pausieren ===
@@ -98,7 +102,15 @@ Public Class ModulMain
 
     ' === Optionsdialog ===
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
+        'Holt sich die aktuellen Settings, speichert sie in der Settings-Inbox und gibt dann das ucOptionsModul zurück
+
+        'Aktuelle Settings auslesen und zwischenspeichern
+        ReadModuleSettingsFromRegistryOrDefaults()
+        StoreSettings(ModulName, aktuelleSettings)
+
+        'ucOptionsModul ausgeben
         Return New ucOptionsModul()
+
     End Function
 
     Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
@@ -142,5 +154,36 @@ Public Class ModulMain
         ' Initialisierung und Re-Initalisierung der Optionen aus der Registry
     End Sub
 
+    'Private Funktionen
 
+    Private Function GetModulDefaultSettings() As Dictionary(Of String, String)
+        'Liefert die Default-Werte des Moduls
+
+        Dim defaults As New Dictionary(Of String, String)
+
+        defaults("Farbverlauf") = "Regenbogen"
+        defaults("GradientAnimieren") = "True"
+        defaults("KoordinatenAnzeigen") = "False"
+
+        Return defaults
+
+    End Function
+
+    Private Sub ReadModuleSettingsFromRegistryOrDefaults()
+        'Füllt die Struktur mit den Settings
+
+        Dim defaults As New Dictionary(Of String, String)
+
+        defaults = GetModulDefaultSettings()
+
+        'Farbverlauf
+        aktuelleSettings.Farbverlauf = ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Farbverlauf", defaults)
+
+        'Gradient Animieren
+        aktuelleSettings.GradientAnimieren = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "GradientAnimieren", defaults))
+
+        'Koordinaten Anzeigen
+        aktuelleSettings.KoordinatenAnzeigen = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "KoordinatenAnzeigen", defaults))
+
+    End Sub
 End Class

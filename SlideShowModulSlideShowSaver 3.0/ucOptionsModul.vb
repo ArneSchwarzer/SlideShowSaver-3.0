@@ -3,11 +3,12 @@
 Imports SlideShowTools.ToolTipHandling
 Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.ListHandling
+Imports SlideShowTools.SettingsHandling
 Imports Modul_SlideShowSaver_3
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
-Imports SlideShowTools.ListHandling
 Imports System.Windows.Forms
 Imports SlideShowInterfaces
 Imports SlideShowTools
@@ -18,6 +19,7 @@ Imports SlideShowLogging
 Public Class ucOptionsModul
 
     'Variablendeklaration
+    Private aktuelleSettings As ModulMain.ModulSettings_SSS_3_0
     Private transitionInfos As List(Of SlideShowTransitionInfo)
     Private shaderInfos As List(Of SlideShowShaderInfo)
     Private markierteTransitions As List(Of String)
@@ -30,16 +32,20 @@ Public Class ucOptionsModul
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
 #Region "ucOptionsModul.Load Header"
+        'Settings aus dem Zwischenspeicher holen
+        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_SSS_3_0)(meineInstanz.ModulName)
+        ClearSettings(meineInstanz.ModulName)
+
         'Initialisieren
         transitionInfos = TransitionListLoader.LadeTransitionInfoListe()
         shaderInfos = ShaderListLoader.LadeShaderInfoListe()
-        markierteTransitions = ModulMain.aktuelleSettings.Transitionseffekte
-        markierteShader = ModulMain.aktuelleSettings.Shader
+        markierteTransitions = aktuelleSettings.Transitionseffekte
+        markierteShader = aktuelleSettings.Shader
 #End Region
 
 #Region "cmbBildauswahl Initialisieren"
         'cmbBildauswahl
-        cmbBildauswahl.SelectedItem = ModulMain.aktuelleSettings.Bildauswahl
+        cmbBildauswahl.SelectedItem = aktuelleSettings.Bildauswahl
 #End Region
 
 #Region "clbTransitions Initialisierung"
@@ -70,7 +76,7 @@ Public Class ucOptionsModul
             lblNcmbEffektauswahl.Enabled = False
             clbTransitions.Enabled = True
         Else
-            cmbEffektauswahl.SelectedItem = ModulMain.aktuelleSettings.TransitionsReihenfolge
+            cmbEffektauswahl.SelectedItem = aktuelleSettings.TransitionsReihenfolge
             cmbEffektauswahl.Enabled = True
             lblNcmbEffektauswahl.Enabled = True
             clbTransitions.Enabled = True
@@ -101,7 +107,7 @@ Public Class ucOptionsModul
             lblNcmbShaderauswahl.Enabled = False
             clbShader.Enabled = True
         Else
-            cmbShaderauswahl.SelectedItem = ModulMain.aktuelleSettings.ShaderReihenfolge
+            cmbShaderauswahl.SelectedItem = aktuelleSettings.ShaderReihenfolge
             cmbShaderauswahl.Enabled = True
             lblNcmbShaderauswahl.Enabled = True
             clbShader.Enabled = True
@@ -110,7 +116,7 @@ Public Class ucOptionsModul
 
 #Region "trbAnzeigedauer Initialisieren"
         'trbAnzeigedauer
-        trbAnzeigedauer.Value = ModulMain.aktuelleSettings.Anzeigedauer
+        trbAnzeigedauer.Value = aktuelleSettings.Anzeigedauer
 
         minuten = trbAnzeigedauer.Value \ 60
         sekunden = trbAnzeigedauer.Value Mod 60
@@ -126,7 +132,7 @@ Public Class ucOptionsModul
 
 #Region "chkBildInfoAnzeigen"
         'chkBildInfoAnzeigen
-        chkBildinformationen.Checked = ModulMain.aktuelleSettings.BildInfoAnzeigen
+        chkBildinformationen.Checked = aktuelleSettings.BildInfoAnzeigen
 #End Region
 
     End Sub

@@ -54,7 +54,7 @@ Partial Class ucOptionsModul
         'cmbGradient
         '
         Me.cmbGradient.FormattingEnabled = True
-        Me.cmbGradient.Items.AddRange(New Object() {"Regenbogen", "Zebra", "Joker", "Wakanda", "Weihnachten"})
+        Me.cmbGradient.Items.AddRange(New Object() {"Regenbogen", "Pastellbogen", "Zebra", "Joker", "Wakanda", "Weihnachten"})
         Me.cmbGradient.Location = New System.Drawing.Point(264, 110)
         Me.cmbGradient.Name = "cmbGradient"
         Me.cmbGradient.Size = New System.Drawing.Size(604, 49)

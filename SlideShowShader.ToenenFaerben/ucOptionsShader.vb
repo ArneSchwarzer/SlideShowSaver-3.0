@@ -35,8 +35,9 @@ Public Class ucOptionsShader
         End If
 
         'trbIntensität setzen
-        trbIntensität.Value = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults))
+        trbIntensität.Value = aktuelleSettings.Intensitaet
         aktuelleSettings.Intensitaet = trbIntensität.Value
+        lblIntensität.Text = trbIntensität.Value & " %"
 
         'Modus setzen
         registryTempWert = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
@@ -76,7 +77,7 @@ Public Class ucOptionsShader
     Private Sub trbIntensität_ValueChanged(sender As Object, e As EventArgs) Handles trbIntensität.ValueChanged
         'Behandelt Trackbar Intensität
 
-        lblInensität.Text = trbIntensität.Value & " %"
+        lblIntensität.Text = trbIntensität.Value & " %"
         aktuelleSettings.Intensitaet = trbIntensität.Value
         WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Intensität", trbIntensität.Value.ToString)
 

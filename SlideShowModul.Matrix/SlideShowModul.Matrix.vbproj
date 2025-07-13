@@ -67,6 +67,12 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmInputModul.Designer.vb">
+      <DependentUpon>frmInputModul.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmInputModul.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ModulMain.vb" />
     <Compile Include="frmModulMain.Designer.vb">
       <DependentUpon>frmModulMain.vb</DependentUpon>
@@ -104,6 +110,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmInputModul.resx">
+      <DependentUpon>frmInputModul.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmModulMain.resx">
       <DependentUpon>frmModulMain.vb</DependentUpon>
     </EmbeddedResource>
@@ -157,6 +166,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Matrix-SplashScreen.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Flying Kitchen-Aid Logo Transparent.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Flying KitchenAid Logo Matrix Transparent.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

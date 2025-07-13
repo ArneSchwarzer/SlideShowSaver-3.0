@@ -120,15 +120,19 @@ Public Class ShaderMain
             geoPosition = "Unbekannt"
         End If
 
-        schlagworte = If(keywords IsNot Nothing, String.Join(" | ", keywords), "")
+        If keywords IsNot Nothing Then
+            If keywords.Any(Function(k) String.Equals(k.Trim(), "18+", StringComparison.OrdinalIgnoreCase)) Then
+                geheimstufe = "Streng Geheim"
+                geheimStufeFarbe = Brushes.Orange
+            ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Akt", StringComparison.OrdinalIgnoreCase)) Then
+                geheimstufe = "Geheim"
+            ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Lingerie", StringComparison.OrdinalIgnoreCase)) Then
+                geheimstufe = "VS-Vertraulich"
+            End If
 
-        If schlagworte.Contains("18+") Then
-            geheimstufe = "Streng Geheim"
-            geheimStufeFarbe = Brushes.Orange
-        ElseIf schlagworte.Contains("Akt") Then
-            geheimstufe = "Geheim"
-        ElseIf schlagworte.Contains("Lingerie") Then
-            geheimstufe = "VS-Vertraulich"
+            schlagworte = String.Join(" | ", keywords)
+        Else
+            schlagworte = ""
         End If
 
         ' --- Text-Overlay-Stil ---

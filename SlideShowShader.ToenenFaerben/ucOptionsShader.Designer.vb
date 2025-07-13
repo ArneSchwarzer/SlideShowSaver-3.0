@@ -28,7 +28,7 @@ Partial Class ucOptionsShader
         Me.picFarbton = New System.Windows.Forms.PictureBox()
         Me.lblNtrbIntensität = New System.Windows.Forms.Label()
         Me.trbIntensität = New System.Windows.Forms.TrackBar()
-        Me.lblInensität = New System.Windows.Forms.Label()
+        Me.lblIntensität = New System.Windows.Forms.Label()
         Me.cdFarbton = New System.Windows.Forms.ColorDialog()
         Me.rbTönen = New System.Windows.Forms.RadioButton()
         Me.rbFärben = New System.Windows.Forms.RadioButton()
@@ -93,18 +93,18 @@ Partial Class ucOptionsShader
         Me.trbIntensität.Name = "trbIntensität"
         Me.trbIntensität.Size = New System.Drawing.Size(453, 101)
         Me.trbIntensität.TabIndex = 24
-        Me.trbIntensität.Value = 35
+        Me.trbIntensität.Value = 98
         '
-        'lblInensität
+        'lblIntensität
         '
-        Me.lblInensität.AutoSize = True
-        Me.lblInensität.Location = New System.Drawing.Point(755, 267)
-        Me.lblInensität.MinimumSize = New System.Drawing.Size(99, 0)
-        Me.lblInensität.Name = "lblInensität"
-        Me.lblInensität.Size = New System.Drawing.Size(99, 41)
-        Me.lblInensität.TabIndex = 25
-        Me.lblInensität.Text = "35 %"
-        Me.lblInensität.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblIntensität.AutoSize = True
+        Me.lblIntensität.Location = New System.Drawing.Point(755, 267)
+        Me.lblIntensität.MinimumSize = New System.Drawing.Size(99, 0)
+        Me.lblIntensität.Name = "lblIntensität"
+        Me.lblIntensität.Size = New System.Drawing.Size(99, 41)
+        Me.lblIntensität.TabIndex = 25
+        Me.lblIntensität.Text = "35 %"
+        Me.lblIntensität.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'rbTönen
         '
@@ -167,7 +167,7 @@ Partial Class ucOptionsShader
         Me.Controls.Add(Me.rbZufall)
         Me.Controls.Add(Me.rbFärben)
         Me.Controls.Add(Me.rbTönen)
-        Me.Controls.Add(Me.lblInensität)
+        Me.Controls.Add(Me.lblIntensität)
         Me.Controls.Add(Me.trbIntensität)
         Me.Controls.Add(Me.lblNtrbIntensität)
         Me.Controls.Add(Me.picFarbton)
@@ -191,7 +191,7 @@ Partial Class ucOptionsShader
     Friend WithEvents picFarbton As Windows.Forms.PictureBox
     Friend WithEvents lblNtrbIntensität As Windows.Forms.Label
     Friend WithEvents trbIntensität As Windows.Forms.TrackBar
-    Friend WithEvents lblInensität As Windows.Forms.Label
+    Friend WithEvents lblIntensität As Windows.Forms.Label
     Friend WithEvents cdFarbton As Windows.Forms.ColorDialog
     Friend WithEvents rbTönen As Windows.Forms.RadioButton
     Friend WithEvents rbFärben As Windows.Forms.RadioButton

@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowTools.SettingsHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 
 Public Class ModulMain
@@ -157,6 +158,11 @@ Public Class ModulMain
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
         'Liefert der frmOptionsMain das leere UC zum Einbau in die Modul-Tabpage.
 
+        'Settings abholen und zwischenspeichern
+        ReadModulSettingsFromRegistry()
+        StoreSettings(ModulName, aktuelleSettings)
+
+        'Jetzt die UC ausgeben
         Return New ucOptionsModul()
 
     End Function
@@ -312,11 +318,7 @@ Public Class ModulMain
         aktuelleSettings.ShaderReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "ShaderReihenfolge", defaults)
 
         'Modus BildInfo Anzeigen
-        If ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", defaults) = "True" Then
-            aktuelleSettings.BildInfoAnzeigen = True
-        Else
-            aktuelleSettings.BildInfoAnzeigen = False
-        End If
+        aktuelleSettings.BildInfoAnzeigen = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", defaults))
 
     End Sub
 

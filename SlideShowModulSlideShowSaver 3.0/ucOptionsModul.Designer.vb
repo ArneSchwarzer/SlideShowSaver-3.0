@@ -77,7 +77,7 @@ Partial Class ucOptionsModul
         Me.trbAnzeigedauer.Name = "trbAnzeigedauer"
         Me.trbAnzeigedauer.Size = New System.Drawing.Size(687, 101)
         Me.trbAnzeigedauer.TabIndex = 3
-        Me.trbAnzeigedauer.Value = 20
+        Me.trbAnzeigedauer.Value = 15
         '
         'lblAnzeigedauer
         '

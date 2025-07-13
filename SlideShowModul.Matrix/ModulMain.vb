@@ -1,16 +1,20 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
 Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ConversionHandling
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.ListHandling
 
 Public Class ModulMain
     Implements ISlideShowModul
 
     ' === INTERN ===
     Private matrixScreen As frmModulMain
-    Private zwischenspeicherSettings As ModulSettings_Matrix
-    Private highlightTexte As List(Of String)
-    Private szenendauer As Integer
+
+    Private Shared aktuelleSettings As ModulSettings_Matrix
+    Public Shared nameModul As String = "Matrix"
+    Public Shared SLIDESHOWMODUL_MATRIX_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "Matrix\"
 
     ' === OPTIONEN-STRUKTUR ===
     Public Structure ModulSettings_Matrix
@@ -62,18 +66,26 @@ Public Class ModulMain
 
     ' === START/STOP ===
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
+        'Started das Modul als Instanz
+
         matrixScreen = New frmModulMain()
         matrixScreen.Show()
+
         RaiseEvent ModulStateChanged("Running")
+
     End Sub
 
     Public Sub StopModul() Implements ISlideShowModul.StopModul
+        'Räumt auf und beendet das Modul
+
         If matrixScreen IsNot Nothing Then
             matrixScreen.Close()
             matrixScreen.Dispose()
             matrixScreen = Nothing
         End If
+
         RaiseEvent ModulStateChanged("Stopped")
+
     End Sub
 
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
@@ -82,33 +94,31 @@ Public Class ModulMain
 
     ' === OPTIONEN ===
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
+        'Liest die aktuellen Settings ein, speichert sie in SettingsInbox und liefert dann das ucOptionsModul
+
+        'Aktuelle Settings einlesen und abspeichern
+        ReadModulSettingsFromRegistryOrDefaults()
+        StoreSettings(nameModul, aktuelleSettings)
+
+        'Und jetzt die ucOptionsModul ausgeben
         Return New ucOptionsModul()
+
     End Function
 
     Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
-        Dim dict = UserControlZuDictionary(uc)
-        zwischenspeicherSettings = DictionaryZuStruktur(Of ModulSettings_Matrix)(dict)
-        Return zwischenspeicherSettings
+        'Keine Funktion
     End Function
 
     Public Sub ApplyModulSettings(settings As Object) Implements ISlideShowModul.ApplyModulSettings
-        zwischenspeicherSettings = DirectCast(settings, ModulSettings_Matrix)
-        ' Bei späterer Funktionalität können hier Ressourcen basierend auf Einstellungen geladen werden.
+        'Keine Funktion
     End Sub
 
     Public Sub GetModulSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowModul.GetModulSettings
-        Dim settings As ModulSettings_Matrix = DirectCast(restoreSettings, ModulSettings_Matrix)
-        Dim dict = StrukturZuDictionary(settings)
-        DictionaryZuUserControl(uc, dict)
+        'Keine Funktion
     End Sub
 
     Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
-        Dim defaults As New ModulSettings_Matrix With {
-            .HighlightTexte = New List(Of String) From {"Follow the white rabbit", "Wake up, Neo"},
-            .SzenendauerSekunden = 20
-        }
-        Dim dict = StrukturZuDictionary(defaults)
-        DictionaryZuUserControl(uc, dict)
+        'Keine Funktion
     End Sub
 
     ' === INFO ===
@@ -122,5 +132,32 @@ Public Class ModulMain
 
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
         ' Initialisierung und Re-Initalisierung der Optionen aus der Registry
+    End Sub
+
+    Private Function GetModulDefaults() As Dictionary(Of String, String)
+        'Liefert die Default-Einstellungen des Moduls
+
+        Dim defaults As New Dictionary(Of String, String)
+
+        defaults("Highlighttexte") = ""
+        defaults("SzenendauerSekunden") = "20"
+
+        Return defaults
+
+    End Function
+
+    Private Sub ReadModulSettingsFromRegistryOrDefaults()
+        'Setzt aktuelle Settings entweder per Registry oder per Defaultwerten
+
+        Dim temRegVal As String
+        Dim defaults As Dictionary(Of String, String)
+
+        defaults = GetModulDefaults()
+
+        temRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_MATRIX_FULLPATH & "Highlighttexte", defaults)
+        aktuelleSettings.HighlightTexte = SplitSemicolonList(temRegVal)
+
+        aktuelleSettings.SzenendauerSekunden = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MATRIX_FULLPATH & "SzenendauerSekunden", defaults))
+
     End Sub
 End Class
