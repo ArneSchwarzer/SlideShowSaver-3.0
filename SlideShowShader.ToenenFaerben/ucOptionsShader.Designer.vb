@@ -34,6 +34,7 @@ Partial Class ucOptionsShader
         Me.rbFärben = New System.Windows.Forms.RadioButton()
         Me.rbZufall = New System.Windows.Forms.RadioButton()
         Me.lblNModus = New System.Windows.Forms.Label()
+        Me.chkZufallsfarbe = New System.Windows.Forms.CheckBox()
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trbIntensität, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -78,7 +79,7 @@ Partial Class ucOptionsShader
         'lblNtrbIntensität
         '
         Me.lblNtrbIntensität.AutoSize = True
-        Me.lblNtrbIntensität.Location = New System.Drawing.Point(34, 213)
+        Me.lblNtrbIntensität.Location = New System.Drawing.Point(27, 267)
         Me.lblNtrbIntensität.Name = "lblNtrbIntensität"
         Me.lblNtrbIntensität.Size = New System.Drawing.Size(141, 41)
         Me.lblNtrbIntensität.TabIndex = 23
@@ -86,7 +87,7 @@ Partial Class ucOptionsShader
         '
         'trbIntensität
         '
-        Me.trbIntensität.Location = New System.Drawing.Point(289, 213)
+        Me.trbIntensität.Location = New System.Drawing.Point(282, 267)
         Me.trbIntensität.Maximum = 100
         Me.trbIntensität.Minimum = 1
         Me.trbIntensität.Name = "trbIntensität"
@@ -97,7 +98,7 @@ Partial Class ucOptionsShader
         'lblInensität
         '
         Me.lblInensität.AutoSize = True
-        Me.lblInensität.Location = New System.Drawing.Point(762, 213)
+        Me.lblInensität.Location = New System.Drawing.Point(755, 267)
         Me.lblInensität.MinimumSize = New System.Drawing.Size(99, 0)
         Me.lblInensität.Name = "lblInensität"
         Me.lblInensität.Size = New System.Drawing.Size(99, 41)
@@ -108,7 +109,7 @@ Partial Class ucOptionsShader
         'rbTönen
         '
         Me.rbTönen.AutoSize = True
-        Me.rbTönen.Location = New System.Drawing.Point(276, 338)
+        Me.rbTönen.Location = New System.Drawing.Point(276, 388)
         Me.rbTönen.Name = "rbTönen"
         Me.rbTönen.Size = New System.Drawing.Size(130, 45)
         Me.rbTönen.TabIndex = 26
@@ -119,7 +120,7 @@ Partial Class ucOptionsShader
         'rbFärben
         '
         Me.rbFärben.AutoSize = True
-        Me.rbFärben.Location = New System.Drawing.Point(276, 389)
+        Me.rbFärben.Location = New System.Drawing.Point(276, 439)
         Me.rbFärben.Name = "rbFärben"
         Me.rbFärben.Size = New System.Drawing.Size(139, 45)
         Me.rbFärben.TabIndex = 27
@@ -130,7 +131,7 @@ Partial Class ucOptionsShader
         'rbZufall
         '
         Me.rbZufall.AutoSize = True
-        Me.rbZufall.Location = New System.Drawing.Point(276, 440)
+        Me.rbZufall.Location = New System.Drawing.Point(276, 490)
         Me.rbZufall.Name = "rbZufall"
         Me.rbZufall.Size = New System.Drawing.Size(146, 45)
         Me.rbZufall.TabIndex = 28
@@ -141,16 +142,27 @@ Partial Class ucOptionsShader
         'lblNModus
         '
         Me.lblNModus.AutoSize = True
-        Me.lblNModus.Location = New System.Drawing.Point(34, 338)
+        Me.lblNModus.Location = New System.Drawing.Point(27, 392)
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 29
         Me.lblNModus.Text = "Modus"
         '
+        'chkZufallsfarbe
+        '
+        Me.chkZufallsfarbe.AutoSize = True
+        Me.chkZufallsfarbe.Location = New System.Drawing.Point(276, 199)
+        Me.chkZufallsfarbe.Name = "chkZufallsfarbe"
+        Me.chkZufallsfarbe.Size = New System.Drawing.Size(203, 45)
+        Me.chkZufallsfarbe.TabIndex = 30
+        Me.chkZufallsfarbe.Text = "Zufallsfarbe"
+        Me.chkZufallsfarbe.UseVisualStyleBackColor = True
+        '
         'ucOptionsShader
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.chkZufallsfarbe)
         Me.Controls.Add(Me.lblNModus)
         Me.Controls.Add(Me.rbZufall)
         Me.Controls.Add(Me.rbFärben)
@@ -185,4 +197,5 @@ Partial Class ucOptionsShader
     Friend WithEvents rbFärben As Windows.Forms.RadioButton
     Friend WithEvents rbZufall As Windows.Forms.RadioButton
     Friend WithEvents lblNModus As Windows.Forms.Label
+    Friend WithEvents chkZufallsfarbe As Windows.Forms.CheckBox
 End Class

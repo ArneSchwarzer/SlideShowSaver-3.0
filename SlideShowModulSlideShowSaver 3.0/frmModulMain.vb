@@ -30,9 +30,12 @@ Public Class frmModulMain
     'Transitionen
     Public listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Public listOfEnabledTransitions As List(Of String)
-    Private aktiveTransition As ISlideShowTransition = Nothing
+    Public aktiveTransition As ISlideShowTransition = Nothing
     Private neueTransition As String = Nothing
-    Private transitionIstAktiv As Boolean = False
+    Public Property transitionIstAktiv As Boolean = False
+    Private stoppuhr As New Stopwatch
+    Private WithEvents tmrDelay As New Timer
+    Private warteAufDelay As Boolean = False
 
     'Shader
     Public listOfAvailableShaders As List(Of SlideShowShaderInfo)
@@ -49,6 +52,10 @@ Public Class frmModulMain
         Me.Text = "Modul SlideShowSaver 3.0"
         Me.TopMost = False
 
+        'tmrDelay
+        tmrDelay = New Timer
+        tmrDelay.Interval = 1000 'Eine Sekunde
+
         'picBildAnzeige initialisieren
         picBildAnzeige.Dock = DockStyle.Fill
         picBildAnzeige.SizeMode = PictureBoxSizeMode.Zoom
@@ -61,34 +68,20 @@ Public Class frmModulMain
         LegitimeTransitionsListeErstellen()
         LegitimeShaderListeErstellen()
 
-        'erstes Bild Laden = Aktueller Desktop
-        If StartBildWurdeVerwendet Then
-            aktuellesBild = GetCurrentScreen()
-        Else
-            aktuellesBild = StartBild
-            StartBildWurdeVerwendet = True
-        End If
+        'ToDo: erstes Bild Laden = Aktueller Desktop
+        'If StartBildWurdeVerwendet Then
+        '    aktuellesBild = GetCurrentScreen()
+        'Else
+        '    aktuellesBild = StartBild
+        '    StartBildWurdeVerwendet = True
+        'End If
 
     End Sub
 
     Private Sub frmModulMain_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         'Startet die Anzeige der Bilder
 
-
-        'erstes Bild zum Wechseln laden
-        If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
-            Do
-                aktuellesVerzeichnis = GetPicturesByDirectory()
-            Loop Until aktuellesVerzeichnis.Count >= 1
-            aktuellesVerzeichnisCounter = 1
-            bildPfad = aktuellesVerzeichnis(0)
-            neuesBild = GetPictureByName(bildPfad)
-        Else
-            bildPfad = GetPictures(1).Item(0)
-            neuesBild = GetPictureByName(bildPfad)
-
-        End If
-
+#Region "Transition aussuchen"
         'Transition aussuchen
         If listOfEnabledTransitions.Count > 0 Then
             Select Case aktuelleSettings.TransitionsReihenfolge
@@ -122,7 +115,9 @@ Public Class frmModulMain
                 AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
             End If
         End If
+#End Region
 
+#Region "Shader aussuchen"
         'Aktiven Shader laden 
         If listOfEnabledShaders.Count > 0 Then
             Select Case aktuelleSettings.ShaderReihenfolge
@@ -145,15 +140,71 @@ Public Class frmModulMain
 
             aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
 
-            'Shader neuesBild anwenden. Das erste Bild (d.h. der aktuelle Desktop) bekommt keinen Shader
-            neuesBild = aktiverShader.RunShader(neuesBild)
         End If
+#End Region
+
+#Region "Erste Bilder laden"
+        'erste Bilder laden (ggf. Shader anwenden)
+        If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
+
+            Do
+                aktuellesVerzeichnis = GetPicturesByDirectory()
+            Loop Until aktuellesVerzeichnis.Count >= 2 'Das Verzeichnis muss mindestens 2 Einträge haben.
+            aktuellesVerzeichnisCounter = 2 'Die ersten beiden Einträge werden gleich "verbraucht"
+
+            'aktuellesBild setzen
+            bildPfad = aktuellesVerzeichnis(0)
+            aktuellesBild = GetPictureByName(bildPfad)
+            If aktiverShader IsNot Nothing Then
+                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, picBildAnzeige.Size)
+            End If
+            listeDerZuletztAngezeigtenBilder.Clear()
+            listeDerZuletztAngezeigtenBilder.Add(bildPfad)
+
+            'neuesBild setzen
+            bildPfad = aktuellesVerzeichnis(1)
+            neuesBild = GetPictureByName(bildPfad)
+            If aktiverShader IsNot Nothing Then
+                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, picBildAnzeige.Size)
+            End If
+            'listeDerZuletztAngezeigtenBilder wird in der Methode Bildwechsel gefüllt.
+
+        Else
+
+            '2 Zufallsbilder raussuchen
+            initialePfade = GetPictures(2)
+
+            'aktuellesBild setzen
+            bildPfad = initialePfade(0)
+            aktuellesBild = GetPictureByName(bildPfad)
+            If aktiverShader IsNot Nothing Then
+                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, picBildAnzeige.Size)
+            End If
+            listeDerZuletztAngezeigtenBilder.Clear()
+            listeDerZuletztAngezeigtenBilder.Add(bildPfad)
+
+            'neuesBild setzen
+            bildPfad = initialePfade(1)
+            neuesBild = GetPictureByName(bildPfad)
+            If aktiverShader IsNot Nothing Then
+                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, picBildAnzeige.Size)
+            End If
+            'listeDerZuletztAngezeigtenBilder wird in der Methode Bildwechsel gefüllt.
+
+        End If
+#End Region
 
         'Erstes Bild anzeigen
         picBildAnzeige.Image = aktuellesBild
         picBildAnzeige.Refresh()
 
-        'Bildinfo wird nicht initialisiert, da das erste Bild ein Screenshot vom Desktop ist.
+        'Bildinfo initialisieren - mit Werten von aktuellesBild
+        If aktuelleSettings.BildInfoAnzeigen Then
+            If bildPfad IsNot Nothing Then
+                ModulMain.sssInfo.RefreshLabels(initialePfade(0))
+            End If
+            ModulMain.sssInfo.Refresh()
+        End If
 
         'Timer starten
         tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
@@ -178,62 +229,67 @@ Public Class frmModulMain
     End Sub
 
     Private Sub tmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
-        'Startet nach Ablauf der Bildanzeigedauer die nächste Transition
+        'Startet nach Ablauf der Bildanzeigedauer die nächste Transition (oder wechselt das Bild selber)
+
         Dim picBoxGFX As Graphics
 
         If transitionIstAktiv Then Exit Sub
+        If warteAufDelay Then Exit Sub
 
         'Falls der Benutzer in der Zwischenzeit an den Optionen 'rumgepfuscht hat
         LegitimeTransitionsListeErstellen()
 
         If listOfEnabledTransitions.Count > 0 Then
+
+#Region "Transition wechseln"
             'Transition aussuchen
             Select Case aktuelleSettings.TransitionsReihenfolge
                 Case "In Reihenfolge"
                     WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition", aktiveTransition.TransitionName)
                     neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, aktiveTransition.TransitionName)
-
-                    If aktiveTransition IsNot Nothing Then
-                        'Alte Eventhandler löschen
-                        RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                    End If
-
-                    aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
-
-                    If aktiveTransition IsNot Nothing Then
-                        'Handler hinzufügen
-                        AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                    End If
-
                 Case "Zufällig"
                     neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-
-                    If aktiveTransition IsNot Nothing Then
-                        'Alte Eventhandler löschen
-                        RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                    End If
-
-                    aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
-
-                    If aktiveTransition IsNot Nothing Then
-                        'Handler hinzufügen
-                        AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                    End If
-
                 Case "Zufällig bei Start"
-                ' Keine Aktion notwendig
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    End If
                 Case "In Reihenfolge bei Start"
-                    ' Keine Aktion notwendig
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+                        If neueTransition = Nothing Then neueTransition = ""
+                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
+                    End If
                 Case Else
-                    ' Keine Aktion notwendig (entspricht zufällig bei Start, in .Shown() behandelt)
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat (entspricht zufällig bei Start)
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    End If
             End Select
 
-            'Transition starten
+            'Neue Transition laden und Handler behandeln
+            If aktiveTransition IsNot Nothing Then
+                'Alte Eventhandler löschen
+                RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            End If
+
+            aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+
+            If aktiveTransition IsNot Nothing Then
+                'Handler hinzufügen
+                AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            End If
+#End Region
+
+            'Transition starten, Status & Stoppuhr setzen
             picBoxGFX = Graphics.FromHwnd(picBildAnzeige.Handle)
+
+            transitionIstAktiv = True
+            stoppuhr = Stopwatch.StartNew()
             aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, picBoxGFX)
 
-            'Status setzen und Timer beenden 
-            transitionIstAktiv = True
+            'Timer beenden 
             tmrModul.Stop()
 
         Else
@@ -241,6 +297,7 @@ Public Class frmModulMain
 
             Bildwechsel()
             transitionIstAktiv = False
+            warteAufDelay = False
 
         End If
 
@@ -305,13 +362,25 @@ Public Class frmModulMain
         'Sofort raus, falls die Transition noch läuft
         If state Then Exit Sub
 
-        'Hier beginnt die Bildanzeige
-        Bildwechsel()
+        'Stoppuhr anhalten
+        stoppuhr.Stop()
+        tmrModul.Stop()
 
-        'Status setzen und tmrModul starten
-        transitionIstAktiv = False
-        tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
-        tmrModul.Start()
+        'Für Transitionen, die so schnell fertig werden, dass es zu einer Racing-Condition mit tmrModul kommt.
+        If stoppuhr.ElapsedMilliseconds < 1000 Then
+            warteAufDelay = True
+            tmrDelay.Interval = 1000
+            tmrDelay.Start()
+        Else
+            'Hier beginnt die Bildanzeige
+            Bildwechsel()
+
+            'Status setzen und tmrModul starten
+            transitionIstAktiv = False
+            warteAufDelay = False
+            tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
+            tmrModul.Start()
+        End If
 
     End Sub
 
@@ -325,8 +394,6 @@ Public Class frmModulMain
         If aktuelleSettings.BildInfoAnzeigen Then
             If bildPfad IsNot Nothing Then
                 ModulMain.sssInfo.RefreshLabels(bildPfad)
-            Else
-                ModulMain.sssInfo.RefreshLabels(initialePfade(1))
             End If
             ModulMain.sssInfo.Refresh()
         End If
@@ -376,8 +443,23 @@ Public Class frmModulMain
                     'keine Aktion notwendig, entspricht "Zufällig bei Start"
             End Select
 
-            neuesBild = aktiverShader.RunShader(neuesBild)
+            neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, picBildAnzeige.Size)
         End If
+
+    End Sub
+
+    Private Sub tmrDelay_Tick(sender As Object, e As EventArgs) Handles tmrDelay.Tick
+        'Falls eine Transition so schnell ist, dass frmModulMain das nicht rechtzeitig mitbekommt.
+        tmrDelay.Stop()
+        warteAufDelay = False
+
+        'Hier beginnt die Bildanzeige
+        Bildwechsel()
+
+        'Status setzen und tmrModul starten
+        transitionIstAktiv = False
+        tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
+        tmrModul.Start()
 
     End Sub
 

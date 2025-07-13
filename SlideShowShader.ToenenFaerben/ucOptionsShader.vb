@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowShader.TönenFärben.ShaderMain
+Imports System.Diagnostics.Eventing.Reader
 
 Public Class ucOptionsShader
     Inherits UserControl
@@ -11,6 +12,8 @@ Public Class ucOptionsShader
     Private aktuelleSettings As ShaderSettings
 
     Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
+        'Initialisiert die Steuerelemente des ucOptionShader
+
         Dim defaults As New Dictionary(Of String, String)
         Dim registryTempWert As String
 
@@ -19,6 +22,17 @@ Public Class ucOptionsShader
         'Farbton picFarbton setzen
         picFarbton.BackColor = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
         aktuelleSettings.Farbton = picFarbton.BackColor
+
+        'chkZufallsfarbe setzen
+        If ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", defaults) = "True" Then
+            chkZufallsfarbe.Checked = True
+            lblNpicFarbton.Enabled = False
+            picFarbton.Enabled = False
+        Else
+            chkZufallsfarbe.Checked = False
+            lblNpicFarbton.Enabled = True
+            picFarbton.Enabled = True
+        End If
 
         'trbIntensität setzen
         trbIntensität.Value = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults))
@@ -41,6 +55,7 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub picFarbton_Click(sender As Object, e As EventArgs) Handles picFarbton.Click
+        'Behandelt PictureBox Farbton
 
         Using dlg As New ColorDialog()
 
@@ -59,6 +74,7 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub trbIntensität_ValueChanged(sender As Object, e As EventArgs) Handles trbIntensität.ValueChanged
+        'Behandelt Trackbar Intensität
 
         lblInensität.Text = trbIntensität.Value & " %"
         aktuelleSettings.Intensitaet = trbIntensität.Value
@@ -67,6 +83,7 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub rbTönen_CheckedChanged(sender As Object, e As EventArgs) Handles rbTönen.CheckedChanged
+        'Behandelt RadioButton Tönen
 
         If rbTönen.Checked = True Then
             aktuelleSettings.Modus = ShaderModus.Toenen
@@ -76,6 +93,7 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub rbFärben_CheckedChanged(sender As Object, e As EventArgs) Handles rbFärben.CheckedChanged
+        'Behandelt RadioButton Färben
 
         If rbFärben.Checked = True Then
             aktuelleSettings.Modus = ShaderModus.Faerben
@@ -85,11 +103,27 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rbZufall.CheckedChanged
+        'Behandelt Radiobutton Zufall
 
         If rbZufall.Checked = True Then
             aktuelleSettings.Modus = ShaderModus.Zufaellig
             WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Modus", "Zufall")
         End If
+
+    End Sub
+
+    Private Sub chkZufallsfarbe_Leave(sender As Object, e As EventArgs) Handles chkZufallsfarbe.Leave
+        'Behandelt Checkbox Zufallsfarbe
+
+        If chkZufallsfarbe.Checked = True Then
+            lblNpicFarbton.Enabled = False
+            picFarbton.Enabled = False
+        Else
+            lblNpicFarbton.Enabled = True
+            picFarbton.Enabled = True
+        End If
+
+        WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
 
     End Sub
 

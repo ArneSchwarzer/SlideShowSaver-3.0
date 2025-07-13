@@ -23,7 +23,7 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
+        Me.lblNShaderName = New System.Windows.Forms.Label()
         Me.lblNoOptions = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
@@ -37,14 +37,14 @@ Partial Class ucOptionsShader
         Me.lblShadername.TabIndex = 17
         Me.lblShadername.Text = "Nachtsicht"
         '
-        'Label6
+        'lblNShaderName
         '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(34, 26)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(110, 41)
-        Me.Label6.TabIndex = 16
-        Me.Label6.Text = "Shader"
+        Me.lblNShaderName.AutoSize = True
+        Me.lblNShaderName.Location = New System.Drawing.Point(34, 26)
+        Me.lblNShaderName.Name = "lblNShaderName"
+        Me.lblNShaderName.Size = New System.Drawing.Size(110, 41)
+        Me.lblNShaderName.TabIndex = 16
+        Me.lblNShaderName.Text = "Shader"
         '
         'lblNoOptions
         '
@@ -61,7 +61,7 @@ Partial Class ucOptionsShader
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.Controls.Add(Me.lblNoOptions)
         Me.Controls.Add(Me.lblShadername)
-        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.lblNShaderName)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsShader"
@@ -72,6 +72,6 @@ Partial Class ucOptionsShader
     End Sub
 
     Friend WithEvents lblShadername As Windows.Forms.Label
-    Friend WithEvents Label6 As Windows.Forms.Label
+    Friend WithEvents lblNShaderName As Windows.Forms.Label
     Friend WithEvents lblNoOptions As Windows.Forms.Label
 End Class

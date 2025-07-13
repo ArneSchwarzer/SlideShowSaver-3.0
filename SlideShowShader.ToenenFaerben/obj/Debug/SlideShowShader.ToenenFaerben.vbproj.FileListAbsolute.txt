@@ -18,3 +18,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\obj\
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\obj\Debug\SlideShowShader.ToenenFaerben.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\obj\Debug\SlideShowShader.ToenenFaerben.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\obj\Debug\SlideShowShader.ToenenFaerben.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\obj\Debug\SlideShowShader.TönenFärben.ucOptionsShader.resources

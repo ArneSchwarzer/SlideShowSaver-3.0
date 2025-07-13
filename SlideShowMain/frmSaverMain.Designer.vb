@@ -25,7 +25,7 @@ Partial Class frmSaverMain
         Me.components = New System.ComponentModel.Container()
         Me.tmrMain = New System.Windows.Forms.Timer(Me.components)
         Me.lblMCP = New System.Windows.Forms.Label()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.lblNameFramework = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'tmrMain
@@ -43,16 +43,16 @@ Partial Class frmSaverMain
         Me.lblMCP.TabIndex = 0
         Me.lblMCP.Text = "Master Control Program running..."
         '
-        'Label1
+        'lblNameFramework
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
-        Me.Label1.ForeColor = System.Drawing.Color.Red
-        Me.Label1.Location = New System.Drawing.Point(31, 70)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(547, 48)
-        Me.Label1.TabIndex = 1
-        Me.Label1.Text = "SlideShowSaver 3.0 Framework"
+        Me.lblNameFramework.AutoSize = True
+        Me.lblNameFramework.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
+        Me.lblNameFramework.ForeColor = System.Drawing.Color.Red
+        Me.lblNameFramework.Location = New System.Drawing.Point(31, 70)
+        Me.lblNameFramework.Name = "lblNameFramework"
+        Me.lblNameFramework.Size = New System.Drawing.Size(547, 48)
+        Me.lblNameFramework.TabIndex = 1
+        Me.lblNameFramework.Text = "SlideShowSaver 3.0 Framework"
         '
         'frmSaverMain
         '
@@ -60,7 +60,7 @@ Partial Class frmSaverMain
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(971, 636)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.lblNameFramework)
         Me.Controls.Add(Me.lblMCP)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
@@ -75,5 +75,5 @@ Partial Class frmSaverMain
 
     Friend WithEvents tmrMain As Timer
     Friend WithEvents lblMCP As Label
-    Friend WithEvents Label1 As Label
+    Friend WithEvents lblNameFramework As Label
 End Class

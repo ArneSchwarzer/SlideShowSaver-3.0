@@ -26,7 +26,7 @@ Public Class ShaderMain
     End Property
 
     ' === Ausführung ===
-    Public Function RunShader(baseImage As Image) As Image Implements ISlideShowShader.RunShader
+    Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
         Dim bmp As New Bitmap(baseImage.Width, baseImage.Height)
 
         ' Farbmatrix zur Umwandlung in Greyscale (nach europäischem Stil 😉)

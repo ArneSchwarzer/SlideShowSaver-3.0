@@ -106,14 +106,19 @@ Public Class frmSaverMain
             fallbackPaused = False
         End If
 
-        'Falls eine Transition ausgewählt ist, vor dem Start des ersten Moduls Start-Transition zeigen.
-        If startTransition IsNot Nothing Then
-            picMainGFX = Graphics.FromHwnd(picMain.Handle)
-            ZeigeEinmaligeStartTransition(StartBild, startLogo, picMainGFX, startTransition)
-            If transitionReihenfolge = "In Reihenfolge bei Start" Then
-                WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", startTransition)
-            End If
-        End If
+        'TODO: Falls eine Transition ausgewählt ist, vor dem Start des ersten Moduls Start-Transition zeigen.
+        'If startTransition IsNot Nothing Then
+        'lblMCP.Visible = False
+        'lblNameFramewok.Visible = False
+        '    picMainGFX = Graphics.FromHwnd(picMain.Handle)
+        '    ZeigeEinmaligeStartTransition(StartBild, startLogo, picMainGFX, startTransition)
+        '    If transitionReihenfolge = "In Reihenfolge bei Start" Then
+        '        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", startTransition)
+        '    End If
+        '
+        ' 
+        '
+        'End If
 
         'Das gewählte Modul anzeigen.
         If fallbackIsActive Then
@@ -379,6 +384,8 @@ Public Class frmSaverMain
         RemoveHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
         einmaligeTransition = Nothing
         transitionBeendet.Reset()
+        lblMCP.Visible = True
+        lblNameFramework.Visible = True
 
     End Sub
 

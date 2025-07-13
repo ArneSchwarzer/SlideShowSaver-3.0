@@ -36,6 +36,12 @@ Public Class TransitionMain
     Public Event PleaseChangeToShader As ISlideShowTransition.PleaseChangeToShaderEventHandler Implements ISlideShowTransition.PleaseChangeToShader
 
     Public Sub RunTransition(oldImage As System.Drawing.Image, picBoxModeOld As Windows.Forms.PictureBoxSizeMode, newImage As System.Drawing.Image, picBoxModeNew As Windows.Forms.PictureBoxSizeMode, targetGraphics As System.Drawing.Graphics, Optional clientSize As System.Drawing.Size = Nothing, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+        'Im Normalfall braucht diese 'Transition' ja eh nicht zu laufen...
+        If durationMs <= 0 Then
+            RaiseEvent TransitionIsRunning(False)
+            Exit Sub
+        End If
+
         'Formal noch einmal TransitionIsRunning werfen.
         RaiseEvent TransitionIsRunning(True)
 
@@ -58,42 +64,43 @@ Public Class TransitionMain
         'Zeichnet newImage auf den Zeichenbereich und gut
         Dim drawRect As Rectangle
         Dim targetRect As Rectangle
-        Dim bmp As New Bitmap(clntSize.Width, clntSize.Height)
 
         'Grafik vorbereiten
         targetRect = New Rectangle(0, 0, clntSize.Width, clntSize.Height)
         drawRect = GetDrawRectangle(newImg.Size, targetRect, newPicBoxSM)
 
-        Using g As Graphics = Graphics.FromImage(bmp)
+        'Neues Bild direkt zeichnen
+        Using g As Graphics = renderTarget
             g.InterpolationMode = InterpolationMode.HighQualityBicubic
             g.Clear(Color.Black)
-
-            ' Endbild gnadenlos auf den Zeichenbereich malen...
-            g.DrawImage(newImg, drawRect)
+            g.DrawImage(newImg, New Rectangle(0, 0, clntSize.Width, clntSize.Height))
         End Using
+
+        renderTarget.DrawImage(newImg, 0, 0)
+
 
         RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
     Public Sub ApplyTransitionSettings(settings As Object) Implements ISlideShowTransition.ApplyTransitionSettings
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Sub
 
     Public Sub GetTransitionSettings(uc As Windows.Forms.UserControl, restoreSettings As Object) Implements ISlideShowTransition.GetTransitionSettings
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Sub
 
     Public Sub GetTransitionRegistryOrDefaultSettings(uc As Windows.Forms.UserControl) Implements ISlideShowTransition.GetTransitionRegistryOrDefaultSettings
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Sub
 
     Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowTransition.AttentionShaderGewechselt
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Sub
 
     Public Sub CheckYourSettings() Implements ISlideShowTransition.CheckYourSettings
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Sub
 
     Public Function GetTransitionOptionsDialog() As Windows.Forms.UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
@@ -101,7 +108,7 @@ Public Class TransitionMain
     End Function
 
     Public Function MemorizeTransitionSettings(uc As Windows.Forms.UserControl) As Object Implements ISlideShowTransition.MemorizeTransitionSettings
-        Throw New NotImplementedException()
+        'Wird nicht genutzt
     End Function
 
 End Class

@@ -25,7 +25,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWische
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowTransition.SchiebenWischen.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\ToggleButton.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.xml
@@ -42,3 +41,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWische
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\obj\Debug\SlideShowTransition.SchiebenWischen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\obj\Debug\SlideShowTransition.SchiebenWischen.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\obj\Debug\SlideShowTransition.SchiebenWischen.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\MyControlsLibrary.dll

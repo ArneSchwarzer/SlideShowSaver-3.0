@@ -104,7 +104,7 @@ Public Class InterfaceDeclarations
         ReadOnly Property ShaderVersion As Version
 
         ' --- Ausführung ---
-        Function RunShader(baseImage As Image) As Image
+        Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image
 
         ' --- Optionen/Dialoghandling ---
         Function GetShaderOptionsDialog() As UserControl

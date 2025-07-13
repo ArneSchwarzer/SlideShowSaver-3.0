@@ -25,7 +25,7 @@ Public Class ShaderMain
     End Property
 
     ' === Shader-Ausführung ===
-    Public Function RunShader(baseImage As Image) As Image Implements ISlideShowShader.RunShader
+    Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
 
         Return baseImage
 

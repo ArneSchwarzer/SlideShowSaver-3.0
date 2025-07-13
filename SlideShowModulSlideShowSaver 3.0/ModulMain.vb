@@ -130,6 +130,11 @@ Public Class ModulMain
         ' Startet den Pause-Modus des Moduls
 
         RaiseEvent ModulStateChanged("Pause")
+
+        If sssScreen.transitionIstAktiv Then
+            sssScreen.aktiveTransition.StopTransition()
+        End If
+
         sssScreen.tmrModul.Stop()
 
         If sssPause Is Nothing Then
@@ -137,13 +142,13 @@ Public Class ModulMain
         End If
 
         pauseIsActive = True
+
         If sssPause.ShowDialog() = DialogResult.OK Then
             sssPause.Dispose()
             sssPause = Nothing
             CheckYourSettings()
             RaiseEvent ModulStateChanged("Running")
         End If
-
 
     End Sub
 

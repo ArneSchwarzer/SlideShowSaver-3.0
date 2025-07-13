@@ -31,30 +31,25 @@ Public Class ShaderMain
     Public Const SLIDESHOWSHADER_FULLPATH As String = SLIDESHOWSHADER_PATH & "Tönen und Färben\"
 
     ' === Shader ausführen ===
-    Public Function RunShader(baseImage As Image) As Image Implements ISlideShowShader.RunShader
+    Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
+        'Färbt oder tönt das Bild
+
         Dim bmp As New Bitmap(baseImage.Width, baseImage.Height)
-        Dim defaults As New Dictionary(Of String, String)
+        Dim rnd As New Random
 
-        defaults = GetShaderDefaultSettings()
+        LiesAktuelleShaderSettingsEin()
 
-        aktuelleSettings.Farbton = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
-
-        Dim intensStr = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults)
-        If Not Integer.TryParse(intensStr, aktuelleSettings.Intensitaet) Then
-            aktuelleSettings.Intensitaet = 35 ' Fallback-Wert
+        'Farbton setzen (falls Zufallsfarbe = False ist er bereits korrekt gesetzt)
+        If aktuelleSettings.Zufallsfarbe Then
+            aktuelleSettings.Farbton = SetzeZufallsFarbe()
         End If
 
-        Dim modusStr = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
-        Select Case modusStr.ToLower()
-            Case "tönen", "toenen"
-                aktuelleSettings.Modus = ShaderModus.Toenen
-            Case "färben", "faerben"
-                aktuelleSettings.Modus = ShaderModus.Faerben
-            Case Else
-                aktuelleSettings.Modus = ShaderModus.Zufaellig
-        End Select
+        'Falls aktueller Modus = Zufällig, dann den tatsächlichen Modus wählen
+        If aktuelleSettings.Modus = "Zufällig" Then
+            aktuelleSettings.Modus = If(rnd.Next(1) = 0, "Färben", "Tönen")
+        End If
 
-
+        'Für Modus "Färben" das Bild erst in Graustufen wandeln
         Using g As Graphics = Graphics.FromImage(bmp)
             If aktuelleSettings.Modus = ShaderModus.Faerben Then
                 ' Bild in Graustufen umwandeln
@@ -67,19 +62,26 @@ Public Class ShaderMain
 
             ' Farbübergabe vorbereiten
             Dim farbe As Color = aktuelleSettings.Farbton
-            Dim intensitaet As Integer = aktuelleSettings.Intensitaet
-            Dim overlayColor As Color = Color.FromArgb(intensitaet, farbe.R, farbe.G, farbe.B)
+            Dim intensitaet As Integer
+            Dim overlayColor As Color
+
+            intensitaet = CInt(255 * (aktuelleSettings.Intensitaet / 100))
+            overlayColor = Color.FromArgb(intensitaet, farbe.R, farbe.G, farbe.B)
 
             Using brush As New SolidBrush(overlayColor)
                 g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height)
             End Using
+
         End Using
 
         Return bmp
+
     End Function
 
-    ' === Hilfsfunktion: Graustufenbild ===
+    ' === Hilfsfunktionen ===
     Private Function ConvertToGrayscale(src As Image) As Image
+        'Wandelt das Bild in ein Graustufenbild
+
         Dim grayBmp As New Bitmap(src.Width, src.Height)
         Using g As Graphics = Graphics.FromImage(grayBmp)
             Dim cm As New Imaging.ColorMatrix(New Single()() {
@@ -93,6 +95,22 @@ Public Class ShaderMain
             g.DrawImage(src, New Rectangle(0, 0, grayBmp.Width, grayBmp.Height), 0, 0, src.Width, src.Height, GraphicsUnit.Pixel, ia)
         End Using
         Return grayBmp
+    End Function
+
+    Private Function SetzeZufallsFarbe() As Color
+        'Sucht eine zufällige Farbe aus der Liste der benannten Farben (Systemfarben werden ignoriert)
+
+        Dim zufallsFarbe As Color
+        Dim rnd As New Random()
+        Dim knownColors = [Enum].GetValues(GetType(KnownColor))
+        Dim echteFarben = knownColors.Cast(Of KnownColor)().
+                Where(Function(kc) Not Color.FromKnownColor(kc).IsSystemColor).ToList()
+        Dim colorName = echteFarben(rnd.Next(echteFarben.Count))
+
+        zufallsFarbe = Color.FromKnownColor(colorName)
+
+        Return zufallsFarbe
+
     End Function
 
     ' === Dialog & Optionen ===
@@ -145,6 +163,7 @@ Public Class ShaderMain
         'Liefert die Default-Werte des Moduls
 
         defaultShaderSettings("Farbton") = "112, 66, 20, 255"
+        defaultShaderSettings("Zufallsfarbe") = "False"
         defaultShaderSettings("Intensität") = "35"
         defaultShaderSettings("Modus") = "Tönen"
 
@@ -152,10 +171,21 @@ Public Class ShaderMain
 
     End Function
 
+    Private Sub LiesAktuelleShaderSettingsEin()
+        Dim defaults As Dictionary(Of String, String) = GetShaderDefaultSettings()
+
+        aktuelleSettings.Farbton = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
+        aktuelleSettings.Zufallsfarbe = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", defaults))
+        aktuelleSettings.Intensitaet = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults))
+        aktuelleSettings.Modus = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
+
+    End Sub
+
     ' === Settings-Struktur ===
 
     Public Structure ShaderSettings
         Public Property Farbton As Color
+        Public Property Zufallsfarbe As Boolean
         Public Property Intensitaet As Integer
         Public Property Modus As ShaderModus
     End Structure
