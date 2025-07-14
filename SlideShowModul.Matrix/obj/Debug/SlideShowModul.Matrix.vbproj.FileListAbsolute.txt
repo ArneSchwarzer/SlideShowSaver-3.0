@@ -60,3 +60,4 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\Sl
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\SlideShowModul.Matrix.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\SlideShowModul.Matrix.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\SlideShowModul.Matrix.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\Modul_Matrix.frmInputModul.resources

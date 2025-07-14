@@ -33,7 +33,7 @@ Public Class TextureHandling
             istScanline = If(rnd.Next(dichte) = 0, True, False)
             For x As Integer = 0 To width - 1
                 If istScanline Then
-                    bmp.SetPixel(x, y, Color.FromArgb(64, 0, 255, 0)) ' leicht sichtbares Scanline-Grün
+                    bmp.SetPixel(x, y, Color.FromArgb(64, 0, rnd.Next(256), 0)) ' Scanline Farbe von Schwarz bis kräftig Grün
                 Else
                     bmp.SetPixel(x, y, Color.FromArgb(0, 0, 0, 0)) ' vollständig transparent
                 End If

@@ -122,6 +122,39 @@ SlideShowTools
  <param name="list">Die Quellliste</param>
  <returns>Ein String mit Semikolon-separierten Einträgen</returns>
 </member>
+<member name="T:SlideShowTools.SettingsHandling">
+ <summary>
+ Temporärer Speicher für Settings-Objekte während der Laufzeit.
+ Erlaubt die Übergabe von Konfigurationsdaten z. B. vom ShaderMain an ein UserControl,
+ ohne Registry oder direkte Objektbindung zu verwenden.
+ </summary>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.StoreSettings(System.String,System.Object)">
+ <summary>
+ Speichert ein beliebiges Settings-Objekt unter einem eindeutigen Namen.
+ </summary>
+ <param name="key">Eindeutiger Bezeichner (z. B. Modulname)</param>
+ <param name="settings">Das zu speichernde Objekt</param>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.GetSettings``1(System.String)">
+ <summary>
+ Holt das gespeicherte Objekt für den angegebenen Key.
+ Gibt Nothing zurück, wenn nicht gefunden oder Typ nicht kompatibel.
+ </summary>
+ <typeparam name="T">Erwarteter Rückgabetyp</typeparam>
+ <param name="key">Bezeichner wie zuvor gespeichert</param>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.ClearSettings(System.String)">
+ <summary>
+ Entfernt den Eintrag aus dem Zwischenspeicher.
+ </summary>
+ <param name="key">Der zu löschende Eintrag</param>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.ClearAll">
+ <summary>
+ Entfernt alle Einträge.
+ </summary>
+</member>
 <member name="T:SlideShowTools.SharedDataHandling">
  <summary>
  Globale Daten, die modulübergreifend von SaverMain aus bereitgestellt werden.

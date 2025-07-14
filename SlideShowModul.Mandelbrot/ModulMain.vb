@@ -114,9 +114,7 @@ Public Class ModulMain
     End Function
 
     Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
-        Dim dict = UserControlZuDictionary(uc)
-        zwischenspeicherSettings = DictionaryZuStruktur(Of ModulSettings_Mandelbrot)(dict)
-        Return zwischenspeicherSettings
+        'Keine Funktion
     End Function
 
     Public Sub ApplyModulSettings(settings As Object) Implements ISlideShowModul.ApplyModulSettings

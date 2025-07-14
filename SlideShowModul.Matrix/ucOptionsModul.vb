@@ -15,18 +15,27 @@ Public Class ucOptionsModul
         'Initialisiert das UC und seine Steuerelemente
 
         'Aktuelle Settings aus der SettingsInbox abholen
-        GetSettings(Of ModulMain.ModulSettings_Matrix)(ModulMain.nameModul)
+        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_Matrix)(ModulMain.nameModul)
         ClearSettings(ModulMain.nameModul)
 
         'Steuerelemente Initialisieren
 
         'lstHighlighttexte
-        For Each item In aktuelleSettings.HighlightTexte
-            lstHiglightTexte.Items.Add(item)
-        Next
+        If aktuelleSettings.HighlightTexte IsNot Nothing Then
+            For Each item In aktuelleSettings.HighlightTexte
+                lstHiglightTexte.Items.Add(item)
+            Next
+        End If
+        lstHiglightTexte.Sorted = True
 
         'trbSzenendauerSekunden
-        trbSzenendauer.Value = aktuelleSettings.SzenendauerSekunden
+        If aktuelleSettings.SzenendauerSekunden < 5 Then
+            trbSzenendauer.Value = 25
+        Else
+            trbSzenendauer.Value = aktuelleSettings.SzenendauerSekunden
+        End If
+        lblSzenendauer.Text = trbSzenendauer.Value.ToString & " s"
+
 
     End Sub
 
@@ -89,6 +98,14 @@ Public Class ucOptionsModul
 
         'DirectCommit
         WriteToRegistry(ModulMain.SLIDESHOWMODUL_MATRIX_FULLPATH & "Highlighttexte", "")
+
+    End Sub
+
+    Private Sub trbSzenendauer_ValueChanged(sender As Object, e As EventArgs) Handles trbSzenendauer.ValueChanged
+        lblSzenendauer.Text = trbSzenendauer.Value.ToString & " s"
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MATRIX_FULLPATH & "SzenendauerSekunden", trbSzenendauer.Value.ToString)
 
     End Sub
 End Class
