@@ -10,7 +10,9 @@ Imports SlideShowTools.SharedDataHandling
 Imports SlideShowTools
 
 Module SaverMain
-    ' -- Initialisierung von globalen Variablen --
+
+#Region "Variablendeklaration"
+    'Variablendeklaration
 
     'Für den Fallback-Saver
     Public fallbackInstanz As frmFallbackSaver
@@ -26,25 +28,30 @@ Module SaverMain
     Public listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Public listOfEnabledTransitions As List(Of String)
     Public activeTransition As ISlideShowTransition = Nothing
-    Private initialerScreenshot As Image = GetCurrentScreen()
 
     'Für Settings & Options-Dialog
     Public optionsDialog As frmOptionsMain = Nothing
     Public optionsDialogIsActive As Boolean
     Public isInputLocked As Boolean
-    Public modulDauer As Integer
-    Public modulReihenfolge As String
     Public defaults As New Dictionary(Of String, String)
-
-    '(Settings für den späteren Gebrauch, sobald implementiert)
-    Public multiMonitor As Boolean
-    Public transitionReihenfolge As String
 
     'Sonstiges
     Public masterControlProgram As frmSaverMain = Nothing
     Public rnd As New Random()
     Public screenDim As Rectangle = Screen.PrimaryScreen.Bounds
+    Public initialerScreenShot As Image = GetCurrentScreen()
 
+    'Structure SettingsMain
+    Public Structure SettingsMain
+        Public ModulDauer As Integer
+        Public ModulReihenfolge As String
+        Public ModulAktivListe As List(Of String)
+        Public MultiMonitor As Boolean
+        Public ModulTransitionListe As List(Of String)
+        Public ModulTransitionReihenfolge As String
+    End Structure
+
+#End Region
 
     ' -- Funktionen und Prozeduren --
     Public Sub Main()

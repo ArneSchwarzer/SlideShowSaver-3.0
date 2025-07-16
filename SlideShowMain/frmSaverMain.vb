@@ -5,28 +5,32 @@ Imports SlideShowTools.KeyAndMouseHandling
 Imports SlideShowMain.SaverMain
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowTools.SettingsHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports SlideShowLogging
 Imports SlideShowLoader
 Imports SlideShowBildauswahl
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.SharedDataHandling
-
+Imports SlideShowTools.ScreenHandling
 
 Public Class frmSaverMain
+#Region "Variablendeklaration"
     'Variablendeklarationen 
 
     'Variablen für die Start-Transition
     Private WithEvents einmaligeTransition As ISlideShowTransition
+    Private einmaligeTransitionName As String = Nothing
     Private transitionBeendet As New Threading.ManualResetEventSlim(False)
     Private startScreen As Image
     Private startLogo As Image
     Private picMain As PictureBox
     Private letzteTransition As String
-    Private startTransition As String = Nothing
 
-    'Default Main Settings
-    Public defaults As Dictionary(Of String, String) = GetMainDefaultSettings()
+    'Main Settings
+    Private aktuelleSettings As SettingsMain
+
+#End Region
 
     Private Sub frmSaverMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Bereitet das MCP zum Start vor
@@ -49,19 +53,19 @@ Public Class frmSaverMain
         BildauswahlMain.CheckYourSettings() 'Bildauswahl Bescheid geben, dass es losgeht
 
         'Transition vorbereiten
-        listOfEnabledTransitions = SplitSemicolonList(ReadFromRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionListe"))
+        listOfEnabledTransitions = aktuelleSettings.ModulTransitionListe
 
         If listOfEnabledTransitions.Count > 0 Then
             listOfAvailableTransitions = TransitionListLoader.LadeTransitionInfoListe()
             letzteTransition = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespieleTransition")
 
-            Select Case ReadFromRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge")
+            Select Case aktuelleSettings.ModulTransitionReihenfolge
                 Case "Zufällig bei Start"
                     Do
-                        startTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-                    Loop Until listOfAvailableTransitions.Any(Function(t) t.TransitionName = startTransition)
+                        einmaligeTransitionName = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    Loop Until listOfAvailableTransitions.Any(Function(t) t.TransitionName = einmaligeTransitionName)
                 Case "In Reihenfolge bei Start"
-                    startTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransition)
+                    einmaligeTransitionName = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransition)
             End Select
 
             picMain = New PictureBox
@@ -87,13 +91,14 @@ Public Class frmSaverMain
 
         Dim erstesModul As String
         Dim picMainGFX As Graphics = Nothing
+        Dim screenSize As New Size
 
         'MCP sagt "Hallo"
         LogHandling.LogInfo("MCP wurde gestartet.")
 
         'Auswahl des ersten Moduls (oder des FallbackSavers)
         If listOfEnabledModules.Count > 0 Then
-            If modulReihenfolge = "In Reihenfolge" Then
+            If aktuelleSettings.ModulReihenfolge = "In Reihenfolge" Then
                 erstesModul = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespieltesModul")
                 erstesModul = ListHandling.GetNextAlphabeticItemName(listOfEnabledModules, erstesModul)
             Else
@@ -106,17 +111,30 @@ Public Class frmSaverMain
             fallbackPaused = False
         End If
 
+        'Label anzeigen
+        screenSize = GetNativeScreenResolution()
+
+        lblMCP.Left = (screenSize.Width - lblMCP.Width) \ 2
+        lblMCP.Visible = True
+
+        lblNameFramework.Left = (screenSize.Width - lblNameFramework.Width) \ 2
+        lblNameFramework.Visible = True
+
+        lblInitialisiere.Text = "Initialisiere Schoner-Modul: " & erstesModul
+        lblInitialisiere.Top = (screenSize.Height - lblInitialisiere.Height) \ 2
+        lblInitialisiere.Left = (screenSize.Width - lblInitialisiere.Width) \ 2
+        lblInitialisiere.Visible = True
+
         'TODO: Falls eine Transition ausgewählt ist, vor dem Start des ersten Moduls Start-Transition zeigen.
-        'If startTransition IsNot Nothing Then
+        'If einmaligeTransitionName IsNot Nothing Then
+        '
         'lblMCP.Visible = False
         'lblNameFramewok.Visible = False
         '    picMainGFX = Graphics.FromHwnd(picMain.Handle)
-        '    ZeigeEinmaligeStartTransition(StartBild, startLogo, picMainGFX, startTransition)
+        '    ZeigeEinmaligeeinmaligeTransitionName(StartBild, startLogo, picMainGFX, einmaligeTransitionName)
         '    If transitionReihenfolge = "In Reihenfolge bei Start" Then
-        '        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", startTransition)
+        '        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", einmaligeTransitionName)
         '    End If
-        '
-        ' 
         '
         'End If
 
@@ -192,12 +210,11 @@ Public Class frmSaverMain
         '(Re-)Initialisieren gemäß Settings
 
         'Basisdaten auslesen
-        modulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaults))
-        modulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaults)
+        ReadMainSettingsFromRegistryOrDefaults()
 
-        If modulReihenfolge <> "Zufällig bei Start" Then
+        If aktuelleSettings.ModulReihenfolge <> "Zufällig bei Start" Then
             'Main Loop gemäß ModulDauer in Minuten setzten & Starten
-            tmrMain.Interval = modulDauer * 60 * 1000
+            tmrMain.Interval = aktuelleSettings.ModulDauer * 60 * 1000
             tmrMain.Start()
         Else
             tmrMain.Stop()
@@ -270,13 +287,19 @@ Public Class frmSaverMain
             LogHandling.LogInfo("Neues Modul gestartet: Fallbacksaver")
         Else
 
-            If modulReihenfolge = "In Reihenfolge" Then
+            If aktuelleSettings.ModulReihenfolge = "In Reihenfolge" Then
                 neuesModul = ListHandling.GetNextAlphabeticItemName(listOfEnabledModules, activeModule.ModulName.ToString)
             Else
                 'entspricht automatisch "Zufällig" und "Zufällig bei Start", da letzteres den trmMain
                 'ja eh schon (in IniAndReinitialize()) abschaltet .
                 neuesModul = ListHandling.GetRandomItemFromList(Of String)(listOfEnabledModules)
             End If
+
+            'Wechsel bei gleichem Modul nicht notwendig
+            If neuesModul = activeModule.ModulName Then Exit Sub
+
+            'Label aktualisieren
+            lblInitialisiere.Text = "Initialisiere Schoner-Modul: " & neuesModul
 
             'Aktuelles Modul aufräumen
             If activeModule IsNot Nothing Then
@@ -306,6 +329,11 @@ Public Class frmSaverMain
         'OptionsDialog aufrufen inklusive Prüfung, ob der Dialog über den OK-Button geschlossen wurde
         Application.DoEvents()
         Threading.Thread.Sleep(100)
+
+        'Aktuelle Settings in die SettingsInbox stellen
+        ReadMainSettingsFromRegistryOrDefaults()
+        StoreSettings("Main", aktuelleSettings)
+
         If optionsDialog.ShowDialog() = DialogResult.OK Then
 
             If optionsDialog IsNot Nothing Then
@@ -366,7 +394,7 @@ Public Class frmSaverMain
 
     End Sub
 
-    Private Sub ZeigeEinmaligeStartTransition(startBild As Image, zielBild As Image, g As Graphics, transition As String)
+    Private Sub ZeigeEinmaligeeinmaligeTransitionName(startBild As Image, zielBild As Image, g As Graphics, transition As String)
 
         ' Transition initialisieren
         einmaligeTransition = TransitionByNameLoader.LadeTransitionNachName(transition)
@@ -393,6 +421,34 @@ Public Class frmSaverMain
         If state = False Then
             transitionBeendet.Set()
         End If
+    End Sub
+
+    Private Sub ReadMainSettingsFromRegistryOrDefaults()
+        'Liest die aktuellenSettings aus der Registry oder setzt Default-Werte
+
+        Dim tmpRegistryValues As String
+        Dim defaults As Dictionary(Of String, String) = GetMainDefaultSettings()
+
+        'ModulDauer
+        aktuelleSettings.ModulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaults))
+
+        'ModulReihenfolge
+        aktuelleSettings.ModulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaults)
+
+        'Aktivierte Module
+        tmpRegistryValues = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulAktivListe", defaults)
+        aktuelleSettings.ModulAktivListe = SplitSemicolonList(tmpRegistryValues)
+
+        'MultiMonitor
+        aktuelleSettings.MultiMonitor = CBool(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "MultiMonitor", defaults))
+
+        'Modul-Transitions
+        tmpRegistryValues = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionListe", defaults)
+        aktuelleSettings.ModulTransitionListe = SplitSemicolonList(tmpRegistryValues)
+
+        'Modul-TransitionsReihenfolge
+        aktuelleSettings.ModulTransitionReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", defaults)
+
     End Sub
 
 End Class

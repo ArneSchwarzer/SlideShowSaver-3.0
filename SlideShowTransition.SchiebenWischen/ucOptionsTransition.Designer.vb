@@ -27,7 +27,7 @@ Partial Class ucOptionsTransition
         Me.lblNoOptions = New System.Windows.Forms.Label()
         Me.lblKeineRichtungInfo = New System.Windows.Forms.Label()
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
-        Me.trbGeschwindigkeit = New System.Windows.Forms.TrackBar()
+        Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNModus = New System.Windows.Forms.Label()
         Me.rbZufall = New System.Windows.Forms.RadioButton()
         Me.rbWischen = New System.Windows.Forms.RadioButton()
@@ -41,7 +41,7 @@ Partial Class ucOptionsTransition
         Me.tbtSW = New MyControlsLibrary.ToggleButton()
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
-        CType(Me.trbGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblShadername
@@ -91,14 +91,14 @@ Partial Class ucOptionsTransition
         Me.lblNtrbGeschwindigkeit.TabIndex = 28
         Me.lblNtrbGeschwindigkeit.Text = "Geschwindigkeit"
         '
-        'trbGeschwindigkeit
+        'trkGeschwindigkeit
         '
-        Me.trbGeschwindigkeit.Location = New System.Drawing.Point(332, 606)
-        Me.trbGeschwindigkeit.Minimum = 1
-        Me.trbGeschwindigkeit.Name = "trbGeschwindigkeit"
-        Me.trbGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
-        Me.trbGeschwindigkeit.TabIndex = 29
-        Me.trbGeschwindigkeit.Value = 3
+        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(332, 606)
+        Me.trkGeschwindigkeit.Minimum = 1
+        Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
+        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
+        Me.trkGeschwindigkeit.TabIndex = 29
+        Me.trkGeschwindigkeit.Value = 3
         '
         'lblNModus
         '
@@ -283,7 +283,7 @@ Partial Class ucOptionsTransition
         Me.Controls.Add(Me.rbZufall)
         Me.Controls.Add(Me.rbWischen)
         Me.Controls.Add(Me.rbSchieben)
-        Me.Controls.Add(Me.trbGeschwindigkeit)
+        Me.Controls.Add(Me.trkGeschwindigkeit)
         Me.Controls.Add(Me.lblNtrbGeschwindigkeit)
         Me.Controls.Add(Me.lblKeineRichtungInfo)
         Me.Controls.Add(Me.lblNoOptions)
@@ -293,7 +293,7 @@ Partial Class ucOptionsTransition
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsTransition"
         Me.Size = New System.Drawing.Size(890, 1020)
-        CType(Me.trbGeschwindigkeit, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -304,7 +304,7 @@ Partial Class ucOptionsTransition
     Friend WithEvents lblNoOptions As Windows.Forms.Label
     Friend WithEvents lblKeineRichtungInfo As Windows.Forms.Label
     Friend WithEvents lblNtrbGeschwindigkeit As Windows.Forms.Label
-    Friend WithEvents trbGeschwindigkeit As Windows.Forms.TrackBar
+    Friend WithEvents trkGeschwindigkeit As Windows.Forms.TrackBar
     Friend WithEvents lblNModus As Windows.Forms.Label
     Friend WithEvents rbZufall As Windows.Forms.RadioButton
     Friend WithEvents rbWischen As Windows.Forms.RadioButton

@@ -27,14 +27,16 @@ Public Class ShaderListLoader
                             .ShaderVersion = dummy.ShaderVersion
                         }
                         shaderInfos.Add(info)
+                        LogHandling.LogDebug("SlideShowLoader - ShaderlistLoader.LadeShaderInfoListe: Shader " & info.ShaderName & " erfolgreich geladen")
                         dummy = Nothing ' Dummy-Instanz explizit verwerfen
                         Exit For
                     End If
                 Next
             Catch ex As Exception
                 ' Logging
-                LogHandling.LogError("Fehler beim Laden der Liste der Shader: " & ex.ToString)
+                LogHandling.LogError("SlideShowLoader - ShaderListLoader.LadeShaderInfoListe: Fehler beim Laden der Liste der Shader: " & ex.Message)
             End Try
+
         Next
 
         Return shaderInfos

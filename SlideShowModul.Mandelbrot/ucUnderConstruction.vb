@@ -14,5 +14,9 @@ Public Class ucUnderConstruction
         panPanel.Left = (Me.ClientSize.Width - panPanel.Width) \ 2
         panPanel.Top = (Me.ClientSize.Height - panPanel.Height) \ 2
 
+        lblUnderConstruction.Left = (panPanel.Width - lblUnderConstruction.Width) \ 2
+        lblHierEntsteht.Left = (panPanel.Width - lblHierEntsteht.Width) \ 2
+        lblModulname.Left = (panPanel.Width - lblModulname.Width) \ 2
+
     End Sub
 End Class

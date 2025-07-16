@@ -5,27 +5,34 @@ Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ConversionHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowLogging
 
 Public Class ModulMain
     Implements ISlideShowModul
 
-    ' === INTERN ===
+#Region "Variablendeklaration"
+    'Variablendeklaration
+
     Private matrixScreen As frmModulMain
 
     Private Shared aktuelleSettings As ModulSettings_Matrix
     Public Shared nameModul As String = "Matrix"
     Public Shared SLIDESHOWMODUL_MATRIX_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "Matrix\"
+#End Region
 
-    ' === OPTIONEN-STRUKTUR ===
+#Region "Strukturen,Enums etc."
+    'Strukturen, Enums etc.
     Public Structure ModulSettings_Matrix
         Public HighlightTexte As List(Of String)
         Public SzenendauerSekunden As Integer
     End Structure
 
-    ' === METADATEN ===
+#End Region
+
+    'Eigenschaften
     Public ReadOnly Property ModulName As String Implements ISlideShowModul.ModulName
         Get
-            Return "Matrix"
+            Return nameModul
         End Get
     End Property
 
@@ -59,16 +66,29 @@ Public Class ModulMain
         End Get
     End Property
 
-    ' === EVENTS ===
-    Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
-    Public Event PleaseChangeToShader(shaderName As String) Implements ISlideShowModul.PleaseChangeToShader
-    Public Event PleaseChangeToTransition(sender As Object, transitionName As String) Implements ISlideShowModul.PleaseChangeToTransition
+    'Events
 
-    ' === START/STOP ===
+#Region "Events"
+    Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
+    Public Shared Event YouHaveMail_Matrix()
+
+#End Region
+
+    'Start/Stop/Pause
+
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
         'Started das Modul als Instanz
 
-        matrixScreen = New frmModulMain()
+        'AktuelleSettings auffrischen
+        CheckYourSettings()
+
+        Try
+            matrixScreen = New frmModulMain()
+        Catch ex As Exception
+            LogHandling.LogError("Modul Matrix - ModulMain.StartModul(): Fehler beim Laden des Moduls: " & ex.ToString)
+        End Try
+
+        matrixScreen.WindowState = FormWindowState.Minimized
         matrixScreen.Show()
 
         RaiseEvent ModulStateChanged("Running")
@@ -92,7 +112,8 @@ Public Class ModulMain
         ' Wird für dieses Modul nicht benötigt
     End Sub
 
-    ' === OPTIONEN ===
+    'Optionen & OptionsDialog
+
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
         'Liest die aktuellen Settings ein, speichert sie in SettingsInbox und liefert dann das ucOptionsModul
 
@@ -105,34 +126,21 @@ Public Class ModulMain
 
     End Function
 
-    Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
-        'Keine Funktion
-    End Function
-
-    Public Sub ApplyModulSettings(settings As Object) Implements ISlideShowModul.ApplyModulSettings
-        'Keine Funktion
-    End Sub
-
-    Public Sub GetModulSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowModul.GetModulSettings
-        'Keine Funktion
-    End Sub
-
-    Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
-        'Keine Funktion
-    End Sub
-
-    ' === INFO ===
-    Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowModul.AttentionShaderGewechselt
-        ' Wird nicht verwendet
-    End Sub
-
-    Public Sub AttentionTransitionGewechselt(sender As Object, transitionName As String) Implements ISlideShowModul.AttentionTransitionGewechselt
-        ' Wird nicht verwendet
-    End Sub
+    'Info-Kommunikation
 
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
         ' Initialisierung und Re-Initalisierung der Optionen aus der Registry
+
+        'Aktuelle Settings abholen und auch gleich in SettingsInbox ablegen
+        ReadModulSettingsFromRegistryOrDefaults()
+        StoreSettings(nameModul, aktuelleSettings)
+
+        'Und auch gleich matrixScreen Bescheid geben
+        RaiseEvent YouHaveMail_Matrix()
+
     End Sub
+
+    'Private Methoden
 
     Private Function GetModulDefaults() As Dictionary(Of String, String)
         'Liefert die Default-Einstellungen des Moduls
@@ -160,4 +168,5 @@ Public Class ModulMain
         aktuelleSettings.SzenendauerSekunden = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MATRIX_FULLPATH & "SzenendauerSekunden", defaults))
 
     End Sub
+
 End Class

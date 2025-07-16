@@ -26,6 +26,7 @@ Partial Class frmSaverMain
         Me.tmrMain = New System.Windows.Forms.Timer(Me.components)
         Me.lblMCP = New System.Windows.Forms.Label()
         Me.lblNameFramework = New System.Windows.Forms.Label()
+        Me.lblInitialisiere = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'tmrMain
@@ -35,11 +36,11 @@ Partial Class frmSaverMain
         'lblMCP
         '
         Me.lblMCP.AutoSize = True
-        Me.lblMCP.Font = New System.Drawing.Font("Segoe UI", 20.0!, System.Drawing.FontStyle.Bold)
+        Me.lblMCP.Font = New System.Drawing.Font("Segoe UI", 24.0!, System.Drawing.FontStyle.Bold)
         Me.lblMCP.ForeColor = System.Drawing.Color.Red
         Me.lblMCP.Location = New System.Drawing.Point(16, -11)
         Me.lblMCP.Name = "lblMCP"
-        Me.lblMCP.Size = New System.Drawing.Size(1007, 81)
+        Me.lblMCP.Size = New System.Drawing.Size(1216, 96)
         Me.lblMCP.TabIndex = 0
         Me.lblMCP.Text = "Master Control Program running..."
         '
@@ -48,11 +49,22 @@ Partial Class frmSaverMain
         Me.lblNameFramework.AutoSize = True
         Me.lblNameFramework.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
         Me.lblNameFramework.ForeColor = System.Drawing.Color.Red
-        Me.lblNameFramework.Location = New System.Drawing.Point(31, 70)
+        Me.lblNameFramework.Location = New System.Drawing.Point(24, 85)
         Me.lblNameFramework.Name = "lblNameFramework"
         Me.lblNameFramework.Size = New System.Drawing.Size(547, 48)
         Me.lblNameFramework.TabIndex = 1
         Me.lblNameFramework.Text = "SlideShowSaver 3.0 Framework"
+        '
+        'lblInitialisiere
+        '
+        Me.lblInitialisiere.AutoSize = True
+        Me.lblInitialisiere.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblInitialisiere.ForeColor = System.Drawing.Color.Snow
+        Me.lblInitialisiere.Location = New System.Drawing.Point(373, 293)
+        Me.lblInitialisiere.Name = "lblInitialisiere"
+        Me.lblInitialisiere.Size = New System.Drawing.Size(504, 72)
+        Me.lblInitialisiere.TabIndex = 2
+        Me.lblInitialisiere.Text = "Initialisiere Modul:"
         '
         'frmSaverMain
         '
@@ -60,6 +72,7 @@ Partial Class frmSaverMain
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Black
         Me.ClientSize = New System.Drawing.Size(971, 636)
+        Me.Controls.Add(Me.lblInitialisiere)
         Me.Controls.Add(Me.lblNameFramework)
         Me.Controls.Add(Me.lblMCP)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
@@ -76,4 +89,5 @@ Partial Class frmSaverMain
     Friend WithEvents tmrMain As Timer
     Friend WithEvents lblMCP As Label
     Friend WithEvents lblNameFramework As Label
+    Friend WithEvents lblInitialisiere As Label
 End Class

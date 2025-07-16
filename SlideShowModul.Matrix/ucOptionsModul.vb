@@ -8,15 +8,16 @@ Imports System.Windows.Forms
 
 Public Class ucOptionsModul
 
+#Region "Variablendeklaration"
     'Variablendeklaration
     Private Shared aktuelleSettings As ModulMain.ModulSettings_Matrix
+#End Region
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Initialisiert das UC und seine Steuerelemente
 
         'Aktuelle Settings aus der SettingsInbox abholen
-        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_Matrix)(ModulMain.nameModul)
-        ClearSettings(ModulMain.nameModul)
+        CheckYourMail()
 
         'Steuerelemente Initialisieren
 
@@ -30,11 +31,11 @@ Public Class ucOptionsModul
 
         'trbSzenendauerSekunden
         If aktuelleSettings.SzenendauerSekunden < 5 Then
-            trbSzenendauer.Value = 25
+            trkSzenendauer.Value = 25
         Else
-            trbSzenendauer.Value = aktuelleSettings.SzenendauerSekunden
+            trkSzenendauer.Value = aktuelleSettings.SzenendauerSekunden
         End If
-        lblSzenendauer.Text = trbSzenendauer.Value.ToString & " s"
+        lblSzenendauer.Text = trkSzenendauer.Value.ToString & " s"
 
 
     End Sub
@@ -101,11 +102,18 @@ Public Class ucOptionsModul
 
     End Sub
 
-    Private Sub trbSzenendauer_ValueChanged(sender As Object, e As EventArgs) Handles trbSzenendauer.ValueChanged
-        lblSzenendauer.Text = trbSzenendauer.Value.ToString & " s"
+    Private Sub trkSzenendauer_ValueChanged(sender As Object, e As EventArgs) Handles trkSzenendauer.ValueChanged
+        lblSzenendauer.Text = trkSzenendauer.Value.ToString & " s"
 
         'DirectCommit
-        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MATRIX_FULLPATH & "SzenendauerSekunden", trbSzenendauer.Value.ToString)
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MATRIX_FULLPATH & "SzenendauerSekunden", trkSzenendauer.Value.ToString)
+
+    End Sub
+
+    Private Sub CheckYourMail()
+        'Liest die aktuellen Settings aus der SettingsInbox aus
+
+        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_Matrix)(ModulMain.nameModul)
 
     End Sub
 End Class

@@ -8,17 +8,21 @@ Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowLoader
 Imports SlideShowLogging
-Imports Modul_SlideShowSaver_3
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.SharedDataHandling
+Imports SlideShowTools.ScreenHandling
+Imports SlideShowTools.SettingsHandling
+Imports Modul_SlideShowSaver_3
 Imports TagLib
 
 Public Class frmModulMain
+
+#Region "Variablendeklaration"
     'Variablendeklaration
 
     'Bildanzeige
-    Private Shared aktuelleSettings As ModulMain.ModulSettings_SSS_3_0
+    Private Shared aktuelleSettings As ModulMain.ModulSettings_SSS
     Private Shared aktuellesBild As Image
     Private Shared neuesBild As Image
     Public Shared bildPfad As String = Nothing
@@ -45,12 +49,16 @@ Public Class frmModulMain
 
     'Sonstiges
     Private rnd As New Random
+#End Region
 
     Private Sub frmModuleMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Initialisiert die Form, Steuerelemente und Settings vor der Anzeige
         FormsHandling.InitialFormPreparation(Me, Color.Black)
         Me.Text = "Modul SlideShowSaver 3.0"
         Me.TopMost = False
+
+        'Event-Handler
+        AddHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
 
         'tmrDelay
         tmrDelay = New Timer
@@ -61,12 +69,8 @@ Public Class frmModulMain
         picBildAnzeige.SizeMode = PictureBoxSizeMode.Zoom
         picBildAnzeige.BackColor = Color.Transparent
 
-        'Aktuelle Settings abholen
-        aktuelleSettings = ModulMain.aktuelleSettings
-
-        'Liste der legalen Transitionen und Shader erstellen
-        LegitimeTransitionsListeErstellen()
-        LegitimeShaderListeErstellen()
+        'Aktuelle Settings abholen & Listen der legitimen Transitionen & Shader erstellen.
+        CheckYourMail()
 
         'ToDo: erstes Bild Laden = Aktueller Desktop
         'If StartBildWurdeVerwendet Then
@@ -156,7 +160,7 @@ Public Class frmModulMain
             bildPfad = aktuellesVerzeichnis(0)
             aktuellesBild = GetPictureByName(bildPfad)
             If aktiverShader IsNot Nothing Then
-                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, picBildAnzeige.Size)
+                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, GetNativeScreenResolution())
             End If
             listeDerZuletztAngezeigtenBilder.Clear()
             listeDerZuletztAngezeigtenBilder.Add(bildPfad)
@@ -165,7 +169,7 @@ Public Class frmModulMain
             bildPfad = aktuellesVerzeichnis(1)
             neuesBild = GetPictureByName(bildPfad)
             If aktiverShader IsNot Nothing Then
-                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, picBildAnzeige.Size)
+                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, GetNativeScreenResolution())
             End If
             'listeDerZuletztAngezeigtenBilder wird in der Methode Bildwechsel gefüllt.
 
@@ -178,7 +182,7 @@ Public Class frmModulMain
             bildPfad = initialePfade(0)
             aktuellesBild = GetPictureByName(bildPfad)
             If aktiverShader IsNot Nothing Then
-                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, picBildAnzeige.Size)
+                aktuellesBild = aktiverShader.RunShader(aktuellesBild, bildPfad, Screen.PrimaryScreen.Bounds.Size)
             End If
             listeDerZuletztAngezeigtenBilder.Clear()
             listeDerZuletztAngezeigtenBilder.Add(bildPfad)
@@ -187,12 +191,15 @@ Public Class frmModulMain
             bildPfad = initialePfade(1)
             neuesBild = GetPictureByName(bildPfad)
             If aktiverShader IsNot Nothing Then
-                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, picBildAnzeige.Size)
+                neuesBild = aktiverShader.RunShader(neuesBild, bildPfad, GetNativeScreenResolution())
             End If
-            'listeDerZuletztAngezeigtenBilder wird in der Methode Bildwechsel gefüllt.
+            'listeDerZuletztAngezeigtenBilder für neuesBild wird in der Methode Bildwechsel gefüllt.
 
         End If
 #End Region
+
+        'Form maximieren
+        Me.WindowState = FormWindowState.Maximized
 
         'Erstes Bild anzeigen
         picBildAnzeige.Image = aktuellesBild
@@ -460,6 +467,27 @@ Public Class frmModulMain
         transitionIstAktiv = False
         tmrModul.Interval = aktuelleSettings.Anzeigedauer * 1000
         tmrModul.Start()
+
+    End Sub
+
+    Private Sub CheckYourMail()
+        'Liest die aktuelleSettings aus der SettingsInbox aus und setzt sie um
+
+        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_SSS)(ModulMain.nameModul)
+
+        LegitimeShaderListeErstellen()
+        LegitimeTransitionsListeErstellen()
+
+    End Sub
+
+    Private Sub frmModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        'Aufräumen und Schluss
+
+        tmrDelay.Dispose()
+        tmrDelay = Nothing
+
+        tmrModul.Dispose()
+        tmrModul = Nothing
 
     End Sub
 

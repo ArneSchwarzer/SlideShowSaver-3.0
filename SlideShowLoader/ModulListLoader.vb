@@ -30,14 +30,16 @@ Public Class ModulListLoader
                             .ModulVersion = dummy.ModulVersion
                             }
                         modulInfos.Add(info)
+                        LogHandling.LogDebug("SlideShowLoader - ModullistLoader.LadeModulInfoListe: Modul " & info.ModulName & " erfolgreich geladen")
                         dummy = Nothing ' Dummy-Instanz sofort wieder freigeben
                         Exit For
                     End If
                 Next
             Catch ex As Exception
                 ' Fehlerbehandlung
-                LogHandling.LogError("Fehler beim Laden der Liste der Module" & ex.ToString)
+                LogHandling.LogError("SlideShowLoader - ModullistLoader.LadeModulInfoListe: Fehler beim Laden der Liste der Module: " & ex.Message)
             End Try
+
         Next
 
         Return modulInfos

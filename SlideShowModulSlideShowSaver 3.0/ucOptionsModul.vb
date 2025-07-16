@@ -1,5 +1,4 @@
 ﻿Imports System.Drawing
-
 Imports SlideShowTools.ToolTipHandling
 Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowTools.RegistryHandling
@@ -14,27 +13,32 @@ Imports SlideShowInterfaces
 Imports SlideShowTools
 Imports SlideShowLogging
 
-
-
 Public Class ucOptionsModul
+    Implements ISlideShowTransitionCommunication
+    Implements ISlideShowShaderCommunication
 
+#Region "Variablendeklaration"
     'Variablendeklaration
-    Private aktuelleSettings As ModulMain.ModulSettings_SSS_3_0
+    Private aktuelleSettings As ModulMain.ModulSettings_SSS
     Private transitionInfos As List(Of SlideShowTransitionInfo)
     Private shaderInfos As List(Of SlideShowShaderInfo)
     Private markierteTransitions As List(Of String)
     Private markierteShader As List(Of String)
 
-    Private meineInstanz As ModulMain = TryCast(ModulMain.activeModuleInstanz, ModulMain)
-
     Private Shared minuten As Integer
     Private Shared sekunden As Integer
+#End Region
+
+#Region "Events"
+    'Events
+    Public Event PleaseChangeToTransition(sender As Object, transitionName As String) Implements ISlideShowTransitionCommunication.PleaseChangeToTransition
+    Public Event PleaseChangeToShader(shaderName As String) Implements ISlideShowShaderCommunication.PleaseChangeToShader
+#End Region
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
 #Region "ucOptionsModul.Load Header"
         'Settings aus dem Zwischenspeicher holen
-        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_SSS_3_0)(meineInstanz.ModulName)
-        ClearSettings(meineInstanz.ModulName)
+        CheckYourMail()
 
         'Initialisieren
         transitionInfos = TransitionListLoader.LadeTransitionInfoListe()
@@ -116,10 +120,10 @@ Public Class ucOptionsModul
 
 #Region "trbAnzeigedauer Initialisieren"
         'trbAnzeigedauer
-        trbAnzeigedauer.Value = aktuelleSettings.Anzeigedauer
+        trkAnzeigedauer.Value = aktuelleSettings.Anzeigedauer
 
-        minuten = trbAnzeigedauer.Value \ 60
-        sekunden = trbAnzeigedauer.Value Mod 60
+        minuten = trkAnzeigedauer.Value \ 60
+        sekunden = trkAnzeigedauer.Value Mod 60
         If minuten > 0 Then
             lblAnzeigedauer.Text = minuten.ToString & "m"
             If sekunden <> 0 Then
@@ -137,11 +141,11 @@ Public Class ucOptionsModul
 
     End Sub
 
-    Private Sub trbAnzeigedauer_ValueChanged(sender As Object, e As EventArgs) Handles trbAnzeigedauer.ValueChanged
+    Private Sub trkAnzeigedauer_ValueChanged(sender As Object, e As EventArgs) Handles trkAnzeigedauer.ValueChanged
 
         'Label aktualisieren
-        minuten = trbAnzeigedauer.Value \ 60
-        sekunden = trbAnzeigedauer.Value Mod 60
+        minuten = trkAnzeigedauer.Value \ 60
+        sekunden = trkAnzeigedauer.Value Mod 60
         If minuten > 0 Then
             lblAnzeigedauer.Text = minuten.ToString & "m"
             If sekunden <> 0 Then
@@ -152,7 +156,7 @@ Public Class ucOptionsModul
         End If
 
         'DirectCommit
-        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", trbAnzeigedauer.Value.ToString)
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", trkAnzeigedauer.Value.ToString)
 
     End Sub
 
@@ -160,7 +164,7 @@ Public Class ucOptionsModul
         'Beauftragt fmrOptionsMain den ucOptionsShader zu wechseln
 
         If clbShader.SelectedItem IsNot Nothing Then
-            meineInstanz.AttentionShaderGewechselt(clbShader.SelectedItem.ToString)
+            RaiseEvent PleaseChangeToShader(clbShader.SelectedItem.ToString)
         End If
 
     End Sub
@@ -168,7 +172,7 @@ Public Class ucOptionsModul
     Private Sub clbTransitions_SelectedIndexChanged(sender As Object, e As EventArgs) Handles clbTransitions.SelectedIndexChanged
 
         If clbTransitions.SelectedItem IsNot Nothing Then
-            meineInstanz.AttentionTransitionGewechselt(clbTransitions, clbTransitions.SelectedItem.ToString)
+            RaiseEvent PleaseChangeToTransition(clbTransitions, clbTransitions.SelectedItem.ToString)
         End If
 
     End Sub
@@ -220,7 +224,7 @@ Public Class ucOptionsModul
 
                         End Sub)
         Catch ex As Exception
-
+            LogHandling.LogWarn("SSS 3.0: ucOptionsModul.clbTransitions_ItemCheck() - Problem: " & ex.ToString)
         End Try
     End Sub
 
@@ -243,7 +247,16 @@ Public Class ucOptionsModul
 
                         End Sub)
         Catch ex As Exception
-            LogHandling.LogWarn("SSS 3.0: ucOptionsModul - Problem bei clbShader_ItemCheck: " & ex.ToString)
+            LogHandling.LogWarn("SSS 3.0: ucOptionsModul.clbShader_ItemCheck() - Problem: " & ex.ToString)
         End Try
     End Sub
+
+    Private Sub CheckYourMail()
+        'Liest die aktuellen Settings aus der SettingsInbox ein.
+
+        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_SSS)(ModulMain.nameModul)
+
+    End Sub
+
 End Class
+

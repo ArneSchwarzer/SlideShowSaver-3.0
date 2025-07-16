@@ -27,14 +27,16 @@ Public Class TransitionListLoader
                             .TransitionVersion = dummy.TransitionVersion
                         }
                         transitionInfos.Add(info)
+                        LogHandling.LogDebug("SlideShowLoader - TransitionlistLoader.LadeTransitionInfoListe: Transition " & info.TransitionName & " erfolgreich geladen")
                         dummy = Nothing ' Dummy-Instanz verwerfen
                         Exit For
                     End If
                 Next
             Catch ex As Exception
                 ' Fehlerbehandlung
-                LogHandling.LogError("Fehler beim Laden der Liste der Transitions: " & ex.ToString)
+                LogHandling.LogError("SlideShowLoader - TransitionListLoader.LadeTranstionInfoListe: Fehler beim Laden der Liste der Transitions: " & ex.Message)
             End Try
+
         Next
 
         Return transitionInfos

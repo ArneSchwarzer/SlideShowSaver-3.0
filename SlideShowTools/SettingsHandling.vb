@@ -32,18 +32,10 @@ Public NotInheritable Class SettingsHandling
             Return Nothing
         End Function
 
-        ''' <summary>
-        ''' Entfernt den Eintrag aus dem Zwischenspeicher.
-        ''' </summary>
-        ''' <param name="key">Der zu löschende Eintrag</param>
-        Public Shared Sub ClearSettings(key As String)
-            If inbox.ContainsKey(key) Then inbox.Remove(key)
-        End Sub
-
-        ''' <summary>
-        ''' Entfernt alle Einträge.
-        ''' </summary>
-        Public Shared Sub ClearAll()
+    ''' <summary>
+    ''' Entfernt alle Einträge.
+    ''' </summary>
+    Public Shared Sub ClearAll()
             inbox.Clear()
         End Sub
 

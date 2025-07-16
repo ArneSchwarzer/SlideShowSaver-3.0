@@ -13,16 +13,21 @@ Public Class InterfaceDeclarations
     ''' Dieses Interface definiert die Struktur eines Bildschirmschoner-Moduls.
     ''' 
     ''' 
-    ''' Hinweis zur Eventweiterleitung:
+    ''' Wichtige Hinweis zu Modul-Implementierung und Eventweiterleitung:
+    '''
+    '''Neben den in diesem Interface vorgegebenen Methoden sollte ein Modul auch immer
+    '''eine Struktur ModulSettings_Modulname sowie diese beiden Methoden anbieten:
+    '''
+    ''' Private Function GetModulDefaultSettings() as Dictionary(Of String, String)
+    ''' Private Sub ReadModulSettingsFromRegistryOrDefault()
     ''' 
-    ''' Module sollten Tastatur- oder Mauseingaben standardmäßig über
+    ''' Die frmModulMain sollte Tastatur- oder Mauseingaben standardmäßig über
     ''' SlideShowTools.KeyAndMouseHandling an das Hauptprogramm weiterleiten.
     ''' </summary>
 
-
     Public Interface ISlideShowModul
 
-        ' --- Eigenschaften ---
+        'Eigenschaften
         ReadOnly Property ModulName As String
         ReadOnly Property ModulBeschreibung As String
         ReadOnly Property ModulVersion As Version
@@ -30,91 +35,128 @@ Public Class InterfaceDeclarations
         ReadOnly Property ModulNutztTransitions As Boolean
         ReadOnly Property ModulNutztShader As Boolean
 
-        ' --- Events ---
+        'Events
         Event ModulStateChanged(newState As String)
-        Event PleaseChangeToShader(shaderName As String)
-        Event PleaseChangeToTransition(sender As Object, transitionName As String)
 
-        ' --- Modulsteuerung ---
+        'Modulsteuerung
         Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing)
         Sub StopModul()
         Sub PauseModusModul()
 
-        ' --- Optionen/Dialoghandling ---
+        'Optionen/Dialoghandling
         Function GetModulOptionsDialog() As UserControl
-        Function MemorizeModulSettings(uc As UserControl) As Object
-        Sub ApplyModulSettings(settings As Object)
-        Sub GetModulSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetModulRegistryOrDefaultSettings(uc As UserControl)
 
-        ' --- Info-Kommunikation ---
-        Sub AttentionShaderGewechselt(shaderName As String)
-        Sub AttentionTransitionGewechselt(sender As Object, transitionName As String)
+        'Info-Kommunikation
         Sub CheckYourSettings()
 
     End Interface
-
 
 
     ' =========================================================
     ' INTERFACE: ISlideShowTransition
     ' =========================================================
 
+    ''' <summary>
+    ''' Dieses Interface definiert die Struktur eines Bildübergangs (Transition) von einem
+    ''' Bild zum nächsten.
+    ''' 
+    ''' 
+    ''' Wichtige Hinweis zur Transition-Implementierung:
+    '''
+    '''Neben den in diesem Interface vorgegebenen Methoden sollte eine Transition auch immer
+    '''eine Struktur TransitionSettings_TransitionName sowie diese beiden Methoden anbieten:
+    '''
+    ''' Private Function GetTransitionDefaultSettings() as Dictionary(Of String, String)
+    ''' Private Sub ReaTransitionSettingsFromRegistryOrDefault()
+    ''' 
+    ''' </summary>
 
     Public Interface ISlideShowTransition
 
-        ' --- Eigenschaften ---
+        'Eigenschaften
         ReadOnly Property TransitionName As String
         ReadOnly Property TransitionKurzBeschreibung As String
         ReadOnly Property TransitionVersion As Version
 
-        ' --- Events ---
+        'Events
         Event TransitionIsRunning(state As Boolean)
-        Event PleaseChangeToShader(shaderName As String)
 
-        ' --- Ausführung ---
+        'Ausführung
         Sub RunTransition(oldImage As Image, picBoxModeOld As PictureBoxSizeMode, newImage As Image, picBoxModeNew As PictureBoxSizeMode, targetGraphics As Graphics, Optional clientSize As Size = Nothing, Optional durationMs As Integer = 0)
         Sub StopTransition()
 
-        ' --- Optionen/Dialoghandling ---
+        'Optionen/Dialoghandling
         Function GetTransitionOptionsDialog() As UserControl
-        Function MemorizeTransitionSettings(uc As UserControl) As Object
-        Sub ApplyTransitionSettings(settings As Object)
-        Sub GetTransitionSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetTransitionRegistryOrDefaultSettings(uc As UserControl)
-
-        ' --- Info-Kommunikation ---
-        Sub AttentionShaderGewechselt(shaderName As String)
-        Sub CheckYourSettings()
 
     End Interface
-
 
 
     ' =========================================================
     ' INTERFACE: ISlideShowShader
     ' =========================================================
 
+    ''' <summary>
+    ''' Dieses Interface definiert die Struktur eines Shaders.
+    ''' 
+    ''' 
+    ''' Wichtige Hinweis zur Shader-Implementierung:
+    '''
+    '''Neben den in diesem Interface vorgegebenen Methoden sollte ein Shader auch immer eine Struktur
+    '''ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
+    '''
+    ''' Private Function GetShaderDefaultSettings() as Dictionary(Of String, String)
+    ''' Private Sub ReadShaderSettingsFromRegistryOrDefault()
+    ''' 
+    ''' </summary>
 
     Public Interface ISlideShowShader
 
-        ' --- Eigenschaften ---
+        'Eigenschaften
         ReadOnly Property ShaderName As String
         ReadOnly Property ShaderKurzBeschreibung As String
         ReadOnly Property ShaderVersion As Version
 
-        ' --- Ausführung ---
+        'Ausführung
         Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image
 
-        ' --- Optionen/Dialoghandling ---
+        'Optionen/Dialoghandling
         Function GetShaderOptionsDialog() As UserControl
-        Function MemorizeShaderSettings(uc As UserControl) As Object
-        Sub ApplyShaderSettings(settings As Object)
-        Sub GetShaderSettings(uc As UserControl, restoreSettings As Object)
-        Sub GetShaderRegistryOrDefaultSettings(uc As UserControl)
 
-        ' --- Info-Kommunikation
-        Sub CheckYourSettings()
+    End Interface
+
+
+    ' =========================================================
+    ' INTERFACE: ISlideShowTransitionCommunication
+    ' =========================================================
+
+    ''' <summary>
+    ''' Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+    ''' und der frmOptionsMain, um auf derer TabPage "Transition" das korrekte ucOptionsTransition zu
+    ''' laden.
+    ''' </summary>
+
+    Public Interface ISlideShowTransitionCommunication
+
+        'Event
+        Event PleaseChangeToTransition(sender As Object, transitionName As String)
+
+    End Interface
+
+
+    ' =========================================================
+    ' INTERFACE: ISlideShowShaderCommunication
+    ' =========================================================
+
+    ''' <summary>
+    ''' Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+    ''' und der frmOptionsMain, um auf derer TabPage "Shader" das korrekte ucOptionsShader zu
+    ''' laden.
+    ''' </summary>
+
+    Public Interface ISlideShowShaderCommunication
+
+        'Event
+        Event PleaseChangeToShader(shaderName As String)
 
     End Interface
 

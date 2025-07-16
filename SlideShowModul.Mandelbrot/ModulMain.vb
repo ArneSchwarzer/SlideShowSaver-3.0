@@ -4,17 +4,36 @@ Imports System.Drawing
 Imports SlideShowTools.ConversionHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowLogging.LogHandling
 
 Public Class ModulMain
-
     Implements ISlideShowModul
 
+#Region "Variablendeklaration"
+    'Variablendeklaration
 
+    'Settings
+    Private aktuelleSettings As ModulSettings_Mandelbrot
+    Public Const SLIDESHOWMODUL_MANDELBROT_FULLPATH = SLIDESHOWMODULBASE_PATH & "Mandelbrot\"
+    Public Const nameModul As String = "Mandelbrot"
 
-    ' === Moduleigenschaften ===
+    'Sonstiges
+    Public mandelbrotScreen As frmModulMain
+#End Region
+
+#Region "Structures & Enums"
+    ' === Settings-Structure ===
+    Public Structure ModulSettings_Mandelbrot
+        Dim Farbverlauf As String
+        Dim GradientAnimieren As Boolean
+        Dim KoordinatenAnzeigen As Boolean
+    End Structure
+#End Region
+
+    'Moduleigenschaften
     Public ReadOnly Property ModulName As String Implements ISlideShowModul.ModulName
         Get
-            Return "Mandelbrot"
+            Return nameModul
         End Get
     End Property
 
@@ -48,40 +67,32 @@ Public Class ModulMain
         End Get
     End Property
 
+#Region "Eventdeklaration"
     ' === Events ===
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
-    Public Event PleaseChangeToShader(shaderName As String) Implements ISlideShowModul.PleaseChangeToShader
-    Public Event PleaseChangeToTransition(sender As Object, transitionName As String) Implements ISlideShowModul.PleaseChangeToTransition
+    Public Shared Event YouHaveMail_Mandelbrot()
+#End Region
 
-    ' === Lokale Variablen ===
 
-    'Settings
-    Private aktuelleSettings As ModulSettings_Mandelbrot
-    Public Const SLIDESHOWMODUL_MANDELBROT_FULLPATH = SLIDESHOWMODULBASE_PATH & "Mandelbrot\"
-    Public Const nameModul As String = "Mandelbrot"
-
-    'Sonstiges
-    Public mandelbrotScreen As frmModulMain
-
-    ' === Settings-Structure ===
-    Public Structure ModulSettings_Mandelbrot
-        Dim Farbverlauf As String
-        Dim GradientAnimieren As Boolean
-        Dim KoordinatenAnzeigen As Boolean
-    End Structure
-
-    ' === Starten ===
+    'Start, Stopp & Pause
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
-        ' SlpashScreen anzeigen
+        'Modul anzeigen
 
-        mandelbrotScreen = New frmModulMain()
+        CheckYourSettings()
+
+        Try
+            mandelbrotScreen = New frmModulMain()
+        Catch ex As Exception
+            LogError("Modul Mandelbrot - ModulMain.StartModul(): Das Modul konnte nicht geladen werden:" & ex.ToString)
+        End Try
+
+        mandelbrotScreen.WindowState = FormWindowState.Minimized
         mandelbrotScreen.Show()
 
         RaiseEvent ModulStateChanged("Running")
 
     End Sub
 
-    ' === Beenden ===
     Public Sub StopModul() Implements ISlideShowModul.StopModul
         'Aufräumen und Modul beenden
 
@@ -95,12 +106,11 @@ Public Class ModulMain
 
     End Sub
 
-    ' === Pausieren ===
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
         ' Noch nicht implementiert
     End Sub
 
-    ' === Optionsdialog ===
+    'Optionen und Optionsdialog
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
         'Holt sich die aktuellen Settings, speichert sie in der Settings-Inbox und gibt dann das ucOptionsModul zurück
 
@@ -113,47 +123,20 @@ Public Class ModulMain
 
     End Function
 
-    Public Function MemorizeModulSettings(uc As UserControl) As Object Implements ISlideShowModul.MemorizeModulSettings
-        'Keine Funktion
-    End Function
-
-    Public Sub ApplyModulSettings(settings As Object) Implements ISlideShowModul.ApplyModulSettings
-        If TypeOf settings Is ModulSettings_Mandelbrot Then
-            aktuelleSettings = CType(settings, ModulSettings_Mandelbrot)
-        End If
-    End Sub
-
-    Public Sub GetModulSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowModul.GetModulSettings
-        If restoreSettings Is Nothing Then Exit Sub
-        Dim dict = StrukturZuDictionary(CType(restoreSettings, ModulSettings_Mandelbrot))
-        DictionaryZuUserControl(uc, dict)
-    End Sub
-
-    Public Sub GetModulRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowModul.GetModulRegistryOrDefaultSettings
-        Dim defaults As New ModulSettings_Mandelbrot With {
-            .Farbverlauf = "Regenbogen",
-            .GradientAnimieren = False,
-            .KoordinatenAnzeigen = False
-        }
-        Dim dict = StrukturZuDictionary(defaults)
-        DictionaryZuUserControl(uc, dict)
-    End Sub
-
-    ' === Info-Kommunikation ===
-    Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowModul.AttentionShaderGewechselt
-        ' nicht verwendet
-    End Sub
-
-    Public Sub AttentionTransitionGewechselt(sender As Object, transitionName As String) Implements ISlideShowModul.AttentionTransitionGewechselt
-        ' nicht verwendet
-    End Sub
-
+    'Info-Kommunikation
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
         ' Initialisierung und Re-Initalisierung der Optionen aus der Registry
+
+        'aktuelleSettings einlesen und gleich auch in der SettingsInbox bereitstellen
+        ReadModuleSettingsFromRegistryOrDefaults()
+        StoreSettings(nameModul, aktuelleSettings)
+
+        'Der Instanz mandelbrotScreen auch Bescheid geben
+        RaiseEvent YouHaveMail_Mandelbrot()
+
     End Sub
 
     'Private Funktionen
-
     Private Function GetModulDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Werte des Moduls
 

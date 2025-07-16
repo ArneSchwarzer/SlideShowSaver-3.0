@@ -5,19 +5,22 @@ Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
+Imports SlideShowTools.SettingsHandling
 Imports System.Drawing.Drawing2D
 Imports SlideShowTools
 
 Public Class TransitionMain
     Implements ISlideShowTransition
 
-    '--- Variablen, Enums und Structures ---
+#Region "Variablendeklaration, Structures & Enums ect."
+    'Variablen, Enums und Structures
 
     Public Const SLIDESHOWTRANSITION_SuW_FULLPATH As String = SLIDESHOWTRANSITION_PATH & "Schieben & Wischen\"
+    Public Const nameTransition As String = "Schieben und Wischen"
 
     Private WithEvents tmrDuration As New Timer
     Private WithEvents tmrAnimation As New Timer
-    Private aktuelleTransitionSettings As New SlideShowTransition_SuW_Settings
+    Private aktuelleSettings As New SlideShowTransitionSettings_SuW
 
     Private oldImg As Image
     Private newImg As Image
@@ -39,8 +42,7 @@ Public Class TransitionMain
     Private fps As Integer = 50
     Private endPunkt As Point = New Point(0, 0)
 
-
-    Public Structure SlideShowTransition_SuW_Settings
+    Public Structure SlideShowTransitionSettings_SuW
         Public geschwindigkeit As Integer
         Public richtungen As List(Of String)
         Public modus As String
@@ -53,10 +55,12 @@ Public Class TransitionMain
         Public directionY As Integer
     End Structure
 
-    ' --- Eigenschaften ---
+#End Region
+
+    'Eigenschaften
     ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
         Get
-            Return "Schieben & Wischen"
+            Return nameTransition
         End Get
     End Property
     ReadOnly Property TransitionKurzBeschreibung As String Implements ISlideShowTransition.TransitionKurzBeschreibung
@@ -70,17 +74,20 @@ Public Class TransitionMain
         End Get
     End Property
 
-    ' --- Events ---
+    'Events
     Event TransitionIsRunning(state As Boolean) Implements ISlideShowTransition.TransitionIsRunning
-    Event PleaseChangeToShader(shaderName As String) Implements ISlideShowTransition.PleaseChangeToShader
 
-    ' --- Ausführung ---
+    'Transition Ausführung
     Sub RunTransition(oldImage As Image, picBoxModeOld As PictureBoxSizeMode, newImage As Image, picBoxModeNew As PictureBoxSizeMode, targetGraphics As Graphics, Optional clientSize As Size = Nothing, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
         Dim rnd As New Random
         Dim richtung As String
         Dim würfel1D2 As Integer
 
         RaiseEvent TransitionIsRunning(True)
+
+        'Aktuelle Settings auslesen und in SettingsInbox ablegen.
+        ReadTransitionSettingsFromRegistryOrDefaults()
+        StoreSettings(nameTransition, aktuelleSettings)
 
         'Parameter in interne Variablen überführen
         oldImg = oldImage
@@ -101,23 +108,20 @@ Public Class TransitionMain
         oldBmpGerahmt = ErzeugeGerahmtesBild(oldImg, oldPicBoxSizeMode, cltSize)
         newBmpGerahmt = ErzeugeGerahmtesBild(newImg, newPicBoxSizeMode, cltSize)
 
-        'Aktuelle Settings abholen
-        GetCurrentTransitionSettings()
-
 #Region "Richtungen festlegen"
         'Richtung für die Transition aussuchen und Bewegungsinfos setzen (und dabei ein paar if-then sparen... ;-)
-        If aktuelleTransitionSettings.richtungen.Count = 0 Then
-            aktuelleTransitionSettings.richtungen.Add("NW")
-            aktuelleTransitionSettings.richtungen.Add("N")
-            aktuelleTransitionSettings.richtungen.Add("NO")
-            aktuelleTransitionSettings.richtungen.Add("O")
-            aktuelleTransitionSettings.richtungen.Add("SO")
-            aktuelleTransitionSettings.richtungen.Add("S")
-            aktuelleTransitionSettings.richtungen.Add("SW")
-            aktuelleTransitionSettings.richtungen.Add("W")
+        If aktuelleSettings.richtungen.Count = 0 Then
+            aktuelleSettings.richtungen.Add("NW")
+            aktuelleSettings.richtungen.Add("N")
+            aktuelleSettings.richtungen.Add("NO")
+            aktuelleSettings.richtungen.Add("O")
+            aktuelleSettings.richtungen.Add("SO")
+            aktuelleSettings.richtungen.Add("S")
+            aktuelleSettings.richtungen.Add("SW")
+            aktuelleSettings.richtungen.Add("W")
         End If
 
-        richtung = aktuelleTransitionSettings.richtungen(rnd.Next(aktuelleTransitionSettings.richtungen.Count))
+        richtung = aktuelleSettings.richtungen(rnd.Next(aktuelleSettings.richtungen.Count))
 
         Select Case richtung
             Case "NW"
@@ -191,17 +195,17 @@ Public Class TransitionMain
         bewegungOldImage.aktuellePositionY = 0
 
         'Falls Modus = Zufällig, Modus erwürfeln
-        If aktuelleTransitionSettings.modus = "Zufällig" Then
+        If aktuelleSettings.modus = "Zufällig" Then
             würfel1D2 = rnd.Next(2)
             If würfel1D2 = 0 Then
-                aktuelleTransitionSettings.modus = "Schieben"
+                aktuelleSettings.modus = "Schieben"
             Else
-                aktuelleTransitionSettings.modus = "Wischen"
+                aktuelleSettings.modus = "Wischen"
             End If
         End If
 
         'Im Modus Wischen die Deltas von oldImage wieder verwerfen.
-        If aktuelleTransitionSettings.modus = "Wischen" Then
+        If aktuelleSettings.modus = "Wischen" Then
             bewegungOldImage.directionX = 0
             bewegungOldImage.directionY = 0
         End If
@@ -212,8 +216,8 @@ Public Class TransitionMain
         Dim distY As Integer = Math.Abs(bewegungNewImage.aktuellePositionY - endPunkt.Y)
 
         ' Offset berechnen
-        offsetX = distX / (aktuelleTransitionSettings.geschwindigkeit * fps)
-        offsetY = distY / (aktuelleTransitionSettings.geschwindigkeit * fps)
+        offsetX = distX / (aktuelleSettings.geschwindigkeit * fps)
+        offsetY = distY / (aktuelleSettings.geschwindigkeit * fps)
 
         'Timer initialisieren
         If tmrAnimation Is Nothing Then tmrAnimation = New Timer()
@@ -248,50 +252,35 @@ Public Class TransitionMain
 
     End Sub
 
-    ' --- Optionen/Dialoghandling ---
+    'Optionen/Dialoghandling
     Function GetTransitionOptionsDialog() As UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
         'Liefert den Options-Dialog der Transition
 
+        'Liest die aktuelleSettings ein und speichert sie in SettingsInbox
+        ReadTransitionSettingsFromRegistryOrDefaults()
+        StoreSettings(nameTransition, aktuelleSettings)
+
+        'Und liefert dann die ucOptionsTransition
         Return New ucOptionsTransition()
 
     End Function
-    Function MemorizeTransitionSettings(uc As UserControl) As Object Implements ISlideShowTransition.MemorizeTransitionSettings
-        ' Nicht implementiert - Direct Commit in dem ucOptionsTransition
-    End Function
-    Sub ApplyTransitionSettings(settings As Object) Implements ISlideShowTransition.ApplyTransitionSettings
-        ' Nicht implementiert - Direct Commit in dem ucOptionsTransition
-    End Sub
-    Sub GetTransitionSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowTransition.GetTransitionSettings
-        ' Nicht implementiert - Direct Commit in dem ucOptionsTransition
-    End Sub
-    Sub GetTransitionRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowTransition.GetTransitionRegistryOrDefaultSettings
-        ' Nicht implementiert - Direct Commit in dem ucOptionsTransition
-    End Sub
 
-    Sub GetCurrentTransitionSettings()
+    'Private Funktionen
+    Sub ReadTransitionSettingsFromRegistryOrDefaults()
         'Setzt aktuelleTransitonSettings mit den Werten aus der Registry oder mit Defaultwerten.
 
         Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
 
-        aktuelleTransitionSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults))
-        aktuelleTransitionSettings.richtungen = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults))
-        aktuelleTransitionSettings.modus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults)
+        aktuelleSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults))
+        aktuelleSettings.richtungen = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults))
+        aktuelleSettings.modus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults)
 
-    End Sub
-
-    ' --- Info-Kommunikation ---
-    Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowTransition.AttentionShaderGewechselt
-        'Für Transitionen, die mit Shadern arbeiten. Hier nicht genutzt
-    End Sub
-
-    Sub CheckYourSettings() Implements ISlideShowTransition.CheckYourSettings
-        'Macht bei dieser Transition keinen Sinn
     End Sub
 
     Public Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
         Dim defaults As New Dictionary(Of String, String)
 
-        defaults.Add("Geschwindigkeit", "50")
+        defaults.Add("Geschwindigkeit", "5")
         defaults.Add("Richtungen", "W; O")
         defaults.Add("Modus", "Wischen")
 
@@ -299,7 +288,7 @@ Public Class TransitionMain
 
     End Function
 
-    ' --- Eigentliche Transition  & Abbruch-Timer ---
+    'Eigentliche Transition  & Abbruch-Timer
     Sub tmrDuration_Tick() Handles tmrDuration.Tick
         'Bricht die Transition nach Ende von DurationMS ab.
 
@@ -319,7 +308,7 @@ Public Class TransitionMain
             ' Endbild gnadenlos auf den Zeichenbereich malen...
             renderTarget.DrawImage(newBmpGerahmt, drawRect)
         Catch ex As Exception
-            LogError("Transition Schieben & Wischen: TransitionMain.tmrDurationTick() - Fehler beim Erstellen von renderTarget: " & ex.Message)
+            LogError("Transition Schieben & Wischen - TransitionMain.tmrDurationTick(): Fehler beim Erstellen von renderTarget: " & ex.Message)
         End Try
 
         '...und dann raus aus der Transition.
@@ -386,4 +375,3 @@ Public Class TransitionMain
     End Function
 
 End Class
-

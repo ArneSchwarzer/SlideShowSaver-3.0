@@ -2,6 +2,7 @@
 Imports System.Windows.Forms
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
 Imports SlideShowShader.TönenFärben.ShaderMain
 Imports System.Diagnostics.Eventing.Reader
 
@@ -9,22 +10,19 @@ Public Class ucOptionsShader
     Inherits UserControl
 
     'Variablendeklaration
-    Private aktuelleSettings As ShaderSettings
+    Private aktuelleSettings As ShaderSettings_ToenenFaerben
 
     Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Initialisiert die Steuerelemente des ucOptionShader
 
-        Dim defaults As New Dictionary(Of String, String)
-        Dim registryTempWert As String
-
-        defaults = ShaderMain.GetShaderDefaultSettings()
+        'Settings abholen
+        CheckYourMail()
 
         'Farbton picFarbton setzen
-        picFarbton.BackColor = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
-        aktuelleSettings.Farbton = picFarbton.BackColor
+        picFarbton.BackColor = aktuelleSettings.Farbton
 
         'chkZufallsfarbe setzen
-        If ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", defaults) = "True" Then
+        If aktuelleSettings.Zufallsfarbe Then
             chkZufallsfarbe.Checked = True
             lblNpicFarbton.Enabled = False
             picFarbton.Enabled = False
@@ -35,22 +33,17 @@ Public Class ucOptionsShader
         End If
 
         'trbIntensität setzen
-        trbIntensität.Value = aktuelleSettings.Intensitaet
-        aktuelleSettings.Intensitaet = trbIntensität.Value
-        lblIntensität.Text = trbIntensität.Value & " %"
+        trkIntensität.Value = aktuelleSettings.Intensitaet
+        lblIntensität.Text = trkIntensität.Value & " %"
 
         'Modus setzen
-        registryTempWert = ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
-        Select Case registryTempWert
-            Case "Tönen"
+        Select Case aktuelleSettings.Modus
+            Case ShaderModus.Toenen
                 rbTönen.Checked = True
-                aktuelleSettings.Modus = ShaderModus.Toenen
-            Case "Färben"
+            Case ShaderModus.Faerben
                 rbFärben.Checked = True
-                aktuelleSettings.Modus = ShaderModus.Faerben
-            Case "Zufall"
+            Case ShaderModus.Zufaellig
                 rbZufall.Checked = True
-                aktuelleSettings.Modus = ShaderModus.Zufaellig
         End Select
 
     End Sub
@@ -67,19 +60,17 @@ Public Class ucOptionsShader
 
             If dlg.ShowDialog() = DialogResult.OK Then
                 picFarbton.BackColor = dlg.Color
-                aktuelleSettings.Farbton = dlg.Color
-                WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Farbton", ColorToString(dlg.Color))
+                WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Farbton", ColorToString(dlg.Color))
             End If
         End Using
 
     End Sub
 
-    Private Sub trbIntensität_ValueChanged(sender As Object, e As EventArgs) Handles trbIntensität.ValueChanged
+    Private Sub trkIntensität_ValueChanged(sender As Object, e As EventArgs) Handles trkIntensität.ValueChanged
         'Behandelt Trackbar Intensität
 
-        lblIntensität.Text = trbIntensität.Value & " %"
-        aktuelleSettings.Intensitaet = trbIntensität.Value
-        WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Intensität", trbIntensität.Value.ToString)
+        lblIntensität.Text = trkIntensität.Value & " %"
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Intensität", trkIntensität.Value.ToString)
 
     End Sub
 
@@ -87,8 +78,7 @@ Public Class ucOptionsShader
         'Behandelt RadioButton Tönen
 
         If rbTönen.Checked = True Then
-            aktuelleSettings.Modus = ShaderModus.Toenen
-            WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Modus", "Tönen")
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Tönen")
         End If
 
     End Sub
@@ -97,8 +87,7 @@ Public Class ucOptionsShader
         'Behandelt RadioButton Färben
 
         If rbFärben.Checked = True Then
-            aktuelleSettings.Modus = ShaderModus.Faerben
-            WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Modus", "Färben")
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Färben")
         End If
 
     End Sub
@@ -107,8 +96,7 @@ Public Class ucOptionsShader
         'Behandelt Radiobutton Zufall
 
         If rbZufall.Checked = True Then
-            aktuelleSettings.Modus = ShaderModus.Zufaellig
-            WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Modus", "Zufall")
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Zufall")
         End If
 
     End Sub
@@ -124,8 +112,14 @@ Public Class ucOptionsShader
             picFarbton.Enabled = True
         End If
 
-        WriteToRegistry(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
 
     End Sub
 
+    Private Sub CheckYourMail()
+        'Liest aktuelleSettings aus der SettingsInbox aus
+
+        aktuelleSettings = GetSettings(Of ShaderSettings_ToenenFaerben)(nameShader)
+
+    End Sub
 End Class

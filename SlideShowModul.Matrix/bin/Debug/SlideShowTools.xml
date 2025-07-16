@@ -144,6 +144,21 @@ SlideShowTools
  <param name="defaultXmlPath">Pfad zur Standard-XML-Datei</param>
  <returns>Anzahl der neu hinzugefügten Orte</returns>
 </member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution(System.Windows.Forms.Control)">
+ <summary>
+ Gibt die native Auflösung des Bildschirms zurück, auf dem sich das angegebene Control befindet.
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution(System.Windows.Forms.Screen)">
+ <summary>
+ Gibt die native Auflösung des übergebenen Screen-Objekts zurück (unabhängig von DPI).
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution">
+ <summary>
+ Gibt die native Auflösung des Bildschirms zurück, auf dem sich das aktive Formular befindet.
+ </summary>
+</member>
 <member name="T:SlideShowTools.SettingsHandling">
  <summary>
  Temporärer Speicher für Settings-Objekte während der Laufzeit.
@@ -165,12 +180,6 @@ SlideShowTools
  </summary>
  <typeparam name="T">Erwarteter Rückgabetyp</typeparam>
  <param name="key">Bezeichner wie zuvor gespeichert</param>
-</member>
-<member name="M:SlideShowTools.SettingsHandling.ClearSettings(System.String)">
- <summary>
- Entfernt den Eintrag aus dem Zwischenspeicher.
- </summary>
- <param name="key">Der zu löschende Eintrag</param>
 </member>
 <member name="M:SlideShowTools.SettingsHandling.ClearAll">
  <summary>

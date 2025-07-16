@@ -2,6 +2,7 @@
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowTools
 
@@ -9,23 +10,17 @@ Public Class ucOptionsBildauswahl
     'Variablendeklaration
 
     'Settings
-    Private defaults As Dictionary(Of String, String)
-    Private verzeichnisseByReg As String
-    Private verzeichnisListe As List(Of String)
-    Private whitelistByReg As String
-    Private whitelistListe As List(Of String)
-    Private blacklistByReg As String
-    Private blacklistListe As List(Of String)
-    Private altersfreigabe As String
-    Private bewertung As Integer
+    Private aktuelleSettings As SettingsBildauswahl
+
 
     Private Sub ucOptionsBildauswahl_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Settings einlesen und setzten
-        defaults = GetBildauswahlDefaultSettings()
+        CheckYourMail()
 
-        verzeichnisseByReg = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse", defaults)
-        verzeichnisListe = SplitSemicolonList(verzeichnisseByReg)
-        For Each item In verzeichnisListe
+        'Steuerelemente initialisieren
+
+        'lstVerzeichnisse
+        For Each item In aktuelleSettings.Verzeichnisse
             lstVerzeichnisse.Items.Add(item)
         Next
         btnVerzeichnisseLöschen.Enabled = False
@@ -33,9 +28,8 @@ Public Class ucOptionsBildauswahl
             btnVerzeichnisseListeLöschen.Enabled = False
         End If
 
-        whitelistByReg = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags", defaults)
-        whitelistListe = SplitSemicolonList(whitelistByReg)
-        For Each item In whitelistListe
+        'White-List
+        For Each item In aktuelleSettings.WhiteListTags
             lstWhiteList.Items.Add(item)
         Next
         btnWhiteListLöschen.Enabled = False
@@ -43,9 +37,8 @@ Public Class ucOptionsBildauswahl
             btnWhiteListListeLöschen.Enabled = False
         End If
 
-        blacklistByReg = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags", defaults)
-        blacklistListe = SplitSemicolonList(blacklistByReg)
-        For Each item In blacklistListe
+        'Black-List
+        For Each item In aktuelleSettings.BlackListTags
             lstBlackList.Items.Add(item)
         Next
         btnBlackListLöschen.Enabled = False
@@ -54,12 +47,11 @@ Public Class ucOptionsBildauswahl
         End If
 
         'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
-        bewertung = CInt(ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", defaults))
-        sbcBewertung.Bewertung = bewertung
+        sbcBewertung.Bewertung = aktuelleSettings.Bewertung
         sbcBewertung.EndInitialization()
 
-        altersfreigabe = ReadFromRegOrDefaults(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", defaults)
-        Select Case altersfreigabe
+        'Altersfreigabe - RadioButtons & Black-List Einträge
+        Select Case aktuelleSettings.Altersfreigabe
             Case "18+"
                 rdo18.Checked = True
                 'Blacklist Tags setzen/löschen
@@ -101,6 +93,8 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub rdo18_CheckedChanged(sender As Object, e As EventArgs) Handles rdo18.CheckedChanged
+        'Behandelt den RadioButton rdo18
+
         'Blacklist Tags setzen/löschen
         lstBlackList.Items.Remove("18+")
         lstBlackList.Items.Remove("Akt")
@@ -109,9 +103,12 @@ Public Class ucOptionsBildauswahl
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "18+")
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
     End Sub
 
     Private Sub rdoAkt_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAkt.CheckedChanged
+        'Behandelt den RadioButton rdo Akt
+
         'Blacklist Tags setzen/löschen
         If Not lstBlackList.Items.Contains("18+") Then
             lstBlackList.Items.Add("18+")
@@ -122,9 +119,12 @@ Public Class ucOptionsBildauswahl
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Akt")
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
     End Sub
 
     Private Sub rdoLingerie_CheckedChanged(sender As Object, e As EventArgs) Handles rdoLingerie.CheckedChanged
+        'Behandelt den RadioButton rdoLingerie
+
         'Blacklist Tags setzen/löschen
         If Not lstBlackList.Items.Contains("18+") Then
             lstBlackList.Items.Add("18+")
@@ -137,9 +137,12 @@ Public Class ucOptionsBildauswahl
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Lingerie")
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
     End Sub
 
     Private Sub rdoJugendfrei_CheckedChanged(sender As Object, e As EventArgs) Handles rdoJugendfrei.CheckedChanged
+        'Behandelt den RadioButton rdoJugendfrei
+
         'Blacklist Tags setzen/löschen
         If Not lstBlackList.Items.Contains("18+") Then
             lstBlackList.Items.Add("18+")
@@ -154,26 +157,37 @@ Public Class ucOptionsBildauswahl
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Jugendfrei")
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
     End Sub
 
     Private Sub lstVerzeichnisse_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstVerzeichnisse.SelectedIndexChanged
+        'Buttons gemäß selektierem Eintrag in lstVerzeichnisse aktivieren/deaktivieren
+
         btnVerzeichnisseLöschen.Enabled = (lstVerzeichnisse.SelectedIndex >= 0)
+
     End Sub
 
     Private Sub lstWhiteList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstWhiteList.SelectedIndexChanged
+        'Buttons gemäß selektierem Eintrag in lstWhiteList aktivieren/deaktivieren
+
         btnWhiteListLöschen.Enabled = (lstWhiteList.SelectedIndex >= 0)
+
     End Sub
 
     Private Sub lstBlackList_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lstBlackList.SelectedIndexChanged
+        'Buttons gemäß selektierem Eintrag in lstBlackList aktivieren/deaktivieren
+
         btnBlackListLöschen.Enabled = (lstBlackList.SelectedIndex >= 0)
+
     End Sub
 
     Private Sub btnVerzeichnisHinzufügen_Click(sender As Object, e As EventArgs) Handles btnVerzeichnisHinzufügen.Click
+        'Behandelt btnVerzeichnisHinzufügen
 
-
+        'Ruft den Dialog 'Ordner auswählen" aus.
         Using dlg As New FolderBrowserDialog()
             dlg.Description = "Bitte wähle ein Verzeichnis aus"
-            dlg.ShowNewFolderButton = True
+            dlg.ShowNewFolderButton = False
 
             If dlg.ShowDialog() = DialogResult.OK Then
                 Dim ausgewählterPfad As String = dlg.SelectedPath
@@ -182,6 +196,8 @@ Public Class ucOptionsBildauswahl
                 End If
             End If
         End Using
+
+        'Buttons setzen
         If lstVerzeichnisse.Items.Count > 0 Then
             btnVerzeichnisseListeLöschen.Enabled = True
             btnVerzeichnisseLöschen.Enabled = (lstVerzeichnisse.SelectedIndex >= 0)
@@ -233,6 +249,7 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         CheckedListBoxHandling.SaveListBoxToRegistry(lstWhiteList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
+
     End Sub
 
     Private Sub btnBlackListHinzufügen_Click(sender As Object, e As EventArgs) Handles btnBlackListHinzufügen.Click
@@ -274,13 +291,19 @@ Public Class ucOptionsBildauswahl
 
         'DirectCommit
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
     End Sub
 
     Private Sub btnVerzeichnisseLöschen_Click(sender As Object, e As EventArgs) Handles btnVerzeichnisseLöschen.Click
+        'Löscht einen Eintrage aus der Verzeichnis-Liste
+
         If lstVerzeichnisse.SelectedIndex < 0 Then
             Exit Sub
         End If
+
         lstVerzeichnisse.Items.Remove(lstVerzeichnisse.SelectedItem)
+
+        'Button setzen
         If lstVerzeichnisse.Items.Count > 0 Then
             btnVerzeichnisseListeLöschen.Enabled = True
             btnVerzeichnisseLöschen.Enabled = (lstVerzeichnisse.SelectedIndex >= 0)
@@ -295,10 +318,15 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnWhiteListLöschen_Click(sender As Object, e As EventArgs) Handles btnWhiteListLöschen.Click
+        'Löscht einen Eintrag aus der WhiteList
+
         If lstWhiteList.SelectedIndex < 0 Then
             Exit Sub
         End If
+
         lstWhiteList.Items.Remove(lstWhiteList.SelectedItem)
+
+        'Buttons setzen
         If lstWhiteList.Items.Count > 0 Then
             btnWhiteListListeLöschen.Enabled = True
             btnWhiteListLöschen.Enabled = (lstWhiteList.SelectedIndex >= 0)
@@ -313,10 +341,15 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnBlackListLöschen_Click(sender As Object, e As EventArgs) Handles btnBlackListLöschen.Click
+        'Löscht einen Eintrag aus der BlackList
+
         If lstBlackList.SelectedIndex < 0 Then
             Exit Sub
         End If
+
         lstBlackList.Items.Remove(lstBlackList.SelectedItem)
+
+        'Buttons setzen
         If lstBlackList.Items.Count > 0 Then
             btnBlackListListeLöschen.Enabled = True
             btnBlackListLöschen.Enabled = (lstBlackList.SelectedIndex >= 0)
@@ -331,6 +364,8 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnBlackListListeLöschen_Click(sender As Object, e As EventArgs) Handles btnBlackListListeLöschen.Click
+        'Löscht alle Einträge aus der BlackList
+
         lstBlackList.Items.Clear()
         btnBlackListLöschen.Enabled = False
         btnBlackListListeLöschen.Enabled = False
@@ -341,6 +376,8 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnVerzeichnisseListeLöschen_Click(sender As Object, e As EventArgs) Handles btnVerzeichnisseListeLöschen.Click
+        'Löscht alle Einträge aus der Verzeichnisliste
+
         lstVerzeichnisse.Items.Clear()
         btnVerzeichnisseListeLöschen.Enabled = False
         btnVerzeichnisseLöschen.Enabled = False
@@ -351,6 +388,8 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnWhiteListListeLöschen_Click(sender As Object, e As EventArgs) Handles btnWhiteListListeLöschen.Click
+        'Löscht alle Einträge aus der WhiteList
+
         lstWhiteList.Items.Clear()
         btnWhiteListLöschen.Enabled = False
         btnWhiteListListeLöschen.Enabled = False
@@ -361,10 +400,19 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub sbcBewertung_BewertungGeaendert(sender As Object, neueBewertung As Integer) Handles sbcBewertung.BewertungGeaendert
+        'Behandelt das SterneBewertungsControl
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", sbcBewertung.Bewertung.ToString)
 
     End Sub
+
+    Private Sub CheckYourMail()
+        'Liest die aktuelleSettings aus der SettingsInbox aus
+
+        aktuelleSettings = GetSettings(Of SettingsBildauswahl)("Bildauswahl")
+
+    End Sub
+
 End Class
 

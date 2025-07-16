@@ -33,17 +33,17 @@ Public Class TransitionMain
     End Property
 
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
-    Public Event PleaseChangeToShader As ISlideShowTransition.PleaseChangeToShaderEventHandler Implements ISlideShowTransition.PleaseChangeToShader
 
     Public Sub RunTransition(oldImage As System.Drawing.Image, picBoxModeOld As Windows.Forms.PictureBoxSizeMode, newImage As System.Drawing.Image, picBoxModeNew As Windows.Forms.PictureBoxSizeMode, targetGraphics As System.Drawing.Graphics, Optional clientSize As System.Drawing.Size = Nothing, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
         'Im Normalfall braucht diese 'Transition' ja eh nicht zu laufen...
+
+        'Formal noch einmal TransitionIsRunning werfen.
+        RaiseEvent TransitionIsRunning(True)
+
         If durationMs <= 0 Then
             RaiseEvent TransitionIsRunning(False)
             Exit Sub
         End If
-
-        'Formal noch einmal TransitionIsRunning werfen.
-        RaiseEvent TransitionIsRunning(True)
 
         'Parameter in interne Variablen überführen
         newImg = newImage
@@ -78,37 +78,13 @@ Public Class TransitionMain
 
         renderTarget.DrawImage(newImg, 0, 0)
 
-
         RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
-    Public Sub ApplyTransitionSettings(settings As Object) Implements ISlideShowTransition.ApplyTransitionSettings
-        'Wird nicht genutzt
-    End Sub
-
-    Public Sub GetTransitionSettings(uc As Windows.Forms.UserControl, restoreSettings As Object) Implements ISlideShowTransition.GetTransitionSettings
-        'Wird nicht genutzt
-    End Sub
-
-    Public Sub GetTransitionRegistryOrDefaultSettings(uc As Windows.Forms.UserControl) Implements ISlideShowTransition.GetTransitionRegistryOrDefaultSettings
-        'Wird nicht genutzt
-    End Sub
-
-    Public Sub AttentionShaderGewechselt(shaderName As String) Implements ISlideShowTransition.AttentionShaderGewechselt
-        'Wird nicht genutzt
-    End Sub
-
-    Public Sub CheckYourSettings() Implements ISlideShowTransition.CheckYourSettings
-        'Wird nicht genutzt
-    End Sub
-
+    'Optionen & OptionsDialog
     Public Function GetTransitionOptionsDialog() As Windows.Forms.UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
         Return New ucOptonsTransition
-    End Function
-
-    Public Function MemorizeTransitionSettings(uc As Windows.Forms.UserControl) As Object Implements ISlideShowTransition.MemorizeTransitionSettings
-        'Wird nicht genutzt
     End Function
 
 End Class

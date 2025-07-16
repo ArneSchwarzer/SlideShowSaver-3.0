@@ -3,14 +3,36 @@ Imports System.Windows.Forms
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.SettingsHandling
 
 Public Class ShaderMain
     Implements ISlideShowShader
 
-    ' === Shaderinformationen ===
+#Region "Variablendeklaration"
+    'Variablendeklaration
+    Public Shared SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH = SLIDESHOWSHADER_PATH & "Tönen und Färben\"
+    Private aktuelleSettings As New ShaderSettings_ToenenFaerben
+    Public Shared nameShader As String = "Tönen und Färben"
+
+    'Settings-Struktur
+    Public Structure ShaderSettings_ToenenFaerben
+        Public Property Farbton As Color
+        Public Property Zufallsfarbe As Boolean
+        Public Property Intensitaet As Integer
+        Public Property Modus As ShaderModus
+    End Structure
+
+    Public Enum ShaderModus
+        Toenen = 0
+        Faerben = 1
+        Zufaellig = 2
+    End Enum
+#End Region
+
+    'Eigenschaften
     Public ReadOnly Property ShaderName As String Implements ISlideShowShader.ShaderName
         Get
-            Return "Tönen und Färben"
+            Return nameShader
         End Get
     End Property
 
@@ -26,18 +48,16 @@ Public Class ShaderMain
         End Get
     End Property
 
-    ' === Interne Settings ===
-    Private aktuelleSettings As New ShaderSettings
-    Public Const SLIDESHOWSHADER_FULLPATH As String = SLIDESHOWSHADER_PATH & "Tönen und Färben\"
-
-    ' === Shader ausführen ===
+    'Shader ausführen
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
         'Färbt oder tönt das Bild
 
         Dim bmp As New Bitmap(baseImage.Width, baseImage.Height)
         Dim rnd As New Random
 
-        LiesAktuelleShaderSettingsEin()
+        'Settings einlesen und in SettingsInbox speichern
+        ReadShaderSettingsFromRegistryOrDefaults()
+        StoreSettings(nameShader, aktuelleSettings)
 
         'Farbton setzen (falls Zufallsfarbe = False ist er bereits korrekt gesetzt)
         If aktuelleSettings.Zufallsfarbe Then
@@ -78,7 +98,52 @@ Public Class ShaderMain
 
     End Function
 
-    ' === Hilfsfunktionen ===
+    'Dialog & Optionen
+    Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
+        'Liefert den Options-Dialog des Shaders
+
+        'Aktuelle Settings abholen und in SettingsInbox speichern
+        ReadShaderSettingsFromRegistryOrDefaults()
+        StoreSettings(nameShader, aktuelleSettings)
+
+        Return New ucOptionsShader
+
+    End Function
+
+    'Private Metohden
+    Public Shared Function GetShaderDefaultSettings() As Dictionary(Of String, String)
+        'Liefert die Default-Werte des Shaders
+
+        Dim defaultShaderSettings_ToenenFaerben As New Dictionary(Of String, String)
+
+        defaultShaderSettings_ToenenFaerben("Farbton") = "112, 66, 20, 255"
+        defaultShaderSettings_ToenenFaerben("Zufallsfarbe") = "False"
+        defaultShaderSettings_ToenenFaerben("Intensität") = "12"
+        defaultShaderSettings_ToenenFaerben("Modus") = "Tönen"
+
+        Return defaultShaderSettings_ToenenFaerben
+
+    End Function
+
+    Private Sub ReadShaderSettingsFromRegistryOrDefaults()
+        'Holt die Settings aus der Registry (oder aus Default-Werten) und legt sie in aktuelleSettings ab.
+
+        Dim defaults As Dictionary(Of String, String) = GetShaderDefaultSettings()
+
+        aktuelleSettings.Farbton = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Farbton", defaults))
+        aktuelleSettings.Zufallsfarbe = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", defaults))
+        aktuelleSettings.Intensitaet = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Intensität", defaults))
+        Select Case ReadFromRegOrDefaults(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", defaults)
+            Case "Tönen"
+                aktuelleSettings.Modus = ShaderModus.Toenen
+            Case "Färben"
+                aktuelleSettings.Modus = ShaderModus.Faerben
+            Case "Zufall"
+                aktuelleSettings.Modus = ShaderModus.Zufaellig
+        End Select
+
+    End Sub
+
     Private Function ConvertToGrayscale(src As Image) As Image
         'Wandelt das Bild in ein Graustufenbild
 
@@ -112,95 +177,5 @@ Public Class ShaderMain
         Return zufallsFarbe
 
     End Function
-
-    ' === Dialog & Optionen ===
-    Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
-        'Liefert den Options-Dialog des Shaders
-
-        Return New ucOptionsShader
-
-    End Function
-
-    Public Function MemorizeShaderSettings(uc As UserControl) As Object Implements ISlideShowShader.MemorizeShaderSettings
-        'Dim optionsUC = TryCast(uc, ucOptionsShader)
-        'If optionsUC IsNot Nothing Then
-        'Return optionsUC.GetSettings()
-        'End If
-        'Return Nothing
-    End Function
-
-    Public Sub ApplyShaderSettings(settings As Object) Implements ISlideShowShader.ApplyShaderSettings
-        'If settings IsNot Nothing AndAlso TypeOf settings Is ShaderSettings Then
-        '    aktuelleSettings = DirectCast(settings, ShaderSettings)
-        'End If
-    End Sub
-
-    Public Sub GetShaderSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowShader.GetShaderSettings
-        'Dim optionsUC = TryCast(uc, ucOptionsShader)
-        'If optionsUC IsNot Nothing AndAlso restoreSettings IsNot Nothing Then
-        '    optionsUC.SetzeSettings(DirectCast(restoreSettings, ShaderSettings))
-        'End If
-    End Sub
-
-    Public Sub GetShaderRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowShader.GetShaderRegistryOrDefaultSettings
-        'Dim optionsUC = TryCast(uc, ucOptionsShader)
-        'If optionsUC IsNot Nothing Then
-        '    ' Noch kein Registry-Zugriff, daher Defaults verwenden
-        '    optionsUC.SetzeSettings(New ShaderSettings With {
-        '        .Farbton = Color.Sienna,
-        '        .Intensitaet = 64,
-        '        .Modus = ShaderModus.Zufaellig
-        '    })
-        'End If
-    End Sub
-
-    Public Sub CheckYourSettings() Implements ISlideShowShader.CheckYourSettings
-        ' Kein Prüfbedarf für diesen Shader
-    End Sub
-
-    Public Shared Function GetShaderDefaultSettings() As Dictionary(Of String, String)
-        Dim defaultShaderSettings As New Dictionary(Of String, String)
-        'Liefert die Default-Werte des Moduls
-
-        defaultShaderSettings("Farbton") = "112, 66, 20, 255"
-        defaultShaderSettings("Zufallsfarbe") = "False"
-        defaultShaderSettings("Intensität") = "12"
-        defaultShaderSettings("Modus") = "Tönen"
-
-        Return defaultShaderSettings
-
-    End Function
-
-    Private Sub LiesAktuelleShaderSettingsEin()
-        Dim defaults As Dictionary(Of String, String) = GetShaderDefaultSettings()
-
-        aktuelleSettings.Farbton = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Farbton", defaults))
-        aktuelleSettings.Zufallsfarbe = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Zufallsfarbe", defaults))
-        aktuelleSettings.Intensitaet = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Intensität", defaults))
-        Select Case ReadFromRegOrDefaults(SLIDESHOWSHADER_FULLPATH & "Modus", defaults)
-            Case "Tönen"
-                aktuelleSettings.Modus = ShaderModus.Toenen
-            Case "Färben"
-                aktuelleSettings.Modus = ShaderModus.Faerben
-            Case "Zufall"
-                aktuelleSettings.Modus = ShaderModus.Zufaellig
-        End Select
-
-    End Sub
-
-    ' === Settings-Struktur ===
-
-    Public Structure ShaderSettings
-        Public Property Farbton As Color
-        Public Property Zufallsfarbe As Boolean
-        Public Property Intensitaet As Integer
-        Public Property Modus As ShaderModus
-    End Structure
-
-    Public Enum ShaderModus
-        Toenen = 0
-        Faerben = 1
-        Zufaellig = 2
-    End Enum
 
 End Class

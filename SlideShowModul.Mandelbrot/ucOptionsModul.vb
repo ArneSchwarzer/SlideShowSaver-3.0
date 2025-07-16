@@ -1,17 +1,19 @@
 ﻿Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.RegistryHandling
+Imports Modul_Mandelbrot.ModulMain
 
 Public Class ucOptionsModul
 
+#Region "Variablendeklaration"
     'Variablendeklaration
-    Private Shared aktuelleSettings As ModulMain.ModulSettings_Mandelbrot
+    Private Shared aktuelleSettings As ModulSettings_Mandelbrot
+#End Region
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Inititalisiert das UC und seine Steuerelemente
 
-        'Settings abholen und aufräumen
-        aktuelleSettings = GetSettings(Of ModulMain.ModulSettings_Mandelbrot)(ModulMain.nameModul)
-        ClearSettings(ModulMain.nameModul)
+        'Settings abholen
+        CheckYourMail()
 
         'Steuerelemente initialisieren
 
@@ -30,7 +32,7 @@ Public Class ucOptionsModul
         'Behandelt cmbGradient
 
         'DirectCommit
-        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Farbverlauf", cmbGradient.SelectedItem.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Farbverlauf", cmbGradient.SelectedItem.ToString)
 
     End Sub
 
@@ -38,7 +40,7 @@ Public Class ucOptionsModul
         'Behandelt chkGradientAnimieren
 
         'DirectCommit
-        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MANDELBROT_FULLPATH & "GradientAnimieren", chkGradientAnimieren.Checked.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "GradientAnimieren", chkGradientAnimieren.Checked.ToString)
 
     End Sub
 
@@ -46,7 +48,15 @@ Public Class ucOptionsModul
         'Behandelt chkKoordinatenAnzeigen
 
         'DirectCommit
-        WriteToRegistry(ModulMain.SLIDESHOWMODUL_MANDELBROT_FULLPATH & "KoordinatenAnzeigen", chkKoordinatenAnzeigen.Checked.ToString)
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "KoordinatenAnzeigen", chkKoordinatenAnzeigen.Checked.ToString)
 
     End Sub
+
+    Private Sub CheckYourMail()
+        'Initialisiert die aktuelleSettings des UCs per SlideShowTools.SettingsHandling.SettingsInbox.
+
+        aktuelleSettings = GetSettings(Of ModulSettings_Mandelbrot)(nameModul)
+
+    End Sub
+
 End Class

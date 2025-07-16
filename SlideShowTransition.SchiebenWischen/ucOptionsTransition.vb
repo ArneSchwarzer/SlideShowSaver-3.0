@@ -1,20 +1,23 @@
 ﻿Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
+Imports SlideShowTools.SettingsHandling
 Imports Transition_Schieben.TransitionMain
 
 Public Class ucOptionsTransition
 
+    'Variablendeklaration
+    Private aktuelleSettings As SlideShowTransitionSettings_SuW
+
     Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Initialisiert die Steuerelemente der ucOptionsTransition
-        Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
-        Dim richtungen As New List(Of String)
+
+        'Aktuelle Settings abholen
+        CheckYourMail()
 
         'Steuerelemente initialisieren
 
         'Richtungsbuttons
-        richtungen = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults))
-
-        For Each richtung In richtungen
+        For Each richtung In aktuelleSettings.richtungen
 
             Select Case richtung
                 Case "N"
@@ -38,11 +41,11 @@ Public Class ucOptionsTransition
         Next
 
         'Geschwindigkeit
-        trbGeschwindigkeit.Value = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults)
-        lblGeschwindigkeit.Text = (11 - trbGeschwindigkeit.Value).ToString & " s"
+        trkGeschwindigkeit.Value = aktuelleSettings.geschwindigkeit
+        lblGeschwindigkeit.Text = (11 - trkGeschwindigkeit.Value).ToString & " s"
 
         'Modus
-        Select Case ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults)
+        Select Case aktuelleSettings.modus
             Case "Schieben"
                 rbSchieben.Checked = True
             Case "Wischen"
@@ -58,6 +61,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs)
@@ -65,6 +69,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs)
@@ -72,6 +77,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs)
@@ -79,14 +85,15 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs)
         'Button Süd-Ost
 
         'DirectCommit
-
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs)
@@ -94,6 +101,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs)
@@ -101,6 +109,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs)
@@ -108,6 +117,7 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+
     End Sub
 
     Private Sub rbSchieben_CheckedChanged(sender As Object, e As EventArgs) Handles rbSchieben.CheckedChanged
@@ -117,6 +127,7 @@ Public Class ucOptionsTransition
             'DirectCommit
             WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Schieben")
         End If
+
     End Sub
 
     Private Sub rbWischen_CheckedChanged(sender As Object, e As EventArgs) Handles rbWischen.CheckedChanged
@@ -126,6 +137,7 @@ Public Class ucOptionsTransition
             'DirectCommit
             WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Wischen")
         End If
+
     End Sub
 
     Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rbZufall.CheckedChanged
@@ -135,15 +147,16 @@ Public Class ucOptionsTransition
             'DirectCommit
             WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Zufällig")
         End If
+
     End Sub
 
-    Private Sub trbGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trbGeschwindigkeit.ValueChanged
+    Private Sub trkGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkGeschwindigkeit.ValueChanged
         'TrackBar Geschwindigkeit
 
-        lblGeschwindigkeit.Text = (11 - trbGeschwindigkeit.Value).ToString & " s"
+        lblGeschwindigkeit.Text = (11 - trkGeschwindigkeit.Value).ToString & " s"
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", trbGeschwindigkeit.Value.ToString)
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", trkGeschwindigkeit.Value.ToString)
 
     End Sub
 
@@ -175,4 +188,10 @@ Public Class ucOptionsTransition
 
     End Function
 
+    Private Sub CheckYourMail()
+        'Liest die aktuellen Settings aus der SetttingsInbox
+
+        aktuelleSettings = GetSettings(Of SlideShowTransitionSettings_SuW)(nameTransition)
+
+    End Sub
 End Class

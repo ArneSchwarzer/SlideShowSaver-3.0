@@ -27,10 +27,61 @@ SlideShowInterfaces
  Dieses Interface definiert die Struktur eines Bildschirmschoner-Moduls.
  
  
- Hinweis zur Eventweiterleitung:
+ Wichtige Hinweis zu Modul-Implementierung und Eventweiterleitung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte ein Modul auch immer
+eine Struktur ModulSettings_Modulname sowie diese beiden Methoden anbieten:
+
+ Private Function GetModulDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReadModulSettingsFromRegistryOrDefault()
  
- Module sollten Tastatur- oder Mauseingaben standardmäßig über
+ Die frmModulMain sollte Tastatur- oder Mauseingaben standardmäßig über
  SlideShowTools.KeyAndMouseHandling an das Hauptprogramm weiterleiten.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowTransition">
+ <summary>
+ Dieses Interface definiert die Struktur eines Bildübergangs (Transition) von einem
+ Bild zum nächsten.
+ 
+ 
+ Wichtige Hinweis zur Transition-Implementierung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte eine Transition auch immer
+eine Struktur TransitionSettings_TransitionName sowie diese beiden Methoden anbieten:
+
+ Private Function GetTransitionDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReaTransitionSettingsFromRegistryOrDefault()
+ 
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowShader">
+ <summary>
+ Dieses Interface definiert die Struktur eines Shaders.
+ 
+ 
+ Wichtige Hinweis zur Shader-Implementierung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte ein Shader auch immer eine Struktur
+ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
+
+ Private Function GetShaderDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReadShaderSettingsFromRegistryOrDefault()
+ 
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowTransitionCommunication">
+ <summary>
+ Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+ und der frmOptionsMain, um auf derer TabPage "Transition" das korrekte ucOptionsTransition zu
+ laden.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowShaderCommunication">
+ <summary>
+ Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+ und der frmOptionsMain, um auf derer TabPage "Shader" das korrekte ucOptionsShader zu
+ laden.
  </summary>
 </member>
 <member name="T:SlideShowInterfaces.InfoHandling.SlideShowModulInfo">

@@ -6,6 +6,8 @@ Imports System.Windows.Forms
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.TextureHandling
 Imports SlideShowTools.LocationHandling
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools
 Imports System.Text
 Imports MetadataExtractor
@@ -19,26 +21,43 @@ Imports MetadataExtractor.Formats
 Public Class ShaderMain
     Implements ISlideShowShader
 
+#Region "Variablendeklaration"
     'Variablendeklarationen
+
+    'Verwaltung
+    Public Shared nameShader As String = "Nachtsicht"
+    Private Shared aktuelleSettings As ShaderSettings_Nachtsicht
+    Public Shared SLIDESHOWSHADER_NACHTSICHT_FULLPATH As String = SLIDESHOWSHADER_PATH & "Nachtsicht\"
 
     'Texturen
     Private noiseOverlay As Image
     Private scanlineOverlay As Image
     Private vignetteOverlay As Image
 
+    'Grapics
     Private g As Graphics
     Private zielRect As Rectangle
 
+#End Region
+
+#Region "Structures, Enums etc."
+    'Structures
+    Public Structure ShaderSettings_Nachtsicht
+
+    End Structure
+#End Region
+
+#Region "Eigenschaften"
     ' === Eigenschaften ===
     Public ReadOnly Property ShaderName As String Implements ISlideShowShader.ShaderName
         Get
-            Return "Nachtsicht"
+            Return nameShader
         End Get
     End Property
 
     Public ReadOnly Property ShaderKurzBeschreibung As String Implements ISlideShowShader.ShaderKurzBeschreibung
         Get
-            Return "Simuliert eine Nachtsichtkamera mit grünem Farbton, Rauschen und Scanlines."
+            Return "Simuliert eine Nachtsichtkamera des BND mit grünem Farbton, Rauschen, Scanlines... und 'Geheiminformationen'."
         End Get
     End Property
 
@@ -47,22 +66,21 @@ Public Class ShaderMain
             Return New Version(1, 0, 0, 0)
         End Get
     End Property
+#End Region
 
-    ' === Shader-Ausführung ===
-
+    'Shader-Ausführung
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
-        ' --- Bild- und Zielgrößen ---
+        'Wandelt ein Bild in einen Überwachungsmonitor des BND...
+
+        'Variablendeklarationen
+
+        'Bild- und Zielgrößen
         Dim zielSize As Size = If(clientSize = Nothing, baseImage.Size, clientSize)
         Dim bildPfad As String = imagePath
         Dim resultImage As New Bitmap(zielSize.Width, zielSize.Height)
         Dim ia As New Imaging.ImageAttributes()
 
-        g = Graphics.FromImage(resultImage)
-        g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
-        g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
-        g.Clear(Color.Black)
-
-        ' --- Nachtsicht-Farbfilter ---
+        'Nachtsicht-Farbfilter
         Dim colorMatrix As New Imaging.ColorMatrix(New Single()() {
         New Single() {0.05F, 0.1F, 0.05F, 0, 0},
         New Single() {0.9F, 1.0F, 0.9F, 0, 0},
@@ -71,36 +89,7 @@ Public Class ShaderMain
         New Single() {0, 0.05F, 0, 0, 1}
         })
 
-        ia.SetColorMatrix(colorMatrix)
-
-        'Overlay Texturen einrichten
-        noiseOverlay = TextureHandling.GenerateNoiseTexture(512, 512, 32)
-        scanlineOverlay = TextureHandling.GenerateScanlineTexture(512, 512, 23)
-        vignetteOverlay = My.Resources.vignetteTexture
-
-        ' --- Basisbild mittig einpassen ---
-        zielRect = GraphicsSizeModeHandling.GetDrawRectangle(baseImage.Size, New Rectangle(0, 0, zielSize.Width, zielSize.Height), PictureBoxSizeMode.Zoom)
-
-        g.DrawImage(baseImage, zielRect, 0, 0, baseImage.Width, baseImage.Height, GraphicsUnit.Pixel, ia)
-
-
-        ' --- Noise-Ebene ---
-        If noiseOverlay IsNot Nothing Then
-            Using noiseBrush As New TextureBrush(noiseOverlay)
-                noiseBrush.WrapMode = Drawing2D.WrapMode.Tile
-                g.FillRectangle(noiseBrush, New Rectangle(Point.Empty, zielSize))
-            End Using
-        End If
-
-        ' --- Scanline-Ebene ---
-        If scanlineOverlay IsNot Nothing Then
-            Using scanBrush As New TextureBrush(scanlineOverlay)
-                scanBrush.WrapMode = Drawing2D.WrapMode.Tile
-                g.FillRectangle(scanBrush, New Rectangle(Point.Empty, zielSize))
-            End Using
-        End If
-
-        ' --- Metadaten via TagLib ---
+        'Metadaten
         Dim aktenzeichen As String = Path.GetFileNameWithoutExtension(bildPfad)
         Dim datum As String = System.IO.File.GetCreationTime(bildPfad).ToString("dd.MM.yyyy")
         Dim dateipfad As String = bildPfad
@@ -112,6 +101,57 @@ Public Class ShaderMain
         Dim geheimStufeFarbe As Brush = Brushes.LimeGreen
         Dim kameraCode As String
 
+        ' --- Text-Overlay-Stil ---
+        Dim overlayFont As New Font("Lucida Console", 12, FontStyle.Bold)
+        Dim geheimFont As New Font("Lucida Console", 18, FontStyle.Bold)
+        Dim overlayBrush As Brush = Brushes.LimeGreen
+        Dim backgroundBrush As New SolidBrush(Color.FromArgb(128, Color.Black))
+        Dim zeilen As List(Of String)
+        Dim höheNächsterText As Integer
+        Dim breiteFuerTextumbruch As Integer
+
+        'Initialisierungen
+
+        'Zur Zeit keine aktuelleSettings zum initialisieren
+        'CheckYourSettings()
+
+        'Graphics initialisieren
+        g = Graphics.FromImage(resultImage)
+        g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
+        g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
+        g.Clear(Color.Black)
+
+        ia.SetColorMatrix(colorMatrix)
+
+        'Eigentliche Shaderfunktion
+
+        'Overlay Texturen einrichten
+        noiseOverlay = TextureHandling.GenerateNoiseTexture(512, 512, 32)
+        scanlineOverlay = TextureHandling.GenerateScanlineTexture(512, 512, 23)
+        vignetteOverlay = My.Resources.vignetteTexture
+
+        'Basisbild mittig einpassen
+        zielRect = GraphicsSizeModeHandling.GetDrawRectangle(baseImage.Size, New Rectangle(0, 0, zielSize.Width, zielSize.Height), PictureBoxSizeMode.Zoom)
+
+        g.DrawImage(baseImage, zielRect, 0, 0, baseImage.Width, baseImage.Height, GraphicsUnit.Pixel, ia)
+
+        'Noise-Ebene
+        If noiseOverlay IsNot Nothing Then
+            Using noiseBrush As New TextureBrush(noiseOverlay)
+                noiseBrush.WrapMode = Drawing2D.WrapMode.Tile
+                g.FillRectangle(noiseBrush, New Rectangle(Point.Empty, zielSize))
+            End Using
+        End If
+
+        'Scanline-Ebene
+        If scanlineOverlay IsNot Nothing Then
+            Using scanBrush As New TextureBrush(scanlineOverlay)
+                scanBrush.WrapMode = Drawing2D.WrapMode.Tile
+                g.FillRectangle(scanBrush, New Rectangle(Point.Empty, zielSize))
+            End Using
+        End If
+
+        'Metadaten via TagLib/MetaDataExtraktor und LocationHandling
         If Path.GetExtension(bildPfad) = ".jpg" OrElse Path.GetExtension(bildPfad) = ".jpeg" Then
             Dim tagLibFile As TagLib.Jpeg.File
             Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
@@ -140,8 +180,12 @@ Public Class ShaderMain
                 If String.IsNullOrWhiteSpace(geoPosition) Then
                     geoPosition = "Unbekannt"
                 End If
+
+                locationHelper = Nothing
+
             End If
 
+            'Geheimstufe (Altersfreigabe) setzen und Schlagwort-String (Tags) vorbereiten
             If keywords IsNot Nothing Then
                 If keywords.Any(Function(k) String.Equals(k.Trim(), "18+", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "Streng Geheim"
@@ -152,28 +196,25 @@ Public Class ShaderMain
                     geheimstufe = "VS-Vertraulich"
                 End If
 
+                keywords.Sort()
                 schlagworte = String.Join(" | ", keywords)
             Else
                 schlagworte = ""
             End If
         End If
 
+        'Phantasie-Kamera Code erzeugen
         kameraCode = GeneriereKameracode()
 
+        'Positionen der Textboxen berechnen & zeichnen
 
-        ' --- Text-Overlay-Stil ---
-        Dim overlayFont As New Font("Lucida Console", 12, FontStyle.Bold)
-        Dim geheimFont As New Font("Lucida Console", 18, FontStyle.Bold)
-        Dim overlayBrush As Brush = Brushes.LimeGreen
-        Dim backgroundBrush As New SolidBrush(Color.FromArgb(128, Color.Black))
-        Dim zeilen As List(Of String)
-        Dim höheNächsterText As Integer
+        'Aktenzeichen (Dateiname)
+        DrawText(g, "Aktenzeichen: ", overlayFont, overlayBrush, 10, 20)
+        höheNächsterText = 20
 
-        'Positionen berechnen
-        'Aktenzeichen
-        DrawText(g, "Aktenzeichen: ", overlayFont, overlayBrush, 10, 15)
-        höheNächsterText = 15
-        zeilen = TextKorrektTeilen(g, aktenzeichen, overlayFont, 800)
+        breiteFuerTextumbruch = (((resultImage.Width - g.MeasureString(geheimstufe, geheimFont).Width) \ 2) - (10 + g.MeasureString("Aktenzeichen: ", overlayFont).Width)) - 10
+
+        zeilen = TextKorrektTeilen(g, aktenzeichen, overlayFont, breiteFuerTextumbruch)
         For Each zeile In zeilen
             DrawText(g, zeile, overlayFont, overlayBrush, 10 + g.MeasureString("Aktenzeichen: ", overlayFont).Width, höheNächsterText)
             höheNächsterText += g.MeasureString(zeile, overlayFont).Height
@@ -184,12 +225,16 @@ Public Class ShaderMain
         DrawText(g, datum, overlayFont, overlayBrush, 10 + g.MeasureString("Aktenzeichen: ", overlayFont).Width, höheNächsterText)
 
         'Geo-Position
-        DrawText(g, "Geo-Position: " & geoPosition, overlayFont, overlayBrush, resultImage.Width - 950, 15)
-        höheNächsterText = 15 + g.MeasureString("Geo-Postition: ", overlayFont).Height
+        DrawText(g, "Geo-Position: ", overlayFont, overlayBrush, resultImage.Width - 950, 20)
+        DrawText(g, geoPosition, overlayFont, overlayBrush, (resultImage.Width - 950) + g.MeasureString("Geo-Position: ", overlayFont).Width, 20)
+        höheNächsterText = 20 + g.MeasureString("Geo-Postition: ", overlayFont).Height
 
-        'Tags
+        'Schlagworte (Tags)
         DrawText(g, "Schlagworte: ", overlayFont, overlayBrush, resultImage.Width - 950, höheNächsterText)
-        zeilen = TextKorrektTeilen(g, schlagworte, overlayFont, 550)
+
+        breiteFuerTextumbruch = (resultImage.Width - ((resultImage.Width - 950) + g.MeasureString("Geo-Position: ", overlayFont).Width)) - 10
+
+        zeilen = TextKorrektTeilen(g, schlagworte, overlayFont, breiteFuerTextumbruch)
         For Each zeile In zeilen
             DrawText(g, zeile, overlayFont, overlayBrush, (resultImage.Width - 950) + g.MeasureString("Geo-Position: ", overlayFont).Width, höheNächsterText)
             höheNächsterText += g.MeasureString(zeile, overlayFont).Height
@@ -199,7 +244,7 @@ Public Class ShaderMain
         DrawText(g, "Geheimhaltungsstufe", overlayFont, overlayBrush, (resultImage.Width - g.MeasureString("Geheimhaltunsgstufe", overlayFont).Width) \ 2, 60)
         DrawText(g, geheimstufe, geheimFont, geheimStufeFarbe, (resultImage.Width - g.MeasureString(geheimstufe, geheimFont).Width) \ 2, 105)
 
-        'Bibleothekarischer Hinweis
+        'Bibleothekarischer Hinweis (Dateipfad)
         DrawText(g, "Bibliothekarischer Hinweis:" & vbCrLf & "Ablageort: " & dateipfad, overlayFont, overlayBrush, 10, resultImage.Height - 80)
 
         'Kamera
@@ -208,18 +253,30 @@ Public Class ShaderMain
         'Rahmen zeichnen
         ZeichneRahmen(kameraCode, overlayFont)
 
-        ' --- Vignette ---
+        'Vignette
         If vignetteOverlay IsNot Nothing Then
             g.DrawImage(vignetteOverlay, New Rectangle(Point.Empty, zielSize))
         End If
 
-        ' --- Fertig ---
+        'Fertig und raus...
         g.Dispose()
         Return resultImage
 
     End Function
 
-    ' Hilfsfunktion
+    'Optionen/Dialog
+    Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
+        'Lädt die aktuellen Settings und legt sie in SettingsInbox ab (z.Zt. noch ohne Funktion, da der Shader
+        'aktuell keine Optionen bietet).
+
+        'aktuelleSettings = ReadShaderSettingsFromRegistryOrDefaults()
+        'StoreSettings(nameShader, aktuelleSettings)
+
+        Return New ucOptionsShader()
+
+    End Function
+
+    'Private Methoden
     Private Sub DrawText(gfx As Graphics, text As String, font As Font, brush As Brush, x As Integer, y As Integer)
         Dim size = gfx.MeasureString(text, font)
         Dim backgroundBrush As New SolidBrush(Color.FromArgb(128, 0, 0, 0))
@@ -304,10 +361,10 @@ Public Class ShaderMain
         g.DrawLine(rahmenStift, (bildbreite + titelbreite) \ 2, 10, bildbreite - 1, 10)
 
         ' Links
-        g.DrawLine(rahmenStift, 0, 0, 0, bildHöhe - 1)
+        g.DrawLine(rahmenStift, 0, 10, 0, bildhöhe - 1)
 
         ' Rechts
-        g.DrawLine(rahmenStift, bildBreite - 1, 0, bildBreite - 1, bildHöhe - 1)
+        g.DrawLine(rahmenStift, bildbreite - 1, 10, bildbreite - 1, bildhöhe - 1)
 
         ' Unten
         g.DrawLine(rahmenStift, 0, bildHöhe - 1, bildBreite - 1, bildHöhe - 1)
@@ -417,30 +474,23 @@ Public Class ShaderMain
 
     End Function
 
+    Private Function GetShaderDefaultSettings() As Dictionary(Of String, String)
+        'Liefert die Default-Settings des Shaders als Dictionary. Zur Zeit ohne Funktion
 
-    ' === Optionen/Dialog (nicht verwendet) ===
-    Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
-        'Wird nicht verwendet
+        Dim defaults As New Dictionary(Of String, String)
+
+        'defaults("Beispiel") = "Beispielinhalt"
+
+        Return defaults
+
     End Function
 
-    Public Function MemorizeShaderSettings(uc As UserControl) As Object Implements ISlideShowShader.MemorizeShaderSettings
-        'Wird nicht verwendet
-        Return Nothing
-    End Function
+    Private Sub ReadShaderSettingsFromRegistryOrDefaults()
+        'Setzt aktuelleSettings auf die Registry oder auf Default-Werte. Zur Zeit ohne Funktion
 
-    Public Sub ApplyShaderSettings(settings As Object) Implements ISlideShowShader.ApplyShaderSettings
-        ' Keine Einstellungen
-    End Sub
+        Dim defaults As New Dictionary(Of String, String)
 
-    Public Sub GetShaderSettings(uc As UserControl, restoreSettings As Object) Implements ISlideShowShader.GetShaderSettings
-        ' Keine Einstellungen
-    End Sub
+        'aktuelleSettings.Beispiel = ReadFromRegistryOrDefaults(SLIDESHOWSHADER_NACHTSICHT_FULLPATH & "Beispiel", defaults)
 
-    Public Sub GetShaderRegistryOrDefaultSettings(uc As UserControl) Implements ISlideShowShader.GetShaderRegistryOrDefaultSettings
-        ' Keine Einstellungen
-    End Sub
-
-    Public Sub CheckYourSettings() Implements ISlideShowShader.CheckYourSettings
-        ' Keine Einstellungen
     End Sub
 End Class

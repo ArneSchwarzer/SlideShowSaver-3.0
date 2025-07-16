@@ -2,6 +2,8 @@
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ToolTipHandling
 Imports SlideShowTools.CheckedListBoxHandling
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.ListHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowLoader
@@ -17,6 +19,7 @@ Imports System.Runtime.InteropServices.ComTypes
 
 Public Class frmOptionsMain
 
+#Region "Variablendeklaration"
     'Variablendeklaration
 
     'Loader-Logik
@@ -46,21 +49,12 @@ Public Class frmOptionsMain
 
     'Sonstiges
     Private uc As UserControl
-    Private modulSettingsZwischenspeicher As New Dictionary(Of String, Object)
-
+    Private aktuelleSettings As SettingsMain
+#End Region
 
     Private Sub frmOptionsMain_Load(sender As Object, e As EventArgs) Handles Me.Load
 #Region "Header frmOptionMain_Load"
-        Dim defaultsMain As New Dictionary(Of String, String)
         Dim anzahlMarkierteModule As Integer
-
-        'Handler für benutzerdefinierte Events
-        If activeModule IsNot Nothing Then
-            AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
-            AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
-        End If
-
-        defaultsMain = GetMainDefaultSettings()
 
         Me.TopMost = True
         Me.BringToFront()
@@ -71,13 +65,15 @@ Public Class frmOptionsMain
         ' Weil Cursor.Hide ein Stack ist...
         CursorPowerShow()
 
+        'Aktuelle Settings einlesen
+        CheckYourMail()
+
         ' Modul-Liste laden
         Dim moduleInfos = ModulListLoader.LadeModulInfoListe()
         clbModule.Items.Clear()
 
-        ' Transition- und Shader-Liste vorbereiten
+        ' ModulTransition Liste vorbereiten
         transitionList = TransitionListLoader.LadeTransitionInfoListe()
-        shaderList = ShaderListLoader.LadeShaderInfoListe()
 
 #End Region
 
@@ -85,7 +81,7 @@ Public Class frmOptionsMain
         ' Trackbar trkDauerModulwechsel und dazugehöriges Label lblDauerModulwechsel
         trkDauerModulwechsel.Minimum = 1
         trkDauerModulwechsel.Maximum = 60
-        trkDauerModulwechsel.Value = Integer.Parse(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", defaultsMain))
+        trkDauerModulwechsel.Value = aktuelleSettings.ModulDauer
         If trkDauerModulwechsel.Value = 60 Then
             lblDauerModuswechsel.Text = "1 h"
         Else
@@ -102,7 +98,7 @@ Public Class frmOptionsMain
 
         EnableToolTipsForCLB(clbModule)
 
-        markierteModule = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulAktivListe", defaultsMain)
+        markierteModule = JoinSemicolonList(aktuelleSettings.ModulAktivListe)
         SetCheckedItemsByName(Of SlideShowModulInfo)(
             clbModule,
             markierteModule,
@@ -114,7 +110,7 @@ Public Class frmOptionsMain
 
 #Region "cmbModulWechsel Initialisierung"
         'Combobox cmbModulwechsel
-        cmbModulwechsel.SelectedItem = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", defaultsMain)
+        cmbModulwechsel.SelectedItem = aktuelleSettings.ModulReihenfolge
         If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start
             lblNtrkDauerModulwechsel.Enabled = False
             lblDauerModuswechsel.Enabled = False
@@ -149,7 +145,7 @@ Public Class frmOptionsMain
 
             EnableToolTipsForCLB(clbTransitionsModule)
 
-            markierteTransitionen = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionListe", defaultsMain)
+            markierteTransitionen = JoinSemicolonList(aktuelleSettings.ModulTransitionListe)
             SetCheckedItemsByName(Of SlideShowTransitionInfo)(
             clbTransitionsModule,
             markierteTransitionen,
@@ -162,13 +158,18 @@ Public Class frmOptionsMain
 
 #Region "cmbTransitionsReihenfolge für Module Initialisieren"
         'Combobox cmbTransitionsReihenfolge
-        cmbTransitionsReihenfolge.SelectedItem = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", defaultsMain)
+        cmbTransitionsReihenfolge.SelectedItem = aktuelleSettings.ModulTransitionReihenfolge
         cmbTransitionsReihenfolge.SelectedIndex = -1
 #End Region
 
 #Region "chkMultiMonitor Initialisieren"
         'Checkbox MultiMonitor Support
-        chkMultiMonitor.Visible = False 'Solange noch kein MultiMonitor Support implementiert ist
+
+        'Solange noch kein MultiMonitor Support implementiert ist
+        '
+        'chkMultiMonitor.Checked = aktuelleSettings.MultiMonitor
+
+        chkMultiMonitor.Visible = False
         chkMultiMonitor.Checked = False
 #End Region
 
@@ -210,16 +211,6 @@ Public Class frmOptionsMain
 
                             KeineModuleLabelLogik(anzahlMarkierteModule)
 
-                            'Benötigt, falls zum Start kein Modul in der Liste der aktiven Module vorhanden war
-                            If activeModule IsNot Nothing Then
-                                RemoveHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
-                                RemoveHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
-
-                                AddHandler activeModule.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
-                                AddHandler activeModule.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
-                            End If
-
-
                             'DirectCommit
                             CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulAktivListe")
 
@@ -234,8 +225,24 @@ Public Class frmOptionsMain
         'Wechselt den Inhalt der tpModul gemäß dem gerade selektieren Modul
         Dim modulName As String
 
+        'Handler vom vorherigen Modul entfernen
         Try
-            ' Vorheriges Modul entladen
+            Dim ucTransition = TryCast(tpModul.Controls(0), ISlideShowTransitionCommunication)
+            If ucTransition IsNot Nothing Then
+                RemoveHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+            End If
+
+            Dim ucShader = TryCast(tpModul.Controls(0), ISlideShowShaderCommunication)
+            If ucShader IsNot Nothing Then
+                RemoveHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+            End If
+        Catch ex As Exception
+            LogHandling.LogError("SaverMain - frmOptionsMain.clbModule.SelectedIndexChanged: Fehler beim Entfernen alter Handler: " & ex.ToString)
+        End Try
+
+        Try
+
+            'Vorheriges Modul entladen
             If aktuellGeladenesModul IsNot Nothing Then
                 aktuellGeladenesModul = Nothing
                 tpModul.Controls.Clear()
@@ -326,7 +333,7 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
-        'Da DirectCommit keine 'Sonderbehandlung' des OK-Buttons notwendig
+        'Da eine DirectCommit-Architektur vorliegt, ist keine 'Sonderbehandlung' des OK-Buttons notwendig
         Close()
     End Sub
 
@@ -477,6 +484,18 @@ Public Class frmOptionsMain
                     tabOptions.TabPages.Add(tpModul)
                 End If
 
+                'Handler für Transitionen und Shader hinzufügen (RemoveHandler des Vorgänger-Moduls hat bereits
+                'in clbModule.SelectedIndexChanged() stattgefunden.
+                Dim ucTransition = TryCast(tpModul.Controls(0), ISlideShowTransitionCommunication)
+                If ucTransition IsNot Nothing Then
+                    AddHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+                End If
+
+                Dim ucShader = TryCast(tpModul.Controls(0), ISlideShowShaderCommunication)
+                If ucShader IsNot Nothing Then
+                    AddHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+                End If
+
             Else
                 tabOptions.TabPages.Remove(tpModul)
             End If
@@ -556,6 +575,13 @@ Public Class frmOptionsMain
 
         '...und Schluss
         Me.DialogResult = DialogResult.OK
+
+    End Sub
+
+    Private Sub CheckYourMail()
+        'aktuelleSettings aus der SettingsInbox abholen
+
+        aktuelleSettings = GetSettings(Of SettingsMain)("Main")
 
     End Sub
 End Class

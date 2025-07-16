@@ -25,7 +25,7 @@ Partial Class ucOptionsModul
         Me.lblNcmbBildauswahl = New System.Windows.Forms.Label()
         Me.cmbBildauswahl = New System.Windows.Forms.ComboBox()
         Me.lblNtrbAnzeigedauer = New System.Windows.Forms.Label()
-        Me.trbAnzeigedauer = New System.Windows.Forms.TrackBar()
+        Me.trkAnzeigedauer = New System.Windows.Forms.TrackBar()
         Me.lblAnzeigedauer = New System.Windows.Forms.Label()
         Me.lblNUebergangseffekteBilder = New System.Windows.Forms.Label()
         Me.clbTransitions = New System.Windows.Forms.CheckedListBox()
@@ -38,7 +38,7 @@ Partial Class ucOptionsModul
         Me.lblNcmbShaderauswahl = New System.Windows.Forms.Label()
         Me.lblModulname = New System.Windows.Forms.Label()
         Me.lblNModulname = New System.Windows.Forms.Label()
-        CType(Me.trbAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblNcmbBildauswahl
@@ -69,15 +69,15 @@ Partial Class ucOptionsModul
         Me.lblNtrbAnzeigedauer.Tag = "langKey=lblNtrbAnzeigedauer"
         Me.lblNtrbAnzeigedauer.Text = "Anzeigedauer"
         '
-        'trbAnzeigedauer
+        'trkAnzeigedauer
         '
-        Me.trbAnzeigedauer.Location = New System.Drawing.Point(39, 205)
-        Me.trbAnzeigedauer.Maximum = 120
-        Me.trbAnzeigedauer.Minimum = 5
-        Me.trbAnzeigedauer.Name = "trbAnzeigedauer"
-        Me.trbAnzeigedauer.Size = New System.Drawing.Size(687, 101)
-        Me.trbAnzeigedauer.TabIndex = 3
-        Me.trbAnzeigedauer.Value = 15
+        Me.trkAnzeigedauer.Location = New System.Drawing.Point(39, 205)
+        Me.trkAnzeigedauer.Maximum = 120
+        Me.trkAnzeigedauer.Minimum = 5
+        Me.trkAnzeigedauer.Name = "trkAnzeigedauer"
+        Me.trkAnzeigedauer.Size = New System.Drawing.Size(687, 101)
+        Me.trkAnzeigedauer.TabIndex = 3
+        Me.trkAnzeigedauer.Value = 15
         '
         'lblAnzeigedauer
         '
@@ -209,7 +209,7 @@ Partial Class ucOptionsModul
         Me.Controls.Add(Me.clbTransitions)
         Me.Controls.Add(Me.lblNUebergangseffekteBilder)
         Me.Controls.Add(Me.lblAnzeigedauer)
-        Me.Controls.Add(Me.trbAnzeigedauer)
+        Me.Controls.Add(Me.trkAnzeigedauer)
         Me.Controls.Add(Me.lblNtrbAnzeigedauer)
         Me.Controls.Add(Me.cmbBildauswahl)
         Me.Controls.Add(Me.lblNcmbBildauswahl)
@@ -217,7 +217,7 @@ Partial Class ucOptionsModul
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsModul"
         Me.Size = New System.Drawing.Size(890, 1020)
-        CType(Me.trbAnzeigedauer, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkAnzeigedauer, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -226,7 +226,7 @@ Partial Class ucOptionsModul
     Friend WithEvents lblNcmbBildauswahl As Windows.Forms.Label
     Friend WithEvents cmbBildauswahl As Windows.Forms.ComboBox
     Friend WithEvents lblNtrbAnzeigedauer As Windows.Forms.Label
-    Friend WithEvents trbAnzeigedauer As Windows.Forms.TrackBar
+    Friend WithEvents trkAnzeigedauer As Windows.Forms.TrackBar
     Friend WithEvents lblAnzeigedauer As Windows.Forms.Label
     Friend WithEvents lblNUebergangseffekteBilder As Windows.Forms.Label
     Friend WithEvents clbTransitions As Windows.Forms.CheckedListBox

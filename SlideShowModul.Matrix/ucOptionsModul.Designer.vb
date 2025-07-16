@@ -29,10 +29,10 @@ Partial Class ucOptionsModul
         Me.btnHighlighttextHinzufügen = New System.Windows.Forms.Button()
         Me.lstHiglightTexte = New System.Windows.Forms.ListBox()
         Me.lblSzenendauer = New System.Windows.Forms.Label()
-        Me.trbSzenendauer = New System.Windows.Forms.TrackBar()
+        Me.trkSzenendauer = New System.Windows.Forms.TrackBar()
         Me.lblNtrbSzenendauer = New System.Windows.Forms.Label()
         Me.lblNclbHighlighttexte = New System.Windows.Forms.Label()
-        CType(Me.trbSzenendauer, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkSzenendauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblModulname
@@ -111,16 +111,16 @@ Partial Class ucOptionsModul
         Me.lblSzenendauer.Text = "20 s"
         Me.lblSzenendauer.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'trbSzenendauer
+        'trkSzenendauer
         '
-        Me.trbSzenendauer.Location = New System.Drawing.Point(40, 651)
-        Me.trbSzenendauer.Margin = New System.Windows.Forms.Padding(4)
-        Me.trbSzenendauer.Maximum = 120
-        Me.trbSzenendauer.Minimum = 5
-        Me.trbSzenendauer.Name = "trbSzenendauer"
-        Me.trbSzenendauer.Size = New System.Drawing.Size(669, 101)
-        Me.trbSzenendauer.TabIndex = 23
-        Me.trbSzenendauer.Value = 20
+        Me.trkSzenendauer.Location = New System.Drawing.Point(40, 651)
+        Me.trkSzenendauer.Margin = New System.Windows.Forms.Padding(4)
+        Me.trkSzenendauer.Maximum = 120
+        Me.trkSzenendauer.Minimum = 5
+        Me.trkSzenendauer.Name = "trkSzenendauer"
+        Me.trkSzenendauer.Size = New System.Drawing.Size(669, 101)
+        Me.trkSzenendauer.TabIndex = 23
+        Me.trkSzenendauer.Value = 20
         '
         'lblNtrbSzenendauer
         '
@@ -147,7 +147,7 @@ Partial Class ucOptionsModul
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.Controls.Add(Me.lblNclbHighlighttexte)
         Me.Controls.Add(Me.lblSzenendauer)
-        Me.Controls.Add(Me.trbSzenendauer)
+        Me.Controls.Add(Me.trkSzenendauer)
         Me.Controls.Add(Me.lblNtrbSzenendauer)
         Me.Controls.Add(Me.btnHighlighttextListeLöschen)
         Me.Controls.Add(Me.btnHighlighttextLöschen)
@@ -159,7 +159,7 @@ Partial Class ucOptionsModul
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsModul"
         Me.Size = New System.Drawing.Size(890, 1020)
-        CType(Me.trbSzenendauer, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkSzenendauer, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -172,7 +172,7 @@ Partial Class ucOptionsModul
     Friend WithEvents btnHighlighttextHinzufügen As Windows.Forms.Button
     Friend WithEvents lstHiglightTexte As Windows.Forms.ListBox
     Friend WithEvents lblSzenendauer As Windows.Forms.Label
-    Friend WithEvents trbSzenendauer As Windows.Forms.TrackBar
+    Friend WithEvents trkSzenendauer As Windows.Forms.TrackBar
     Friend WithEvents lblNtrbSzenendauer As Windows.Forms.Label
     Friend WithEvents lblNclbHighlighttexte As Windows.Forms.Label
 End Class
