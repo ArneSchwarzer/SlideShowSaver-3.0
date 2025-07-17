@@ -127,7 +127,7 @@ Public Class ShaderMain
 
         'Overlay Texturen einrichten
         noiseOverlay = TextureHandling.GenerateNoiseTexture(512, 512, 32)
-        scanlineOverlay = TextureHandling.GenerateScanlineTexture(512, 512, 23)
+        scanlineOverlay = TextureHandling.GenerateScanlineTexture(8, zielSize.Height, 23)
         vignetteOverlay = My.Resources.vignetteTexture
 
         'Basisbild mittig einpassen
@@ -206,6 +206,9 @@ Public Class ShaderMain
         'Phantasie-Kamera Code erzeugen
         kameraCode = GeneriereKameracode()
 
+        'Rahmen zeichnen
+        ZeichneRahmen(kameraCode, overlayFont)
+
         'Positionen der Textboxen berechnen & zeichnen
 
         'Aktenzeichen (Dateiname)
@@ -249,9 +252,6 @@ Public Class ShaderMain
 
         'Kamera
         DrawText(g, kameraCode, overlayFont, overlayBrush, (resultImage.Width - g.MeasureString(kameraCode, overlayFont).Width) \ 2, 0)
-
-        'Rahmen zeichnen
-        ZeichneRahmen(kameraCode, overlayFont)
 
         'Vignette
         If vignetteOverlay IsNot Nothing Then
@@ -367,7 +367,11 @@ Public Class ShaderMain
         g.DrawLine(rahmenStift, bildbreite - 1, 10, bildbreite - 1, bildhöhe - 1)
 
         ' Unten
-        g.DrawLine(rahmenStift, 0, bildHöhe - 1, bildBreite - 1, bildHöhe - 1)
+        g.DrawLine(rahmenStift, 0, bildhöhe - 1, bildbreite - 1, bildhöhe - 1)
+
+        'Oberen Rand korrigieren
+        rahmenStift = New Pen(Color.Black, 10)
+        g.DrawLine(rahmenStift, 0, 0, bildbreite, 0)
 
     End Sub
 

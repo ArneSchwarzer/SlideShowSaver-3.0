@@ -128,12 +128,6 @@
     <Compile Include="frmPictureInfo.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ucUnderConstruction.Designer.vb">
-      <DependentUpon>ucUnderConstruction.vb</DependentUpon>
-    </Compile>
-    <Compile Include="ucUnderConstruction.vb">
-      <SubType>UserControl</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="frmModulBitteWarten.resx">
@@ -156,9 +150,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ucOptionsModul.resx">
       <DependentUpon>ucOptionsModul.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ucUnderConstruction.resx">
-      <DependentUpon>ucUnderConstruction.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

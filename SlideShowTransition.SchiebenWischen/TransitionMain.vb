@@ -22,6 +22,8 @@ Public Class TransitionMain
     Private WithEvents tmrAnimation As New Timer
     Private aktuelleSettings As New SlideShowTransitionSettings_SuW
 
+    Private bufferBitmap As Bitmap
+    Private bufferGraphics As Graphics
     Private oldImg As Image
     Private newImg As Image
     Private oldBmpGerahmt As Bitmap
@@ -39,13 +41,13 @@ Public Class TransitionMain
 
     Private offsetX As Double
     Private offsetY As Double
-    Private fps As Integer = 50
     Private endPunkt As Point = New Point(0, 0)
 
     Public Structure SlideShowTransitionSettings_SuW
         Public geschwindigkeit As Integer
         Public richtungen As List(Of String)
         Public modus As String
+        Public FPS As Integer
     End Structure
 
     Private Structure BewegungsInfos
@@ -216,21 +218,29 @@ Public Class TransitionMain
         Dim distY As Integer = Math.Abs(bewegungNewImage.aktuellePositionY - endPunkt.Y)
 
         ' Offset berechnen
-        offsetX = distX / (aktuelleSettings.geschwindigkeit * fps)
-        offsetY = distY / (aktuelleSettings.geschwindigkeit * fps)
+        offsetX = distX / ((11 - aktuelleSettings.geschwindigkeit) * aktuelleSettings.FPS)
+        offsetY = distY / ((11 - aktuelleSettings.geschwindigkeit) * aktuelleSettings.FPS)
+
+        'Letzte Vorbereitung - bmpBuffer Initialisieren
+        InitBuffer()
+
+        'Zur Optimierung im Modus "Wischen" altes Bild "vorzeichnen" - und dann stehenlassen.
+        bufferGraphics.Clear(Color.Black)
+
+        Dim zielRectOld As New Rectangle(New Point(bewegungOldImage.aktuellePositionX, bewegungOldImage.aktuellePositionY), cltSize)
+        bufferGraphics.DrawImage(oldBmpGerahmt, zielRectOld)
 
         'Timer initialisieren
         If tmrAnimation Is Nothing Then tmrAnimation = New Timer()
         If tmrDuration Is Nothing Then tmrDuration = New Timer()
 
-        tmrAnimation.Interval = 1000 \ fps
+        tmrAnimation.Interval = 1000 \ aktuelleSettings.FPS
         tmrAnimation.Start()
 
         If durationMs > 0 Then
             tmrDuration.Interval = durationMs
             tmrDuration.Start()
         End If
-
 
     End Sub
     Sub StopTransition() Implements ISlideShowTransition.StopTransition
@@ -274,6 +284,7 @@ Public Class TransitionMain
         aktuelleSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults))
         aktuelleSettings.richtungen = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults))
         aktuelleSettings.modus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults)
+        aktuelleSettings.FPS = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "FPS", defaults))
 
     End Sub
 
@@ -283,6 +294,7 @@ Public Class TransitionMain
         defaults.Add("Geschwindigkeit", "5")
         defaults.Add("Richtungen", "W; O")
         defaults.Add("Modus", "Wischen")
+        defaults.Add("FPS", "60")
 
         Return defaults
 
@@ -316,46 +328,73 @@ Public Class TransitionMain
 
     End Sub
 
+    Private Sub InitBuffer()
+        If bufferBitmap IsNot Nothing Then
+            bufferGraphics.Dispose()
+            bufferBitmap.Dispose()
+        End If
+
+        bufferBitmap = New Bitmap(cltSize.Width, cltSize.Height)
+        bufferGraphics = Graphics.FromImage(bufferBitmap)
+    End Sub
+
     Private Sub tmrAnimation_Tick(sender As Object, e As EventArgs) Handles tmrAnimation.Tick
-        ' --- Positionen aktualisieren ---
+        'Positionen aktualisieren
         bewegungOldImage.aktuellePositionX += CInt(offsetX) * bewegungOldImage.directionX
         bewegungOldImage.aktuellePositionY += CInt(offsetY) * bewegungOldImage.directionY
         bewegungNewImage.aktuellePositionX += CInt(offsetX) * bewegungNewImage.directionX
         bewegungNewImage.aktuellePositionY += CInt(offsetY) * bewegungNewImage.directionY
 
-        ' --- Ziel erreicht? ---
+        'Ziel erreicht?
         Dim aktuellePosition As New Point(bewegungNewImage.aktuellePositionX, bewegungNewImage.aktuellePositionY)
-        If IstZielErreicht(endPunkt, aktuellePosition, Math.Max(offsetX, offsetY)) Then
+        If IstZielErreicht(endPunkt, aktuellePosition) Then
             StopTransition()
             Return
         End If
 
-        ' --- Neues Bild generieren ---
-        bmp = New Bitmap(cltSize.Width, cltSize.Height)
-        Using zeichenFlaeche As Graphics = Graphics.FromImage(bmp)
-            zeichenFlaeche.Clear(Color.Black)
+        'Modusabhängige Zeichnung
+        If aktuelleSettings.modus = "Wischen" Then
 
-            ' Altes Bild zeichnen
+            'Nur das neue Bild wird bewegt/gezeichnet
+            Dim zielRectNew As New Rectangle(
+            New Point(bewegungNewImage.aktuellePositionX, bewegungNewImage.aktuellePositionY),
+            cltSize)
+            bufferGraphics.DrawImage(newBmpGerahmt, zielRectNew)
+
+        Else '"Schieben"-Modus
+
+            'Bestehendes Bitmap wiederverwenden
+            bufferGraphics.Clear(Color.Black)
+
+            'Altes Bild zeichnen
             Dim zielRectOld As New Rectangle(
             New Point(bewegungOldImage.aktuellePositionX, bewegungOldImage.aktuellePositionY),
             cltSize)
-            zeichenFlaeche.DrawImage(oldBmpGerahmt, zielRectOld)
+            bufferGraphics.DrawImage(oldBmpGerahmt, zielRectOld)
 
             ' Neues Bild zeichnen
             Dim zielRectNew As New Rectangle(
             New Point(bewegungNewImage.aktuellePositionX, bewegungNewImage.aktuellePositionY),
             cltSize)
-            zeichenFlaeche.DrawImage(newBmpGerahmt, zielRectNew)
-        End Using
+            bufferGraphics.DrawImage(newBmpGerahmt, zielRectNew)
 
-        ' --- Ausgabe aufs Ziel ---
-        renderTarget.DrawImage(bmp, 0, 0)
-        bmp.Dispose()
+        End If
+
+        'Ausgabe aufs Ziel
+        renderTarget.DrawImage(bufferBitmap, 0, 0)
     End Sub
 
 
-    Private Function IstZielErreicht(p1 As Point, p2 As Point, tolerance As Integer) As Boolean
-        Return Math.Abs(p1.X - p2.X) <= tolerance AndAlso Math.Abs(p1.Y - p2.Y) <= tolerance
+
+    Private Function IstZielErreicht(p1 As Point, p2 As Point) As Boolean
+        If bewegungNewImage.directionX <> 0 Then
+            If (p2.X - p1.X) * bewegungNewImage.directionX >= 0 Then Return True
+        End If
+        If bewegungNewImage.directionY <> 0 Then
+            If (p2.Y - p1.Y) * bewegungNewImage.directionY >= 0 Then Return True
+        End If
+        Return False
+
     End Function
 
     Private Function ErzeugeGerahmtesBild(bild As Image, sizeMode As PictureBoxSizeMode, zielgroesse As Size) As Bitmap

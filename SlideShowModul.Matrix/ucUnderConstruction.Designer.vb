@@ -38,18 +38,24 @@ Partial Class ucUnderConstruction
         Me.panPanel.Controls.Add(Me.lblModulname)
         Me.panPanel.Controls.Add(Me.lblHierEntsteht)
         Me.panPanel.Controls.Add(Me.lblUnderConstruction)
-        Me.panPanel.Location = New System.Drawing.Point(4, 4)
+        Me.panPanel.Location = New System.Drawing.Point(5, 6)
+        Me.panPanel.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.panPanel.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.panPanel.MinimumSize = New System.Drawing.Size(1024, 768)
         Me.panPanel.Name = "panPanel"
-        Me.panPanel.Size = New System.Drawing.Size(1552, 1117)
+        Me.panPanel.Size = New System.Drawing.Size(1024, 768)
         Me.panPanel.TabIndex = 6
         '
         'picLogo
         '
         Me.picLogo.BackgroundImage = Global.Modul_Matrix.My.Resources.Resources.Matrix_SplashScreen
         Me.picLogo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.picLogo.Location = New System.Drawing.Point(264, 394)
+        Me.picLogo.Location = New System.Drawing.Point(0, 317)
+        Me.picLogo.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.picLogo.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.picLogo.MinimumSize = New System.Drawing.Size(1024, 0)
         Me.picLogo.Name = "picLogo"
-        Me.picLogo.Size = New System.Drawing.Size(986, 615)
+        Me.picLogo.Size = New System.Drawing.Size(1024, 414)
         Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.picLogo.TabIndex = 5
         Me.picLogo.TabStop = False
@@ -59,10 +65,13 @@ Partial Class ucUnderConstruction
         Me.lblModulname.AutoSize = True
         Me.lblModulname.Font = New System.Drawing.Font("Segoe UI", 24.0!, System.Drawing.FontStyle.Bold)
         Me.lblModulname.ForeColor = System.Drawing.Color.Blue
-        Me.lblModulname.Location = New System.Drawing.Point(0, 256)
-        Me.lblModulname.MinimumSize = New System.Drawing.Size(1552, 0)
+        Me.lblModulname.Location = New System.Drawing.Point(0, 178)
+        Me.lblModulname.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblModulname.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.lblModulname.MinimumSize = New System.Drawing.Size(1024, 0)
         Me.lblModulname.Name = "lblModulname"
-        Me.lblModulname.Size = New System.Drawing.Size(1552, 96)
+        Me.lblModulname.RightToLeft = System.Windows.Forms.RightToLeft.No
+        Me.lblModulname.Size = New System.Drawing.Size(1024, 96)
         Me.lblModulname.TabIndex = 5
         Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblModulname.Text = "Matrix"
@@ -71,36 +80,47 @@ Partial Class ucUnderConstruction
         'lblHierEntsteht
         '
         Me.lblHierEntsteht.AutoSize = True
-        Me.lblHierEntsteht.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
+        Me.lblHierEntsteht.Font = New System.Drawing.Font("Segoe UI", 12.0!, System.Drawing.FontStyle.Bold)
         Me.lblHierEntsteht.ForeColor = System.Drawing.Color.Blue
-        Me.lblHierEntsteht.Location = New System.Drawing.Point(37, 154)
+        Me.lblHierEntsteht.Location = New System.Drawing.Point(0, 100)
+        Me.lblHierEntsteht.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblHierEntsteht.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.lblHierEntsteht.MinimumSize = New System.Drawing.Size(1024, 0)
         Me.lblHierEntsteht.Name = "lblHierEntsteht"
-        Me.lblHierEntsteht.Size = New System.Drawing.Size(1456, 72)
+        Me.lblHierEntsteht.Size = New System.Drawing.Size(1024, 48)
         Me.lblHierEntsteht.TabIndex = 5
         Me.lblHierEntsteht.Tag = "langKey=lblHierEntsteht"
         Me.lblHierEntsteht.Text = "Hier entsteht gerade das neue Bildschirmschoner-Modul"
+        Me.lblHierEntsteht.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'lblUnderConstruction
         '
-        Me.lblUnderConstruction.AutoSize = True
         Me.lblUnderConstruction.BackColor = System.Drawing.Color.Transparent
         Me.lblUnderConstruction.Font = New System.Drawing.Font("Segoe UI", 18.0!, System.Drawing.FontStyle.Bold)
         Me.lblUnderConstruction.ForeColor = System.Drawing.Color.Blue
-        Me.lblUnderConstruction.Location = New System.Drawing.Point(438, 69)
+        Me.lblUnderConstruction.Location = New System.Drawing.Point(0, 13)
+        Me.lblUnderConstruction.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
+        Me.lblUnderConstruction.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.lblUnderConstruction.MinimumSize = New System.Drawing.Size(1024, 0)
         Me.lblUnderConstruction.Name = "lblUnderConstruction"
-        Me.lblUnderConstruction.Size = New System.Drawing.Size(593, 72)
+        Me.lblUnderConstruction.Size = New System.Drawing.Size(1024, 68)
         Me.lblUnderConstruction.TabIndex = 5
         Me.lblUnderConstruction.Tag = "langKey=lblUnderConstruction"
         Me.lblUnderConstruction.Text = "! Under Construction !"
+        Me.lblUnderConstruction.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
         'ucUnderConstruction
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(14.0!, 29.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.Transparent
         Me.Controls.Add(Me.panPanel)
+        Me.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.MaximumSize = New System.Drawing.Size(1024, 768)
+        Me.MinimumSize = New System.Drawing.Size(1024, 768)
         Me.Name = "ucUnderConstruction"
-        Me.Size = New System.Drawing.Size(1561, 1124)
+        Me.Size = New System.Drawing.Size(1024, 768)
         Me.panPanel.ResumeLayout(False)
         Me.panPanel.PerformLayout()
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()

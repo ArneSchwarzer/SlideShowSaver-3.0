@@ -6,6 +6,7 @@ Imports SlideShowTools.ScreenHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowLogging.LogHandling
 Imports Modul_Matrix.ModulMain
+Imports SlideShowLogging
 
 
 Public Class frmModulMain
@@ -25,6 +26,9 @@ Public Class frmModulMain
         Me.Text = "Modul Matrix"
         Me.TopMost = False
 
+        Me.Top = 0
+        Me.Left = 0
+
         'Eventhandler
         AddHandler YouHaveMail_Matrix, AddressOf CheckYourMail
 
@@ -34,8 +38,9 @@ Public Class frmModulMain
         'UC Under Constuction einlesen
         uc = New ucUnderConstruction()
 
-        uc.Top = (Me.ClientSize.Height - uc.Height) \ 2
-        uc.Left = (Me.ClientSize.Width - uc.Width) \ 2
+        uc.Left = (GetNativeScreenResolution().Width - uc.Width) \ 2
+        uc.Top = (GetNativeScreenResolution().Height - uc.Height) \ 2
+
         Me.Controls.Add(uc)
 
     End Sub
@@ -45,6 +50,7 @@ Public Class frmModulMain
 
         'Jetzt die Form sichtbar machen
         Me.WindowState = FormWindowState.Maximized
+
 
     End Sub
 

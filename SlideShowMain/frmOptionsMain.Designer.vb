@@ -215,7 +215,7 @@ Partial Class frmOptionsMain
         'cmbModulwechsel
         '
         Me.cmbModulwechsel.FormattingEnabled = True
-        Me.cmbModulwechsel.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge"})
+        Me.cmbModulwechsel.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
         Me.cmbModulwechsel.Location = New System.Drawing.Point(489, 333)
         Me.cmbModulwechsel.Name = "cmbModulwechsel"
         Me.cmbModulwechsel.Size = New System.Drawing.Size(388, 49)

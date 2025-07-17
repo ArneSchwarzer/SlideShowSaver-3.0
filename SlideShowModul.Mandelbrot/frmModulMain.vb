@@ -33,8 +33,8 @@ Public Class frmModulMain
         'UserControl ucUnderConstruction
         uc = New ucUnderConstruction()
 
-        uc.Top = (Me.ClientSize.Height - uc.Height) \ 2
-        uc.Left = (Me.ClientSize.Width - uc.Width) \ 2
+        uc.Left = (GetNativeScreenResolution().Width - uc.Width) \ 2
+        uc.Top = (GetNativeScreenResolution().Height - uc.Height) \ 2
         Me.Controls.Add(uc)
 
     End Sub

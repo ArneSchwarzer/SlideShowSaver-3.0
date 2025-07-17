@@ -209,8 +209,9 @@ Public Class frmSaverMain
     Private Sub IniAndReinitialize()
         '(Re-)Initialisieren gemäß Settings
 
-        'Basisdaten auslesen
+        'Basisdaten auslesen und in SettingsInbox ablegen
         ReadMainSettingsFromRegistryOrDefaults()
+        StoreSettings("Main", aktuelleSettings)
 
         If aktuelleSettings.ModulReihenfolge <> "Zufällig bei Start" Then
             'Main Loop gemäß ModulDauer in Minuten setzten & Starten
@@ -318,6 +319,10 @@ Public Class frmSaverMain
     Private Sub openOptionsDialog()
         'Öffnet den Options-Dialog
 
+        'Aktuelle Settings in die SettingsInbox stellen
+        ReadMainSettingsFromRegistryOrDefaults()
+        StoreSettings("Main", aktuelleSettings)
+
         Try
             If optionsDialog Is Nothing Then
                 optionsDialog = New frmOptionsMain()
@@ -329,10 +334,6 @@ Public Class frmSaverMain
         'OptionsDialog aufrufen inklusive Prüfung, ob der Dialog über den OK-Button geschlossen wurde
         Application.DoEvents()
         Threading.Thread.Sleep(100)
-
-        'Aktuelle Settings in die SettingsInbox stellen
-        ReadMainSettingsFromRegistryOrDefaults()
-        StoreSettings("Main", aktuelleSettings)
 
         If optionsDialog.ShowDialog() = DialogResult.OK Then
 

@@ -110,8 +110,10 @@ Public Class frmOptionsMain
 
 #Region "cmbModulWechsel Initialisierung"
         'Combobox cmbModulwechsel
+
         cmbModulwechsel.SelectedItem = aktuelleSettings.ModulReihenfolge
-        If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start
+
+        If cmbModulwechsel.SelectedIndex = 0 OrElse cmbModulwechsel.SelectedIndex = 2 Then '"Zufällig bei Start" oder "In Reihenfolge bei Start"
             lblNtrkDauerModulwechsel.Enabled = False
             lblDauerModuswechsel.Enabled = False
             trkDauerModulwechsel.Enabled = False
@@ -159,7 +161,15 @@ Public Class frmOptionsMain
 #Region "cmbTransitionsReihenfolge für Module Initialisieren"
         'Combobox cmbTransitionsReihenfolge
         cmbTransitionsReihenfolge.SelectedItem = aktuelleSettings.ModulTransitionReihenfolge
-        cmbTransitionsReihenfolge.SelectedIndex = -1
+
+        If clbTransitionsModule.CheckedItems.Count <= 1 Then
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+        Else
+            cmbTransitionsReihenfolge.Enabled = True
+            lblNcmbAbspielmodusTransitionsModule.Enabled = True
+        End If
+
 #End Region
 
 #Region "chkMultiMonitor Initialisieren"
@@ -304,11 +314,16 @@ Public Class frmOptionsMain
             If anzahlMarkierteModule = 0 Then
                 lblKeineModule.Text = "Keine Module ausgewählt, spiele Bouncing Logo"
                 lblKeineModule.Visible = True
+                cmbModulwechsel.SelectedIndex = -1
             Else
                 lblKeineModule.Visible = False
             End If
 
-            cmbModulwechsel.SelectedIndex = -1
+            If cmbModulwechsel.SelectedIndex = 0 Or cmbModulwechsel.SelectedIndex = 1 Then 'Falls "Zufällig bei Start" oder "Zufällig" --> "Zufällig bei Start"
+                cmbModulwechsel.SelectedIndex = 0
+            Else 'Sonst "In Reihenfolge bei Start"
+                cmbModulwechsel.SelectedIndex = 2
+            End If
             cmbModulwechsel.Enabled = False
             lblNcmbModulWechsel.Enabled = False
             trkDauerModulwechsel.Visible = False
@@ -345,7 +360,7 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub cmbModulwechsel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbModulwechsel.SelectedIndexChanged
-        If cmbModulwechsel.SelectedIndex = 0 Then 'Zufällig bei Start --> Kein Modulwechsel während der Laufzeit
+        If cmbModulwechsel.SelectedIndex = 0 Or cmbModulwechsel.SelectedIndex = 2 Then '"Zufällig bei Start" oder "In Reihenfolge bei Start" --> Kein Modulwechsel während der Laufzeit
             lblNtrkDauerModulwechsel.Enabled = False
             lblDauerModuswechsel.Enabled = False
             trkDauerModulwechsel.Enabled = False
@@ -452,6 +467,15 @@ Public Class frmOptionsMain
 
         BeginInvoke(New MethodInvoker(Sub()
                                           CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWMAIN_PATH & "ModulTransitionListe")
+
+                                          If clbTransitionsModule.CheckedItems.Count <= 1 Then
+                                              cmbTransitionsReihenfolge.Enabled = False
+                                              lblNcmbAbspielmodusTransitionsModule.Enabled = False
+                                          Else
+                                              cmbTransitionsReihenfolge.Enabled = True
+                                              lblNcmbAbspielmodusTransitionsModule.Enabled = True
+                                          End If
+
                                       End Sub))
 
     End Sub

@@ -66,6 +66,7 @@ Public Class frmModulMain
 
         'picBildAnzeige initialisieren
         picBildAnzeige.Dock = DockStyle.Fill
+        SetDoubleBuffered(picBildAnzeige, True)
         picBildAnzeige.SizeMode = PictureBoxSizeMode.Zoom
         picBildAnzeige.BackColor = Color.Transparent
 
@@ -483,6 +484,10 @@ Public Class frmModulMain
     Private Sub frmModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
         'Aufräumen und Schluss
 
+        If transitionIstAktiv Then
+            aktiveTransition.StopTransition()
+        End If
+
         tmrDelay.Dispose()
         tmrDelay = Nothing
 
@@ -490,5 +495,13 @@ Public Class frmModulMain
         tmrModul = Nothing
 
     End Sub
+
+    Public Sub SetDoubleBuffered(control As Control, enable As Boolean)
+        'Die "versteckte" Eigenschaft DoubleBuffering für die Picture-Box aktivieren.
+
+        Dim doubleBufferProperty = GetType(Control).GetProperty("DoubleBuffered", Reflection.BindingFlags.Instance Or Reflection.BindingFlags.NonPublic)
+        doubleBufferProperty.SetValue(control, enable, Nothing)
+    End Sub
+
 
 End Class

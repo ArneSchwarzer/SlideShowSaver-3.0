@@ -41,7 +41,10 @@ Partial Class ucOptionsTransition
         Me.tbtSW = New MyControlsLibrary.ToggleButton()
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
+        Me.nudFPS = New System.Windows.Forms.NumericUpDown()
+        Me.lblNnudFPS = New System.Windows.Forms.Label()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.nudFPS, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblShadername
@@ -103,7 +106,7 @@ Partial Class ucOptionsTransition
         'lblNModus
         '
         Me.lblNModus.AutoSize = True
-        Me.lblNModus.Location = New System.Drawing.Point(41, 724)
+        Me.lblNModus.Location = New System.Drawing.Point(41, 785)
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 33
@@ -112,7 +115,7 @@ Partial Class ucOptionsTransition
         'rbZufall
         '
         Me.rbZufall.AutoSize = True
-        Me.rbZufall.Location = New System.Drawing.Point(332, 826)
+        Me.rbZufall.Location = New System.Drawing.Point(332, 887)
         Me.rbZufall.Name = "rbZufall"
         Me.rbZufall.Size = New System.Drawing.Size(146, 45)
         Me.rbZufall.TabIndex = 32
@@ -123,7 +126,7 @@ Partial Class ucOptionsTransition
         'rbWischen
         '
         Me.rbWischen.AutoSize = True
-        Me.rbWischen.Location = New System.Drawing.Point(332, 775)
+        Me.rbWischen.Location = New System.Drawing.Point(332, 836)
         Me.rbWischen.Name = "rbWischen"
         Me.rbWischen.Size = New System.Drawing.Size(161, 45)
         Me.rbWischen.TabIndex = 31
@@ -134,7 +137,7 @@ Partial Class ucOptionsTransition
         'rbSchieben
         '
         Me.rbSchieben.AutoSize = True
-        Me.rbSchieben.Location = New System.Drawing.Point(332, 724)
+        Me.rbSchieben.Location = New System.Drawing.Point(332, 785)
         Me.rbSchieben.Name = "rbSchieben"
         Me.rbSchieben.Size = New System.Drawing.Size(170, 45)
         Me.rbSchieben.TabIndex = 30
@@ -266,10 +269,31 @@ Partial Class ucOptionsTransition
         Me.tbtSO.UncheckedBackColor = System.Drawing.SystemColors.Control
         Me.tbtSO.UseVisualStyleBackColor = False
         '
+        'nudFPS
+        '
+        Me.nudFPS.Location = New System.Drawing.Point(332, 716)
+        Me.nudFPS.Maximum = New Decimal(New Integer() {120, 0, 0, 0})
+        Me.nudFPS.Minimum = New Decimal(New Integer() {5, 0, 0, 0})
+        Me.nudFPS.Name = "nudFPS"
+        Me.nudFPS.Size = New System.Drawing.Size(120, 47)
+        Me.nudFPS.TabIndex = 43
+        Me.nudFPS.Value = New Decimal(New Integer() {25, 0, 0, 0})
+        '
+        'lblNnudFPS
+        '
+        Me.lblNnudFPS.AutoSize = True
+        Me.lblNnudFPS.Location = New System.Drawing.Point(48, 716)
+        Me.lblNnudFPS.Name = "lblNnudFPS"
+        Me.lblNnudFPS.Size = New System.Drawing.Size(66, 41)
+        Me.lblNnudFPS.TabIndex = 44
+        Me.lblNnudFPS.Text = "FPS"
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.lblNnudFPS)
+        Me.Controls.Add(Me.nudFPS)
         Me.Controls.Add(Me.tbtSO)
         Me.Controls.Add(Me.tbtS)
         Me.Controls.Add(Me.tbtSW)
@@ -294,6 +318,7 @@ Partial Class ucOptionsTransition
         Me.Name = "ucOptionsTransition"
         Me.Size = New System.Drawing.Size(890, 1020)
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.nudFPS, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -318,4 +343,6 @@ Partial Class ucOptionsTransition
     Friend WithEvents tbtSW As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtS As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtSO As MyControlsLibrary.ToggleButton
+    Friend WithEvents nudFPS As Windows.Forms.NumericUpDown
+    Friend WithEvents lblNnudFPS As Windows.Forms.Label
 End Class

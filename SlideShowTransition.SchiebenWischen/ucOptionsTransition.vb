@@ -17,6 +17,15 @@ Public Class ucOptionsTransition
         'Steuerelemente initialisieren
 
         'Richtungsbuttons
+        tbtN.Checked = False
+        tbtNO.Checked = False
+        tbtO.Checked = False
+        tbtSO.Checked = False
+        tbtS.Checked = False
+        tbtSW.Checked = False
+        tbtW.Checked = False
+        tbtNW.Checked = False
+
         For Each richtung In aktuelleSettings.richtungen
 
             Select Case richtung
@@ -40,9 +49,19 @@ Public Class ucOptionsTransition
 
         Next
 
+        'Label "Keine Richtung Ausgewählt"
+        If aktuelleSettings.richtungen.Count = 0 Then
+            lblKeineRichtungInfo.Visible = True
+        Else
+            lblKeineRichtungInfo.Visible = False
+        End If
+
         'Geschwindigkeit
         trkGeschwindigkeit.Value = aktuelleSettings.geschwindigkeit
         lblGeschwindigkeit.Text = (11 - trkGeschwindigkeit.Value).ToString & " s"
+
+        'FPS
+        nudFPS.Value = aktuelleSettings.FPS
 
         'Modus
         Select Case aktuelleSettings.modus
@@ -56,67 +75,67 @@ Public Class ucOptionsTransition
 
     End Sub
 
-    Private Sub tbtNW_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtNW_CheckChanged(sender As Object, e As EventArgs) Handles tbtNW.CheckChanged
         'Button Nord-West
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs) Handles tbtN.CheckChanged
         'Button Nord
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs) Handles tbtNO.CheckChanged
         'Button Nord-Ost
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs) Handles tbtO.CheckChanged
         'Button Ost
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs) Handles tbtSO.CheckChanged
         'Button Süd-Ost
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs) Handles tbtS.CheckChanged
         'Button Süd
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs) Handles tbtSW.CheckChanged
         'Button Süd-West
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs)
+    Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs) Handles tbtW.CheckChanged
         'Button West
 
         'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", RichtungsStringBauen())
+        RichtungsStringBauen()
 
     End Sub
 
@@ -160,10 +179,11 @@ Public Class ucOptionsTransition
 
     End Sub
 
-    Private Function RichtungsStringBauen() As String
-        'Setzt den Richtungsstring zusammen und setzt auch gleich das lblRichtungen entsprechend.
+    Private Sub RichtungsStringBauen()
+        'Setzt den Richtungsstring zusammen, speichert ihn in die Registry und setzt auch gleich das
+        'lblRichtungen entsprechend.
 
-        Dim richtungsString As String = Nothing
+        Dim richtungsString As String = ""
         Dim richtungen As New List(Of String)
 
         If tbtN.Checked Then richtungen.Add("N")
@@ -177,21 +197,30 @@ Public Class ucOptionsTransition
 
         richtungsString = String.Join(";", richtungen)
 
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", richtungsString)
+
         'Label ein- oder ausschalten
-        If richtungsString Is Nothing Then
+        If richtungen.Count = 0 Then
             lblKeineRichtungInfo.Visible = True
         Else
             lblKeineRichtungInfo.Visible = False
         End If
 
-        Return richtungsString
-
-    End Function
+    End Sub
 
     Private Sub CheckYourMail()
         'Liest die aktuellen Settings aus der SetttingsInbox
 
         aktuelleSettings = GetSettings(Of SlideShowTransitionSettings_SuW)(nameTransition)
+
+    End Sub
+
+    Private Sub nudFPS_ValueChanged(sender As Object, e As EventArgs) Handles nudFPS.ValueChanged
+        'Behandelt den NumericUpAndDown FPS
+
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "FPS", nudFPS.Value.ToString)
 
     End Sub
 End Class
