@@ -66,7 +66,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\o
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.Resources.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.frmPauseModusOverlay.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucOptionsModul.resources
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\Modul_SlideShowSaver_3._0.ucUnderConstruction.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.GenerateResource.cache
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideShowModul.SlideShowSaver_3_0.vbproj.CoreCompileInputs.cache
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\obj\Debug\SlideSho.A12CC809.Up2Date

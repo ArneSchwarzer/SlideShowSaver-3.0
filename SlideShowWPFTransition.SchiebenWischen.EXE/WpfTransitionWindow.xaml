@@ -1,0 +1,19 @@
+﻿<Window x:Class="SlideShowWPFTransition.SchiebenWischen.WpfTransitionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WPF Transition Window"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="True">
+    <Canvas x:Name="canvasRoot" Background="Black">
+        <Image x:Name="imgOld"
+               Width="{Binding ActualWidth, ElementName=canvasRoot}"
+               Height="{Binding ActualHeight, ElementName=canvasRoot}" />
+        <Image x:Name="imgNew"
+               Width="{Binding ActualWidth, ElementName=canvasRoot}"
+               Height="{Binding ActualHeight, ElementName=canvasRoot}" />
+    </Canvas>
+</Window>

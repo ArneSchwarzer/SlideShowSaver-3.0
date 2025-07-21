@@ -384,8 +384,6 @@ Public Class TransitionMain
         renderTarget.DrawImage(bufferBitmap, 0, 0)
     End Sub
 
-
-
     Private Function IstZielErreicht(p1 As Point, p2 As Point) As Boolean
         If bewegungNewImage.directionX <> 0 Then
             If (p2.X - p1.X) * bewegungNewImage.directionX >= 0 Then Return True

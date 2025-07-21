@@ -27,7 +27,7 @@ Public Class TransitionListLoader
                             .TransitionVersion = dummy.TransitionVersion
                         }
                         transitionInfos.Add(info)
-                        LogHandling.LogDebug("SlideShowLoader - TransitionlistLoader.LadeTransitionInfoListe: Transition " & info.TransitionName & " erfolgreich geladen")
+                        'LogHandling.LogDebug("SlideShowLoader - TransitionlistLoader.LadeTransitionInfoListe: Transition " & info.TransitionName & " erfolgreich geladen")
                         dummy = Nothing ' Dummy-Instanz verwerfen
                         Exit For
                     End If

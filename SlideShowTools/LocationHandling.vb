@@ -4,17 +4,23 @@
 
 Imports System.IO
 Imports System.Xml.Linq
+Imports SlideShowLogging.LogHandling
 
 Public Class LocationHandling
     Private Const xmlPfad As String = "Orte\GeoNames_StadtListe_20000.xml"
     Private xmlDaten As XDocument
 
     Public Sub New()
-        If IO.File.Exists(xmlPfad) Then
-            xmlDaten = XDocument.Load(xmlPfad)
-        Else
-            Throw New FileNotFoundException("Die Ortsdatenbank konnte nicht geladen werden: " & xmlPfad)
-        End If
+        Try
+            If IO.File.Exists(xmlPfad) Then
+                xmlDaten = XDocument.Load(xmlPfad)
+            Else
+                LogError("SlideShowTools - LocationHandling.Sub New(): Fehler beim Einlesen der GeoNames_StadtListe_20000.xml")
+            End If
+        Catch ex As Exception
+            LogError("SlideShowTools - LocationHandling.Sub New(): Fehler beim Einlesen der GeoNames_StadtListe_20000.xml" & ex.ToString)
+        End Try
+
     End Sub
 
     Public Function CreateLocationString(tags As List(Of String)) As List(Of String)
@@ -43,7 +49,10 @@ Public Class LocationHandling
                            Select ort).FirstOrDefault()
             If treffer IsNot Nothing Then
                 Return $"{treffer.<Latitude>.Value}, {treffer.<Longitude>.Value}"
+            Else
+                ' LogDebug("SlideShowTools - LocationHandling.DetermineGPSLocation(): Tag '" & tag & "' konnte nicht in der Ortsdatenbank gefunden werden")
             End If
+
         Next
         Return ""
     End Function

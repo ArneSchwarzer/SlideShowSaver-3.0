@@ -240,6 +240,7 @@ Public Class frmModulMain
         'Startet nach Ablauf der Bildanzeigedauer die nächste Transition (oder wechselt das Bild selber)
 
         Dim picBoxGFX As Graphics
+        Dim picBoxSize As Size = picBildAnzeige.ClientSize
 
         If transitionIstAktiv Then Exit Sub
         If warteAufDelay Then Exit Sub
@@ -295,7 +296,8 @@ Public Class frmModulMain
 
             transitionIstAktiv = True
             stoppuhr = Stopwatch.StartNew()
-            aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, picBoxGFX)
+
+            aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, picBoxGFX, picBoxSize)
 
             'Timer beenden 
             tmrModul.Stop()

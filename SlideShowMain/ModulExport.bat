@@ -37,9 +37,10 @@ echo.
 :: === Transitionen ===
 :: Quellpfade
 set "SOURCE1=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\SlideShowTransition.Cut.dll"
-set "SOURCE2=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowTransition.SchiebenWischen.dll"
-set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\SlideShowTransition.Cut.pdb"
-set "SOURCE4=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.SchiebenWischen\bin\Debug\SlideShowTransition.SchiebenWischen.pdb"
+set "SOURCE2=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\SlideShowTransition.Cut.pdb"
+set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowWPFTransition.SchiebenWischen.dll"
+set "SOURCE4=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowWPFTransition.SchiebenWischen.pdb"
+
 :: Zielverzeichnis
 set "TARGET=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Transitions"
 
@@ -54,8 +55,8 @@ echo Kopiere Transitionen und benenne um...
 echo.
 
 copy /Y "%SOURCE1%" "%TARGET%\Direkter Uebergang.ssst"
-copy /Y "%SOURCE2%" "%TARGET%\Schieben und Wischen.ssst"
-copy /Y "%SOURCE3%" "%TARGET%\Direkter Uebergang.pdb"
+copy /Y "%SOURCE2%" "%TARGET%\Direkter Uebergang.pdb"
+copy /Y "%SOURCE3%" "%TARGET%\Schieben und Wischen.ssst"
 copy /Y "%SOURCE4%" "%TARGET%\Schieben und Wischen.pdb"
 
 echo Transitionen kopiert.
