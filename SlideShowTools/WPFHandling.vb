@@ -9,7 +9,7 @@ Imports System.IO
 
 Public Class WPFHandling
 
-    Public Shared Event FrameFertig(bitmap As Bitmap)
+    Public Shared Event FrameIstFertig(bitmap As RenderTargetBitmap)
 
     Private Shared drawAction As Action(Of DrawingContext, Windows.Size)
     Private Shared frameTimer As DispatcherTimer
@@ -57,9 +57,9 @@ Public Class WPFHandling
         rtb.Render(drawingVisual)
 
         ' Umwandeln in System.Drawing.Bitmap
-        Dim bitmap As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
+        'Dim bitmap As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
 
-        RaiseEvent FrameFertig(bitmap)
+        RaiseEvent FrameIstFertig(rtb)
     End Sub
 
     Private Shared Function ConvertRenderTargetBitmapToBitmap(rtb As RenderTargetBitmap) As Bitmap

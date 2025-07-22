@@ -8,7 +8,7 @@
         ResizeMode="NoResize"
         AllowsTransparency="False"
         WindowStartupLocation="Manual"
-        Topmost="True"
+        Topmost="False"
         KeyDown="Window_KeyDown"
         MouseDown="Window_MouseDown">
    

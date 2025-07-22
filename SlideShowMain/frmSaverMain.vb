@@ -186,7 +186,7 @@ Public Class frmSaverMain
 
         Else ' Alle anderen Tasten - Den Saver beenden
 
-            closeSlideShowSaver()
+            '  closeSlideShowSaver()
 
         End If
     End Sub
@@ -399,24 +399,24 @@ Public Class frmSaverMain
 
     Private Sub ZeigeEinmaligeeinmaligeTransitionName(startBild As Image, zielBild As Image, g As Graphics, transition As String)
 
-        ' Transition initialisieren
-        einmaligeTransition = TransitionByNameLoader.LadeTransitionNachName(transition)
-        AddHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
+        '' Transition initialisieren
+        'einmaligeTransition = TransitionByNameLoader.LadeTransitionNachName(transition)
+        'AddHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
 
-        ' Starten
-        einmaligeTransition.RunTransition(startBild, PictureBoxSizeMode.Zoom, zielBild,
-         PictureBoxSizeMode.CenterImage, g,
-        picMain.ClientSize, 3000)
+        '' Starten
+        'einmaligeTransition.RunTransition(startBild, PictureBoxSizeMode.Zoom, zielBild,
+        ' PictureBoxSizeMode.CenterImage, g,
+        'picMain.ClientSize, 3000)
 
-        ' Auf Beendigung warten (max. 5 Sekunden als Sicherheit)
-        transitionBeendet.Wait(5000)
+        '' Auf Beendigung warten (max. 5 Sekunden als Sicherheit)
+        'transitionBeendet.Wait(5000)
 
-        ' Aufräumen
-        RemoveHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
-        einmaligeTransition = Nothing
-        transitionBeendet.Reset()
-        lblMCP.Visible = True
-        lblNameFramework.Visible = True
+        '' Aufräumen
+        'RemoveHandler einmaligeTransition.TransitionIsRunning, AddressOf TransitionEinmalBeendet
+        'einmaligeTransition = Nothing
+        'transitionBeendet.Reset()
+        'lblMCP.Visible = True
+        'lblNameFramework.Visible = True
 
     End Sub
 

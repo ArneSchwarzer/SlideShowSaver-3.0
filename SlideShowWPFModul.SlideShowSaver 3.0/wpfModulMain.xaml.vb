@@ -12,6 +12,8 @@ Imports SlideShowTools.WPFHandling
 Imports System.Runtime.InteropServices
 Imports System.Windows.Interop
 Imports SlideShowInterfaces.InfoHandling
+Imports SlideShowLogging
+Imports System.Drawing
 
 Partial Public Class wpfModulMain
 
@@ -23,7 +25,9 @@ Partial Public Class wpfModulMain
 
     'Bildanzeige & -auswahl
     Private aktuellesBild As BitmapImage
+    Private aktuellesImage As Image
     Private neuesBild As BitmapImage
+    Private neuesImage As Image
     Private bildPfad As String
     Private initialePfade As List(Of String)
     Private aktuellesVerzeichnis As New List(Of String)
@@ -38,6 +42,9 @@ Partial Public Class wpfModulMain
     Public transitionIstAktiv As Boolean = False
     Private listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Private listOfEnabledTransitions As List(Of String)
+    Private warteAufDelay As Boolean
+    Private stoppuhr As New Stopwatch
+    Private sizeWinForm As System.Drawing.Size
 
     'Shader
     Private aktiverShader As ISlideShowShader = Nothing
@@ -47,6 +54,7 @@ Partial Public Class wpfModulMain
 
     'Timer
     Public WithEvents tmrModul As New DispatcherTimer()
+    Private WithEvents tmrDelay As New DispatcherTimer()
 
     'Sonstiges
     Private rnd As New Random()
@@ -56,19 +64,20 @@ Partial Public Class wpfModulMain
 #End Region
 
     'DLL Imports
-    <DllImport("user32.dll")>
-    Private Shared Function SetForegroundWindow(hWnd As IntPtr) As Boolean
-    End Function
+    '<DllImport("user32.dll")>
+    'Private Shared Function SetForegroundWindow(hWnd As IntPtr) As Boolean
+    'End Function
 
-    <DllImport("user32.dll")>
-    Private Shared Function ShowWindow(hWnd As IntPtr, nCmdShow As Integer) As Boolean
-    End Function
+    '<DllImport("user32.dll")>
+    'Private Shared Function ShowWindow(hWnd As IntPtr, nCmdShow As Integer) As Boolean
+    'End Function
 
     Public Sub New()
         'Erzeugt und initialisiert das Fenster und seine Komponenten
 
         'Eventhandler
-        AddHandler tmrModul.Tick, AddressOf tmrModul_Tick
+        AddHandler tmrModul.Tick, AddressOf TmrModul_Tick
+        AddHandler tmrDelay.Tick, AddressOf tmrDelay_Tick
         AddHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
 
         'Initialisierung der Komponenten
@@ -83,7 +92,7 @@ Partial Public Class wpfModulMain
         'Weitere Initialisierungen der Form
 
         'Versuch, das Fenster in den Vordergrund zu bringen - Ebene 1
-        Me.Topmost = True
+        Me.Topmost = False
         Me.ShowActivated = True
         Me.Show()
         Me.Activate()
@@ -94,7 +103,7 @@ Partial Public Class wpfModulMain
         AddHandler bringToFrontTimer.Tick,
                                             Sub()
                                                 bringToFrontTimer.Stop()
-                                                Me.Topmost = True
+                                                Me.Topmost = False
                                                 Me.Focus()
                                                 Me.Activate()
                                             End Sub
@@ -108,28 +117,82 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub TmrModul_Tick(sender As Object, e As EventArgs)
-        'If Not transitionAktiv Then
-        '    StarteTransition()
-        'End If
+        'Nac Beendigung der Anzeige des Bildes gemäß Anzeigedauer startet der Timer die nächste Transition
+        'oder, falls keine ausgewählt ist, initiert den Bildwechsel.
 
-        'Bis zur Implementierung von Transitionen übernimmt TmrModul_Tick den Bildwechsel
-        Bildwechsel()
-        transitionIstAktiv = False
 
-    End Sub
+        If transitionIstAktiv Then Exit Sub
+        If warteAufDelay Then Exit Sub
 
-    Private Sub StarteTransition()
-        'transitionAktiv = True
+        'Falls der Benutzer in der Zwischenzeit an den Optionen 'rumgepfuscht hat
+        LegitimeTransitionsListeErstellen()
 
-        '' Beispiel: Übergang simulieren (hier noch ohne echte WPF Transition)
-        'imgAnzeige.Source = neuesBild
-        'aktuellesBild = neuesBild
+        If listOfEnabledTransitions.Count > 0 Then
 
-        '' Neues Bild vorbereiten
-        'bildPfad = BildauswahlMain.GetPictures(1)(0)
-        'neuesBild = LadeBild(bildPfad)
+#Region "Transition wechseln"
+            'Transition aussuchen
+            Select Case aktuelleSettings.TransitionsReihenfolge
+                Case "In Reihenfolge"
+                    WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition", aktiveTransition.TransitionName)
+                    neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, aktiveTransition.TransitionName)
+                Case "Zufällig"
+                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                Case "Zufällig bei Start"
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    End If
+                Case "In Reihenfolge bei Start"
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+                        If neueTransition = Nothing Then neueTransition = ""
+                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
+                    End If
+                Case Else
+                    ' Falls der Benutzer in der Zwischenzeit die Settings geändert hat (entspricht zufällig bei Start)
+                    If aktiveTransition Is Nothing Then
+                        neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                    End If
+            End Select
 
-        'transitionAktiv = False
+            'Neue Transition laden und Handler behandeln
+            If aktiveTransition IsNot Nothing Then
+                'Alte Eventhandler löschen
+                RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+                RemoveHandler aktiveTransition.FrameIstFertig, AddressOf Transition_FrameIstFertig
+            End If
+
+            aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+
+            If aktiveTransition IsNot Nothing Then
+                'Handler hinzufügen
+                AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+                AddHandler aktiveTransition.FrameIstFertig, AddressOf Transition_FrameIstFertig
+            End If
+#End Region
+
+            'Transition starten, Status & Stoppuhr setzen
+
+            transitionIstAktiv = True
+            stoppuhr = Stopwatch.StartNew()
+
+            sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
+
+            aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
+
+            'Timer beenden 
+            tmrModul.Stop()
+
+        Else
+            'Dann muss der Timer halt selber ran...
+
+            Bildwechsel()
+            transitionIstAktiv = False
+            warteAufDelay = False
+
+        End If
+
     End Sub
 
     Private Function LadeBild(pfad As String) As BitmapImage
@@ -158,44 +221,44 @@ Partial Public Class wpfModulMain
     Private Sub LadeErstesBild()
         'Wählt die ersten Bilder zur Anzeige aus.
 
-        Dim tempImage As System.Drawing.Image
         Dim helper As New WindowInteropHelper(Me)
         Dim hwnd As IntPtr = helper.Handle
 
 #Region "Transition aussuchen"
         'Transition aussuchen
-        'If listOfEnabledTransitions.Count > 0 Then
-        '    Select Case aktuelleSettings.TransitionsReihenfolge
-        '        Case "In Reihenfolge"
-        '            neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
-        '            If neueTransition = Nothing Then neueTransition = ""
-        '            neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
-        '        Case "Zufällig"
-        '            neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-        '        Case "Zufällig bei Start"
-        '            neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-        '        Case "In Reihenfolge bei Start"
-        '            neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
-        '            If neueTransition = Nothing Then neueTransition = ""
-        '            neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
-        '        Case Else
-        '            'Entspricht "Zufällig bei Start"
-        '            neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-        '    End Select
+        If listOfEnabledTransitions.Count > 0 Then
+            Select Case aktuelleSettings.TransitionsReihenfolge
+                Case "In Reihenfolge"
+                    neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+                    If neueTransition = Nothing Then neueTransition = ""
+                    neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
+                Case "Zufällig"
+                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                Case "Zufällig bei Start"
+                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+                Case "In Reihenfolge bei Start"
+                    neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+                    If neueTransition = Nothing Then neueTransition = ""
+                    neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
+                Case Else
+                    'Entspricht "Zufällig bei Start"
+                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+            End Select
 
-        '    'If aktiveTransition IsNot Nothing Then
-        '    '    'Sinnlos bei Initialisierung, aber gehört sich ja so. Und vielleicht gibt es ja doch noch 
-        '    '    'Leichen im Speicher...
-        '    '    RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-        '    'End If
+            If aktiveTransition IsNot Nothing Then
+                'Sinnlos bei Initialisierung, aber gehört sich ja so. Und vielleicht gibt es ja doch noch 
+                'Leichen im Speicher...
+                RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            End If
 
-        '    aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+            aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
 
-        '    'If aktiveTransition IsNot Nothing Then
-        '    '    'Handler hinzufügen
-        '    '    AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-        '    'End If
-        'End If
+            If aktiveTransition IsNot Nothing Then
+                'Handler hinzufügen
+                AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            End If
+
+        End If
 #End Region
 
 #Region "Shader aussuchen"
@@ -236,26 +299,34 @@ Partial Public Class wpfModulMain
 
             'aktuellesBild setzen
             bildPfad = aktuellesVerzeichnis(0)
-            tempImage = GetPictureByName(bildPfad)
+            aktuellesImage = GetPictureByName(bildPfad)
 
-            If aktiverShader IsNot Nothing Then
-                tempImage = aktiverShader.RunShader(tempImage, bildPfad, GetNativeScreenResolution())
-            End If
+            Try
+                If aktiverShader IsNot Nothing Then
+                    aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfad, GetNativeScreenResolution())
+                End If
+            Catch ex As Exception
+                LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.LadeErstesBild(): Problem beim Starten des Shaders: " & ex.ToString)
+            End Try
 
-            aktuellesBild = ConvertImageToBitmapImage(tempImage)
+            aktuellesBild = ConvertImageToBitmapImage(aktuellesImage)
 
             listeDerZuletztAngezeigtenBilder.Clear()
             listeDerZuletztAngezeigtenBilder.Add(bildPfad)
 
             'neuesBild setzen
             bildPfad = aktuellesVerzeichnis(1)
-            tempImage = GetPictureByName(bildPfad)
+            neuesImage = GetPictureByName(bildPfad)
 
-            If aktiverShader IsNot Nothing Then
-                tempImage = aktiverShader.RunShader(tempImage, bildPfad, GetNativeScreenResolution())
-            End If
+            Try
+                If aktiverShader IsNot Nothing Then
+                    neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
+                End If
+            Catch ex As Exception
+                LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.LadeErstesBild(): Problem den Shader zu starten: " & ex.Message)
+            End Try
 
-            neuesBild = ConvertImageToBitmapImage(tempImage)
+            neuesBild = ConvertImageToBitmapImage(neuesImage)
 
             'listeDerZuletztAngezeigtenBilder wird in der Methode Bildwechsel gefüllt.
 
@@ -266,26 +337,26 @@ Partial Public Class wpfModulMain
 
             'aktuellesBild setzen
             bildPfad = initialePfade(0)
-            tempImage = GetPictureByName(bildPfad)
+            aktuellesImage = GetPictureByName(bildPfad)
 
             If aktiverShader IsNot Nothing Then
-                tempImage = aktiverShader.RunShader(tempImage, bildPfad, Screen.PrimaryScreen.Bounds.Size)
+                aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfad, Screen.PrimaryScreen.Bounds.Size)
             End If
 
-            aktuellesBild = ConvertImageToBitmapImage(tempImage)
+            aktuellesBild = ConvertImageToBitmapImage(aktuellesImage)
 
             listeDerZuletztAngezeigtenBilder.Clear()
             listeDerZuletztAngezeigtenBilder.Add(bildPfad)
 
             'neuesBild setzen
             bildPfad = initialePfade(1)
-            tempImage = GetPictureByName(bildPfad)
+            neuesImage = GetPictureByName(bildPfad)
 
             If aktiverShader IsNot Nothing Then
-                tempImage = aktiverShader.RunShader(tempImage, bildPfad, GetNativeScreenResolution())
+                neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
             End If
 
-            neuesBild = ConvertImageToBitmapImage(tempImage)
+            neuesBild = ConvertImageToBitmapImage(neuesImage)
 
             'listeDerZuletztAngezeigtenBilder für neuesBild wird in der Methode Bildwechsel gefüllt.
 
@@ -297,8 +368,8 @@ Partial Public Class wpfModulMain
 
         'Versuch, das Fenster in den Vordergrund zu bringen - Ebene 3
         'Direkt in die Windows.InteropServices eingreifen - unglaublich!!!
-        ShowWindow(hwnd, SW_SHOWMAXIMIZED)
-        SetForegroundWindow(hwnd)
+        'ShowWindow(hwnd, SW_SHOWMAXIMIZED)
+        'SetForegroundWindow(hwnd)
 
         'Bildinfo initialisieren - mit Werten von aktuellesBild
 
@@ -331,8 +402,7 @@ Partial Public Class wpfModulMain
     Private Sub Bildwechsel()
         'Eigentliche Anzeige des Bildes, Verwaltungsaufgaben und Auswahl des nächsten Bildes
 
-        Dim tempImage As System.Drawing.Image
-
+        aktuellesImage = neuesImage
         aktuellesBild = neuesBild
         imgAnzeige.Source = aktuellesBild
 
@@ -367,7 +437,7 @@ Partial Public Class wpfModulMain
             bildPfad = GetPictures(1).Item(0)
         End If
 
-        tempImage = GetPictureByName(bildPfad)
+        neuesImage = GetPictureByName(bildPfad)
 
         'Falls der Benutzer in der Zwischenzeit an den Optionen 'rumgepfuscht hat
         LegitimeShaderListeErstellen()
@@ -378,32 +448,41 @@ Partial Public Class wpfModulMain
                 Case "In Reihenfolge"
                     WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzterShader", aktiverShader.ShaderName)
                     neuerShader = GetNextAlphabeticItemName(listOfEnabledShaders, aktiverShader.ShaderName)
-                    aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
                 Case "Zufällig"
                     neuerShader = listOfEnabledShaders(rnd.Next(listOfEnabledShaders.Count))
-                    aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
                 Case "Zufällig bei Start"
-                'Keine Aktion notwendig.
+                    neuerShader = listOfEnabledShaders(rnd.Next(listOfEnabledShaders.Count))
                 Case "In Reihenfolge bei Start"
-                    'Keine Aktion notwendig.
+                    neuerShader = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzterShader")
+                    If neuerShader = Nothing Then neuerShader = ""
+                    neuerShader = GetNextAlphabeticItemName(listOfEnabledTransitions, neuerShader)
                 Case Else
-                    'keine Aktion notwendig, entspricht "Zufällig bei Start"
+                    'Entspricht "Zufällig bei Start"
+                    neuerShader = listOfEnabledShaders(rnd.Next(listOfEnabledShaders.Count))
             End Select
 
-            tempImage = aktiverShader.RunShader(tempImage, bildPfad, GetNativeScreenResolution())
+            If Not String.IsNullOrEmpty(neuerShader) Then
+                aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
+                neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
+            End If
+
         End If
 
-        neuesBild = ConvertImageToBitmapImage(tempImage)
+        neuesBild = ConvertImageToBitmapImage(neuesImage)
 
     End Sub
 
     Private Sub wpfModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
         'Aufräumen
+        If transitionIstAktiv Then
+            aktiveTransition.StopTransition()
+        End If
 
         RemoveHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
         RemoveHandler tmrModul.Tick, AddressOf TmrModul_Tick
 
         tmrModul = Nothing
+        tmrDelay = Nothing
 
     End Sub
 
@@ -457,6 +536,53 @@ Partial Public Class wpfModulMain
 
         listOfEnabledTransitions = tempList
 
+    End Sub
+
+    Private Sub Transition_TransitionIsRunning(state As Boolean)
+        'Wechselt das aktuelle Bild nach erfolgreichem Abschluss der Transition und startet tmrModul 
+
+        'Sofort raus, falls die Transition noch läuft
+        If state Then Exit Sub
+
+        'Stoppuhr anhalten
+        stoppuhr.Stop()
+        tmrModul.Stop()
+
+        'Für Transitionen, die so schnell fertig werden, dass es zu einer Racing-Condition mit tmrModul kommt.
+        If stoppuhr.ElapsedMilliseconds < 1000 Then
+            warteAufDelay = True
+            tmrDelay.Interval = TimeSpan.FromSeconds(1)
+            tmrDelay.Start()
+        Else
+            'Hier beginnt die Bildanzeige
+            Bildwechsel()
+
+            'Status setzen und tmrModul starten
+            transitionIstAktiv = False
+            warteAufDelay = False
+            tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
+            tmrModul.Start()
+        End If
+
+    End Sub
+
+    Private Sub tmrDelay_Tick(sender As Object, e As EventArgs) Handles tmrDelay.Tick
+        'Falls eine Transition so schnell ist, dass frmModulMain das nicht rechtzeitig mitbekommt.
+        tmrDelay.Stop()
+        warteAufDelay = False
+
+        'Hier beginnt die Bildanzeige
+        Bildwechsel()
+
+        'Status setzen und tmrModul starten
+        transitionIstAktiv = False
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
+        tmrModul.Start()
+
+    End Sub
+
+    Private Sub Transition_FrameIstFertig(rtb As RenderTargetBitmap)
+        imgAnzeige.Source = rtb
     End Sub
 
 End Class

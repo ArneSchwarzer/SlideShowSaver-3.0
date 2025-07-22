@@ -1,22 +1,18 @@
 ﻿Imports System.Drawing
-Imports System.Drawing.Drawing2D
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports System.Runtime.InteropServices
 Imports System.Windows
-Imports System.Windows.Controls
 Imports System.Windows.Forms
 Imports System.Windows.Media
-Imports System.Windows.Media.Animation
 Imports System.Windows.Media.Imaging
+Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
-Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.WPFHandling
-Imports SlideShowWPFTransition.SchiebenWischen.SlideShowWPFTransition.SchiebenWischen
 
 Namespace TransitionMain_SuW
 
@@ -32,7 +28,7 @@ Namespace TransitionMain_SuW
         Private aktuelleSettings As New SlideShowTransitionSettings_SuW
 
         'Fallback auf WPFTransitionWindow
-        'Public Shadows win As WpfTransitionWindow
+        'Public Shared win As WpfTransitionWindow
 
         'Timer und Zeitmanagement
         Private WithEvents tmrDuration As New Timer
@@ -41,8 +37,8 @@ Namespace TransitionMain_SuW
         Private Const FPS As Integer = 120
 
         'Transitions-Bilder
-        Private oldBmpGerahmt As Bitmap
-        Private newBmpGerahmt As Bitmap
+        Private oldBmpGerahmt As RenderTargetBitmap
+        Private newBmpGerahmt As RenderTargetBitmap
         Private oldPicBoxSizeMode As PictureBoxSizeMode
         Private newPicBoxSizeMode As PictureBoxSizeMode
         Private oldBmpSource As BitmapSource
@@ -56,14 +52,16 @@ Namespace TransitionMain_SuW
         Private sizeWPF As System.Windows.Size
 
         'Zielausgabe
-        Private renderTarget As Graphics
         Private targetRect As Rectangle
-        Private cltSize As System.Drawing.Size
+        Private sizeWinForms As System.Drawing.Size
+
+        'Rendering
+        Private Shared drawAction As Action(Of DrawingContext, Windows.Size)
+        Private Shared frameTimer As DispatcherTimer
+        Private Shared renderSize As Windows.Size
 
         'Sonstiges
         Private bmp As Bitmap
-        Private backBuffer As Bitmap = Nothing
-        Private backBufferGraphics As Graphics = Nothing
 
         Public Structure SlideShowTransitionSettings_SuW
             Public geschwindigkeit As Integer
@@ -95,30 +93,32 @@ Namespace TransitionMain_SuW
 
         'Events
         Event TransitionIsRunning(state As Boolean) Implements ISlideShowTransition.TransitionIsRunning
+        Event FrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowTransition.FrameIstFertig
 
         'Transition Ausführung
-        Public Sub RunTransition(oldImage As System.Drawing.Image, picBoxModeOld As PictureBoxSizeMode,
-                             newImage As System.Drawing.Image, picBoxModeNew As PictureBoxSizeMode,
-                             targetGraphics As Graphics,
-                             Optional clientSize As System.Drawing.Size = Nothing,
+        Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
+                             newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode,
+                             clientSize As System.Drawing.Size,
                              Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
 
-            AddHandler WPFHandling.FrameFertig, AddressOf FrameFertigHandler
+            Dim dx As Integer = 0, dy As Integer = 0
+            Dim richtungArray() As String = {"N", "NO", "O", "SO", "S", "SW", "W", "NW"}
+            Dim richtung As String
 
             RaiseEvent TransitionIsRunning(True)
 
+            'Überführen der Parameter in Klassenvariablen
             oldPicBoxSizeMode = picBoxModeOld
             newPicBoxSizeMode = picBoxModeNew
-            renderTarget = targetGraphics
-            cltSize = If(clientSize.IsEmpty, renderTarget.VisibleClipBounds.Size.ToSize(), clientSize)
-            sizeWPF = New System.Windows.Size(cltSize.Width, cltSize.Height)
-            targetRect = New Rectangle(0, 0, cltSize.Width, cltSize.Height)
+            sizeWinForms = clientSize
+            sizeWPF = New System.Windows.Size(sizeWinForms.Width, sizeWinForms.Height)
+            targetRect = New Rectangle(0, 0, sizeWinForms.Width, sizeWinForms.Height)
 
             ' Bilder vorbereiten
-            oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, oldPicBoxSizeMode, cltSize)
-            newBmpGerahmt = ErzeugeGerahmtesBild(newImage, newPicBoxSizeMode, cltSize)
-            oldBmpSource = ConvertBitmapToImageSource(oldBmpGerahmt)
-            newBmpSource = ConvertBitmapToImageSource(newBmpGerahmt)
+            oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, oldPicBoxSizeMode, sizeWinForms)
+            newBmpGerahmt = ErzeugeGerahmtesBild(newImage, newPicBoxSizeMode, sizeWinForms)
+            oldBmpSource = CType(oldBmpGerahmt, ImageSource)
+            newBmpSource = CType(newBmpGerahmt, ImageSource)
 
             ReadTransitionSettingsFromRegistryOrDefaults()
             StoreSettings(TransitionName, aktuelleSettings)
@@ -134,21 +134,22 @@ Namespace TransitionMain_SuW
             'win.StartTransition(oldBmpGerahmt, newBmpGerahmt)
 
             ' Richtungsauswahl
-            Dim richtung As String = If(aktuelleSettings.richtungen?.Count > 0,
-                                    aktuelleSettings.richtungen(New Random().Next(aktuelleSettings.richtungen.Count)),
-                                    "W")
+            If aktuelleSettings.richtungen?.Count > 0 Then
+                richtung = aktuelleSettings.richtungen(New Random().Next(aktuelleSettings.richtungen.Count))
+            Else
+                richtung = richtungArray(New Random().Next(8))
+            End If
 
             ' Koordinaten berechnen
-            Dim dx As Integer = 0, dy As Integer = 0
             Select Case richtung
-                Case "N" : dx = 0 : dy = -cltSize.Height
-                Case "S" : dx = 0 : dy = cltSize.Height
-                Case "W" : dx = -cltSize.Width : dy = 0
-                Case "O" : dx = cltSize.Width : dy = 0
-                Case "NW" : dx = -cltSize.Width : dy = -cltSize.Height
-                Case "NO" : dx = cltSize.Width : dy = -cltSize.Height
-                Case "SW" : dx = -cltSize.Width : dy = cltSize.Height
-                Case "SO" : dx = cltSize.Width : dy = cltSize.Height
+                Case "N" : dx = 0 : dy = -sizeWinForms.Height
+                Case "S" : dx = 0 : dy = sizeWinForms.Height
+                Case "W" : dx = -sizeWinForms.Width : dy = 0
+                Case "O" : dx = sizeWinForms.Width : dy = 0
+                Case "NW" : dx = -sizeWinForms.Width : dy = -sizeWinForms.Height
+                Case "NO" : dx = sizeWinForms.Width : dy = -sizeWinForms.Height
+                Case "SW" : dx = -sizeWinForms.Width : dy = sizeWinForms.Height
+                Case "SO" : dx = sizeWinForms.Width : dy = sizeWinForms.Height
             End Select
 
             ' Modus ggf. zufällig wählen
@@ -175,13 +176,11 @@ Namespace TransitionMain_SuW
                 tmrDuration.Start()
             End If
 
-            ' Animation starten (Delegat an WPFHandling)
+            ' Animation starten 
             dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
             startTime = DateTime.Now
 
-            WPFHandling.StartRenderLoop(AddressOf DrawTransitionFrame,
-                            New Windows.Size(sizeWPF.Width, sizeWPF.Height),
-                            1000 \ FPS)
+            StartRenderLoop(AddressOf DrawTransitionFrame, New Windows.Size(sizeWPF.Width, sizeWPF.Height))
 
         End Sub
 
@@ -239,19 +238,33 @@ Namespace TransitionMain_SuW
         End Function
 
         'Bildwandlung und -manipulation
-        Private Function ErzeugeGerahmtesBild(bild As System.Drawing.Image, sizeMode As PictureBoxSizeMode, zielgroesse As System.Drawing.Size) As Bitmap
+
+        Public Shared Function ErzeugeGerahmtesBild(bild As BitmapImage,
+                                             modus As PictureBoxSizeMode,
+                                             zielgröße As System.Drawing.Size) As RenderTargetBitmap
             'Erstellt ein Bitmap mit dem Bild gemäß SizeMode mit schwarzem Rahmen in der Zielgröße
 
-            bmp = New Bitmap(zielgroesse.Width, zielgroesse.Height)
+            Dim drawingVisual As New DrawingVisual()
 
-            Using g As Graphics = Graphics.FromImage(bmp)
-                g.Clear(System.Drawing.Color.Black)
-                Dim drawRect As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bild.Size, targetRect, sizeMode)
-                g.DrawImage(bild, drawRect)
+            Using dc As DrawingContext = drawingVisual.RenderOpen()
+                ' Bildgröße berechnen anhand SizeMode
+                Dim bildgröße As New System.Drawing.Size(bild.PixelWidth, bild.PixelHeight)
+                Dim quellRect As New Rectangle(New System.Drawing.Point(0, 0), zielgröße)
+                Dim zielRectangle As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bildgröße, quellRect, modus)
+                Dim zielRect As New Rect(0.0, 0.0, zielRectangle.Width, zielRectangle.Height)
+
+                ' Hintergrund zeichnen (optional)
+                dc.DrawRectangle(Media.Brushes.Black, Nothing, zielRect)
+
+                ' Bild zeichnen
+                dc.DrawImage(bild, zielRect)
             End Using
 
-            Return bmp
+            ' Rendern in RenderTargetBitmap
+            Dim bmp As New RenderTargetBitmap(CInt(zielgröße.Width), CInt(zielgröße.Height), 96, 96, PixelFormats.Pbgra32)
+            bmp.Render(drawingVisual)
 
+            Return bmp
         End Function
 
         Private Function ConvertBitmapToImageSource(bmp As Bitmap) As BitmapSource
@@ -268,27 +281,10 @@ Namespace TransitionMain_SuW
         End Function
 
         'Abbruch- und Endverwaltung
-        Sub endBildZeichnen()
-            'Zeichnet "neuBmpGerahmt" auf das renderTarget
+        Public Sub EndBildZeichnen()
+            'Gibt das Endbild aus
 
-            Dim drawRect As Rectangle
-            Dim targetRect As Rectangle
-
-            'Grafik vorbereiten
-            bmp = New Bitmap(cltSize.Width, cltSize.Height)
-            targetRect = New Rectangle(0, 0, cltSize.Width, cltSize.Height)
-            drawRect = GetDrawRectangle(newBmpGerahmt.Size, targetRect, newPicBoxSizeMode)
-
-            Try
-                renderTarget = Graphics.FromImage(bmp)
-                renderTarget.InterpolationMode = InterpolationMode.HighQualityBicubic
-                renderTarget.Clear(System.Drawing.Color.Black)
-
-                ' Endbild auf den Zeichenbereich malen...
-                renderTarget.DrawImage(newBmpGerahmt, drawRect)
-            Catch ex As Exception
-                LogError("Transition Schieben & Wischen - TransitionMain.endBildZeichnen(): Fehler beim Erstellen von renderTarget: " & ex.Message)
-            End Try
+            RaiseEvent FrameIstFertig(newBmpGerahmt)
 
         End Sub
 
@@ -297,37 +293,13 @@ Namespace TransitionMain_SuW
             LogDebug("Transition SuW - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
             'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
-            endBildZeichnen()
+            EndBildZeichnen()
 
             StopTransition()
 
         End Sub
 
         'Animation und Zeichnen
-        Private Sub FrameFertigHandler(bitmap As Bitmap)
-            If renderTarget Is Nothing Then Exit Sub
-
-            ' Initialisieren des Backbuffers bei Bedarf
-            If backBuffer Is Nothing OrElse backBuffer.Width <> bitmap.Width OrElse backBuffer.Height <> bitmap.Height Then
-                backBuffer?.Dispose()
-                backBufferGraphics?.Dispose()
-                backBuffer = New Bitmap(bitmap.Width, bitmap.Height)
-                backBufferGraphics = Graphics.FromImage(backBuffer)
-            End If
-
-            ' Hintergrund löschen
-            backBufferGraphics.Clear(System.Drawing.Color.Black) ' Oder passend zum Bildhintergrund
-
-            ' Frame zeichnen
-            backBufferGraphics.DrawImage(bitmap, 0, 0)
-
-            ' Endgültig auf den Bildschirm bringen (ohne Flackern)
-            SyncLock renderTarget
-                renderTarget.DrawImage(backBuffer, 0, 0)
-            End SyncLock
-        End Sub
-
-
         Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
             Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
             Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
@@ -340,8 +312,7 @@ Namespace TransitionMain_SuW
 
             ' Fertig?
             If progress >= 1.0 Then
-                WPFHandling.StopRenderLoop()
-                RemoveHandler WPFHandling.FrameFertig, AddressOf FrameFertigHandler
+                StopRenderLoop()
                 StopTransition()
             End If
 
@@ -354,8 +325,86 @@ Namespace TransitionMain_SuW
             dc.DrawImage(oldBmpSource, New Rect(oldX, oldY, sizeWPF.Width, sizeWPF.Height))
             dc.DrawImage(newBmpSource, New Rect(newX, newY, sizeWPF.Width, sizeWPF.Height))
 
+        End Sub
+
+        Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
+                                          zielGroesse As Windows.Size)
+
+            drawAction = drawActionInput
+            renderSize = zielGroesse
+
+            StopRenderLoop()
+
+            frameTimer = New DispatcherTimer()
+            AddHandler frameTimer.Tick, AddressOf OnFrameTick
+            frameTimer.Interval = TimeSpan.FromMilliseconds(1000 \ FPS)
+            frameTimer.Start()
+        End Sub
+
+        Public Sub StopRenderLoop()
+            If frameTimer IsNot Nothing Then
+                frameTimer.Stop()
+                RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
+                frameTimer = Nothing
+            End If
+        End Sub
+
+        Private Sub OnFrameTick(sender As Object, e As EventArgs)
+            If drawAction Is Nothing Then Exit Sub
+
+            ' Neuen Frame zeichnen
+            Dim drawingVisual As New DrawingVisual()
+            Using dc As DrawingContext = drawingVisual.RenderOpen()
+                dc.DrawRectangle(Media.Brushes.Black, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
+                drawAction.Invoke(dc, renderSize)
+            End Using
+
+            ' Rendern in Bitmap
+            Dim rtb As New RenderTargetBitmap(CInt(renderSize.Width),
+                                              CInt(renderSize.Height),
+                                              96, 96, PixelFormats.Pbgra32)
+            rtb.Render(drawingVisual)
+
+            ' Umwandeln in System.Drawing.Bitmap
+            'Dim bitmap As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
+
+            RaiseEvent FrameIstFertig(rtb)
 
         End Sub
+
+        Private Shared Function ConvertRenderTargetBitmapToBitmap(rtb As RenderTargetBitmap) As Bitmap
+            Dim width As Integer = rtb.PixelWidth
+            Dim height As Integer = rtb.PixelHeight
+            Dim stride As Integer = width * 4
+
+            Dim pixelData(stride * height - 1) As Byte
+            rtb.CopyPixels(pixelData, stride, 0)
+
+            Dim bmp As New Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb)
+            Dim bmpData As BitmapData = bmp.LockBits(New Rectangle(0, 0, width, height),
+                                                     ImageLockMode.WriteOnly,
+                                                     System.Drawing.Imaging.PixelFormat.Format32bppPArgb)
+            Marshal.Copy(pixelData, 0, bmpData.Scan0, pixelData.Length)
+            bmp.UnlockBits(bmpData)
+
+            Return bmp
+        End Function
+
+        Public Shared Function ConvertImageToBitmapImage(img As System.Drawing.Image) As BitmapImage
+            Using ms As New MemoryStream()
+                img.Save(ms, ImageFormat.Png)
+                ms.Seek(0, SeekOrigin.Begin)
+
+                Dim bmpImage As New BitmapImage()
+                bmpImage.BeginInit()
+                bmpImage.CacheOption = BitmapCacheOption.OnLoad
+                bmpImage.StreamSource = ms
+                bmpImage.EndInit()
+                bmpImage.Freeze() ' wichtig für Cross-Thread-Access
+
+                Return bmpImage
+            End Using
+        End Function
 
     End Class
 

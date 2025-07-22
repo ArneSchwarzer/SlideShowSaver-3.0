@@ -1,5 +1,6 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
+Imports System.Windows.Media.Imaging
 Imports SlideShowInterfaces.InfoHandling
 
 
@@ -80,9 +81,10 @@ Public Class InterfaceDeclarations
 
         'Events
         Event TransitionIsRunning(state As Boolean)
+        Event FrameIstFertig(bitmap As RenderTargetBitmap)
 
         'Ausführung
-        Sub RunTransition(oldImage As Image, picBoxModeOld As PictureBoxSizeMode, newImage As Image, picBoxModeNew As PictureBoxSizeMode, targetGraphics As Graphics, Optional clientSize As Size = Nothing, Optional durationMs As Integer = 0)
+        Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs As Integer = 0)
         Sub StopTransition()
 
         'Optionen/Dialoghandling
