@@ -16,6 +16,7 @@ Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.WPFHandling
+Imports SlideShowWPFTransition.SchiebenWischen.SlideShowWPFTransition.SchiebenWischen
 
 Namespace TransitionMain_SuW
 
@@ -30,11 +31,14 @@ Namespace TransitionMain_SuW
         Public Const nameTransition As String = "Schieben und Wischen"
         Private aktuelleSettings As New SlideShowTransitionSettings_SuW
 
+        'Fallback auf WPFTransitionWindow
+        'Public Shadows win As WpfTransitionWindow
+
         'Timer und Zeitmanagement
         Private WithEvents tmrDuration As New Timer
         Private startTime As DateTime
         Private dauerInMS As Integer
-        Private Const FPS As Integer = 60
+        Private Const FPS As Integer = 120
 
         'Transitions-Bilder
         Private oldBmpGerahmt As Bitmap
@@ -45,8 +49,10 @@ Namespace TransitionMain_SuW
         Private newBmpSource As BitmapSource
 
         'Animation, Positionen, Offsets etc. - Systems.Windows-Welt
-        Private posOldWPF As System.Windows.Point
-        Private posNewWPF As System.Windows.Point
+        Private startPosOldWPF As System.Windows.Point
+        Private zielPosOldWPF As System.Windows.Point
+        Private startPosNewWPF As System.Windows.Point
+        Private zielPosNewWPF As System.Windows.Point
         Private sizeWPF As System.Windows.Size
 
         'Zielausgabe
@@ -56,6 +62,8 @@ Namespace TransitionMain_SuW
 
         'Sonstiges
         Private bmp As Bitmap
+        Private backBuffer As Bitmap = Nothing
+        Private backBufferGraphics As Graphics = Nothing
 
         Public Structure SlideShowTransitionSettings_SuW
             Public geschwindigkeit As Integer
@@ -95,10 +103,9 @@ Namespace TransitionMain_SuW
                              Optional clientSize As System.Drawing.Size = Nothing,
                              Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
 
-            RaiseEvent TransitionIsRunning(True)
+            AddHandler WPFHandling.FrameFertig, AddressOf FrameFertigHandler
 
-            startTime = DateTime.Now
-            dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
+            RaiseEvent TransitionIsRunning(True)
 
             oldPicBoxSizeMode = picBoxModeOld
             newPicBoxSizeMode = picBoxModeNew
@@ -115,6 +122,16 @@ Namespace TransitionMain_SuW
 
             ReadTransitionSettingsFromRegistryOrDefaults()
             StoreSettings(TransitionName, aktuelleSettings)
+
+            'Fallback auf WPFTransitionWindow
+            'win = New WpfTransitionWindow()
+            'AddHandler win.TransitionIstFertig, Sub()
+            '                                        StopTransition()
+            '                                    End Sub
+
+            'win.WindowState = WindowState.Maximized
+            'win.Show()
+            'win.StartTransition(oldBmpGerahmt, newBmpGerahmt)
 
             ' Richtungsauswahl
             Dim richtung As String = If(aktuelleSettings.richtungen?.Count > 0,
@@ -139,14 +156,16 @@ Namespace TransitionMain_SuW
                 aktuelleSettings.modus = If(New Random().Next(2) = 0, "Schieben", "Wischen")
             End If
 
-            posOldWPF = New System.Windows.Point(0, 0)
-            posNewWPF = New System.Windows.Point(dx, dy)
+            startPosOldWPF = New Windows.Point(0, 0)
+            zielPosOldWPF = New Windows.Point(-dx, -dy)
+            startPosNewWPF = New Windows.Point(dx, dy)
+            zielPosNewWPF = New Windows.Point(0, 0)
 
             If aktuelleSettings.modus = "Wischen" Then
-                posOldWPF = New System.Windows.Point(0, 0) ' statisch
+                zielPosOldWPF = New System.Windows.Point(0, 0) ' statisch
             End If
 
-            ' Notbremse?
+            'Falls vom Modul gewünscht, Notbremse setzen.
             If durationMs > 0 Then
                 If tmrDuration Is Nothing Then tmrDuration = New Timer()
                 tmrDuration.Interval = durationMs
@@ -157,7 +176,13 @@ Namespace TransitionMain_SuW
             End If
 
             ' Animation starten (Delegat an WPFHandling)
-            WPFHandling.StartVisualTransition(AddressOf DrawTransitionFrame, 1000 \ FPS)
+            dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
+            startTime = DateTime.Now
+
+            WPFHandling.StartRenderLoop(AddressOf DrawTransitionFrame,
+                            New Windows.Size(sizeWPF.Width, sizeWPF.Height),
+                            1000 \ FPS)
+
         End Sub
 
         Sub StopTransition() Implements ISlideShowTransition.StopTransition
@@ -226,7 +251,6 @@ Namespace TransitionMain_SuW
             End Using
 
             Return bmp
-            bmp.Dispose()
 
         End Function
 
@@ -270,6 +294,7 @@ Namespace TransitionMain_SuW
 
         Sub tmrDuration_Tick() Handles tmrDuration.Tick
             'Bricht die Transition nach Ende von DurationMS ab.
+            LogDebug("Transition SuW - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
             'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
             endBildZeichnen()
@@ -279,15 +304,46 @@ Namespace TransitionMain_SuW
         End Sub
 
         'Animation und Zeichnen
+        Private Sub FrameFertigHandler(bitmap As Bitmap)
+            If renderTarget Is Nothing Then Exit Sub
+
+            ' Initialisieren des Backbuffers bei Bedarf
+            If backBuffer Is Nothing OrElse backBuffer.Width <> bitmap.Width OrElse backBuffer.Height <> bitmap.Height Then
+                backBuffer?.Dispose()
+                backBufferGraphics?.Dispose()
+                backBuffer = New Bitmap(bitmap.Width, bitmap.Height)
+                backBufferGraphics = Graphics.FromImage(backBuffer)
+            End If
+
+            ' Hintergrund löschen
+            backBufferGraphics.Clear(System.Drawing.Color.Black) ' Oder passend zum Bildhintergrund
+
+            ' Frame zeichnen
+            backBufferGraphics.DrawImage(bitmap, 0, 0)
+
+            ' Endgültig auf den Bildschirm bringen (ohne Flackern)
+            SyncLock renderTarget
+                renderTarget.DrawImage(backBuffer, 0, 0)
+            End SyncLock
+        End Sub
+
+
         Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
             Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
             Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
 
             ' Position berechnen (linear interpoliert)
-            Dim newX As Double = posNewWPF.X * (1.0 - progress)
-            Dim newY As Double = posNewWPF.Y * (1.0 - progress)
-            Dim oldX As Double = posOldWPF.X + (posNewWPF.X * progress)
-            Dim oldY As Double = posOldWPF.Y + (posNewWPF.Y * progress)
+            Dim oldX As Double = startPosOldWPF.X + (zielPosOldWPF.X - startPosOldWPF.X) * progress
+            Dim oldY As Double = startPosOldWPF.Y + (zielPosOldWPF.Y - startPosOldWPF.Y) * progress
+            Dim newX As Double = startPosNewWPF.X + (zielPosNewWPF.X - startPosNewWPF.X) * progress
+            Dim newY As Double = startPosNewWPF.Y + (zielPosNewWPF.Y - startPosNewWPF.Y) * progress
+
+            ' Fertig?
+            If progress >= 1.0 Then
+                WPFHandling.StopRenderLoop()
+                RemoveHandler WPFHandling.FrameFertig, AddressOf FrameFertigHandler
+                StopTransition()
+            End If
 
             If aktuelleSettings.modus = "Wischen" Then
                 oldX = 0
@@ -298,10 +354,7 @@ Namespace TransitionMain_SuW
             dc.DrawImage(oldBmpSource, New Rect(oldX, oldY, sizeWPF.Width, sizeWPF.Height))
             dc.DrawImage(newBmpSource, New Rect(newX, newY, sizeWPF.Width, sizeWPF.Height))
 
-            ' Fertig?
-            If progress >= 1.0 Then
-                StopTransition()
-            End If
+
         End Sub
 
     End Class

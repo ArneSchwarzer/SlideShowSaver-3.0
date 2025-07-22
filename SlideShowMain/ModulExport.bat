@@ -10,6 +10,9 @@ set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideSh
 set "SOURCE4=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\SlideShowModul.Mandelbrot.pdb"
 set "SOURCE5=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowModul.Matrix.pdb"
 set "SOURCE6=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModulSlideShowSaver 3.0\bin\Debug\SlideShowModul.SlideShowSaver 3.0.pdb"
+set "SOURCE7=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowWPFModul.SlideShowSaver 3.0.dll"
+set "SOURCE8=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowWPFModul.SlideShowSaver 3.0.pdb"
+
 :: Zielverzeichnis
 set "TARGET=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Module"
 
@@ -29,6 +32,8 @@ copy /Y "%SOURCE3%" "%TARGET%\SlideShowSaver 3.0.sssm"
 copy /Y "%SOURCE4%" "%TARGET%\Mandelbrot.pdb"
 copy /Y "%SOURCE5%" "%TARGET%\Matrix.pdb"
 copy /Y "%SOURCE6%" "%TARGET%\SlideShowSaver 3.0.pdb"
+copy /Y "%SOURCE7%" "%TARGET%\SlideShowSaver (WPF) 3.0.sssm"
+copy /Y "%SOURCE8%" "%TARGET%\SlideShowSaver (WPF) 3.0.pdb"
 
 echo Module kopiert.
 echo.

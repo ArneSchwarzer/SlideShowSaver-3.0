@@ -43,6 +43,8 @@ Public Class frmSaverMain
         FormsHandling.InitialFormPreparation(Me, Color.Black)
         Me.TopMost = False
         Me.ShowInTaskbar = False
+        Me.WindowState = FormWindowState.Maximized
+
         If CursorHandling.IsCursorVisible() AndAlso Not optionsDialogIsActive Then
             Cursor.Hide()
         End If

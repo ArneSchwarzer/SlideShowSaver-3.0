@@ -207,28 +207,6 @@ SlideShowTools
  </summary>
  <param name="clb">Die CheckedListBox, auf der ToolTips angezeigt werden sollen</param>
 </member>
-<member name="M:SlideShowTools.WPFHandling.StartVisualTransition(System.Action{System.Windows.Media.DrawingContext,System.Windows.Size},System.Int32)">
- <summary>
- Startet eine WPF-Visual-Transition mit der angegebenen Zeichenaktion.
- </summary>
- <param name="drawAction">Methode, die pro Frame aufgerufen wird und in den DrawingContext zeichnet.</param>
- <param name="frameIntervalMs">Optionaler Frame-Intervall in Millisekunden (Standard: 33 ms = ~30 FPS).</param>
-</member>
-<member name="M:SlideShowTools.WPFHandling.StopVisualTransition">
- <summary>
- Beendet die laufende Visual-Transition und schließt das WPF-Fenster.
- </summary>
-</member>
-<member name="T:SlideShowTools.WPFHandling.DrawingVisualWindow">
- <summary>
- Internes Vollbild-Fenster mit DrawingVisual-Zeichenfläche.
- </summary>
-</member>
-<member name="T:SlideShowTools.WPFHandling.VisualHost">
- <summary>
- Host für das Visual (stellt sicher, dass es gerendert wird).
- </summary>
-</member>
 <member name="M:SlideShowTools.XmlHandling.LadeWerteliste(System.String,System.String,System.String)">
  <summary>
  Lädt alle Werte eines bestimmten Attributs aus einer XML-Datei.

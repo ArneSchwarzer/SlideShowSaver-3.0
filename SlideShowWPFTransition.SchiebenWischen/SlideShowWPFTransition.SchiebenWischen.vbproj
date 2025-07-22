@@ -2,6 +2,9 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <EnablePerMonitorHighDpi>true</EnablePerMonitorHighDpi>
+  </PropertyGroup>
+  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{40FDB6FE-BD9E-4EBB-84C7-A07A2BCAF55A}</ProjectGuid>
@@ -102,8 +105,8 @@
     <EmbeddedResource Include="ucOptionsTransition.resx">
       <DependentUpon>ucOptionsTransition.vb</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="WpfTransitionWindow.xaml.vb">
-      <DependentUpon>WpfTransitionWindow.xaml</DependentUpon>
+    <Compile Include="wpfTransitionWindow.xaml.vb">
+      <DependentUpon>wpfTransitionWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -115,7 +118,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="WpfTransitionWindow.xaml">
+    <Page Include="wpfTransitionWindow.xaml">
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
