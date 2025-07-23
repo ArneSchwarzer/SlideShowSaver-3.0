@@ -4,14 +4,19 @@ Imports SlideShowInterfaces.InterfaceDeclarations
 Imports System.Drawing.Drawing2D
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports System.Runtime.Remoting.Messaging
+Imports System.Windows.Media.Imaging
+Imports System.Windows.Controls
+Imports SlideShowTools.WPFHandling
+Imports SlideShowTools
+
 
 Public Class TransitionMain
     Implements ISlideShowTransition
 
     'Variablendeklaration
-    Private newImg As Image
+    Private newImg As BitmapImage
+    Private newRTImg As RenderTargetBitmap
     Private newPicBoxSM As PictureBoxSizeMode
-    Private renderTarget As Graphics
     Private clntSize As Size
 
     Public ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
@@ -33,50 +38,28 @@ Public Class TransitionMain
     End Property
 
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
+    Public Event FrameIstFertig As ISlideShowTransition.FrameIstFertigEventHandler Implements ISlideShowTransition.FrameIstFertig
 
-    Public Sub RunTransition(oldImage As System.Drawing.Image, picBoxModeOld As Windows.Forms.PictureBoxSizeMode, newImage As System.Drawing.Image, picBoxModeNew As Windows.Forms.PictureBoxSizeMode, targetGraphics As System.Drawing.Graphics, Optional clientSize As System.Drawing.Size = Nothing, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
-        'Im Normalfall braucht diese 'Transition' ja eh nicht zu laufen...
+    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
+                         newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode,
+                         clientSize As Size, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
 
-        'Formal noch einmal TransitionIsRunning werfen.
+        Dim sizeWPF As New Windows.Size(clientSize.Width, clientSize.Height)
+
+        'Lohnt eigentlich gar nicht...
         RaiseEvent TransitionIsRunning(True)
 
-        If durationMs <= 0 Then
-            RaiseEvent TransitionIsRunning(False)
-            Exit Sub
-        End If
+        newRTImg = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
 
-        'Parameter in interne Variablen überführen
-        newImg = newImage
-        newPicBoxSM = picBoxModeNew
-        renderTarget = targetGraphics
-        clntSize = clientSize
-
-        If clntSize.IsEmpty Then
-            clntSize = renderTarget.VisibleClipBounds.Size.ToSize()
-        End If
-
-        'Gleich zum Ende der Transition.
-        StopTransition()
+        'Das Bild direkt als fertig zurückgeben
+        RaiseEvent FrameIstFertig(newRTImg)
+        RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
+
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Zeichnet newImage auf den Zeichenbereich und gut
-        Dim drawRect As Rectangle
-        Dim targetRect As Rectangle
-
-        'Grafik vorbereiten
-        targetRect = New Rectangle(0, 0, clntSize.Width, clntSize.Height)
-        drawRect = GetDrawRectangle(newImg.Size, targetRect, newPicBoxSM)
-
-        'Neues Bild direkt zeichnen
-        Using g As Graphics = renderTarget
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic
-            g.Clear(Color.Black)
-            g.DrawImage(newImg, New Rectangle(0, 0, clntSize.Width, clntSize.Height))
-        End Using
-
-        renderTarget.DrawImage(newImg, 0, 0)
+        'Nichts zu tun, Frame wurde bereits geliefert
 
         RaiseEvent TransitionIsRunning(False)
 

@@ -107,6 +107,10 @@ Namespace TransitionMain_SuW
 
             RaiseEvent TransitionIsRunning(True)
 
+            If oldImage Is Nothing OrElse newImage Is Nothing Then
+                StopTransition()
+            End If
+
             'Überführen der Parameter in Klassenvariablen
             oldPicBoxSizeMode = picBoxModeOld
             newPicBoxSizeMode = picBoxModeNew
@@ -251,13 +255,12 @@ Namespace TransitionMain_SuW
                 Dim bildgröße As New System.Drawing.Size(bild.PixelWidth, bild.PixelHeight)
                 Dim quellRect As New Rectangle(New System.Drawing.Point(0, 0), zielgröße)
                 Dim zielRectangle As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bildgröße, quellRect, modus)
-                Dim zielRect As New Rect(0.0, 0.0, zielRectangle.Width, zielRectangle.Height)
+                Dim zielRect As New Rect(zielRectangle.Left, zielRectangle.Top, zielRectangle.Width, zielRectangle.Height)
+                Dim gesamterBereich As New Rect(0.0, 0.0, zielgröße.Width, zielgröße.Height)
 
-                ' Hintergrund zeichnen (optional)
-                dc.DrawRectangle(Media.Brushes.Black, Nothing, zielRect)
-
-                ' Bild zeichnen
+                dc.DrawRectangle(Media.Brushes.Black, Nothing, gesamterBereich)
                 dc.DrawImage(bild, zielRect)
+
             End Using
 
             ' Rendern in RenderTargetBitmap
@@ -310,12 +313,6 @@ Namespace TransitionMain_SuW
             Dim newX As Double = startPosNewWPF.X + (zielPosNewWPF.X - startPosNewWPF.X) * progress
             Dim newY As Double = startPosNewWPF.Y + (zielPosNewWPF.Y - startPosNewWPF.Y) * progress
 
-            ' Fertig?
-            If progress >= 1.0 Then
-                StopRenderLoop()
-                StopTransition()
-            End If
-
             If aktuelleSettings.modus = "Wischen" Then
                 oldX = 0
                 oldY = 0
@@ -324,6 +321,12 @@ Namespace TransitionMain_SuW
             ' Bilder zeichnen
             dc.DrawImage(oldBmpSource, New Rect(oldX, oldY, sizeWPF.Width, sizeWPF.Height))
             dc.DrawImage(newBmpSource, New Rect(newX, newY, sizeWPF.Width, sizeWPF.Height))
+
+            ' Fertig?
+            If progress >= 1.0 Then
+                StopRenderLoop()
+                StopTransition()
+            End If
 
         End Sub
 

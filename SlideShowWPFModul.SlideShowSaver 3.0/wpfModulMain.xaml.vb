@@ -127,7 +127,7 @@ Partial Public Class wpfModulMain
         'Falls der Benutzer in der Zwischenzeit an den Optionen 'rumgepfuscht hat
         LegitimeTransitionsListeErstellen()
 
-        If listOfEnabledTransitions.Count > 0 Then
+        If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
 
 #Region "Transition wechseln"
             'Transition aussuchen
@@ -176,9 +176,7 @@ Partial Public Class wpfModulMain
 
             transitionIstAktiv = True
             stoppuhr = Stopwatch.StartNew()
-
             sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
-
             aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
 
             'Timer beenden 
@@ -582,6 +580,9 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub Transition_FrameIstFertig(rtb As RenderTargetBitmap)
+        imgAnzeige.Source = Nothing
+        GC.Collect()
+        GC.WaitForPendingFinalizers()
         imgAnzeige.Source = rtb
     End Sub
 

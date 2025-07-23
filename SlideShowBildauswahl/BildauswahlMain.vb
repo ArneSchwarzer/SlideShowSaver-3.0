@@ -9,12 +9,22 @@ Imports System.Windows.Forms
 Imports TagLib
 Imports SlideShowLogging
 Imports TagLib.Image
+Imports System.Threading
 
 Public Class BildauswahlMain
 
     'Variablen, Konstanten und Enums
     Private Shared rnd As New Random()
     Private Shared aktuelleSettings As New SettingsBildauswahl
+
+    'Preload Bilderlisten
+    Private Shared vorbereiteteDateien As New List(Of String)
+    Private Shared vorbereiteteVerzeichnisse As New Dictionary(Of String, List(Of String))
+    Private Shared vorbereitungsThreadPictures As Thread = Nothing
+    Private Shared vorbereitungsThreadVerzeichnisse As Thread = Nothing
+    Private Shared prepareSettingsSnapshot As SettingsBildauswahl
+    Private Shared hasFirstResultsPictues As Boolean = False
+    Private Shared hasFirstResultsVerzeichnisse As Boolean = False
 
     Public Structure SettingsBildauswahl
         Public Verzeichnisse As List(Of String)
@@ -43,7 +53,18 @@ Public Class BildauswahlMain
         'Aktualisiert die Settings der Bildauswahl und schreibt sie in die SettingsInbox
 
         aktuelleSettings = ReadSettingsBildauswahlFromRegistryOrDefauls()
-        StoreSettings("Bildauswahl", aktuelleSettings)
+
+        If Not SettingsSindIdentisch(aktuelleSettings, prepareSettingsSnapshot) Then
+            StoreSettings("Bildauswahl", aktuelleSettings)
+            vorbereitungsThreadPictures = Nothing 'löscht ggf. alten Thread
+            vorbereitungsThreadVerzeichnisse = Nothing
+            vorbereitungsThreadPictures = New Thread(AddressOf StarteVorbereitungenPictures)
+            vorbereitungsThreadVerzeichnisse = New Thread(AddressOf StarteVorbereitungenVerzeichnisse)
+            vorbereitungsThreadPictures.IsBackground = True
+            vorbereitungsThreadVerzeichnisse.IsBackground = True
+            vorbereitungsThreadPictures.Start()
+            vorbereitungsThreadVerzeichnisse.Start()
+        End If
 
     End Sub
 
@@ -224,41 +245,73 @@ Public Class BildauswahlMain
 
     End Function
 
+    Public Shared Sub PreparePictures()
+        prepareSettingsSnapshot = aktuelleSettings
+        hasFirstResultsPictues = False
+        vorbereiteteDateien.Clear()
+
+        Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
+        Dim bilderListe = CreateFileList(prepareSettingsSnapshot.Verzeichnisse, dateiTypen)
+
+        For Each bild In bilderListe
+            If Path.GetExtension(bild).ToLower() Like "*.jp*g" Then
+                If Not CheckIfLegalFile(bild) Then Continue For
+            End If
+            vorbereiteteDateien.Add(bild)
+            If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 2 Then
+                hasFirstResultsPictues = True
+            End If
+        Next
+    End Sub
+
     Public Shared Function GetPictures(n As Integer, Optional targetDir As String = "") As List(Of String)
         ' Die Pfade von n Bildern werden gemäß den Einstellungen zufällig geladen. Die Liste der Bilder ist unsortiert.
         ' Ein optionales targetDir beschränkt die Suche auf ebendieses.
 
-        Dim suchVerzeichnisse As New List(Of String)
-        Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
-        Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
-        Dim bilderListe As List(Of String)
-        Dim bild As String
         Dim ergebnisListe As New List(Of String)
-        Dim extension As String
-        Dim i As Integer = 0
+        Dim quelle As List(Of String)
+        Dim maxWaitTime As Integer = 2000 ' max. 2 Sekunden warten
+        Dim waited As Integer = 0
 
-        ' Zielverzeichnis erstellen
-        If targetDir Is "" Then
-            suchVerzeichnisse = aktuelleSettings.Verzeichnisse
-        Else
-            suchVerzeichnisse.Add(targetDir)
+        While Not hasFirstResultsPictues AndAlso waited < maxWaitTime
+            Thread.Sleep(50)
+            waited += 50
+        End While
+
+        If vorbereiteteDateien.Count = 0 Then
+            If vorbereitungsThreadPictures Is Nothing OrElse Not vorbereitungsThreadPictures.IsAlive Then
+                vorbereitungsThreadPictures = New Thread(AddressOf StarteVorbereitungenPictures)
+                vorbereitungsThreadPictures.IsBackground = True
+                vorbereitungsThreadPictures.Start()
+            End If
         End If
 
-        ' Bilderliste initialisieren
-        bilderListe = CreateFileList(suchVerzeichnisse, dateiTypen)
 
-        While i < n
-            ' Zufälliges Bild auswählen
-            bild = bilderListe(rnd.Next(0, bilderListe.Count))
-            extension = Path.GetExtension(bild).ToLower()
+        If targetDir = "" Then
 
-            ' Falls EXIF-relevant → CheckIfLegalFile prüfen, sonst direkt akzeptieren
-            If exifFormate.Contains(extension) Then
-                If Not CheckIfLegalFile(bild) Then Continue While
-            End If
+            quelle = vorbereiteteDateien
 
+        Else
+            Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
+            quelle.Clear()
+            quelle.Add(targetDir)
+            Dim bilderListe = CreateFileList(quelle, dateiTypen)
+            quelle.Clear()
+
+            For Each bild In bilderListe
+                If Path.GetExtension(bild).ToLower() Like "*.jp*g" Then
+                    If Not CheckIfLegalFile(bild) Then Continue For
+                End If
+                quelle.Add(bild)
+            Next
+
+        End If
+
+
+        Dim i As Integer = 0
+        While i < n AndAlso quelle.Count > 0
+            Dim bild = quelle(rnd.Next(0, quelle.Count))
             ergebnisListe.Add(bild)
-
             i += 1
         End While
 
@@ -266,45 +319,67 @@ Public Class BildauswahlMain
 
     End Function
 
+    Public Shared Sub PreparePicturesByDirectory()
+        vorbereiteteVerzeichnisse.Clear()
+        hasFirstResultsVerzeichnisse = False
+
+        Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
+        For Each verzeichnis In aktuelleSettings.Verzeichnisse
+            If Not Directory.Exists(verzeichnis) Then Continue For
+            Dim unterverzeichnisse = Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
+
+            For Each unterverzeichnis In unterverzeichnisse
+                Dim bilder = Directory.GetFiles(unterverzeichnis, "*.*", SearchOption.TopDirectoryOnly).
+                Where(Function(f) dateiTypen.Any(Function(ext) f.EndsWith(ext, StringComparison.OrdinalIgnoreCase))).ToList()
+
+                Dim gefiltert = bilder.Where(Function(bild)
+                                                 Dim ext = Path.GetExtension(bild).ToLower()
+                                                 If ext = ".jpg" OrElse ext = ".jpeg" Then
+                                                     Return CheckIfLegalFile(bild)
+                                                 End If
+                                                 Return True
+                                             End Function).ToList()
+
+                If gefiltert.Count > 0 Then
+                    vorbereiteteVerzeichnisse(unterverzeichnis) = gefiltert
+                    If Not hasFirstResultsVerzeichnisse AndAlso vorbereiteteVerzeichnisse.Count > 0 Then
+                        hasFirstResultsVerzeichnisse = True
+                    End If
+                End If
+            Next
+        Next
+
+    End Sub
+
     Public Shared Function GetPicturesByDirectory(Optional targetDir As String = "") As List(Of String)
         ' Die Pfade aller Bilder eines zufällig bestimmten Verzeichnisses werden gemäß den Einstellungen erstellt
         ' Die Liste der Bilder ist alphabetisch sortiert.
         ' Ein optionales targetDir gibt die Pfade aller gemäß Einstellungen legitimen Bilder ebendieses Verzeichnisses aus.
 
-        Dim dateiTypen As New List(Of String) From {"*.bmp", "*.jpg", "*.jpeg", "*.png"}
-        Dim exifFormate As New List(Of String) From {".jpg", ".jpeg"}
-        Dim listOfFiles As New List(Of String)
-        Dim gefundeneDateien As String()
-        Dim ergebnisListe As New List(Of String)
-        Dim extension As String
-
-        ' Zielverzeichnis initialisieren
-        If targetDir = "" Then
-            targetDir = GetZufaelligesUnterverzeichnis()
+        If vorbereiteteDateien.Count = 0 Then
+            If vorbereitungsThreadVerzeichnisse Is Nothing OrElse Not vorbereitungsThreadVerzeichnisse.IsAlive Then
+                vorbereitungsThreadVerzeichnisse = New Thread(AddressOf StarteVorbereitungenVerzeichnisse)
+                vorbereitungsThreadVerzeichnisse.IsBackground = True
+                vorbereitungsThreadVerzeichnisse.Start()
+            End If
         End If
 
-        ' Zielverzeichnis komplett auslesen
-        For Each endung In dateiTypen
-            Try
-                gefundeneDateien = Directory.GetFiles(targetDir, endung, SearchOption.AllDirectories)
-                listOfFiles.AddRange(gefundeneDateien)
-            Catch ex As Exception
-                LogHandling.LogError("SlideShowBildauswahl meldet ein Problem bei der Erstellung der Dateiliste in der Funktion GetPicturesByDirectory(): " & ex.ToString)
-            End Try
-        Next
+        Dim maxWaitTime As Integer = 2000 ' max. 2 Sekunden warten
+        Dim waited As Integer = 0
 
-        listOfFiles.Sort()
+        While Not hasFirstResultsVerzeichnisse AndAlso waited < maxWaitTime
+            Thread.Sleep(50)
+            waited += 50
+        End While
 
-        ' Legitime Bilder in die Ergebnisliste schreiben
-        For Each bild In listOfFiles
-            extension = Path.GetExtension(bild).ToLower()
-
-            If Not exifFormate.Contains(extension) OrElse CheckIfLegalFile(bild) Then
-                ergebnisListe.Add(bild)
-            End If
-        Next
-
-        Return ergebnisListe
+        If targetDir = "" Then
+            Dim zufallsKey = vorbereiteteVerzeichnisse.Keys(rnd.Next(0, vorbereiteteVerzeichnisse.Count))
+            Return vorbereiteteVerzeichnisse(zufallsKey)
+        ElseIf vorbereiteteVerzeichnisse.ContainsKey(targetDir) Then
+            Return vorbereiteteVerzeichnisse(targetDir)
+        Else
+            Return New List(Of String)()
+        End If
 
     End Function
 
@@ -443,4 +518,23 @@ Public Class BildauswahlMain
 
     End Function
 
+    Public Shared Function SettingsSindIdentisch(a As SettingsBildauswahl, b As SettingsBildauswahl) As Boolean
+        Return a.Bewertung = b.Bewertung AndAlso
+           a.Altersfreigabe = b.Altersfreigabe AndAlso
+           a.BlackListTags.SequenceEqual(b.BlackListTags) AndAlso
+           a.WhiteListTags.SequenceEqual(b.WhiteListTags) AndAlso
+           a.Verzeichnisse.SequenceEqual(b.Verzeichnisse)
+    End Function
+
+    Private Shared Sub StarteVorbereitungenPictures()
+
+        PreparePictures()
+
+    End Sub
+
+    Private Shared Sub StarteVorbereitungenVerzeichnisse()
+
+        PreparePicturesByDirectory()
+
+    End Sub
 End Class

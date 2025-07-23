@@ -80,6 +80,22 @@ Public Class WPFHandling
         Return bmp
     End Function
 
+    Public Shared Function ConvertBitmapImageToRenderTargetBitmap(bmpImage As BitmapImage, size As Windows.Size) As RenderTargetBitmap
+        Dim imageControl As New Windows.Controls.Image()
+        imageControl.Source = bmpImage
+        imageControl.Width = size.Width
+        imageControl.Height = size.Height
+        imageControl.Stretch = Stretch.Uniform ' Alternativ: Stretch.Fill, je nach gewünschtem Verhalten
+
+        imageControl.Measure(New Windows.Size(size.Width, size.Height))
+        imageControl.Arrange(New Rect(0, 0, size.Width, size.Height))
+
+        Dim rtb As New RenderTargetBitmap(size.Width, size.Height, 96, 96, PixelFormats.Pbgra32)
+        rtb.Render(imageControl)
+
+        Return rtb
+    End Function
+
     Public Shared Function ConvertImageToBitmapImage(img As Image) As BitmapImage
         Using ms As New MemoryStream()
             img.Save(ms, ImageFormat.Png)

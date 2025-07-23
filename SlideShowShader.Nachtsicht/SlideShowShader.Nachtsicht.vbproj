@@ -130,6 +130,10 @@
       <Project>{7f07849f-94c6-4f94-9713-6d5fd4cc76ac}</Project>
       <Name>SlideShowInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SlideShowLogging\SlideShowLogging.vbproj">
+      <Project>{4de43745-d2ce-442c-acc5-49e2bcb0c87f}</Project>
+      <Name>SlideShowLogging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SlideShowTools\SlideShowTools.vbproj">
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>

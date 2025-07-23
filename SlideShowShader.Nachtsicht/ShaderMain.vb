@@ -9,6 +9,7 @@ Imports SlideShowTools.LocationHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools
+Imports SlideShowLogging.LogHandling
 Imports System.Text
 Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Exif
@@ -17,6 +18,7 @@ Imports TagLib
 Imports TagLib.IFD.Entries
 Imports System.Globalization
 Imports MetadataExtractor.Formats
+Imports SlideShowLogging
 
 Public Class ShaderMain
     Implements ISlideShowShader
@@ -157,11 +159,18 @@ Public Class ShaderMain
             Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
             Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
 
-            tagLibFile = TagLib.File.Create(bildPfad)
+            Try
+                tagLibFile = TagLib.File.Create(bildPfad)
+            Catch ex As Exception
+                LogError("Shader Nachtsicht - ShaderMain.RunShader(): Probleme beim Erstellen von TagLibFile:" & ex.ToString)
+                tagLibFile = Nothing
+            End Try
+
 
             'Tags auslesen
             keywords.Clear()
-            If tagLibFile.ImageTag.Keywords IsNot Nothing Then
+
+            If tagLibFile IsNot Nothing AndAlso tagLibFile.ImageTag.Keywords IsNot Nothing Then
                 For Each keyword In tagLibFile.ImageTag.Keywords
                     keywords.Add(keyword)
                 Next
@@ -213,7 +222,7 @@ Public Class ShaderMain
 
         'Aktenzeichen (Dateiname)
         DrawText(g, "Aktenzeichen: ", overlayFont, overlayBrush, 10, 20)
-        höheNächsterText = 20
+        höheNächsterText = 22
 
         breiteFuerTextumbruch = (((resultImage.Width - g.MeasureString(geheimstufe, geheimFont).Width) \ 2) - (10 + g.MeasureString("Aktenzeichen: ", overlayFont).Width)) - 10
 

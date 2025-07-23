@@ -13,6 +13,7 @@ Imports SlideShowBildauswahl
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.SharedDataHandling
 Imports SlideShowTools.ScreenHandling
+Imports System.Threading
 
 Public Class frmSaverMain
 #Region "Variablendeklaration"
@@ -53,6 +54,9 @@ Public Class frmSaverMain
         IniAndReinitialize()
         LegitimeListeErstellen()
         BildauswahlMain.CheckYourSettings() 'Bildauswahl Bescheid geben, dass es losgeht
+
+        'Generierung der Bilder- und Verzeichnislisten starten
+        BildauswahlMain.CheckYourSettings()
 
         'Transition vorbereiten
         listOfEnabledTransitions = aktuelleSettings.ModulTransitionListe

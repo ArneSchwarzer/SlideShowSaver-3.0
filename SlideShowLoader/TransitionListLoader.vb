@@ -32,9 +32,12 @@ Public Class TransitionListLoader
                         Exit For
                     End If
                 Next
-            Catch ex As Exception
+            Catch ex As ReflectionTypeLoadException
                 ' Fehlerbehandlung
-                LogHandling.LogError("SlideShowLoader - TransitionListLoader.LadeTranstionInfoListe: Fehler beim Laden der Liste der Transitions: " & ex.Message)
+                For Each lex In ex.LoaderExceptions
+                    LogHandling.LogError("SlideShowLoader - TransitionListLoader.LadeTranstionInfoListe: Fehler beim Laden der Liste der Transitions: " & lex.Message)
+                Next
+
             End Try
 
         Next
