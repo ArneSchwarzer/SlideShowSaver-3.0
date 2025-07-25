@@ -6,9 +6,10 @@ Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.SettingsHandling
 Imports System.Windows.Forms
-Imports TagLib
+Imports MetadataExtractor
+Imports MetadataExtractor.Formats.Xmp
+Imports MetadataExtractor.Formats.Exif
 Imports SlideShowLogging
-Imports TagLib.Image
 Imports System.Threading
 
 Public Class BildauswahlMain
@@ -23,8 +24,9 @@ Public Class BildauswahlMain
     Private Shared vorbereitungsThreadPictures As Thread = Nothing
     Private Shared vorbereitungsThreadVerzeichnisse As Thread = Nothing
     Private Shared prepareSettingsSnapshot As SettingsBildauswahl
-    Private Shared hasFirstResultsPictues As Boolean = False
-    Private Shared hasFirstResultsVerzeichnisse As Boolean = False
+    Public Shared hasFirstResultsPictues As Boolean = False
+    Public Shared hasFirstResultsVerzeichnisse As Boolean = False
+    Private Shared cancelThreads As Boolean = False
 
     Public Structure SettingsBildauswahl
         Public Verzeichnisse As List(Of String)
@@ -33,6 +35,10 @@ Public Class BildauswahlMain
         Public Altersfreigabe As String
         Public Bewertung As Integer
     End Structure
+
+    'Events
+    Public Shared Event ErsteBilderGefunden()
+    Public Shared Event ErsteVerzeichnisseGefunden()
 
     Public Shared Function GetBildauswahlDefaultSettings() As Dictionary(Of String, String)
         ' Gibt die Defaultwerte von SlideShowBildauswahl als Dictionary zurück.
@@ -116,7 +122,7 @@ Public Class BildauswahlMain
 
         For Each verzeichnis In verzeichnisse
 
-            If Not Directory.Exists(verzeichnis) Then
+            If Not System.IO.Directory.Exists(verzeichnis) Then
                 ' Verzeichnis existiert nicht, logge und überspringe
                 LogHandling.LogError("Verzeichnis nicht gefunden: " & verzeichnis)
                 Continue For
@@ -124,7 +130,7 @@ Public Class BildauswahlMain
 
             Dim unterverzeichnisse As String() = {}
             Try
-                unterverzeichnisse = Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
+                unterverzeichnisse = System.IO.Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
             Catch ex As Exception
                 LogHandling.LogError("Fehler beim Durchsuchen von Unterverzeichnissen in '" & verzeichnis & "': " & ex.Message)
                 Continue For
@@ -137,7 +143,7 @@ Public Class BildauswahlMain
             For Each pfad In alleVerzeichnisse
                 Dim subdirs() As String = {}
                 Try
-                    subdirs = Directory.GetDirectories(pfad)
+                    subdirs = System.IO.Directory.GetDirectories(pfad)
                 Catch ex As Exception
                     LogHandling.LogError("Fehler beim Abrufen von Unterverzeichnissen in '" & pfad & "': " & ex.Message)
                     Continue For
@@ -146,7 +152,7 @@ Public Class BildauswahlMain
                 ' Nur wenn keine Unterverzeichnisse existieren => Blattverzeichnis
                 If subdirs.Length = 0 Then
                     Try
-                        Dim files = Directory.GetFiles(pfad, "*.*", SearchOption.TopDirectoryOnly).
+                        Dim files = System.IO.Directory.GetFiles(pfad, "*.*", SearchOption.TopDirectoryOnly).
                             Where(Function(f) endungen.Any(Function(ext) f.EndsWith(ext, StringComparison.OrdinalIgnoreCase))).
                             ToList()
                         listOfFiles.AddRange(files)
@@ -182,52 +188,69 @@ Public Class BildauswahlMain
     End Function
 
     Public Shared Function CheckIfLegalFile(bild As String) As Boolean
-        'Prüft, ob ein Bild den Kriterien gemäß den aktuellen Settings entspricht 
+        ' Prüft, ob ein Bild den Kriterien gemäß den aktuellen Settings entspricht
 
-        Dim tagLibFile As TagLib.Jpeg.File
         Dim checkWhitelist As Boolean = False
-        Dim checkBlacklist As Boolean = True 'Wird während des Test ggf. auf 'False' gesetzt
+        Dim checkBlacklist As Boolean = True
         Dim checkBewertung As Boolean = False
 
+        Dim ratingStr As String
+        Dim rating As Integer
+
         Try
-            tagLibFile = TagLib.File.Create(bild)
+            Dim directories = ImageMetadataReader.ReadMetadata(bild)
+            Dim xmpDir = directories.OfType(Of XmpDirectory)().FirstOrDefault()
 
-            'Check #1: Bewertung
-            If tagLibFile.ImageTag.Rating >= aktuelleSettings.Bewertung Then checkBewertung = True
+            If xmpDir IsNot Nothing Then
+                Dim xmp = xmpDir.XmpMeta
+                If xmp IsNot Nothing Then
 
-            'Check #2: White-List
-            If aktuelleSettings.WhiteListTags.Count = 0 Then
-                checkWhitelist = True
-            Else
-                For Each includeTag As String In aktuelleSettings.WhiteListTags
-                    If tagLibFile.ImageTag.Keywords.Contains(includeTag) Then
-                        checkWhitelist = True
+                    'Check #1: Bewertung
+                    ratingStr = xmp.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+                    If Not String.IsNullOrEmpty(ratingStr) Then
+                        If Integer.TryParse(ratingStr, rating) Then
+                            If rating >= aktuelleSettings.Bewertung Then
+                                checkBewertung = True
+                            End If
+                        End If
                     End If
-                Next
+
+                    'Check #2: WhiteList
+                    If aktuelleSettings.WhiteListTags.Count = 0 Then
+                        checkWhitelist = True
+                    Else
+                        Dim keywords = xmp.GetPropertyString("http://purl.org/dc/elements/1.1/", "subject")
+                        If Not String.IsNullOrEmpty(keywords) Then
+                            For Each includeTag In aktuelleSettings.WhiteListTags
+                                If keywords.IndexOf(includeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                                    checkWhitelist = True
+                                    Exit For
+                                End If
+                            Next
+                        End If
+                    End If
+
+                    'Check #3: BlackList
+                    Dim blacklisted As Boolean = False
+                    Dim blackKeywords = xmp.GetPropertyString("http://purl.org/dc/elements/1.1/", "subject")
+                    If Not String.IsNullOrEmpty(blackKeywords) Then
+                        For Each excludeTag In aktuelleSettings.BlackListTags
+                            If blackKeywords.IndexOf(excludeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                                blacklisted = True
+                                Exit For
+                            End If
+                        Next
+                    End If
+                    If blacklisted Then checkBlacklist = False
+
+                End If
             End If
 
-            'Check #3: Black-List (enthält Prüfung der Altersfreigabe-Stufe)
-            For Each excludeTag As String In aktuelleSettings.BlackListTags
-                If tagLibFile.ImageTag.Keywords.Contains(excludeTag) Then
-                    checkBlacklist = False
-                End If
-            Next
-
-            'Aufräumen
-            tagLibFile.Dispose()
-
         Catch ex As Exception
-            LogHandling.LogError("SlideShowBildauswahl.CheckIfLegalFile(" & bild & ") - Problem mit tagLibFile: " & ex.Message)
+            LogHandling.LogError("SlideShowBildauswahl.CheckIfLegalFile(" & bild & ") - Fehler beim Auslesen mit MetadataExtractor: " & ex.Message)
         End Try
 
-        'Checks überstanden?
-        If checkBewertung And checkWhitelist And checkBlacklist Then
-            Return True
-        Else
-            Return False
-        End If
-
-
+        Return checkBewertung AndAlso checkWhitelist AndAlso checkBlacklist
     End Function
 
     Public Shared Function GetCurrentScreen() As Image
@@ -253,15 +276,24 @@ Public Class BildauswahlMain
         Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
         Dim bilderListe = CreateFileList(prepareSettingsSnapshot.Verzeichnisse, dateiTypen)
 
+        If cancelThreads Then Exit Sub
+
         For Each bild In bilderListe
+            If cancelThreads Then Exit For
+
             If Path.GetExtension(bild).ToLower() Like "*.jp*g" Then
                 If Not CheckIfLegalFile(bild) Then Continue For
             End If
+
             vorbereiteteDateien.Add(bild)
+
             If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 2 Then
                 hasFirstResultsPictues = True
+                RaiseEvent ErsteBilderGefunden()
             End If
         Next
+
+        vorbereitungsThreadPictures = Nothing
     End Sub
 
     Public Shared Function GetPictures(n As Integer, Optional targetDir As String = "") As List(Of String)
@@ -270,22 +302,6 @@ Public Class BildauswahlMain
 
         Dim ergebnisListe As New List(Of String)
         Dim quelle As List(Of String)
-        Dim maxWaitTime As Integer = 2000 ' max. 2 Sekunden warten
-        Dim waited As Integer = 0
-
-        While Not hasFirstResultsPictues AndAlso waited < maxWaitTime
-            Thread.Sleep(50)
-            waited += 50
-        End While
-
-        If vorbereiteteDateien.Count = 0 Then
-            If vorbereitungsThreadPictures Is Nothing OrElse Not vorbereitungsThreadPictures.IsAlive Then
-                vorbereitungsThreadPictures = New Thread(AddressOf StarteVorbereitungenPictures)
-                vorbereitungsThreadPictures.IsBackground = True
-                vorbereitungsThreadPictures.Start()
-            End If
-        End If
-
 
         If targetDir = "" Then
 
@@ -307,7 +323,6 @@ Public Class BildauswahlMain
 
         End If
 
-
         Dim i As Integer = 0
         While i < n AndAlso quelle.Count > 0
             Dim bild = quelle(rnd.Next(0, quelle.Count))
@@ -325,11 +340,15 @@ Public Class BildauswahlMain
 
         Dim dateiTypen As New List(Of String) From {".bmp", ".jpg", ".jpeg", ".png"}
         For Each verzeichnis In aktuelleSettings.Verzeichnisse
-            If Not Directory.Exists(verzeichnis) Then Continue For
-            Dim unterverzeichnisse = Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
+            If cancelThreads Then Exit For
+            If Not System.IO.Directory.Exists(verzeichnis) Then Continue For
+
+            Dim unterverzeichnisse = System.IO.Directory.GetDirectories(verzeichnis, "*", SearchOption.AllDirectories)
 
             For Each unterverzeichnis In unterverzeichnisse
-                Dim bilder = Directory.GetFiles(unterverzeichnis, "*.*", SearchOption.TopDirectoryOnly).
+                If cancelThreads Then Exit For
+
+                Dim bilder = System.IO.Directory.GetFiles(unterverzeichnis, "*.*", SearchOption.TopDirectoryOnly).
                 Where(Function(f) dateiTypen.Any(Function(ext) f.EndsWith(ext, StringComparison.OrdinalIgnoreCase))).ToList()
 
                 Dim gefiltert = bilder.Where(Function(bild)
@@ -342,35 +361,23 @@ Public Class BildauswahlMain
 
                 If gefiltert.Count > 0 Then
                     vorbereiteteVerzeichnisse(unterverzeichnis) = gefiltert
-                    If Not hasFirstResultsVerzeichnisse AndAlso vorbereiteteVerzeichnisse.Count > 0 Then
+
+                    If Not hasFirstResultsVerzeichnisse Then
                         hasFirstResultsVerzeichnisse = True
+                        RaiseEvent ErsteVerzeichnisseGefunden()
                     End If
                 End If
+
             Next
         Next
 
+        vorbereitungsThreadVerzeichnisse = Nothing
     End Sub
 
     Public Shared Function GetPicturesByDirectory(Optional targetDir As String = "") As List(Of String)
         ' Die Pfade aller Bilder eines zufällig bestimmten Verzeichnisses werden gemäß den Einstellungen erstellt
         ' Die Liste der Bilder ist alphabetisch sortiert.
         ' Ein optionales targetDir gibt die Pfade aller gemäß Einstellungen legitimen Bilder ebendieses Verzeichnisses aus.
-
-        If vorbereiteteDateien.Count = 0 Then
-            If vorbereitungsThreadVerzeichnisse Is Nothing OrElse Not vorbereitungsThreadVerzeichnisse.IsAlive Then
-                vorbereitungsThreadVerzeichnisse = New Thread(AddressOf StarteVorbereitungenVerzeichnisse)
-                vorbereitungsThreadVerzeichnisse.IsBackground = True
-                vorbereitungsThreadVerzeichnisse.Start()
-            End If
-        End If
-
-        Dim maxWaitTime As Integer = 2000 ' max. 2 Sekunden warten
-        Dim waited As Integer = 0
-
-        While Not hasFirstResultsVerzeichnisse AndAlso waited < maxWaitTime
-            Thread.Sleep(50)
-            waited += 50
-        End While
 
         If targetDir = "" Then
             Dim zufallsKey = vorbereiteteVerzeichnisse.Keys(rnd.Next(0, vorbereiteteVerzeichnisse.Count))
@@ -391,45 +398,42 @@ Public Class BildauswahlMain
 
         extension = Path.GetExtension(bild).ToLower()
         If correctOrientation AndAlso exifFormate.Contains(extension) Then
-            Return (CorrectPictureOrientation(bild))
+            Return (CorrectPictureOrientation(New Bitmap(bild), bild))
         Else
             Return (New Bitmap(bild))
         End If
 
     End Function
 
-    Public Shared Function CorrectPictureOrientation(pfad As String) As Image
-        ' Dreht und Spiegelt ein Bild gemäß seiner EXIF Daten
+    Public Shared Function CorrectPictureOrientation(picture As Image, pfad As String) As Image
+        Dim orientation As Integer = 1 ' Default = "Normal"
 
-        Dim img As Image = Image.FromFile(pfad)
-        Dim exifOrientation As Integer = 1 ' Default: Normal
-        Dim tagLibFile As TagLib.Jpeg.File
-
-        ' Ausrichtung aus EXIF auslesen
         Try
-            tagLibFile = TagLib.File.Create(pfad)
-            exifOrientation = tagLibFile.ImageTag.Orientation
+            Dim directories = ImageMetadataReader.ReadMetadata(pfad)
+            Dim exifDir = directories.OfType(Of ExifIfd0Directory)().FirstOrDefault()
+
+            If exifDir IsNot Nothing AndAlso exifDir.ContainsTag(ExifDirectoryBase.TagOrientation) Then
+                orientation = exifDir.GetInt32(ExifDirectoryBase.TagOrientation)
+            End If
         Catch ex As Exception
-            LogHandling.LogWarn("Die EXIF von " & pfad & " hat keine Information 'Orientation'. Das Bild wird belassen wie ist.")
+            LogHandling.LogError("SlideShowBildauswahl.CorrectPictureOrientation(" & pfad & ") - Fehler beim Auslesen der Ausrichtung: " & ex.Message)
         End Try
 
-        ' Bild drehen
-        Select Case exifOrientation
-
-            ' Case 1: keine Aktion
-            Case 2 : img.RotateFlip(RotateFlipType.RotateNoneFlipX)
-            Case 3 : img.RotateFlip(RotateFlipType.Rotate180FlipNone)
-            Case 4 : img.RotateFlip(RotateFlipType.Rotate180FlipX)
-            Case 5 : img.RotateFlip(RotateFlipType.Rotate90FlipX)
-            Case 6 : img.RotateFlip(RotateFlipType.Rotate90FlipNone)
-            Case 7 : img.RotateFlip(RotateFlipType.Rotate270FlipX)
-            Case 8 : img.RotateFlip(RotateFlipType.Rotate270FlipNone)
-
+        ' Orientierung anwenden
+        Select Case orientation
+            Case 1 : Return picture ' Kein Drehbedarf
+            Case 2 : picture.RotateFlip(RotateFlipType.RotateNoneFlipX)
+            Case 3 : picture.RotateFlip(RotateFlipType.Rotate180FlipNone)
+            Case 4 : picture.RotateFlip(RotateFlipType.Rotate180FlipX)
+            Case 5 : picture.RotateFlip(RotateFlipType.Rotate90FlipX)
+            Case 6 : picture.RotateFlip(RotateFlipType.Rotate90FlipNone)
+            Case 7 : picture.RotateFlip(RotateFlipType.Rotate270FlipX)
+            Case 8 : picture.RotateFlip(RotateFlipType.Rotate270FlipNone)
         End Select
 
-        Return img
-
+        Return picture
     End Function
+
 
     ''' <summary>
     ''' Dreht ein Bild um den angegebenen Winkel angle.
@@ -501,9 +505,9 @@ Public Class BildauswahlMain
 
         ' Alle Unterverzeichnisse rekursiv sammeln
         For Each hauptVerzeichnis In aktuelleSettings.Verzeichnisse
-            If Directory.Exists(hauptVerzeichnis) Then
+            If System.IO.Directory.Exists(hauptVerzeichnis) Then
                 Try
-                    alleVerzeichnisse.AddRange(Directory.GetDirectories(hauptVerzeichnis, "*", SearchOption.AllDirectories))
+                    alleVerzeichnisse.AddRange(System.IO.Directory.GetDirectories(hauptVerzeichnis, "*", SearchOption.AllDirectories))
                 Catch ex As Exception
                     ' Bei Zugriff verweigert o. Ä. einfach ignorieren
                 End Try
@@ -535,6 +539,21 @@ Public Class BildauswahlMain
     Private Shared Sub StarteVorbereitungenVerzeichnisse()
 
         PreparePicturesByDirectory()
+
+    End Sub
+
+    Public Sub StoppeAlleThreads()
+        cancelThreads = True
+        If vorbereitungsThreadPictures IsNot Nothing AndAlso vorbereitungsThreadPictures.IsAlive Then
+            vorbereitungsThreadPictures.Join(500)
+        End If
+
+        If vorbereitungsThreadVerzeichnisse IsNot Nothing AndAlso vorbereitungsThreadVerzeichnisse.IsAlive Then
+            vorbereitungsThreadVerzeichnisse.Join(500)
+        End If
+
+        vorbereitungsThreadPictures = Nothing
+        vorbereitungsThreadVerzeichnisse = Nothing
 
     End Sub
 End Class

@@ -4,15 +4,12 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShow
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataExtractor.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowLogging.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowInterfaces.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowLogging.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\SlideShowLogging.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\MetadataExtractor.xml
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.pdb
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\TagLibSharp.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\bin\Debug\XmpCore.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\obj\Debug\SlideShowTools.vbproj.AssemblyReference.cache
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTools\obj\Debug\SlideShowTools.Resources.resources

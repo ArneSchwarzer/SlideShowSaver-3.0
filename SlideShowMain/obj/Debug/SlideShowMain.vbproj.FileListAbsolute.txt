@@ -15,7 +15,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowM
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowBildauswahl.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowBildauswahl.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowBildauswahl.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowInterfaces.pdb
@@ -35,9 +34,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowS
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MyControlsLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\MetadataExtractor.xml
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.pdb
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\TagLibSharp.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.xml

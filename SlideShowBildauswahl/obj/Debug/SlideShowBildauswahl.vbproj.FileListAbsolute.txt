@@ -2,7 +2,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\Sli
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowBildauswahl.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowBildauswahl.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowTools.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowTools.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.vbproj.AssemblyReference.cache

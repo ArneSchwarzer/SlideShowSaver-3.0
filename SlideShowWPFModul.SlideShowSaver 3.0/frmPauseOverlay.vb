@@ -3,10 +3,11 @@ Imports System.Windows.Forms
 Imports SlideShowTools.CursorHandling
 Imports SlideShowTools.XmlHandling
 Imports SlideShowBildauswahl.BildauswahlMain
-Imports TagLib
 Imports System.IO
 Imports SlideShowTools
 Imports SlideShowLogging
+Imports MetadataExtractor
+Imports MetadataExtractor.Formats.Xmp
 
 Public Class frmPauseModusOverlay
 
@@ -17,7 +18,6 @@ Public Class frmPauseModusOverlay
     Private bild As BitmapImage
     Private meineInstanz As ModulMain = TryCast(ModulMain.activeModuleInstanz, ModulMain)
     Private pauseInfoScreen As frmPictureInfo = Nothing
-    Private tagLibFile As TagLib.Jpeg.File
     Private xmlPfad As String = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 "SlideShowSaver 3.0\Module\SlideShowSaver 3.0\Markierte Fotos.xml"
@@ -76,13 +76,19 @@ Public Class frmPauseModusOverlay
         lblPauseAnzahl.Text = "Bild " & indexListe & " von " & anzeigeListe.Count
         lblOptionsDialogDisabled.Visible = False
 
-        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        'Sternebewertungscontrol
         Try
-            tagLibFile = TagLib.File.Create(bildPfad)
-            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
-            tagLibFile.Dispose()
+            Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
+            Dim xmp = directories.OfType(Of XmpDirectory)().FirstOrDefault()
+            Dim ratingStr As String = xmp.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+
+            If Not String.IsNullOrEmpty(ratingStr) Then
+                Integer.TryParse(ratingStr, sbcBewerten.Bewertung)
+            Else
+                sbcBewerten.Bewertung = 0
+            End If
         Catch ex As Exception
-            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen des SterneBewertungControls: " & ex.ToString)
         End Try
 
         'Steuerelemente & Timer einrichten
@@ -183,7 +189,6 @@ Public Class frmPauseModusOverlay
     End Sub
 
     Private Sub sbcBewerten_BewertungGeaendert(sender As Object, neueBewertung As Integer) Handles sbcBewerten.BewertungGeaendert
-        Dim taglibFile As TagLib.Jpeg.File
         Dim tempImage As Image
 
         If Not String.IsNullOrEmpty(bildPfad) Then
@@ -193,11 +198,29 @@ Public Class frmPauseModusOverlay
                     meineInstanz.sssScreen.imgAnzeige.Source = Nothing
                 End If
 
-                ' Tag schreiben
-                taglibFile = TagLib.File.Create(bildPfad)
-                taglibFile.ImageTag.Rating = sbcBewerten.Bewertung
-                taglibFile.Save()
-                taglibFile.Dispose()
+                ' Metadaten mit BitmapMetadata aktualisieren (nur JPEG)
+                Dim encoder As New JpegBitmapEncoder()
+                Dim bitmap As BitmapImage = New BitmapImage(New Uri(bildPfad))
+                encoder.Frames.Add(BitmapFrame.Create(bitmap))
+
+                Dim metadata As BitmapMetadata = TryCast(BitmapFrame.Create(bitmap).Metadata.Clone(), BitmapMetadata)
+
+                If metadata IsNot Nothing Then
+                    metadata.SetQuery("/xmp/xmp:Rating", neueBewertung)
+                    encoder.Frames.Clear()
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap, Nothing, metadata, Nothing))
+
+                    ' Sicherung des Originals erstellen
+                    Dim backupPfad As String = bildPfad & ".bak"
+                    If Not File.Exists(backupPfad) Then
+                        File.Copy(bildPfad, backupPfad)
+                    End If
+
+                    ' Datei überschreiben
+                    Using filestream As New FileStream(bildPfad, FileMode.Create, FileAccess.Write)
+                        encoder.Save(filestream)
+                    End Using
+                End If
 
                 ' Bild wieder neu einladen (nach dem Speichern)
                 tempImage = GetPictureByName(bildPfad)
@@ -209,8 +232,8 @@ Public Class frmPauseModusOverlay
                 LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen der Bewertung für Bild " & bildPfad & ": " & ex.ToString)
             End Try
         End If
-
     End Sub
+
 
 
     Private Sub chkPauseMarkPicture_CheckStateChanged(sender As Object, e As EventArgs) Handles chkPauseMarkPicture.CheckStateChanged
@@ -237,13 +260,19 @@ Public Class frmPauseModusOverlay
             btnPauseBack.Enabled = False
         End If
 
-        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        'Sternebewertungscontrol
         Try
-            tagLibFile = TagLib.File.Create(bildPfad)
-            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
-            tagLibFile.Dispose()
+            Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
+            Dim xmp = directories.OfType(Of XmpDirectory)().FirstOrDefault()
+            Dim ratingStr As String = xmp.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+
+            If Not String.IsNullOrEmpty(ratingStr) Then
+                Integer.TryParse(ratingStr, sbcBewerten.Bewertung)
+            Else
+                sbcBewerten.Bewertung = 0
+            End If
         Catch ex As Exception
-            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen des SterneBewertungControls: " & ex.ToString)
         End Try
 
         'Zum Schutz vor unabsichtlichem Ändern der Bewertung eines Bildes
@@ -291,13 +320,19 @@ Public Class frmPauseModusOverlay
             btnPauseForward.Enabled = False
         End If
 
-        'Bei TagLib-Dateien immer ein bischen vorsichtig sein.
+        'Sternebewertungscontrol
         Try
-            tagLibFile = TagLib.File.Create(bildPfad)
-            sbcBewerten.Bewertung = tagLibFile.ImageTag.Rating
-            tagLibFile.Dispose()
+            Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
+            Dim xmp = directories.OfType(Of XmpDirectory)().FirstOrDefault()
+            Dim ratingStr As String = xmp.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+
+            If Not String.IsNullOrEmpty(ratingStr) Then
+                Integer.TryParse(ratingStr, sbcBewerten.Bewertung)
+            Else
+                sbcBewerten.Bewertung = 0
+            End If
         Catch ex As Exception
-            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Erstellen von tagLibFile: " & ex.ToString)
+            LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen des SterneBewertungControls: " & ex.ToString)
         End Try
 
         'Zum Schutz vor unabsichtlichem Ändern der Bewertung eines Bildes

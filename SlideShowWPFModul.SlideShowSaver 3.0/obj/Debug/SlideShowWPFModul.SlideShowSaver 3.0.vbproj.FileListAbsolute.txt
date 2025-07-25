@@ -17,7 +17,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowLoader.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowBildauswahl.xml

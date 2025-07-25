@@ -14,6 +14,7 @@ Imports System.Windows.Interop
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowLogging
 Imports System.Drawing
+Imports SlideShowBildauswahl
 
 Partial Public Class wpfModulMain
 
@@ -79,6 +80,8 @@ Partial Public Class wpfModulMain
         AddHandler tmrModul.Tick, AddressOf TmrModul_Tick
         AddHandler tmrDelay.Tick, AddressOf tmrDelay_Tick
         AddHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
+        AddHandler BildauswahlMain.ErsteBilderGefunden, AddressOf LadeErstesBild
+        AddHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf LadeErstesBild
 
         'Initialisierung der Komponenten
         InitializeComponent()
@@ -111,7 +114,7 @@ Partial Public Class wpfModulMain
 
 
         CheckYourMail()
-        LadeErstesBild()
+        ShaderUndTransitionenVorbereiten()
         tmrModul.Start()
 
     End Sub
@@ -216,12 +219,7 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-    Private Sub LadeErstesBild()
-        'Wählt die ersten Bilder zur Anzeige aus.
-
-        Dim helper As New WindowInteropHelper(Me)
-        Dim hwnd As IntPtr = helper.Handle
-
+    Private Sub ShaderUndTransitionenVorbereiten()
 #Region "Transition aussuchen"
         'Transition aussuchen
         If listOfEnabledTransitions.Count > 0 Then
@@ -285,6 +283,19 @@ Partial Public Class wpfModulMain
         End If
 #End Region
 
+        'Falls die Events von BildauswahlMain bereits verschlafen wurden
+        If (BildauswahlMain.hasFirstResultsPictues AndAlso aktuelleSettings.Bildauswahl = "Zufallsbild") OrElse (BildauswahlMain.hasFirstResultsVerzeichnisse AndAlso aktuelleSettings.Bildauswahl = "Zufallsverzeichnis") Then
+            LadeErstesBild()
+        End If
+
+    End Sub
+
+    Private Sub LadeErstesBild()
+        'Wählt die ersten Bilder zur Anzeige aus. Entweder Eventgetriggerert oder, falls die Events verschlafen
+        'wurden von ShaderUndTransitionenVorbereiten()
+
+        Dim helper As New WindowInteropHelper(Me)
+        Dim hwnd As IntPtr = helper.Handle
 
 #Region "Erste Bilder laden"
         'erste Bilder laden (ggf. Shader anwenden)
@@ -406,11 +417,11 @@ Partial Public Class wpfModulMain
 
         'BildInfo des Bildes aktualisieren
         If aktuelleSettings.BildInfoAnzeigen Then
-            If bildPfad IsNot Nothing Then
+            If ModulMain.sssInfo IsNot Nothing AndAlso bildPfad IsNot Nothing Then
                 ModulMain.sssInfo.RefreshLabels(bildPfad)
+                ModulMain.sssInfo.Refresh()
+                ModulMain.sssInfo.BringToFront()
             End If
-            ModulMain.sssInfo.Refresh()
-            ModulMain.sssInfo.BringToFront()
         End If
 
         'Liste der letzten 10 Bilder befüllen und ggf. das erste Element wieder aus der Liste löschen.

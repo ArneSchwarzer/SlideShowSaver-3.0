@@ -15,7 +15,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\obj\Deb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\obj\Debug\SlideShowShader.Nachtsicht.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\MetadataExtractor.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\bin\Debug\SlideShowTools.pdb

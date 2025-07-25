@@ -1,24 +1,15 @@
 ﻿Imports System.Drawing
-Imports System.Drawing.Drawing2D
-Imports System.Drawing.Imaging
+Imports System.Globalization
 Imports System.IO
 Imports System.Windows.Forms
-Imports SlideShowInterfaces.InterfaceDeclarations
-Imports SlideShowTools.TextureHandling
-Imports SlideShowTools.LocationHandling
-Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools
-Imports SlideShowLogging.LogHandling
-Imports System.Text
 Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Exif
 Imports MetadataExtractor.Formats.Iptc
-Imports TagLib
-Imports TagLib.IFD.Entries
-Imports System.Globalization
-Imports MetadataExtractor.Formats
+Imports MetadataExtractor.Formats.Xmp
+Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
+Imports SlideShowTools
+Imports SlideShowTools.RegistryHandling
 
 Public Class ShaderMain
     Implements ISlideShowShader
@@ -155,28 +146,42 @@ Public Class ShaderMain
 
         'Metadaten via TagLib/MetaDataExtraktor und LocationHandling
         If Path.GetExtension(bildPfad) = ".jpg" OrElse Path.GetExtension(bildPfad) = ".jpeg" Then
-            Dim tagLibFile As TagLib.Jpeg.File
             Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
             Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
 
-            Try
-                tagLibFile = TagLib.File.Create(bildPfad)
-            Catch ex As Exception
-                LogError("Shader Nachtsicht - ShaderMain.RunShader(): Probleme beim Erstellen von TagLibFile:" & ex.ToString)
-                tagLibFile = Nothing
-            End Try
 
-
-            'Tags auslesen
+            ' Tags auslesen via MetadataExtractor
             keywords.Clear()
 
-            If tagLibFile IsNot Nothing AndAlso tagLibFile.ImageTag.Keywords IsNot Nothing Then
-                For Each keyword In tagLibFile.ImageTag.Keywords
-                    keywords.Add(keyword)
-                Next
-            Else
+            Try
+                Dim xmpDir = directories.OfType(Of XmpDirectory)().FirstOrDefault()
+
+                If xmpDir IsNot Nothing AndAlso xmpDir.XmpMeta IsNot Nothing Then
+                    Dim xmp = xmpDir.XmpMeta
+                    Dim subjectArray = xmp.GetProperty("http://purl.org/dc/elements/1.1/", "subject")
+
+                    If subjectArray IsNot Nothing Then
+                        Dim subjectCount = xmp.CountArrayItems("http://purl.org/dc/elements/1.1/", "subject")
+
+                        For i = 1 To subjectCount
+                            Dim item = xmp.GetArrayItem("http://purl.org/dc/elements/1.1/", "subject", i)
+                            If item IsNot Nothing Then
+                                keywords.Add(item.Value.Trim())
+                            End If
+                        Next
+
+                        If keywords.Count = 0 Then keywords.Add("-")
+
+                    Else
+                        keywords.Add("-")
+                    End If
+                End If
+
+            Catch ex As Exception
                 keywords.Add("-")
-            End If
+                LogHandling.LogError("ShaderNachtsicht - Fehler beim Auslesen der Tags: " & ex.Message)
+            End Try
+
 
             'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das nichts bringt LocationHelper bemühen.
             If HoleGpsKoordinaten(bildPfad) IsNot Nothing Then

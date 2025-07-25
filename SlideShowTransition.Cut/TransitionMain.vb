@@ -8,6 +8,7 @@ Imports System.Windows.Media.Imaging
 Imports System.Windows.Controls
 Imports SlideShowTools.WPFHandling
 Imports SlideShowTools
+Imports System.Windows.Threading
 
 
 Public Class TransitionMain
@@ -51,7 +52,9 @@ Public Class TransitionMain
 
         newRTImg = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
 
-        'Das Bild direkt als fertig zurückgeben
+        'Dem Modul 1/2 Sekunde Zeit zum aufholen geben und dann das Bild direkt als fertig zurückgeben
+        System.Threading.Thread.Sleep(500)
+
         RaiseEvent FrameIstFertig(newRTImg)
         RaiseEvent TransitionIsRunning(False)
 

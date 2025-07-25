@@ -36,7 +36,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\Sl
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\MyControlsLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowBildauswahl.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowBildauswahl.xml
@@ -61,3 +60,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\Sl
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\SlideShowModul.Matrix.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\SlideShowModul.Matrix.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\obj\Debug\Modul_Matrix.frmInputModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\XmpCore.xml

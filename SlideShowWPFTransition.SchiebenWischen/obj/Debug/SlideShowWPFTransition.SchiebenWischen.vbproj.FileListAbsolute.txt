@@ -14,7 +14,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWis
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\taglib-sharp.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowInterfaces.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\bin\Debug\SlideShowLogging.pdb

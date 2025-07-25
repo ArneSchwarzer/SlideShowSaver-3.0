@@ -2,7 +2,6 @@
 Imports System.Runtime.InteropServices
 Imports System.Windows.Forms
 Imports SlideShowLogging.LogHandling
-Imports TagLib
 Imports SlideShowTools.ListHandling
 Imports SlideShowLogging
 Imports SlideShowTools.KeyAndMouseHandling
@@ -50,16 +49,14 @@ Public Class frmPictureInfo
         Else
             Try
                 Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
-                Dim tagLibFile As TagLib.Jpeg.File
 
-                tagLibFile = TagLib.File.Create(bildPfad)
-
-                ' ========== Dateiname und Pfad ==========
+                'Dateiname und Pfad
                 lblDateiname.Text = Path.GetFileNameWithoutExtension(bildPfad)
                 lblDateipfad.Text = bildPfad
                 lblBewertung.Visible = False
                 slbBewertung.Visible = True
-                ' ========== Erstellungsdatum, Blende, Verschlusszeit, ISO, Brennweite ==========
+
+                'Erstellungsdatum, Blende, Verschlusszeit, ISO, Brennweite
                 Dim subIfd = directories.OfType(Of ExifSubIfdDirectory)().FirstOrDefault()
                 If subIfd IsNot Nothing Then
                     Dim rawDate As String = subIfd.GetDescription(ExifDirectoryBase.TagDateTimeOriginal)
@@ -82,20 +79,20 @@ Public Class frmPictureInfo
                     lblBrennweite.Text = subIfd.GetDescription(ExifDirectoryBase.TagFocalLength)
                 End If
 
-                ' ========== Kamera (Modell) ==========
+                'Kamera (Modell)
                 Dim ifd0 = directories.OfType(Of ExifIfd0Directory)().FirstOrDefault()
                 If ifd0 IsNot Nothing Then
                     lblKamera.Text = ifd0.GetDescription(ExifDirectoryBase.TagModel)
                 End If
 
-                ' ========== Objektiv (sofern vorhanden) ==========
+                'Objektiv (sofern vorhanden)
                 Dim lens = subIfd?.GetDescription(ExifDirectoryBase.TagLensModel)
                 If String.IsNullOrEmpty(lens) Then
                     lens = ifd0?.GetDescription(ExifDirectoryBase.TagLensModel)
                 End If
                 lblObjektiv.Text = If(lens, "unbekannt")
 
-                ' ========== IPTC: Autor, Bewertung, Tags ==========
+                'IPTC: Autor, Bewertung, Tags
                 Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
                 If iptc IsNot Nothing Then
                     Dim autor As String = iptc.GetDescription(IptcDirectory.TagByLine)
@@ -120,10 +117,6 @@ Public Class frmPictureInfo
                         lblAutor.Text = "-"
                     End If
 
-                    Dim rating As Integer
-                    rating = tagLibFile.ImageTag.Rating
-                    slbBewertung.bewertung = rating
-
                     Dim keywords = iptc.GetStringArray(IptcDirectory.TagKeywords)
                     If keywords IsNot Nothing Then
                         Array.Sort(keywords, StringComparer.CurrentCultureIgnoreCase)
@@ -134,13 +127,21 @@ Public Class frmPictureInfo
 
                 End If
 
-                ' ========== Fallback über XMP falls IPTC leer ==========
+                'Bewertung und Fallback für Author über XMP falls IPTC leer
                 Dim xmp = directories.OfType(Of XmpDirectory)().FirstOrDefault()
                 If xmp IsNot Nothing Then
                     If String.IsNullOrEmpty(lblAutor.Text) Then
                         lblAutor.Text = xmp.XmpMeta.GetPropertyString("http://purl.org/dc/elements/1.1/", "creator")
-
                     End If
+
+                    Dim ratingStr As String = xmp.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+
+                    If Not String.IsNullOrEmpty(ratingStr) Then
+                        Integer.TryParse(ratingStr, slbBewertung.Bewertung)
+                    Else
+                        slbBewertung.Bewertung = 0
+                    End If
+
                 End If
 
             Catch ex As Exception

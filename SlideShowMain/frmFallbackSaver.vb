@@ -1,5 +1,4 @@
-﻿Imports TagLib
-Imports System.Windows.Forms
+﻿Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowTools
 Imports SlideShowMain.SaverMain
