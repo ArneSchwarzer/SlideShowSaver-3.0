@@ -32,19 +32,33 @@ Public Class ucOptionsShader
             picFarbton.Enabled = True
         End If
 
-        'trbIntensität setzen
+        'trkIntensität setzen
         trkIntensität.Value = aktuelleSettings.Intensitaet
         lblIntensität.Text = trkIntensität.Value & " %"
 
         'Modus setzen
         Select Case aktuelleSettings.Modus
             Case ShaderModus.Toenen
-                rbTönen.Checked = True
+                rdoTönen.Checked = True
             Case ShaderModus.Faerben
-                rbFärben.Checked = True
+                rdoFärben.Checked = True
             Case ShaderModus.Zufaellig
-                rbZufall.Checked = True
+                rdoZufall.Checked = True
         End Select
+
+        'AnimationsModus setzen
+        Select Case aktuelleSettings.Animationsmodus
+            Case AnimationsModus.Statisch
+                rdoAnimationKeine.Checked = True
+            Case AnimationsModus.Animiert
+                rdoAnimationEin.Checked = True
+            Case AnimationsModus.Zufaellig
+                rdoAnimationZufällig.Checked = True
+        End Select
+
+        'trkGeschwindigkeit setzen
+        trkAnimationsgeschwindigkeit.Value = (trkAnimationsgeschwindigkeit.Maximum + 1) - aktuelleSettings.Geschwindigkeit
+        lblAnimationsgeschwindigkeit.Text = aktuelleSettings.Geschwindigkeit.ToString & " s"
 
     End Sub
 
@@ -74,28 +88,28 @@ Public Class ucOptionsShader
 
     End Sub
 
-    Private Sub rbTönen_CheckedChanged(sender As Object, e As EventArgs) Handles rbTönen.CheckedChanged
+    Private Sub rdoTönen_CheckedChanged(sender As Object, e As EventArgs) Handles rdoTönen.CheckedChanged
         'Behandelt RadioButton Tönen
 
-        If rbTönen.Checked = True Then
+        If rdoTönen.Checked = True Then
             WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Tönen")
         End If
 
     End Sub
 
-    Private Sub rbFärben_CheckedChanged(sender As Object, e As EventArgs) Handles rbFärben.CheckedChanged
+    Private Sub rdoFärben_CheckedChanged(sender As Object, e As EventArgs) Handles rdoFärben.CheckedChanged
         'Behandelt RadioButton Färben
 
-        If rbFärben.Checked = True Then
+        If rdoFärben.Checked = True Then
             WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Färben")
         End If
 
     End Sub
 
-    Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rbZufall.CheckedChanged
+    Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rdoZufall.CheckedChanged
         'Behandelt Radiobutton Zufall
 
-        If rbZufall.Checked = True Then
+        If rdoZufall.Checked = True Then
             WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Zufall")
         End If
 
@@ -121,5 +135,36 @@ Public Class ucOptionsShader
 
         aktuelleSettings = GetSettings(Of ShaderSettings_ToenenFaerben)(nameShader)
 
+    End Sub
+
+    Private Sub rdoAnimationKeine_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationKeine.CheckedChanged
+        'Behandelt Radiobutton Animation "Statisch"
+
+        If rdoAnimationKeine.Checked = True Then
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Statisch")
+        End If
+    End Sub
+
+    Private Sub rdoAnimationEin_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationEin.CheckedChanged
+        'Behandelt Radiobutton Animation "Animiert"
+
+        If rdoAnimationEin.Checked = True Then
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Animiert")
+        End If
+    End Sub
+
+    Private Sub rdoAnimationZufällig_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationZufällig.CheckedChanged
+        'Behandelt Radiobutton Animation "Statisch"
+
+        If rdoAnimationZufällig.Checked = True Then
+            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Zufall")
+        End If
+    End Sub
+
+    Private Sub trkAnimationsgeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkAnimationsgeschwindigkeit.ValueChanged
+        'Behandelt die Trackbar Animationsgeschwindigkeit
+
+        lblAnimationsgeschwindigkeit.Text = (trkAnimationsgeschwindigkeit.Maximum + 1) - trkAnimationsgeschwindigkeit.Value & " s"
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Geschwindigkeit", (trkAnimationsgeschwindigkeit.Maximum + 1) - trkAnimationsgeschwindigkeit.Value)
     End Sub
 End Class

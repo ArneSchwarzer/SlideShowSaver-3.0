@@ -10,6 +10,9 @@ Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
 Imports SlideShowTools
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.WPFHandling
+Imports System.Windows.Media
+Imports System.Windows.Media.Imaging
 
 Public Class ShaderMain
     Implements ISlideShowShader
@@ -61,6 +64,8 @@ Public Class ShaderMain
     End Property
 #End Region
 
+    'Events
+    Event ShaderFrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowShader.ShaderFrameIstFertig
     'Shader-Ausführung
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
         'Wandelt ein Bild in einen Überwachungsmonitor des BND...
@@ -72,6 +77,9 @@ Public Class ShaderMain
         Dim bildPfad As String = imagePath
         Dim resultImage As New Bitmap(zielSize.Width, zielSize.Height)
         Dim ia As New Imaging.ImageAttributes()
+
+        'Für Event-Ausgabe
+        Dim rtb As RenderTargetBitmap
 
         'Nachtsicht-Farbfilter
         Dim colorMatrix As New Imaging.ColorMatrix(New Single()() {
@@ -91,14 +99,14 @@ Public Class ShaderMain
         Dim schlagworte As String
         Dim keywords As New List(Of String)
         Dim geheimstufe As String = "VS-Nur für den Dienstgebrauch" ' kann sich dynamisch ändern
-        Dim geheimStufeFarbe As Brush = Brushes.LimeGreen
+        Dim geheimStufeFarbe As System.Drawing.Brush = System.Drawing.Brushes.LimeGreen
         Dim kameraCode As String
 
         ' --- Text-Overlay-Stil ---
         Dim overlayFont As New Font("Lucida Console", 12, FontStyle.Bold)
         Dim geheimFont As New Font("Lucida Console", 18, FontStyle.Bold)
-        Dim overlayBrush As Brush = Brushes.LimeGreen
-        Dim backgroundBrush As New SolidBrush(Color.FromArgb(128, Color.Black))
+        Dim overlayBrush As System.Drawing.Brush = System.Drawing.Brushes.LimeGreen
+        Dim backgroundBrush As New SolidBrush(System.Drawing.Color.FromArgb(128, System.Drawing.Color.Black))
         Dim zeilen As List(Of String)
         Dim höheNächsterText As Integer
         Dim breiteFuerTextumbruch As Integer
@@ -112,7 +120,7 @@ Public Class ShaderMain
         g = Graphics.FromImage(resultImage)
         g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
         g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
-        g.Clear(Color.Black)
+        g.Clear(System.Drawing.Color.Black)
 
         ia.SetColorMatrix(colorMatrix)
 
@@ -203,7 +211,7 @@ Public Class ShaderMain
             If keywords IsNot Nothing Then
                 If keywords.Any(Function(k) String.Equals(k.Trim(), "18+", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "Streng Geheim"
-                    geheimStufeFarbe = Brushes.Orange
+                    geheimStufeFarbe = System.Drawing.Brushes.Orange
                 ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Akt", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "Geheim"
                 ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Lingerie", StringComparison.OrdinalIgnoreCase)) Then
@@ -262,7 +270,7 @@ Public Class ShaderMain
         DrawText(g, geheimstufe, geheimFont, geheimStufeFarbe, (resultImage.Width - g.MeasureString(geheimstufe, geheimFont).Width) \ 2, 105)
 
         'Bibleothekarischer Hinweis (Dateipfad)
-        DrawText(g, "Bibliothekarischer Hinweis:" & vbCrLf & "Ablageort: " & dateipfad, overlayFont, overlayBrush, 10, resultImage.Height - 80)
+        DrawText(g, "Bibliothekarischer Hinweis:" & vbCrLf & "Ablageort: " & dateipfad, overlayFont, overlayBrush, 10, resultImage.Height - 85)
 
         'Kamera
         DrawText(g, kameraCode, overlayFont, overlayBrush, (resultImage.Width - g.MeasureString(kameraCode, overlayFont).Width) \ 2, 0)
@@ -274,10 +282,18 @@ Public Class ShaderMain
 
         'Fertig und raus...
         g.Dispose()
+
+        'Ergebnis sowohl als Event als auch als Bitmap liefern
+        rtb = ConvertImageToRenderTargetBitmap(resultImage, zielSize)
+        RaiseEvent ShaderFrameIstFertig(rtb)
+
         Return resultImage
 
     End Function
 
+    Public Sub StopShader() Implements ISlideShowShader.StopShader
+        'Statischer Shader - keine Aktion notwendig
+    End Sub
     'Optionen/Dialog
     Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
         'Lädt die aktuellen Settings und legt sie in SettingsInbox ab (z.Zt. noch ohne Funktion, da der Shader
@@ -291,9 +307,9 @@ Public Class ShaderMain
     End Function
 
     'Private Methoden
-    Private Sub DrawText(gfx As Graphics, text As String, font As Font, brush As Brush, x As Integer, y As Integer)
+    Private Sub DrawText(gfx As Graphics, text As String, font As Font, brush As System.Drawing.Brush, x As Integer, y As Integer)
         Dim size = gfx.MeasureString(text, font)
-        Dim backgroundBrush As New SolidBrush(Color.FromArgb(128, 0, 0, 0))
+        Dim backgroundBrush As New SolidBrush(System.Drawing.Color.FromArgb(128, 0, 0, 0))
 
         gfx.FillRectangle(backgroundBrush, x - 4, y - 2, size.Width + 8, size.Height + 4)
         gfx.DrawString(text, font, brush, x, y)
@@ -356,7 +372,7 @@ Public Class ShaderMain
     End Function
 
     Private Sub ZeichneRahmen(titelText As String, overlayFont As Font)
-        Dim rahmenStift As New Pen(Color.LimeGreen, 10)
+        Dim rahmenStift As New System.Drawing.Pen(System.Drawing.Color.LimeGreen, 10)
         Dim titelSize As SizeF = g.MeasureString(titelText, overlayFont)
         Dim lueckeBreite As Integer = CInt(titelSize.Width + 20)
         Dim bildbreite As Integer
@@ -384,7 +400,7 @@ Public Class ShaderMain
         g.DrawLine(rahmenStift, 0, bildhöhe - 1, bildbreite - 1, bildhöhe - 1)
 
         'Oberen Rand korrigieren
-        rahmenStift = New Pen(Color.Black, 10)
+        rahmenStift = New System.Drawing.Pen(System.Drawing.Color.Black, 10)
         g.DrawLine(rahmenStift, 0, 0, bildbreite, 0)
 
     End Sub

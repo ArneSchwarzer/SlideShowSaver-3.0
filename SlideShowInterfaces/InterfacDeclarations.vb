@@ -81,7 +81,7 @@ Public Class InterfaceDeclarations
 
         'Events
         Event TransitionIsRunning(state As Boolean)
-        Event FrameIstFertig(bitmap As RenderTargetBitmap)
+        Event TransitionFrameIstFertig(bitmap As RenderTargetBitmap)
 
         'Ausführung
         Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs As Integer = 0)
@@ -118,8 +118,13 @@ Public Class InterfaceDeclarations
         ReadOnly Property ShaderKurzBeschreibung As String
         ReadOnly Property ShaderVersion As Version
 
+        'Events
+        Event ShaderFrameIstFertig(bitmap As RenderTargetBitmap)
+
         'Ausführung
         Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image
+
+        Sub StopShader()
 
         'Optionen/Dialoghandling
         Function GetShaderOptionsDialog() As UserControl

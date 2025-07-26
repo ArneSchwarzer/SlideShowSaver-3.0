@@ -1,6 +1,7 @@
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowSprachen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowSprachen.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowSprachen.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\MyControlsLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowTools.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\SlideShowInterfaces.dll
@@ -19,4 +20,3 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\obj\Debug\SlideS
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\obj\Debug\SlideShowSprachen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\obj\Debug\SlideShowSprachen.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\obj\Debug\SlideShowSprachen.pdb
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\MyControlsLibrary.dll

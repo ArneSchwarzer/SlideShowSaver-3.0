@@ -39,7 +39,7 @@ Public Class TransitionMain
     End Property
 
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
-    Public Event FrameIstFertig As ISlideShowTransition.FrameIstFertigEventHandler Implements ISlideShowTransition.FrameIstFertig
+    Public Event TransitionFrameIstFertig As ISlideShowTransition.TransitionFrameIstFertigEventHandler Implements ISlideShowTransition.TransitionFrameIstFertig
 
     Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
                          newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode,
@@ -55,7 +55,7 @@ Public Class TransitionMain
         'Dem Modul 1/2 Sekunde Zeit zum aufholen geben und dann das Bild direkt als fertig zurückgeben
         System.Threading.Thread.Sleep(500)
 
-        RaiseEvent FrameIstFertig(newRTImg)
+        RaiseEvent TransitionFrameIstFertig(newRTImg)
         RaiseEvent TransitionIsRunning(False)
 
     End Sub

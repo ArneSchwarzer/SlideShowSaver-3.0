@@ -10,9 +10,11 @@ Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
+Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
+
 
 Namespace TransitionMain_SuW
 
@@ -93,7 +95,7 @@ Namespace TransitionMain_SuW
 
         'Events
         Event TransitionIsRunning(state As Boolean) Implements ISlideShowTransition.TransitionIsRunning
-        Event FrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowTransition.FrameIstFertig
+        Event TransitionFrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowTransition.TransitionFrameIstFertig
 
         'Transition Ausführung
         Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
@@ -243,33 +245,6 @@ Namespace TransitionMain_SuW
 
         'Bildwandlung und -manipulation
 
-        Public Shared Function ErzeugeGerahmtesBild(bild As BitmapImage,
-                                             modus As PictureBoxSizeMode,
-                                             zielgröße As System.Drawing.Size) As RenderTargetBitmap
-            'Erstellt ein Bitmap mit dem Bild gemäß SizeMode mit schwarzem Rahmen in der Zielgröße
-
-            Dim drawingVisual As New DrawingVisual()
-
-            Using dc As DrawingContext = drawingVisual.RenderOpen()
-                ' Bildgröße berechnen anhand SizeMode
-                Dim bildgröße As New System.Drawing.Size(bild.PixelWidth, bild.PixelHeight)
-                Dim quellRect As New Rectangle(New System.Drawing.Point(0, 0), zielgröße)
-                Dim zielRectangle As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bildgröße, quellRect, modus)
-                Dim zielRect As New Rect(zielRectangle.Left, zielRectangle.Top, zielRectangle.Width, zielRectangle.Height)
-                Dim gesamterBereich As New Rect(0.0, 0.0, zielgröße.Width, zielgröße.Height)
-
-                dc.DrawRectangle(Media.Brushes.Black, Nothing, gesamterBereich)
-                dc.DrawImage(bild, zielRect)
-
-            End Using
-
-            ' Rendern in RenderTargetBitmap
-            Dim bmp As New RenderTargetBitmap(CInt(zielgröße.Width), CInt(zielgröße.Height), 96, 96, PixelFormats.Pbgra32)
-            bmp.Render(drawingVisual)
-
-            Return bmp
-        End Function
-
         Private Function ConvertBitmapToImageSource(bmp As Bitmap) As BitmapSource
             Using memory = New MemoryStream()
                 bmp.Save(memory, ImageFormat.Png)
@@ -287,7 +262,7 @@ Namespace TransitionMain_SuW
         Public Sub EndBildZeichnen()
             'Gibt das Endbild aus
 
-            RaiseEvent FrameIstFertig(newBmpGerahmt)
+            RaiseEvent TransitionFrameIstFertig(newBmpGerahmt)
 
         End Sub
 
@@ -342,6 +317,7 @@ Namespace TransitionMain_SuW
             AddHandler frameTimer.Tick, AddressOf OnFrameTick
             frameTimer.Interval = TimeSpan.FromMilliseconds(1000 \ FPS)
             frameTimer.Start()
+
         End Sub
 
         Public Sub StopRenderLoop()
@@ -371,7 +347,7 @@ Namespace TransitionMain_SuW
             ' Umwandeln in System.Drawing.Bitmap
             'Dim bitmap As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
 
-            RaiseEvent FrameIstFertig(rtb)
+            RaiseEvent TransitionFrameIstFertig(rtb)
 
         End Sub
 

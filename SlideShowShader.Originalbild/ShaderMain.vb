@@ -1,6 +1,9 @@
 ﻿Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowInterfaces.InterfaceDeclarations
+Imports System.Windows.Media.Imaging
+Imports SlideShowTools.GraphicsSizeModeHandling
+Imports SlideShowTools.WPFHandling
 
 Public Class ShaderMain
     Implements ISlideShowShader
@@ -24,12 +27,29 @@ Public Class ShaderMain
         End Get
     End Property
 
+    'Events
+    Event ShaderFrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowShader.ShaderFrameIstFertig
+
     'Shader Ausführung
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
+
+        Dim rtb As RenderTargetBitmap
+        Dim bm As BitmapImage
+
+        If clientSize = Nothing Then clientSize = baseImage.Size
+
+        'Ergebnis sowohl als Event als auch als Bitmap liefern
+        bm = ConvertImageToBitmapImage(baseImage)
+        rtb = ErzeugeGerahmtesBild(bm, PictureBoxSizeMode.Zoom, clientSize)
+        RaiseEvent ShaderFrameIstFertig(rtb)
 
         Return baseImage
 
     End Function
+
+    Public Sub StopShader() Implements ISlideShowShader.StopShader
+        ' Statischer Shader, keine Aktion notwendig
+    End Sub
 
     'Optionen & OptionsDialog
     Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
