@@ -277,7 +277,7 @@ Namespace TransitionMain_SuW
 
         End Sub
 
-        'Animation und Zeichnen
+        'Animation und rendern
         Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
             Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
             Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
@@ -344,46 +344,9 @@ Namespace TransitionMain_SuW
                                               96, 96, PixelFormats.Pbgra32)
             rtb.Render(drawingVisual)
 
-            ' Umwandeln in System.Drawing.Bitmap
-            'Dim bitmap As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
-
             RaiseEvent TransitionFrameIstFertig(rtb)
 
         End Sub
-
-        Private Shared Function ConvertRenderTargetBitmapToBitmap(rtb As RenderTargetBitmap) As Bitmap
-            Dim width As Integer = rtb.PixelWidth
-            Dim height As Integer = rtb.PixelHeight
-            Dim stride As Integer = width * 4
-
-            Dim pixelData(stride * height - 1) As Byte
-            rtb.CopyPixels(pixelData, stride, 0)
-
-            Dim bmp As New Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb)
-            Dim bmpData As BitmapData = bmp.LockBits(New Rectangle(0, 0, width, height),
-                                                     ImageLockMode.WriteOnly,
-                                                     System.Drawing.Imaging.PixelFormat.Format32bppPArgb)
-            Marshal.Copy(pixelData, 0, bmpData.Scan0, pixelData.Length)
-            bmp.UnlockBits(bmpData)
-
-            Return bmp
-        End Function
-
-        Public Shared Function ConvertImageToBitmapImage(img As System.Drawing.Image) As BitmapImage
-            Using ms As New MemoryStream()
-                img.Save(ms, ImageFormat.Png)
-                ms.Seek(0, SeekOrigin.Begin)
-
-                Dim bmpImage As New BitmapImage()
-                bmpImage.BeginInit()
-                bmpImage.CacheOption = BitmapCacheOption.OnLoad
-                bmpImage.StreamSource = ms
-                bmpImage.EndInit()
-                bmpImage.Freeze() ' wichtig für Cross-Thread-Access
-
-                Return bmpImage
-            End Using
-        End Function
 
     End Class
 

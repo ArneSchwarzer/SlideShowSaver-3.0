@@ -2,6 +2,7 @@
 Imports System.Globalization
 Imports System.IO
 Imports System.Windows.Forms
+Imports System.Windows.Media
 Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Exif
 Imports MetadataExtractor.Formats.Iptc
@@ -10,16 +11,12 @@ Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
 Imports SlideShowTools
 Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.WPFHandling
-Imports System.Windows.Media
-Imports System.Windows.Media.Imaging
 
 Public Class ShaderMain
     Implements ISlideShowShader
 
-#Region "Variablendeklaration"
     'Variablendeklarationen
-
+#Region "Variablendeklaration"
     'Verwaltung
     Public Shared nameShader As String = "Nachtsicht"
     Private Shared aktuelleSettings As ShaderSettings_Nachtsicht
@@ -34,17 +31,14 @@ Public Class ShaderMain
     Private g As Graphics
     Private zielRect As Rectangle
 
-#End Region
-
-#Region "Structures, Enums etc."
     'Structures
     Public Structure ShaderSettings_Nachtsicht
 
     End Structure
 #End Region
 
+    'Eigenschaften
 #Region "Eigenschaften"
-    ' === Eigenschaften ===
     Public ReadOnly Property ShaderName As String Implements ISlideShowShader.ShaderName
         Get
             Return nameShader
@@ -64,8 +58,6 @@ Public Class ShaderMain
     End Property
 #End Region
 
-    'Events
-    Event ShaderFrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowShader.ShaderFrameIstFertig
     'Shader-Ausführung
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
         'Wandelt ein Bild in einen Überwachungsmonitor des BND...
@@ -77,9 +69,6 @@ Public Class ShaderMain
         Dim bildPfad As String = imagePath
         Dim resultImage As New Bitmap(zielSize.Width, zielSize.Height)
         Dim ia As New Imaging.ImageAttributes()
-
-        'Für Event-Ausgabe
-        Dim rtb As RenderTargetBitmap
 
         'Nachtsicht-Farbfilter
         Dim colorMatrix As New Imaging.ColorMatrix(New Single()() {
@@ -102,7 +91,7 @@ Public Class ShaderMain
         Dim geheimStufeFarbe As System.Drawing.Brush = System.Drawing.Brushes.LimeGreen
         Dim kameraCode As String
 
-        ' --- Text-Overlay-Stil ---
+        'Text-Overlay-Stil
         Dim overlayFont As New Font("Lucida Console", 12, FontStyle.Bold)
         Dim geheimFont As New Font("Lucida Console", 18, FontStyle.Bold)
         Dim overlayBrush As System.Drawing.Brush = System.Drawing.Brushes.LimeGreen
@@ -112,9 +101,6 @@ Public Class ShaderMain
         Dim breiteFuerTextumbruch As Integer
 
         'Initialisierungen
-
-        'Zur Zeit keine aktuelleSettings zum initialisieren
-        'CheckYourSettings()
 
         'Graphics initialisieren
         g = Graphics.FromImage(resultImage)
@@ -152,13 +138,11 @@ Public Class ShaderMain
             End Using
         End If
 
-        'Metadaten via TagLib/MetaDataExtraktor und LocationHandling
+        'Metadaten via MetaDataExtraktor und LocationHandling
         If Path.GetExtension(bildPfad) = ".jpg" OrElse Path.GetExtension(bildPfad) = ".jpeg" Then
             Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
             Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
 
-
-            ' Tags auslesen via MetadataExtractor
             keywords.Clear()
 
             Try
@@ -190,8 +174,7 @@ Public Class ShaderMain
                 LogHandling.LogError("ShaderNachtsicht - Fehler beim Auslesen der Tags: " & ex.Message)
             End Try
 
-
-            'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das nichts bringt LocationHelper bemühen.
+            'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das Nichts bringt LocationHelper bemühen.
             If HoleGpsKoordinaten(bildPfad) IsNot Nothing Then
                 geoPosition = HoleGpsKoordinaten(bildPfad)
             Else
@@ -283,17 +266,11 @@ Public Class ShaderMain
         'Fertig und raus...
         g.Dispose()
 
-        'Ergebnis sowohl als Event als auch als Bitmap liefern
-        rtb = ConvertImageToRenderTargetBitmap(resultImage, zielSize)
-        RaiseEvent ShaderFrameIstFertig(rtb)
-
+        'Ergebnis liefern
         Return resultImage
 
     End Function
 
-    Public Sub StopShader() Implements ISlideShowShader.StopShader
-        'Statischer Shader - keine Aktion notwendig
-    End Sub
     'Optionen/Dialog
     Public Function GetShaderOptionsDialog() As UserControl Implements ISlideShowShader.GetShaderOptionsDialog
         'Lädt die aktuellen Settings und legt sie in SettingsInbox ab (z.Zt. noch ohne Funktion, da der Shader
@@ -307,6 +284,7 @@ Public Class ShaderMain
     End Function
 
     'Private Methoden
+    'Zeichnen
     Private Sub DrawText(gfx As Graphics, text As String, font As Font, brush As System.Drawing.Brush, x As Integer, y As Integer)
         Dim size = gfx.MeasureString(text, font)
         Dim backgroundBrush As New SolidBrush(System.Drawing.Color.FromArgb(128, 0, 0, 0))
@@ -508,6 +486,7 @@ Public Class ShaderMain
 
     End Function
 
+    'Settings & Defaultwerte
     Private Function GetShaderDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Settings des Shaders als Dictionary. Zur Zeit ohne Funktion
 

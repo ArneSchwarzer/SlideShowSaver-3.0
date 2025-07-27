@@ -14,8 +14,8 @@ Public Class ModulMain
 
     'Allgemein
     Public Shared aktuelleSettings As SettingsModul_SSS
-    Public Const SLIDESHOWMODUL_SSS_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0 (WPF)\"
-    Public Const nameModul As String = "SlideShowSaver 3.0 (WPF)"
+    Public Const SLIDESHOWMODUL_SSS_FULLPATH As String = SLIDESHOWMODULBASE_PATH & "SlideShowSaver 3.0\"
+    Public Const nameModul As String = "SlideShowSaver 3.0"
     Public Shared pauseIsActive As Boolean = False
 
     'Instanzen

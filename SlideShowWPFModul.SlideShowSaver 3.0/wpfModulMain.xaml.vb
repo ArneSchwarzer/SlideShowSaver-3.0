@@ -213,7 +213,6 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-
     'Hauptschleife
     Private Sub TmrModul_Tick(sender As Object, e As EventArgs)
         'Nac Beendigung der Anzeige des Bildes gemäß Anzeigedauer startet der Timer die nächste Transition
@@ -227,12 +226,6 @@ Partial Public Class wpfModulMain
 
         If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
 
-            'Aktiven Shader beenden
-            If aktiverShader IsNot Nothing Then
-                aktiverShader.StopShader()
-                RemoveHandler aktiverShader.ShaderFrameIstFertig, AddressOf Shader_ShaderFrameIstFertig
-            End If
-
             'Transition starten, Status & Stoppuhr setzen
             transitionIstAktiv = True
             stoppuhr = Stopwatch.StartNew()
@@ -245,11 +238,6 @@ Partial Public Class wpfModulMain
         Else
 
             'Dann muss der Timer halt selber ran...
-            If aktiverShader IsNot Nothing Then
-                aktiverShader.StopShader()
-                RemoveHandler aktiverShader.ShaderFrameIstFertig, AddressOf Shader_ShaderFrameIstFertig
-            End If
-
             Bildwechsel()
             transitionIstAktiv = False
             warteAufDelay = False
@@ -287,13 +275,6 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub Transition_TransitionFrameIstFertig(rtb As RenderTargetBitmap)
-        imgAnzeige.Source = Nothing
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
-        imgAnzeige.Source = rtb
-    End Sub
-
-    Private Sub Shader_ShaderFrameIstFertig(rtb As RenderTargetBitmap)
         imgAnzeige.Source = Nothing
         GC.Collect()
         GC.WaitForPendingFinalizers()
@@ -518,17 +499,7 @@ Partial Public Class wpfModulMain
                     neuerShader = listOfEnabledShaders(rnd.Next(listOfEnabledShaders.Count))
             End Select
 
-            If aktiverShader IsNot Nothing Then
-                'Alten Handler entfernen
-                RemoveHandler aktiverShader.ShaderFrameIstFertig, AddressOf Shader_ShaderFrameIstFertig
-            End If
-
             aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
-
-            If aktiverShader IsNot Nothing Then
-                'Neuen Handler hinzufügen
-                AddHandler aktiverShader.ShaderFrameIstFertig, AddressOf Shader_ShaderFrameIstFertig
-            End If
 
         End If
 

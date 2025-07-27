@@ -1,10 +1,8 @@
-﻿Imports System.Drawing
-Imports System.Windows.Forms
+﻿Imports System.Windows.Forms
+Imports SlideShowShader.TönenFärben.ShaderMain
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowShader.TönenFärben.ShaderMain
-Imports System.Diagnostics.Eventing.Reader
 
 Public Class ucOptionsShader
     Inherits UserControl
@@ -45,20 +43,6 @@ Public Class ucOptionsShader
             Case ShaderModus.Zufaellig
                 rdoZufall.Checked = True
         End Select
-
-        'AnimationsModus setzen
-        Select Case aktuelleSettings.Animationsmodus
-            Case AnimationsModus.Statisch
-                rdoAnimationKeine.Checked = True
-            Case AnimationsModus.Animiert
-                rdoAnimationEin.Checked = True
-            Case AnimationsModus.Zufaellig
-                rdoAnimationZufällig.Checked = True
-        End Select
-
-        'trkGeschwindigkeit setzen
-        trkAnimationsgeschwindigkeit.Value = (trkAnimationsgeschwindigkeit.Maximum + 1) - aktuelleSettings.Geschwindigkeit
-        lblAnimationsgeschwindigkeit.Text = aktuelleSettings.Geschwindigkeit.ToString & " s"
 
     End Sub
 
@@ -137,34 +121,4 @@ Public Class ucOptionsShader
 
     End Sub
 
-    Private Sub rdoAnimationKeine_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationKeine.CheckedChanged
-        'Behandelt Radiobutton Animation "Statisch"
-
-        If rdoAnimationKeine.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Statisch")
-        End If
-    End Sub
-
-    Private Sub rdoAnimationEin_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationEin.CheckedChanged
-        'Behandelt Radiobutton Animation "Animiert"
-
-        If rdoAnimationEin.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Animiert")
-        End If
-    End Sub
-
-    Private Sub rdoAnimationZufällig_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAnimationZufällig.CheckedChanged
-        'Behandelt Radiobutton Animation "Statisch"
-
-        If rdoAnimationZufällig.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Animationsmodus", "Zufall")
-        End If
-    End Sub
-
-    Private Sub trkAnimationsgeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkAnimationsgeschwindigkeit.ValueChanged
-        'Behandelt die Trackbar Animationsgeschwindigkeit
-
-        lblAnimationsgeschwindigkeit.Text = (trkAnimationsgeschwindigkeit.Maximum + 1) - trkAnimationsgeschwindigkeit.Value & " s"
-        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Geschwindigkeit", (trkAnimationsgeschwindigkeit.Maximum + 1) - trkAnimationsgeschwindigkeit.Value)
-    End Sub
 End Class
