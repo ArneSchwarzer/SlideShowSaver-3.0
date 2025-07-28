@@ -7,7 +7,7 @@
     <ProjectGuid>{136EF778-9383-42F3-B4E4-36149597413E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Transition_Überblenden</RootNamespace>
-    <AssemblyName>Transition Überblenden</AssemblyName>
+    <AssemblyName>BlendenUeberblenden</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -20,7 +20,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>Transition Überblenden.xml</DocumentationFile>
+    <DocumentationFile>BlendenUeberblenden.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -29,7 +29,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>Transition Überblenden.xml</DocumentationFile>
+    <DocumentationFile>BlendenUeberblenden.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -45,6 +45,10 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MyControlsLibrary">
+      <HintPath>..\..\..\..\Documents\Visual Studio Libraries\MyControlsLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -54,6 +58,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />
@@ -67,13 +72,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.vb" />
-    <Compile Include="frmTransition.Designer.vb">
-      <DependentUpon>frmTransition.vb</DependentUpon>
-    </Compile>
-    <Compile Include="frmTransition.vb">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="TransitionMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -90,16 +89,22 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ucOptionsTransition.Designer.vb">
+      <DependentUpon>ucOptionsTransition.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ucOptionsTransition.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="frmTransition.resx">
-      <DependentUpon>frmTransition.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ucOptionsTransition.resx">
+      <DependentUpon>ucOptionsTransition.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -118,10 +123,17 @@
       <Project>{7f07849f-94c6-4f94-9713-6d5fd4cc76ac}</Project>
       <Name>SlideShowInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SlideShowLogging\SlideShowLogging.vbproj">
+      <Project>{4de43745-d2ce-442c-acc5-49e2bcb0c87f}</Project>
+      <Name>SlideShowLogging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SlideShowTools\SlideShowTools.vbproj">
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

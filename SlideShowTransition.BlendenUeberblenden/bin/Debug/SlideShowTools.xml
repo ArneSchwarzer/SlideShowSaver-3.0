@@ -122,6 +122,85 @@ SlideShowTools
  <param name="list">Die Quellliste</param>
  <returns>Ein String mit Semikolon-separierten Einträgen</returns>
 </member>
+<member name="M:SlideShowTools.LocationHandling.GetContinent(System.String)">
+ <summary>
+ Gibt den Kontinent für ein übergebenes Land zurück (erster Treffer).
+ </summary>
+ <param name="country">Landname</param>
+ <returns>Kontinentname oder leerer String</returns>
+</member>
+<member name="M:SlideShowTools.LocationHandling.GetCountry(System.String)">
+ <summary>
+ Gibt das Land zu einer gegebenen Stadt zurück (erster Treffer).
+ </summary>
+ <param name="city">Stadtname</param>
+ <returns>Landname oder leerer String</returns>
+</member>
+<member name="M:SlideShowTools.LocationHandling.MergeLocations(System.String,System.String)">
+ <summary>
+ Führt zwei Ortsdatenbanken (userXML und defaultXML) zusammen, ohne Duplikate.
+ </summary>
+ <param name="userXmlPath">Pfad zur benutzerdefinierten XML-Datei</param>
+ <param name="defaultXmlPath">Pfad zur Standard-XML-Datei</param>
+ <returns>Anzahl der neu hinzugefügten Orte</returns>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution(System.Windows.Forms.Control)">
+ <summary>
+ Gibt die native Auflösung des Bildschirms zurück, auf dem sich das angegebene Control befindet.
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution(System.Windows.Forms.Screen)">
+ <summary>
+ Gibt die native Auflösung des übergebenen Screen-Objekts zurück (unabhängig von DPI).
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution">
+ <summary>
+ Gibt die native Auflösung des Bildschirms zurück, auf dem sich das aktive Formular befindet.
+ </summary>
+</member>
+<member name="T:SlideShowTools.SettingsHandling">
+ <summary>
+ Temporärer Speicher für Settings-Objekte während der Laufzeit.
+ Erlaubt die Übergabe von Konfigurationsdaten z. B. vom ShaderMain an ein UserControl,
+ ohne Registry oder direkte Objektbindung zu verwenden.
+ </summary>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.StoreSettings(System.String,System.Object)">
+ <summary>
+ Speichert ein beliebiges Settings-Objekt unter einem eindeutigen Namen.
+ </summary>
+ <param name="key">Eindeutiger Bezeichner (z. B. Modulname)</param>
+ <param name="settings">Das zu speichernde Objekt</param>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.GetSettings``1(System.String)">
+ <summary>
+ Holt das gespeicherte Objekt für den angegebenen Key.
+ Gibt Nothing zurück, wenn nicht gefunden oder Typ nicht kompatibel.
+ </summary>
+ <typeparam name="T">Erwarteter Rückgabetyp</typeparam>
+ <param name="key">Bezeichner wie zuvor gespeichert</param>
+</member>
+<member name="M:SlideShowTools.SettingsHandling.ClearAll">
+ <summary>
+ Entfernt alle Einträge.
+ </summary>
+</member>
+<member name="T:SlideShowTools.SharedDataHandling">
+ <summary>
+ Globale Daten, die modulübergreifend von SaverMain aus bereitgestellt werden.
+ </summary>
+</member>
+<member name="P:SlideShowTools.SharedDataHandling.StartBild">
+ <summary>
+ Enthält den Screenshot vom Desktop zum Zeitpunkt des Starts von SaverMain.
+ </summary>
+</member>
+<member name="P:SlideShowTools.SharedDataHandling.StartBildWurdeVerwendet">
+ <summary>
+ Gibt an, ob ein Modul das Startbild bereits verwendet hat.
+ </summary>
+</member>
 <member name="M:SlideShowTools.ToolTipHandling.EnableToolTipsForCLB(System.Windows.Forms.CheckedListBox)">
  <summary>
  Initialisiert ToolTips für eine CheckedListBox mit SlideShowModulInfo, SlideShowTransitionInfo oder SlideShowShaderInfo.

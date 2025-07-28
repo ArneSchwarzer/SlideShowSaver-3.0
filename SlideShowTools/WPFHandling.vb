@@ -7,6 +7,7 @@ Imports System.Drawing.Imaging
 Imports System.Runtime.InteropServices
 Imports System.Windows
 Imports System.IO
+Imports System.Threading
 
 Public Class WPFHandling
 
@@ -100,40 +101,53 @@ Public Class WPFHandling
         End Using
     End Function
 
+    Public Shared Function ConvertImageToRenderTargetBitmap(bmp As Bitmap) As RenderTargetBitmap
+        If bmp Is Nothing Then Return Nothing
 
-    Public Shared Function ConvertImageToRenderTargetBitmap(img As Image, targetSize As System.Drawing.Size) As RenderTargetBitmap
-        If img Is Nothing Then Return Nothing
+        ' Bitmap in MemoryStream speichern
+        Using ms As New MemoryStream()
+            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
+            ms.Seek(0, SeekOrigin.Begin)
 
-        ' Konvertiere System.Drawing.Image → BitmapSource
-        Using bmp As Bitmap = New Bitmap(img)
-            Dim hBitmap As IntPtr = bmp.GetHbitmap()
-            Try
-                Dim bitmapSource As BitmapSource = Imaging.CreateBitmapSourceFromHBitmap(
-                hBitmap,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions())
+            ' BitmapImage laden
+            Dim decoder As New PngBitmapDecoder(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad)
+            Dim source As BitmapSource = decoder.Frames(0)
 
-                bitmapSource.Freeze() ' wichtig für Thread-Sicherheit
+            ' In DrawingVisual zeichnen
+            Dim drawingVisual As New DrawingVisual()
+            Using dc As DrawingContext = drawingVisual.RenderOpen()
+                dc.DrawImage(source, New Rect(0, 0, source.PixelWidth, source.PixelHeight))
+            End Using
 
-                ' Erzeuge RTB und zeichne das BitmapSource hinein
-                Dim rtb As New RenderTargetBitmap(targetSize.Width, targetSize.Height, 96, 96, PixelFormats.Pbgra32)
-                Dim dv As New DrawingVisual()
-                Using dc As DrawingContext = dv.RenderOpen()
-                    dc.DrawImage(bitmapSource, New Rect(0, 0, targetSize.Width, targetSize.Height))
-                End Using
-                rtb.Render(dv)
+            ' RenderTargetBitmap erzeugen
+            Dim rtb As New RenderTargetBitmap(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, PixelFormats.Pbgra32)
+            rtb.Render(drawingVisual)
 
-                Return rtb
-
-            Finally
-                ' Clean up unmanaged HBITMAP
-                DeleteObject(hBitmap)
-            End Try
+            Return rtb
         End Using
     End Function
 
+
     'BitmapImage to...
+    Public Shared Function ConvertBitmapImageToImage(bmpImage As BitmapImage) As System.Drawing.Image
+        If bmpImage Is Nothing Then Return Nothing
+
+        ' Sicherstellen, dass das Bild vollständig geladen ist
+        If bmpImage.IsDownloading Then
+            Dim done As New ManualResetEvent(False)
+            AddHandler bmpImage.DownloadCompleted, Sub() done.Set()
+            done.WaitOne()
+        End If
+
+        Using ms As New MemoryStream()
+            Dim encoder As New PngBitmapEncoder()
+            encoder.Frames.Add(BitmapFrame.Create(bmpImage))
+            encoder.Save(ms)
+            ms.Seek(0, SeekOrigin.Begin)
+            Return Image.FromStream(ms)
+        End Using
+    End Function
+
     Public Shared Function ConvertBitmapImageToRenderTargetBitmap(bmpImage As BitmapImage, size As Windows.Size) As RenderTargetBitmap
         Dim imageControl As New Windows.Controls.Image()
         imageControl.Source = bmpImage

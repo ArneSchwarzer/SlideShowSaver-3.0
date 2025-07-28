@@ -1,4 +1,5 @@
-﻿Imports System.Windows.Forms
+﻿Imports System.Drawing
+Imports System.Windows.Forms
 Imports SlideShowShader.TönenFärben.ShaderMain
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
@@ -22,10 +23,12 @@ Public Class ucOptionsShader
         'chkZufallsfarbe setzen
         If aktuelleSettings.Zufallsfarbe Then
             chkZufallsfarbe.Checked = True
+            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
             lblNpicFarbton.Enabled = False
             picFarbton.Enabled = False
         Else
             chkZufallsfarbe.Checked = False
+            picFarbton.BackColor = aktuelleSettings.Farbton
             lblNpicFarbton.Enabled = True
             picFarbton.Enabled = True
         End If
@@ -58,6 +61,7 @@ Public Class ucOptionsShader
 
             If dlg.ShowDialog() = DialogResult.OK Then
                 picFarbton.BackColor = dlg.Color
+                aktuelleSettings.Farbton = dlg.Color
                 WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Farbton", ColorToString(dlg.Color))
             End If
         End Using
@@ -99,18 +103,24 @@ Public Class ucOptionsShader
 
     End Sub
 
-    Private Sub chkZufallsfarbe_Leave(sender As Object, e As EventArgs) Handles chkZufallsfarbe.Leave
+    Private Sub chkZufallsfarbe_CheckedChanged(sender As Object, e As EventArgs) Handles chkZufallsfarbe.CheckedChanged
         'Behandelt Checkbox Zufallsfarbe
 
-        If chkZufallsfarbe.Checked = True Then
-            lblNpicFarbton.Enabled = False
-            picFarbton.Enabled = False
-        Else
-            lblNpicFarbton.Enabled = True
-            picFarbton.Enabled = True
-        End If
+        ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
+        ' nachdem der Checked-Zustand aktualisiert wurde
+        BeginInvoke(Sub()
+                        If chkZufallsfarbe.Checked = True Then
+                            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
+                            lblNpicFarbton.Enabled = False
+                            picFarbton.Enabled = False
+                        Else
+                            picFarbton.BackColor = aktuelleSettings.Farbton
+                            lblNpicFarbton.Enabled = True
+                            picFarbton.Enabled = True
+                        End If
 
-        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
+                        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
+                    End Sub)
 
     End Sub
 
