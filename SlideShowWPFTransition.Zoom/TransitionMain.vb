@@ -1,13 +1,12 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
+Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging.LogHandling
+Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.WPFHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.GraphicsSizeModeHandling
-Imports System.Windows.Threading
 
 Public Class TransitionMain
     Implements ISlideShowTransition

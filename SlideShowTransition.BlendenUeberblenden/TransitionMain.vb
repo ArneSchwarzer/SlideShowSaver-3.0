@@ -12,7 +12,7 @@ Imports SlideShowTools
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.WPFHandling
+Imports SlideShowTools.ImageConversionHandling
 
 Public Class TransitionMain
     Implements ISlideShowTransition

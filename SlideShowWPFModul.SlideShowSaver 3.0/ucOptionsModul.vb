@@ -50,6 +50,16 @@ Public Class ucOptionsModul
 #Region "cmbBildauswahl Initialisieren"
         'cmbBildauswahl
         cmbBildauswahl.SelectedItem = aktuelleSettings.Bildauswahl
+        If aktuelleSettings.Bildauswahl = "Zufällig" Then
+            chkPräsentationsschirm.Enabled = False
+        Else
+            chkPräsentationsschirm.Enabled = True
+        End If
+#End Region
+
+#Region "chkPräsentationsschirm Initialisieren"
+        'chkPräsentationsschirm
+        chkPräsentationsschirm.Checked = aktuelleSettings.Präsentationsschirm
 #End Region
 
 #Region "clbTransitions Initialisierung"
@@ -186,8 +196,20 @@ Public Class ucOptionsModul
 
     Private Sub cmbBildauswahl_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbBildauswahl.SelectedIndexChanged
 
+        If cmbBildauswahl.SelectedItem = "Zufällig" Then
+            chkPräsentationsschirm.Enabled = False
+        Else
+            chkPräsentationsschirm.Enabled = True
+        End If
         'DirectCommit
         WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", cmbBildauswahl.SelectedItem.ToString)
+
+    End Sub
+
+    Private Sub chkPräsentationsschirm_CheckedChanged(sender As Object, e As EventArgs) Handles chkPräsentationsschirm.CheckedChanged
+
+        'DirectCommit
+        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "Präsentationsschirm", chkPräsentationsschirm.Checked.ToString)
 
     End Sub
 

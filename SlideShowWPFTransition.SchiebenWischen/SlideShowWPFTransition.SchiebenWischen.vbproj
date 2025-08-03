@@ -102,9 +102,6 @@
     <EmbeddedResource Include="ucOptionsTransition.resx">
       <DependentUpon>ucOptionsTransition.vb</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="wpfTransitionWindow.xaml.vb">
-      <DependentUpon>wpfTransitionWindow.xaml</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -113,13 +110,6 @@
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="wpfTransitionWindow.xaml">
-      <CustomToolNamespace>My.Resources</CustomToolNamespace>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="My Project\Application.myapp">

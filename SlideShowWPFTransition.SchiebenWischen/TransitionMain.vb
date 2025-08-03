@@ -29,9 +29,6 @@ Namespace TransitionMain_SuW
         Public Const nameTransition As String = "Schieben und Wischen"
         Private aktuelleSettings As New SlideShowTransitionSettings_SuW
 
-        'Fallback auf WPFTransitionWindow
-        'Public Shared win As WpfTransitionWindow
-
         'Timer und Zeitmanagement
         Private WithEvents tmrDuration As New Timer
         Private startTime As DateTime
@@ -128,16 +125,6 @@ Namespace TransitionMain_SuW
 
             ReadTransitionSettingsFromRegistryOrDefaults()
             StoreSettings(TransitionName, aktuelleSettings)
-
-            'Fallback auf WPFTransitionWindow
-            'win = New WpfTransitionWindow()
-            'AddHandler win.TransitionIstFertig, Sub()
-            '                                        StopTransition()
-            '                                    End Sub
-
-            'win.WindowState = WindowState.Maximized
-            'win.Show()
-            'win.StartTransition(oldBmpGerahmt, newBmpGerahmt)
 
             ' Richtungsauswahl
             If aktuelleSettings.richtungen?.Count > 0 Then
@@ -241,21 +228,6 @@ Namespace TransitionMain_SuW
 
             Return defaults
 
-        End Function
-
-        'Bildwandlung und -manipulation
-
-        Private Function ConvertBitmapToImageSource(bmp As Bitmap) As BitmapSource
-            Using memory = New MemoryStream()
-                bmp.Save(memory, ImageFormat.Png)
-                memory.Position = 0
-                Dim bitmapImage As New BitmapImage()
-                bitmapImage.BeginInit()
-                bitmapImage.StreamSource = memory
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad
-                bitmapImage.EndInit()
-                Return bitmapImage
-            End Using
         End Function
 
         'Abbruch- und Endverwaltung

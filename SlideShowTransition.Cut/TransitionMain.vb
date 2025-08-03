@@ -1,14 +1,8 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
-Imports SlideShowInterfaces.InterfaceDeclarations
-Imports System.Drawing.Drawing2D
-Imports SlideShowTools.GraphicsSizeModeHandling
-Imports System.Runtime.Remoting.Messaging
 Imports System.Windows.Media.Imaging
-Imports System.Windows.Controls
-Imports SlideShowTools.WPFHandling
-Imports SlideShowTools
-Imports System.Windows.Threading
+Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowTools.ImageConversionHandling
 
 
 Public Class TransitionMain

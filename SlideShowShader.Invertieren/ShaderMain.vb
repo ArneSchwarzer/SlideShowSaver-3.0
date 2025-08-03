@@ -1,5 +1,6 @@
 ﻿Imports System.Drawing.Imaging
 Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowLogging
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
 
@@ -42,6 +43,7 @@ Public Class ShaderMain
         Dim bmp As New Bitmap(baseImage.Width, baseImage.Height)
         Dim attributes As New ImageAttributes()
         Dim rnd As New Random
+        Dim rndTest As Integer
 
         If clientSize = Nothing Then clientSize = baseImage.Size
 
@@ -62,9 +64,15 @@ Public Class ShaderMain
         New Single() {0, 0, 0, 0, 1}
     })
 
+        ReadShaderSettingsFromRegistryOrDefaults()
+
         'Wenn Modus Zufall gesetzt ist, dann Modus auswürfeln
+        LogHandling.LogDebug("Shader Invertieren - ShaderMain.RunShader: Aktueller Modus: " & aktuelleSettings.Modus)
         If aktuelleSettings.Modus = "Zufall" Then
-            If rnd.Next(1) = 0 Then
+            rndTest = rnd.Next(2)
+            LogHandling.LogDebug("Shader Invertieren - ShaderMain.RunShader: Zufallsmodus ausgewürfelt: " & rndTest)
+            If rndTest = 0 Then
+
                 aktuelleSettings.Modus = "Farbe"
             Else
                 aktuelleSettings.Modus = "Weiss-Schwarz"

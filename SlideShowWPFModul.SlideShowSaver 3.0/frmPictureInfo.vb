@@ -1,15 +1,10 @@
 ﻿Imports System.Drawing
-Imports System.Runtime.InteropServices
-Imports System.Windows.Forms
-Imports SlideShowLogging.LogHandling
-Imports SlideShowTools.ListHandling
-Imports SlideShowLogging
-Imports SlideShowTools.KeyAndMouseHandling
-Imports MetadataExtractor
-Imports MetadataExtractor.Formats.Exif
-Imports MetadataExtractor.Formats.Iptc
 Imports System.IO
-Imports MetadataExtractor.Formats.Xmp
+Imports System.Windows.Forms
+Imports SlideShowTools.MataDataHandling
+Imports SlideShowLogging
+Imports SlideShowLogging.LogHandling
+Imports SlideShowTools.KeyAndMouseHandling
 
 Public Class frmPictureInfo
 
@@ -30,6 +25,7 @@ Public Class frmPictureInfo
     Public Sub RefreshLabels(bildPfad As String)
         'Setzt die Labeltexte gemäß EXIF Daten, falls der Dateityp so etwas überhaupt bietet
 
+        Dim metadaten As Metadata
         Dim endung As String = Path.GetExtension(bildPfad).ToLowerInvariant()
 
         If endung.ToLower = ".bmp" OrElse endung.ToLower = ".png" Then
@@ -47,106 +43,99 @@ Public Class frmPictureInfo
             lblAutor.Text = "-"
             lblTags.Text = "-"
         Else
-            Try
-                Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
 
-                'Dateiname und Pfad
-                lblDateiname.Text = Path.GetFileNameWithoutExtension(bildPfad)
-                lblDateipfad.Text = bildPfad
-                lblBewertung.Visible = False
-                slbBewertung.Visible = True
+            metadaten = ExtractMetadataFromImage(bildPfad)
 
-                'Erstellungsdatum, Blende, Verschlusszeit, ISO, Brennweite
-                Dim subIfd = directories.OfType(Of ExifSubIfdDirectory)().FirstOrDefault()
-                If subIfd IsNot Nothing Then
-                    Dim rawDate As String = subIfd.GetDescription(ExifDirectoryBase.TagDateTimeOriginal)
+            'Dateiname und Pfad
+            lblDateiname.Text = Path.GetFileNameWithoutExtension(bildPfad)
+            lblDateipfad.Text = bildPfad
+            lblBewertung.Visible = False
+            slbBewertung.Visible = True
 
-                    If Not String.IsNullOrEmpty(rawDate) Then
-                        ' Beispiel: "2022:11:05 15:34:12"
-                        Dim parsedDate As DateTime
-                        If DateTime.TryParseExact(rawDate, "yyyy:MM:dd HH:mm:ss", Nothing, Globalization.DateTimeStyles.None, parsedDate) Then
-                            lblErstellungsdatum.Text = parsedDate.ToString("dd.MM.yyyy HH:mm:ss")
-                        Else
-                            lblErstellungsdatum.Text = rawDate ' Fallback
-                        End If
+            'Erstellungsdatum
+            If Not String.IsNullOrEmpty(metadaten.CreatedDate.ToString) Then
+                lblErstellungsdatum.Text = metadaten.CreatedDate.ToString("dd.MM.yyyy HH:mm:ss")
+            Else
+                lblErstellungsdatum.Text = "-"
+            End If
+
+            'Blende
+            If Not String.IsNullOrEmpty(metadaten.FNumber) Then
+                lblBlende.Text = metadaten.FNumber
+            Else
+                lblBlende.Text = "-"
+            End If
+
+            'Verschlusszeit
+            If Not String.IsNullOrEmpty(metadaten.ExposureTime) Then
+                lblVerschlusszeit.Text = metadaten.ExposureTime
+            Else
+                lblVerschlusszeit.Text = "-"
+            End If
+
+            'ISO
+            If metadaten.ISO > 0 Then
+                lblISO.Text = metadaten.ISO.ToString()
+            Else
+                lblISO.Text = "-"
+            End If
+
+            'Brennweite
+            If Not String.IsNullOrEmpty(metadaten.FocalLength) Then
+                lblBrennweite.Text = metadaten.FocalLength
+            Else
+                lblBrennweite.Text = "-"
+            End If
+
+            'Kamera (Modell)
+            If Not String.IsNullOrEmpty(metadaten.CameraModel) Then
+                lblKamera.Text = metadaten.CameraModel
+            Else
+                lblKamera.Text = "-"
+            End If
+
+            'Objektiv (sofern vorhanden)
+            If Not String.IsNullOrEmpty(metadaten.LensModel) Then
+                lblObjektiv.Text = metadaten.LensModel
+            Else
+                lblObjektiv.Text = "-"
+            End If
+
+            'Aurtor
+            If Not String.IsNullOrEmpty(metadaten.Author) Then
+                Dim worte = metadaten.Author.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
+
+                ' Wir suchen das Muster A B A B (oder mehrfache Wiederholung)
+                If worte.Length >= 2 AndAlso worte.Length Mod 2 = 0 Then
+                    Dim halb = worte.Length \ 2
+                    Dim ersterTeil = String.Join(" ", worte.Take(halb))
+                    Dim zweiterTeil = String.Join(" ", worte.Skip(halb))
+                    If ersterTeil = zweiterTeil Then
+                        lblAutor.Text = ersterTeil
                     Else
-                        lblErstellungsdatum.Text = "-"
+                        lblAutor.Text = metadaten.Author ' Keine Wiederholung → zeige Original
                     End If
-
-                    lblBlende.Text = subIfd.GetDescription(ExifDirectoryBase.TagFNumber)
-                    lblVerschlusszeit.Text = subIfd.GetDescription(ExifDirectoryBase.TagExposureTime)
-                    lblISO.Text = subIfd.GetDescription(ExifDirectoryBase.TagIsoEquivalent)
-                    lblBrennweite.Text = subIfd.GetDescription(ExifDirectoryBase.TagFocalLength)
+                Else
+                    lblAutor.Text = metadaten.Author ' ungerade Anzahl → keine Dopplung möglich
                 End If
+            Else
+                lblAutor.Text = "-"
+            End If
 
-                'Kamera (Modell)
-                Dim ifd0 = directories.OfType(Of ExifIfd0Directory)().FirstOrDefault()
-                If ifd0 IsNot Nothing Then
-                    lblKamera.Text = ifd0.GetDescription(ExifDirectoryBase.TagModel)
-                End If
+            'Tags
+            If metadaten.Keywords IsNot Nothing AndAlso metadaten.Keywords.Count > 0 Then
+                Array.Sort(metadaten.Keywords.ToArray(), StringComparer.CurrentCultureIgnoreCase)
+                lblTags.Text = String.Join(" | ", metadaten.Keywords)
+            Else
+                lblTags.Text = "-"
+            End If
 
-                'Objektiv (sofern vorhanden)
-                Dim lens = subIfd?.GetDescription(ExifDirectoryBase.TagLensModel)
-                If String.IsNullOrEmpty(lens) Then
-                    lens = ifd0?.GetDescription(ExifDirectoryBase.TagLensModel)
-                End If
-                lblObjektiv.Text = If(lens, "unbekannt")
-
-                'IPTC: Autor, Bewertung, Tags
-                Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
-                If iptc IsNot Nothing Then
-                    Dim autor As String = iptc.GetDescription(IptcDirectory.TagByLine)
-
-                    If Not String.IsNullOrWhiteSpace(autor) Then
-                        Dim worte = autor.Split(New Char() {" "c}, StringSplitOptions.RemoveEmptyEntries)
-
-                        ' Wir suchen das Muster A B A B (oder mehrfache Wiederholung)
-                        If worte.Length >= 2 AndAlso worte.Length Mod 2 = 0 Then
-                            Dim halb = worte.Length \ 2
-                            Dim ersterTeil = String.Join(" ", worte.Take(halb))
-                            Dim zweiterTeil = String.Join(" ", worte.Skip(halb))
-                            If ersterTeil = zweiterTeil Then
-                                lblAutor.Text = ersterTeil
-                            Else
-                                lblAutor.Text = autor ' Keine Wiederholung → zeige Original
-                            End If
-                        Else
-                            lblAutor.Text = autor ' ungerade Anzahl → keine Dopplung möglich
-                        End If
-                    Else
-                        lblAutor.Text = "-"
-                    End If
-
-                    Dim keywords = iptc.GetStringArray(IptcDirectory.TagKeywords)
-                    If keywords IsNot Nothing Then
-                        Array.Sort(keywords, StringComparer.CurrentCultureIgnoreCase)
-                        lblTags.Text = String.Join(" | ", keywords)
-                    Else
-                        lblTags.Text = ""
-                    End If
-
-                End If
-
-                'Bewertung und Fallback für Author über XMP falls IPTC leer
-                Dim xmp = directories.OfType(Of XmpDirectory)().FirstOrDefault()
-                If xmp IsNot Nothing Then
-                    If String.IsNullOrEmpty(lblAutor.Text) Then
-                        lblAutor.Text = xmp.XmpMeta.GetPropertyString("http://purl.org/dc/elements/1.1/", "creator")
-                    End If
-
-                    Dim ratingStr As String = xmp.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
-
-                    If Not String.IsNullOrEmpty(ratingStr) Then
-                        Integer.TryParse(ratingStr, slbBewertung.Bewertung)
-                    Else
-                        slbBewertung.Bewertung = 0
-                    End If
-
-                End If
-
-            Catch ex As Exception
-                LogHandling.LogWarn("Die EXIF von " & bildPfad & " konnte nicht in die Form frmPictureInfo eingelesen werden: " & ex.Message)
-            End Try
+            'Bewertung
+            If metadaten.Rating >= 0 Then
+                slbBewertung.Bewertung = metadaten.Rating
+            Else
+                slbBewertung.Bewertung = 0
+            End If
         End If
 
     End Sub

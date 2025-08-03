@@ -1,20 +1,18 @@
-﻿Imports System.IO
+﻿Imports System.Drawing
+Imports System.IO
 Imports System.Windows.Forms
 Imports System.Windows.Threading
+Imports SlideShowBildauswahl
 Imports SlideShowBildauswahl.BildauswahlMain
+Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
+Imports SlideShowLogging
+Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ScreenHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.WPFHandling
-Imports System.Runtime.InteropServices
-Imports System.Windows.Interop
-Imports SlideShowInterfaces.InfoHandling
-Imports SlideShowLogging
-Imports System.Drawing
-Imports SlideShowBildauswahl
 
 Partial Public Class wpfModulMain
 
@@ -35,6 +33,9 @@ Partial Public Class wpfModulMain
 
     'Für frmPauseModul
     Public Shared listeDerZuletztAngezeigtenBilder As New List(Of String)
+
+    'Präsentationsmodus
+    Private präsentationAnzeigen As Boolean = False
 
     'Transitionen
     Public aktiveTransition As ISlideShowTransition = Nothing
@@ -143,6 +144,12 @@ Partial Public Class wpfModulMain
                 Loop Until aktuellesVerzeichnis.Count >= 2
                 aktuellesVerzeichnisCounter = 2
                 bildPfade = aktuellesVerzeichnis
+
+                'Präsentationsmodus aktivieren, wenn eingestellt
+                If aktuelleSettings.Präsentationsschirm Then
+                    präsentationAnzeigen = True
+                End If
+
             Else
                 bildPfade = GetPictures(2)
             End If
@@ -162,7 +169,6 @@ Partial Public Class wpfModulMain
             End If
 
         Loop Until aktuellesImage IsNot Nothing AndAlso neuesImage IsNot Nothing
-
 
         'Shader anwenden 
         LadeNeuenShader(True)
@@ -192,24 +198,37 @@ Partial Public Class wpfModulMain
 #End Region
 
         'Erstes Bild anzeigen
-        imgAnzeige.Source = aktuellesBild
+        If Not präsentationAnzeigen Then
 
-        'Bildinfo initialisieren - mit Werten von aktuellesBild
-        If aktuelleSettings.BildInfoAnzeigen AndAlso bildPfade(0) IsNot Nothing Then
-            ModulMain.sssInfo.RefreshLabels(bildPfade(0))
-            ModulMain.sssInfo.Refresh()
-            ModulMain.sssInfo.BringToFront()
+            imgAnzeige.Source = aktuellesBild
+
+            'Bildinfo initialisieren - mit Werten von aktuellesBild
+            If aktuelleSettings.BildInfoAnzeigen AndAlso bildPfade(0) IsNot Nothing Then
+                ModulMain.sssInfo.RefreshLabels(bildPfade(0))
+                ModulMain.sssInfo.Refresh()
+                ModulMain.sssInfo.BringToFront()
+            End If
+
+            'ListeDerZuletztAngezeigtenBilder initial befüllen. neuesBild wird erst im tmrTick-Loop gefüllt.
+            listeDerZuletztAngezeigtenBilder.Clear()
+            listeDerZuletztAngezeigtenBilder.Add(bildPfade(0))
+
+        Else
+
+            PräsentationsschirmAnzeigen()
+
         End If
 
-        'ListeDerZuletztAngezeigtenBilder initial befüllen. neuesBild wird erst im tmrTick-Loop gefüllt.
-        listeDerZuletztAngezeigtenBilder.Clear()
-        listeDerZuletztAngezeigtenBilder.Add(bildPfade(0))
+
+
 
         'Ab jetzt wird bildPfade(1) nicht mehr benötigt
         bildPfade(0) = bildPfade(1)
 
-        'Jetzt den Timer starten
-        tmrModul.Start()
+        'Jetzt den Timer starten, falls nicht schon über den Präsentationsschirm gestartet
+        If Not aktuelleSettings.Präsentationsschirm Then
+            tmrModul.Start()
+        End If
 
     End Sub
 
@@ -222,19 +241,27 @@ Partial Public Class wpfModulMain
         If transitionIstAktiv Then Exit Sub
         If warteAufDelay Then Exit Sub
 
+        lblPräsentationsschirm.Visibility = Visibility.Hidden
+        imgAnzeige.Visibility = Visibility.Visible
         LadeNeueTransition(False)
 
         If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
 
-            'Transition starten, Status & Stoppuhr setzen
-            transitionIstAktiv = True
-            stoppuhr = Stopwatch.StartNew()
-            sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
-            aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
+            If Not präsentationAnzeigen Then
+                'Transition starten, Status & Stoppuhr setzen
+                transitionIstAktiv = True
+                stoppuhr = Stopwatch.StartNew()
+                sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
+                aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
 
-            'Timer beenden 
-            tmrModul.Stop()
-
+                'Timer beenden 
+                tmrModul.Stop()
+            Else
+                präsentationAnzeigen = False
+                Bildwechsel()
+                transitionIstAktiv = False
+                warteAufDelay = False
+            End If
         Else
 
             'Dann muss der Timer halt selber ran...
@@ -330,7 +357,10 @@ Partial Public Class wpfModulMain
                     aktuellesVerzeichnisCounter = 0
                     Do
                         aktuellesVerzeichnis = GetPicturesByDirectory()
-                    Loop Until aktuellesVerzeichnis.Count > 0
+                    Loop Until aktuellesVerzeichnis.Count > 1
+                    If aktuelleSettings.Präsentationsschirm Then
+                        präsentationAnzeigen = True
+                    End If
                 End If
                 bildPfade(0) = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
             Else
@@ -361,6 +391,28 @@ Partial Public Class wpfModulMain
         Else
             LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.Bildwechsel(): §$)/§&=-neuesImage ist schon wieder Nothing. Trotz Schutz-Loop! Sollte '" & bildPfade(0) & "' sein.")
         End If
+
+        If präsentationAnzeigen Then
+            PräsentationsschirmAnzeigen()
+            tmrModul.Stop()
+        End If
+
+    End Sub
+
+    Private Sub PräsentationsschirmAnzeigen()
+        'Zeigt den Präsentationsschirm an, der die Bilder in voller Größe anzeigt
+        'und den Timer für die Präsentation startet
+        Dim PräsentationsText As String
+
+        PräsentationsText = Path.GetFileName(Path.GetDirectoryName(aktuellesVerzeichnis(0)))
+
+        If aktuellesVerzeichnis(0) IsNot Nothing Then
+            lblPräsentationsschirm.Content = PräsentationsText
+            lblPräsentationsschirm.Visibility = Visibility.Visible
+            imgAnzeige.Visibility = Visibility.Hidden
+        End If
+
+        tmrModul.Start()
 
     End Sub
 

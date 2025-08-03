@@ -13,6 +13,14 @@
         MouseDown="Window_MouseDown">
    
     <Grid>
+        <Label x:Name="lblPräsentationsschirm" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center" 
+               FontSize="48" 
+               FontWeight="Bold"
+               Foreground="White" 
+               Content="SlideShowSaver 3.0"
+               Visibility="Hidden"/>
         <Image x:Name="imgAnzeige" Stretch="Uniform"/>
     </Grid>
     

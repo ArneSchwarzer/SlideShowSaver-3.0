@@ -3,10 +3,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Windows.Forms
 Imports System.Windows.Media
-Imports MetadataExtractor
-Imports MetadataExtractor.Formats.Exif
-Imports MetadataExtractor.Formats.Iptc
-Imports MetadataExtractor.Formats.Xmp
+Imports SlideShowTools.MataDataHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
 Imports SlideShowTools
@@ -80,6 +77,7 @@ Public Class ShaderMain
         })
 
         'Metadaten
+        Dim metadaten As Metadata
         Dim aktenzeichen As String = Path.GetFileNameWithoutExtension(bildPfad)
         Dim datum As String = System.IO.File.GetCreationTime(bildPfad).ToString("dd.MM.yyyy")
         Dim dateipfad As String = bildPfad
@@ -140,43 +138,19 @@ Public Class ShaderMain
 
         'Metadaten via MetaDataExtraktor und LocationHandling
         If Path.GetExtension(bildPfad) = ".jpg" OrElse Path.GetExtension(bildPfad) = ".jpeg" Then
-            Dim directories = ImageMetadataReader.ReadMetadata(bildPfad)
-            Dim iptc = directories.OfType(Of IptcDirectory)().FirstOrDefault()
+            ExtractMetadataFromImage(bildPfad)
 
-            keywords.Clear()
-
-            Try
-                Dim xmpDir = directories.OfType(Of XmpDirectory)().FirstOrDefault()
-
-                If xmpDir IsNot Nothing AndAlso xmpDir.XmpMeta IsNot Nothing Then
-                    Dim xmp = xmpDir.XmpMeta
-                    Dim subjectArray = xmp.GetProperty("http://purl.org/dc/elements/1.1/", "subject")
-
-                    If subjectArray IsNot Nothing Then
-                        Dim subjectCount = xmp.CountArrayItems("http://purl.org/dc/elements/1.1/", "subject")
-
-                        For i = 1 To subjectCount
-                            Dim item = xmp.GetArrayItem("http://purl.org/dc/elements/1.1/", "subject", i)
-                            If item IsNot Nothing Then
-                                keywords.Add(item.Value.Trim())
-                            End If
-                        Next
-
-                        If keywords.Count = 0 Then keywords.Add("-")
-
-                    Else
-                        keywords.Add("-")
-                    End If
-                End If
-
-            Catch ex As Exception
+            'Keywords
+            If metadaten.Keywords IsNot Nothing Then
+                keywords = metadaten.Keywords
+                If keywords.Count = 0 Then keywords.Add("-")
+            Else
                 keywords.Add("-")
-                LogHandling.LogError("ShaderNachtsicht - Fehler beim Auslesen der Tags: " & ex.Message)
-            End Try
+            End If
 
             'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das Nichts bringt LocationHelper bemühen.
-            If HoleGpsKoordinaten(bildPfad) IsNot Nothing Then
-                geoPosition = HoleGpsKoordinaten(bildPfad)
+            If Not String.IsNullOrEmpty(metadaten.geographicLongitude) AndAlso Not String.IsNullOrEmpty(metadaten.goeographicLatitude) Then
+                geoPosition = metadaten.goeographicLatitude & ", " & metadaten.geographicLongitude
             Else
                 locationHelper = New SlideShowTools.LocationHandling()
 
@@ -292,39 +266,6 @@ Public Class ShaderMain
         gfx.FillRectangle(backgroundBrush, x - 4, y - 2, size.Width + 8, size.Height + 4)
         gfx.DrawString(text, font, brush, x, y)
     End Sub
-
-    Private Function HoleGpsKoordinaten(pfadZurDatei As String) As String
-        ' Variablendeklaration
-        Dim verzeichnisse As IList(Of MetadataExtractor.Directory)
-        Dim gpsDirectory As GpsDirectory
-        Dim latLänge As Double
-        Dim lonLänge As Double
-        Dim latRef As String
-        Dim lonRef As String
-        Dim gpsString As String
-
-        verzeichnisse = ImageMetadataReader.ReadMetadata(pfadZurDatei)
-
-        gpsDirectory = verzeichnisse.OfType(Of GpsDirectory).FirstOrDefault()
-
-        If gpsDirectory Is Nothing Then
-            Return Nothing ' Keine GPS-Daten gefunden
-        End If
-
-        ' Koordinaten abrufen
-        Dim location As GeoLocation = gpsDirectory.GetGeoLocation()
-
-        If location IsNot Nothing Then
-            latLänge = location.Latitude
-            lonLänge = location.Longitude
-            gpsString = latLänge.ToString("F6", CultureInfo.InvariantCulture) & ", " &
-                        lonLänge.ToString("F6", CultureInfo.InvariantCulture)
-            Return gpsString
-        End If
-
-        Return Nothing
-
-    End Function
 
     Private Function GeneriereKameracode() As String
         Dim rnd As New Random()

@@ -1,7 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
 Imports SlideShowTools.CursorHandling
-Imports SlideShowTools.XmlHandling
+Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports System.IO
 Imports SlideShowTools
@@ -108,7 +108,7 @@ Public Class frmPauseModusOverlay
             meineInstanz.sssScreen.tmrModul.Stop()
 
             tempImage = GetPictureByName(bildPfad)
-            bild = WPFHandling.ConvertImageToBitmapImage(tempImage)
+            bild = ConvertImageToBitmapImage(tempImage)
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild
 
@@ -224,7 +224,7 @@ Public Class frmPauseModusOverlay
 
                 ' Bild wieder neu einladen (nach dem Speichern)
                 tempImage = GetPictureByName(bildPfad)
-                bild = WPFHandling.ConvertImageToBitmapImage(tempImage)
+                bild = ConvertImageToBitmapImage(tempImage)
 
                 meineInstanz.sssScreen.imgAnzeige.Source = bild
 
@@ -298,7 +298,7 @@ Public Class frmPauseModusOverlay
         If meineInstanz IsNot Nothing Then
 
             tempImage = GetPictureByName(bildPfad)
-            bild = WPFHandling.ConvertImageToBitmapImage(tempImage)
+            bild = ConvertImageToBitmapImage(tempImage)
             meineInstanz.sssScreen.imgAnzeige.Source = bild
         End If
 
@@ -357,7 +357,7 @@ Public Class frmPauseModusOverlay
         'Bild anzeigen
         If meineInstanz IsNot Nothing Then
             tempImage = GetPictureByName(bildPfad)
-            bild = WPFHandling.ConvertImageToBitmapImage(tempImage)
+            bild = ConvertImageToBitmapImage(tempImage)
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild
         End If

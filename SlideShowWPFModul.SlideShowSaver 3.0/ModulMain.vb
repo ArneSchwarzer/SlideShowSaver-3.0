@@ -27,6 +27,7 @@ Public Class ModulMain
     'Struktur für die Moduloptionen
     Public Structure SettingsModul_SSS
         Public Bildauswahl As String
+        Public Präsentationsschirm As Boolean
         Public Anzeigedauer As Integer
         Public Transitionseffekte As List(Of String)
         Public TransitionsReihenfolge As String
@@ -211,6 +212,7 @@ Public Class ModulMain
         'Liefert die Default-Werte des Moduls
 
         defaultModulSettings("Bildauswahl") = "Zufallsbild"
+        defaultModulSettings("Präsentationsschirm") = "True"
         defaultModulSettings("Anzeigedauer") = "20"
         defaultModulSettings("Transitionseffekte") = ""
         defaultModulSettings("TransitionsReihenfolge") = "Zufällig bei Start"
@@ -231,6 +233,9 @@ Public Class ModulMain
 
         'Modus Bildauswahl
         aktuelleSettings.Bildauswahl = ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Bildauswahl", defaults)
+
+        'Präsentationsschirm
+        aktuelleSettings.Präsentationsschirm = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Präsentationsschirm", defaults))
 
         'Anzeigedauer
         aktuelleSettings.Anzeigedauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "Anzeigedauer", defaults))

@@ -53,9 +53,8 @@ Public Class frmSaverMain
         'Settings einlesen
         IniAndReinitialize()
         LegitimeListeErstellen()
-        BildauswahlMain.CheckYourSettings() 'Bildauswahl Bescheid geben, dass es losgeht
 
-        'Generierung der Bilder- und Verzeichnislisten starten
+        'Bildauswahl Bescheid geben, dass es losgeht
         BildauswahlMain.CheckYourSettings()
 
         'Transition vorbereiten

@@ -8,3 +8,23 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\Slid
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.pdb
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.dll
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.xml
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.AssemblyReference.cache
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.Resources.resources
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.GenerateResource.cache
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.CoreCompileInputs.cache
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.dll
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.xml
+C:\Users\arnod\Source\Repos\SlideShowSaver-3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.pdb
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.dll
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.pdb
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\bin\Debug\SlideShowInterfaces.xml
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.AssemblyReference.cache
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.Resources.resources
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.GenerateResource.cache
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.vbproj.CoreCompileInputs.cache
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.dll
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.xml
+C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowInterfaces\obj\Debug\SlideShowInterfaces.pdb

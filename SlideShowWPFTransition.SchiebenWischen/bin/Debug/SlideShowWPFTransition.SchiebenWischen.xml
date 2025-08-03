@@ -22,15 +22,5 @@ SlideShowWPFTransition.SchiebenWischen
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
-<member name="T:SlideShowWPFTransition.SchiebenWischen.SlideShowWPFTransition.SchiebenWischen.WpfTransitionWindow">
-<summary>
-WpfTransitionWindow
-</summary>
-</member>
-<member name="M:SlideShowWPFTransition.SchiebenWischen.SlideShowWPFTransition.SchiebenWischen.WpfTransitionWindow.InitializeComponent">
-<summary>
-InitializeComponent
-</summary>
-</member>
 </members>
 </doc>

@@ -2,13 +2,13 @@
 Imports System.Drawing.Drawing2D
 Imports System.Drawing.Imaging
 Imports System.IO
+Imports MetadataExtractor
+Imports MetadataExtractor.Formats.Exif
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.SettingsHandling
 Imports System.Windows.Forms
-Imports MetadataExtractor
-Imports MetadataExtractor.Formats.Xmp
-Imports MetadataExtractor.Formats.Exif
+Imports SlideShowTools.MataDataHandling
 Imports SlideShowLogging
 Imports System.Threading
 
@@ -190,67 +190,70 @@ Public Class BildauswahlMain
     Public Shared Function CheckIfLegalFile(bild As String) As Boolean
         ' Prüft, ob ein Bild den Kriterien gemäß den aktuellen Settings entspricht
 
-        Dim checkWhitelist As Boolean = False
-        Dim checkBlacklist As Boolean = True
-        Dim checkBewertung As Boolean = False
+        Dim checkWhitelist As Boolean
+        Dim checkBlacklist As Boolean
+        Dim checkBewertung As Boolean
 
-        Dim ratingStr As String
-        Dim rating As Integer
+        Dim metadaten As New Metadata
+        Dim whitetags As New List(Of String)
+        Dim blacktags As New List(Of String)
+        Dim keywords As New List(Of String)
+        Dim metaRating As Integer
+        Dim settingsRating As Integer
 
-        Try
-            Dim directories = ImageMetadataReader.ReadMetadata(bild)
-            Dim xmpDir = directories.OfType(Of XmpDirectory)().FirstOrDefault()
+        metadaten = ExtractMetadataFromImage(bild)
 
-            If xmpDir IsNot Nothing Then
-                Dim xmp = xmpDir.XmpMeta
-                If xmp IsNot Nothing Then
+        'Sortiere die Tags um die Performance zu verbessern
+        metadaten.Keywords.Sort()
+        aktuelleSettings.WhiteListTags.Sort()
+        aktuelleSettings.BlackListTags.Sort()
 
-                    'Check #1: Bewertung
-                    ratingStr = xmp.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
-                    If Not String.IsNullOrEmpty(ratingStr) Then
-                        If Integer.TryParse(ratingStr, rating) Then
-                            If rating >= aktuelleSettings.Bewertung Then
-                                checkBewertung = True
-                            End If
-                        End If
-                    End If
+        'Zur Absicherung gegen parallele Threads
+        metaRating = aktuelleSettings.Bewertung
+        settingsRating = metadaten.Rating
+        whitetags = aktuelleSettings.WhiteListTags.ToList()
+        blacktags = aktuelleSettings.BlackListTags.ToList()
+        keywords = metadaten.Keywords.ToList()
 
-                    'Check #2: WhiteList
-                    If aktuelleSettings.WhiteListTags.Count = 0 Then
+        'Check #1: Bewertung
+        If metaRating >= settingsRating Then
+            checkBewertung = True
+        Else
+            checkBewertung = False
+        End If
+
+        'Check #2: WhiteList
+        If whitetags.Count = 0 Then
+            checkWhitelist = True
+        Else
+            checkWhitelist = False
+            For Each includeTag In whitetags
+                For Each keyword In keywords
+                    If keyword.IndexOf(includeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
                         checkWhitelist = True
-                    Else
-                        Dim keywords = xmp.GetPropertyString("http://purl.org/dc/elements/1.1/", "subject")
-                        If Not String.IsNullOrEmpty(keywords) Then
-                            For Each includeTag In aktuelleSettings.WhiteListTags
-                                If keywords.IndexOf(includeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
-                                    checkWhitelist = True
-                                    Exit For
-                                End If
-                            Next
-                        End If
+                        Exit For
                     End If
+                    If checkWhitelist Then Exit For
+                Next
+            Next
+        End If
 
-                    'Check #3: BlackList
-                    Dim blacklisted As Boolean = False
-                    Dim blackKeywords = xmp.GetPropertyString("http://purl.org/dc/elements/1.1/", "subject")
-                    If Not String.IsNullOrEmpty(blackKeywords) Then
-                        For Each excludeTag In aktuelleSettings.BlackListTags
-                            If blackKeywords.IndexOf(excludeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
-                                blacklisted = True
-                                Exit For
-                            End If
-                        Next
-                    End If
-                    If blacklisted Then checkBlacklist = False
-
+        'Check #3: BlackList
+        checkBlacklist = True
+        For Each excludeTag In blacktags
+            For Each keyword In keywords
+                ' Prüfen, ob eines der Blacklist-Tags in den Keywords enthalten ist
+                If keyword.IndexOf(excludeTag, StringComparison.OrdinalIgnoreCase) >= 0 Then
+                    checkBlacklist = False
+                    Exit For
                 End If
-            End If
+                If Not checkBlacklist Then Exit For
+            Next
+        Next
 
-        Catch ex As Exception
-            LogHandling.LogError("SlideShowBildauswahl.CheckIfLegalFile(" & bild & ") - Fehler beim Auslesen mit MetadataExtractor: " & ex.Message)
-        End Try
-
+        'Ergebnis ausgeben
         Return checkBewertung AndAlso checkWhitelist AndAlso checkBlacklist
+
     End Function
 
     Public Shared Function GetCurrentScreen() As Image
@@ -287,7 +290,7 @@ Public Class BildauswahlMain
 
             vorbereiteteDateien.Add(bild)
 
-            If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 2 Then
+            If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 20 Then
                 hasFirstResultsPictues = True
                 RaiseEvent ErsteBilderGefunden()
             End If
@@ -335,6 +338,7 @@ Public Class BildauswahlMain
     End Function
 
     Public Shared Sub PreparePicturesByDirectory()
+
         vorbereiteteVerzeichnisse.Clear()
         hasFirstResultsVerzeichnisse = False
 
@@ -362,7 +366,7 @@ Public Class BildauswahlMain
                 If gefiltert.Count > 0 Then
                     vorbereiteteVerzeichnisse(unterverzeichnis) = gefiltert
 
-                    If Not hasFirstResultsVerzeichnisse Then
+                    If Not hasFirstResultsVerzeichnisse AndAlso vorbereiteteVerzeichnisse.Count >= 5 Then
                         hasFirstResultsVerzeichnisse = True
                         RaiseEvent ErsteVerzeichnisseGefunden()
                     End If
@@ -433,7 +437,6 @@ Public Class BildauswahlMain
 
         Return picture
     End Function
-
 
     ''' <summary>
     ''' Dreht ein Bild um den angegebenen Winkel angle.
@@ -532,12 +535,14 @@ Public Class BildauswahlMain
 
     Private Shared Sub StarteVorbereitungenPictures()
 
+        Thread.Sleep(500)
         PreparePictures()
 
     End Sub
 
     Private Shared Sub StarteVorbereitungenVerzeichnisse()
 
+        Thread.Sleep(500)
         PreparePicturesByDirectory()
 
     End Sub

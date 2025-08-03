@@ -83,7 +83,6 @@ Module SaverMain
             LogHandling.LogError("Das MCP konnte nicht geladen werden: " & ex.ToString)
         End Try
 
-
         ' ----------------------------------------------------------------
         ' Schoner gemäß mitgelieferter Argument im passenden Modus starten
         ' ----------------------------------------------------------------
