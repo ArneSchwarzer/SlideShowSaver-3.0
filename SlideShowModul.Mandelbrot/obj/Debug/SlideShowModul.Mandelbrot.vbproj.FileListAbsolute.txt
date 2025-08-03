@@ -47,3 +47,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\obj\Debu
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\obj\Debug\SlideShowModul.Mandelbrot.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\obj\Debug\SlideShowModul.Mandelbrot.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\obj\Debug\SlideShowModul.Mandelbrot.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\XmpCore.xml

@@ -66,3 +66,7 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\Metad
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\XmpCore.dll
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\MetadataExtractor.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\bin\Debug\XmpCore.xml

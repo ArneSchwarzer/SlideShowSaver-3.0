@@ -1,15 +1,14 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {}
+    "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {}
   },
   "projects": {
-    "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
+    "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
       "restore": {
-        "projectUniqueName": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
+        "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
         "projectName": "SlideShowInterfaces",
-        "projectPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
-        "UsingMicrosoftNETSdk": false,
+        "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
         "frameworks": {
           "net48": {
             "projectReferences": {}
@@ -20,20 +19,20 @@
         "net48": {}
       }
     },
-    "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {
+    "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
+        "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
         "projectName": "SlideShowLoader",
-        "projectPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
-        "packagesPath": "C:\\Users\\arnod\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\obj\\",
+        "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj",
+        "packagesPath": "C:\\Users\\Arne\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\arnod\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Arne\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -42,17 +41,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net48": {
             "targetAlias": "net48",
             "projectReferences": {
-              "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
-                "projectPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj"
+              "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
+                "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj"
               },
-              "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj": {
-                "projectPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj"
+              "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj": {
+                "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj"
               }
             }
           }
@@ -66,22 +66,20 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.300"
+        }
       },
       "frameworks": {
         "net48": {
           "targetAlias": "net48",
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj": {
+    "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj": {
       "restore": {
-        "projectUniqueName": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
+        "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
         "projectName": "SlideShowLogging",
-        "projectPath": "C:\\Users\\arnod\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
-        "UsingMicrosoftNETSdk": false,
+        "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
         "frameworks": {
           "net48": {
             "projectReferences": {}
