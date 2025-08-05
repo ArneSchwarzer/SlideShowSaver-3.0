@@ -1,21 +1,17 @@
-﻿Imports SlideShowMain.SaverMain
-Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.ToolTipHandling
-Imports SlideShowTools.CheckedListBoxHandling
-Imports SlideShowTools.SettingsHandling
-Imports SlideShowTools.ListHandling
-Imports SlideShowInterfaces.InterfaceDeclarations
+﻿Imports SlideShowBildauswahl
 Imports SlideShowInterfaces.InfoHandling
+Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
-Imports SlideShowBildauswahl
-Imports SlideShowTools.CursorHandling
 Imports SlideShowLogging
-Imports SlideShowTools
-Imports StarControlLibrary
 Imports SlideShowSprachen
-Imports System.TimeZoneInfo
-Imports System.Diagnostics.Eventing.Reader
-Imports System.Runtime.InteropServices.ComTypes
+Imports SlideShowTools
+Imports SlideShowTools.CheckedListBoxHandling
+Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.CursorHandling
+Imports SlideShowTools.ListHandling
+Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.ToolTipHandling
 
 Public Class frmOptionsMain
 
@@ -181,6 +177,13 @@ Public Class frmOptionsMain
 
         chkMultiMonitor.Visible = False
         chkMultiMonitor.Checked = False
+#End Region
+
+#Region "picHintergrundfarbe Initialisieren"
+        'Hintergrundfarbe für den Schoner
+
+        picHintergrundfarbe.BackColor = aktuelleSettings.Hintergrundfarbe
+
 #End Region
 
 #Region "Sprachauswahl-Leiste laden"
@@ -607,5 +610,23 @@ Public Class frmOptionsMain
 
         aktuelleSettings = GetSettings(Of SettingsMain)("Main")
 
+    End Sub
+
+    Private Sub picHintergrundfarbe_Click(sender As Object, e As EventArgs) Handles picHintergrundfarbe.Click
+        'Behandelt PictureBox Hintergrundfarbe
+
+        Using dlg As New ColorDialog()
+
+            dlg.Color = aktuelleSettings.Hintergrundfarbe
+            dlg.AllowFullOpen = True
+            dlg.AnyColor = True
+            dlg.FullOpen = True
+
+            If dlg.ShowDialog() = DialogResult.OK Then
+                picHintergrundfarbe.BackColor = dlg.Color
+                aktuelleSettings.Hintergrundfarbe = dlg.Color
+                WriteToRegistry(SLIDESHOWMAIN_PATH & "Hintergrundfarbe", ColorToString(dlg.Color))
+            End If
+        End Using
     End Sub
 End Class

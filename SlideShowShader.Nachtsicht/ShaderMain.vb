@@ -8,6 +8,8 @@ Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
 Imports SlideShowTools
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SharedDataHandling
+Imports SlideShowTools.ColorHandling
 
 Public Class ShaderMain
     Implements ISlideShowShader
@@ -79,7 +81,7 @@ Public Class ShaderMain
         'Metadaten
         Dim metadaten As Metadata
         Dim aktenzeichen As String = Path.GetFileNameWithoutExtension(bildPfad)
-        Dim datum As String = System.IO.File.GetCreationTime(bildPfad).ToString("dd.MM.yyyy")
+        Dim datum As String = System.IO.File.GetCreationTime(bildPfad).ToString("dd.MM.yyyy HH:mm:ss")
         Dim dateipfad As String = bildPfad
         Dim geoPosition As String
         Dim locationHelper As LocationHandling
@@ -104,7 +106,7 @@ Public Class ShaderMain
         g = Graphics.FromImage(resultImage)
         g.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBicubic
         g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
-        g.Clear(System.Drawing.Color.Black)
+        g.Clear(HintergrundFarbeSaver)
 
         ia.SetColorMatrix(colorMatrix)
 

@@ -68,3 +68,7 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\D
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\XmpCore.dll
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\MetadataExtractor.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\bin\Debug\XmpCore.xml

@@ -50,7 +50,7 @@ Public Class ucOptionsModul
 #Region "cmbBildauswahl Initialisieren"
         'cmbBildauswahl
         cmbBildauswahl.SelectedItem = aktuelleSettings.Bildauswahl
-        If aktuelleSettings.Bildauswahl = "Zufällig" Then
+        If aktuelleSettings.Bildauswahl = "Zufallsbild" Then
             chkPräsentationsschirm.Enabled = False
         Else
             chkPräsentationsschirm.Enabled = True
@@ -196,7 +196,7 @@ Public Class ucOptionsModul
 
     Private Sub cmbBildauswahl_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbBildauswahl.SelectedIndexChanged
 
-        If cmbBildauswahl.SelectedItem = "Zufällig" Then
+        If cmbBildauswahl.SelectedItem = "Zufallsbild" Then
             chkPräsentationsschirm.Enabled = False
         Else
             chkPräsentationsschirm.Enabled = True

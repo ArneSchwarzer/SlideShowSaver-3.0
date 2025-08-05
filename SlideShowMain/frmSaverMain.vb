@@ -1,19 +1,16 @@
-﻿Imports System.Windows.Forms
-Imports System.Drawing
-Imports SlideShowTools
-Imports SlideShowTools.KeyAndMouseHandling
-Imports SlideShowMain.SaverMain
-Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.ListHandling
-Imports SlideShowTools.SettingsHandling
+﻿Imports SlideShowBildauswahl
 Imports SlideShowBildauswahl.BildauswahlMain
-Imports SlideShowLogging
-Imports SlideShowLoader
-Imports SlideShowBildauswahl
 Imports SlideShowInterfaces.InterfaceDeclarations
-Imports SlideShowTools.SharedDataHandling
+Imports SlideShowLoader
+Imports SlideShowLogging
+Imports SlideShowTools
+Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.KeyAndMouseHandling
+Imports SlideShowTools.ListHandling
+Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ScreenHandling
-Imports System.Threading
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.SharedDataHandling
 
 Public Class frmSaverMain
 #Region "Variablendeklaration"
@@ -218,6 +215,9 @@ Public Class frmSaverMain
         ReadMainSettingsFromRegistryOrDefaults()
         StoreSettings("Main", aktuelleSettings)
 
+        'Den Modulen die Hintergrundfarbe bereitstellen
+        HintergrundFarbeSaver = aktuelleSettings.Hintergrundfarbe
+
         If aktuelleSettings.ModulReihenfolge <> "Zufällig bei Start" Then
             'Main Loop gemäß ModulDauer in Minuten setzten & Starten
             tmrMain.Interval = aktuelleSettings.ModulDauer * 60 * 1000
@@ -354,6 +354,10 @@ Public Class frmSaverMain
             If listOfEnabledModules.Count = 0 Then
                 fallbackIsActive = True
                 fallbackPaused = False
+            ElseIf fallbackIsActive Then
+                fallbackIsActive = False
+                fallbackPaused = False
+                fallbackInstanz.Close()
             End If
 
             'Und prüfen ob das aktuelle Modul weiterlaufen darf oder nicht
@@ -365,6 +369,11 @@ Public Class frmSaverMain
             BildauswahlMain.CheckYourSettings()
             If activeModule IsNot Nothing Then
                 activeModule.CheckYourSettings()
+            End If
+
+            'Dem Fallbacksaver befehlen, seine Hintergrundfarbe anzupassen
+            If fallbackIsActive Then
+                fallbackInstanz.CheckYourMail()
             End If
 
         End If
@@ -454,6 +463,9 @@ Public Class frmSaverMain
 
         'Modul-TransitionsReihenfolge
         aktuelleSettings.ModulTransitionReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", defaults)
+
+        'Hintergrundfarbve
+        aktuelleSettings.Hintergrundfarbe = StringToColor(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "Hintergrundfarbe", defaults))
 
     End Sub
 

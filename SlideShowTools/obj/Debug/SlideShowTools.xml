@@ -201,6 +201,11 @@ SlideShowTools
  Gibt an, ob ein Modul das Startbild bereits verwendet hat.
  </summary>
 </member>
+<member name="P:SlideShowTools.SharedDataHandling.HintergrundFarbeSaver">
+ <summary>
+ Gibt an, ob ein Modul das Startbild bereits verwendet hat.
+ </summary>
+</member>
 <member name="M:SlideShowTools.ToolTipHandling.EnableToolTipsForCLB(System.Windows.Forms.CheckedListBox)">
  <summary>
  Initialisiert ToolTips für eine CheckedListBox mit SlideShowModulInfo, SlideShowTransitionInfo oder SlideShowShaderInfo.

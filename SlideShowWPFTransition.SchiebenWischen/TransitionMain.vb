@@ -10,10 +10,12 @@ Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
+Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.SharedDataHandling
 
 
 Namespace TransitionMain_SuW
@@ -305,8 +307,10 @@ Namespace TransitionMain_SuW
 
             ' Neuen Frame zeichnen
             Dim drawingVisual As New DrawingVisual()
+            Dim hintergrundBrush As New SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
+
             Using dc As DrawingContext = drawingVisual.RenderOpen()
-                dc.DrawRectangle(Media.Brushes.Black, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
+                dc.DrawRectangle(hintergrundBrush, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
                 drawAction.Invoke(dc, renderSize)
             End Using
 

@@ -1,8 +1,7 @@
 ﻿<Window x:Class="wpfModulMain"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SlideShowSaver 3.0"
-        Background="Black"
+        Title="SlideShowSaver 3.0"        
         WindowStyle="None"
         WindowState="Maximized"
         ResizeMode="NoResize"
@@ -11,17 +10,40 @@
         Topmost="False"
         KeyDown="Window_KeyDown"
         MouseDown="Window_MouseDown">
-   
+
     <Grid>
-        <Label x:Name="lblPräsentationsschirm" 
-               HorizontalAlignment="Center" 
-               VerticalAlignment="Center"                
-               FontSize="48" 
-               FontWeight="Bold"
-               Foreground="White" 
-               Content="SlideShowSaver 3.0"
-               Visibility="Hidden"/>
-        <Image x:Name="imgAnzeige" Stretch="Uniform"/>
+        <!-- Hauptbild, immer Vollbild -->
+        <Image x:Name="imgAnzeige"
+               Stretch="Uniform"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center" />
+
+        <!-- Labels oben links -->
+        <StackPanel x:Name="pnlStatus"
+                    Orientation="Vertical"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="10"                    >
+            <!-- Standard: unsichtbar -->
+            <Label x:Name="lblInitialisiereBilder"
+                   FontSize="18"
+                   FontWeight="Bold"                   
+                   Content="Initialisiere Bilder... " />
+            <Label x:Name="lblInitialisiereVerzeichnisse"
+                   FontSize="18"
+                   FontWeight="Bold"                   
+                   Content="Initialisiere Verzeichnisse... " />
+        </StackPanel>
+
+        <!-- Präsentations‑TextBlock in Bildschirmmitte -->
+        <TextBlock x:Name="txbPräsentationsschirm"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   FontSize="48"
+                   FontWeight="Bold"                   
+                   Text="SlideShowSaver 3.0"
+                   TextWrapping="Wrap"/>
+        <!-- Standard: unsichtbar -->
     </Grid>
-    
 </Window>

@@ -3,6 +3,8 @@ Imports System.Windows
 Imports System.Windows.Forms
 Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
+Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.SharedDataHandling
 
 Public Class GraphicsSizeModeHandling
 
@@ -56,8 +58,9 @@ Public Class GraphicsSizeModeHandling
             Dim zielRectangle As Rectangle = GraphicsSizeModeHandling.GetDrawRectangle(bildgröße, quellRect, modus)
             Dim zielRect As New Rect(zielRectangle.Left, zielRectangle.Top, zielRectangle.Width, zielRectangle.Height)
             Dim gesamterBereich As New Rect(0.0, 0.0, zielgröße.Width, zielgröße.Height)
+            Dim hintergrundBrush As New SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
 
-            dc.DrawRectangle(Media.Brushes.Black, Nothing, gesamterBereich)
+            dc.DrawRectangle(hintergrundBrush, Nothing, gesamterBereich)
             dc.DrawImage(bild, zielRect)
 
         End Using

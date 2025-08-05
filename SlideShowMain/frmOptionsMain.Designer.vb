@@ -46,9 +46,12 @@ Partial Class frmOptionsMain
         Me.tpShader = New System.Windows.Forms.TabPage()
         Me.btnOK = New System.Windows.Forms.Button()
         Me.pnlLanguages = New System.Windows.Forms.Panel()
+        Me.lblNHintergrundfarbe = New System.Windows.Forms.Label()
+        Me.picHintergrundfarbe = New System.Windows.Forms.PictureBox()
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
         CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblNTitel
@@ -79,6 +82,8 @@ Partial Class frmOptionsMain
         '
         'tpAllgemein
         '
+        Me.tpAllgemein.Controls.Add(Me.picHintergrundfarbe)
+        Me.tpAllgemein.Controls.Add(Me.lblNHintergrundfarbe)
         Me.tpAllgemein.Controls.Add(Me.lblKeineTransitionsModule)
         Me.tpAllgemein.Controls.Add(Me.lblNcmbAbspielmodusTransitionsModule)
         Me.tpAllgemein.Controls.Add(Me.cmbTransitionsReihenfolge)
@@ -117,7 +122,7 @@ Partial Class frmOptionsMain
         'lblNcmbAbspielmodusTransitionsModule
         '
         Me.lblNcmbAbspielmodusTransitionsModule.AutoSize = True
-        Me.lblNcmbAbspielmodusTransitionsModule.Location = New System.Drawing.Point(21, 889)
+        Me.lblNcmbAbspielmodusTransitionsModule.Location = New System.Drawing.Point(21, 852)
         Me.lblNcmbAbspielmodusTransitionsModule.Name = "lblNcmbAbspielmodusTransitionsModule"
         Me.lblNcmbAbspielmodusTransitionsModule.Size = New System.Drawing.Size(365, 41)
         Me.lblNcmbAbspielmodusTransitionsModule.TabIndex = 12
@@ -127,7 +132,7 @@ Partial Class frmOptionsMain
         '
         Me.cmbTransitionsReihenfolge.FormattingEnabled = True
         Me.cmbTransitionsReihenfolge.Items.AddRange(New Object() {"Zufällig bei Start", "In Reihenfolge bei Start"})
-        Me.cmbTransitionsReihenfolge.Location = New System.Drawing.Point(489, 889)
+        Me.cmbTransitionsReihenfolge.Location = New System.Drawing.Point(489, 852)
         Me.cmbTransitionsReihenfolge.Name = "cmbTransitionsReihenfolge"
         Me.cmbTransitionsReihenfolge.Size = New System.Drawing.Size(388, 49)
         Me.cmbTransitionsReihenfolge.TabIndex = 11
@@ -139,7 +144,7 @@ Partial Class frmOptionsMain
         Me.clbTransitionsModule.Location = New System.Drawing.Point(27, 614)
         Me.clbTransitionsModule.Margin = New System.Windows.Forms.Padding(4)
         Me.clbTransitionsModule.Name = "clbTransitionsModule"
-        Me.clbTransitionsModule.Size = New System.Drawing.Size(850, 268)
+        Me.clbTransitionsModule.Size = New System.Drawing.Size(850, 224)
         Me.clbTransitionsModule.TabIndex = 10
         '
         'lblNclbTransitionsModule
@@ -167,7 +172,7 @@ Partial Class frmOptionsMain
         'chkMultiMonitor
         '
         Me.chkMultiMonitor.AutoSize = True
-        Me.chkMultiMonitor.Location = New System.Drawing.Point(26, 962)
+        Me.chkMultiMonitor.Location = New System.Drawing.Point(28, 987)
         Me.chkMultiMonitor.Name = "chkMultiMonitor"
         Me.chkMultiMonitor.Size = New System.Drawing.Size(338, 45)
         Me.chkMultiMonitor.TabIndex = 7
@@ -299,6 +304,24 @@ Partial Class frmOptionsMain
         Me.pnlLanguages.Size = New System.Drawing.Size(922, 84)
         Me.pnlLanguages.TabIndex = 4
         '
+        'lblNHintergrundfarbe
+        '
+        Me.lblNHintergrundfarbe.AutoSize = True
+        Me.lblNHintergrundfarbe.Location = New System.Drawing.Point(27, 933)
+        Me.lblNHintergrundfarbe.Name = "lblNHintergrundfarbe"
+        Me.lblNHintergrundfarbe.Size = New System.Drawing.Size(247, 41)
+        Me.lblNHintergrundfarbe.TabIndex = 14
+        Me.lblNHintergrundfarbe.Text = "Hintergrundfarbe"
+        '
+        'picHintergrundfarbe
+        '
+        Me.picHintergrundfarbe.BackColor = System.Drawing.Color.Black
+        Me.picHintergrundfarbe.Location = New System.Drawing.Point(489, 924)
+        Me.picHintergrundfarbe.Name = "picHintergrundfarbe"
+        Me.picHintergrundfarbe.Size = New System.Drawing.Size(387, 50)
+        Me.picHintergrundfarbe.TabIndex = 15
+        Me.picHintergrundfarbe.TabStop = False
+        '
         'frmOptionsMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
@@ -317,6 +340,7 @@ Partial Class frmOptionsMain
         Me.tpAllgemein.ResumeLayout(False)
         Me.tpAllgemein.PerformLayout()
         CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -345,4 +369,6 @@ Partial Class frmOptionsMain
     Friend WithEvents lblNclbTransitionsModule As Label
     Friend WithEvents lblKeineTransitionsModule As Label
     Friend WithEvents pnlLanguages As Panel
+    Friend WithEvents picHintergrundfarbe As PictureBox
+    Friend WithEvents lblNHintergrundfarbe As Label
 End Class

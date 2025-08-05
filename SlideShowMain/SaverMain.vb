@@ -49,6 +49,7 @@ Module SaverMain
         Public MultiMonitor As Boolean
         Public ModulTransitionListe As List(Of String)
         Public ModulTransitionReihenfolge As String
+        Public Hintergrundfarbe As Color
     End Structure
 
 #End Region
@@ -135,6 +136,7 @@ Module SaverMain
         defaults("MultiMonitor") = "False" 'Multi-Monitor Support aktivieren
         defaults("ModulTransitionListe") = "" 'Liste der Transitions zwischen den Modulen
         defaults("ModulTransitionReihenfolge") = "Zufällig bei Start" 'Wie wechseln die Transitions zwischen Modulen
+        defaults("Hintergrundfarbe") = "0,0,0,255"
 
         Return defaults
     End Function

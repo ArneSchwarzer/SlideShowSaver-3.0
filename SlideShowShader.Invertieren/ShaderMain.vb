@@ -67,12 +67,10 @@ Public Class ShaderMain
         ReadShaderSettingsFromRegistryOrDefaults()
 
         'Wenn Modus Zufall gesetzt ist, dann Modus auswürfeln
-        LogHandling.LogDebug("Shader Invertieren - ShaderMain.RunShader: Aktueller Modus: " & aktuelleSettings.Modus)
         If aktuelleSettings.Modus = "Zufall" Then
             rndTest = rnd.Next(2)
-            LogHandling.LogDebug("Shader Invertieren - ShaderMain.RunShader: Zufallsmodus ausgewürfelt: " & rndTest)
-            If rndTest = 0 Then
 
+            If rndTest = 0 Then
                 aktuelleSettings.Modus = "Farbe"
             Else
                 aktuelleSettings.Modus = "Weiss-Schwarz"

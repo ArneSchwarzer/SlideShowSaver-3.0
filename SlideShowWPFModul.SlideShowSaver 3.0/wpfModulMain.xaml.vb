@@ -1,6 +1,9 @@
 ﻿Imports System.Drawing
 Imports System.IO
+Imports System.Reflection.Emit
 Imports System.Windows.Forms
+Imports System.Windows.Interop
+Imports System.Windows.Media
 Imports System.Windows.Threading
 Imports SlideShowBildauswahl
 Imports SlideShowBildauswahl.BildauswahlMain
@@ -8,11 +11,13 @@ Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
 Imports SlideShowLogging
+Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ScreenHandling
 Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.SharedDataHandling
 
 Partial Public Class wpfModulMain
 
@@ -63,6 +68,7 @@ Partial Public Class wpfModulMain
     Private Const SW_RESTORE As Integer = 9
     Private hasFirstVerzeichnisse As Boolean = False
     Private hasFirstBilder As Boolean = False
+    Private hintergrundWM As Windows.Media.Color
 
 #End Region
 
@@ -86,7 +92,7 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-    Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs)
+    Private Sub Window_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         'Weitere Initialisierungen der Form
 
         'Versuch, das Fenster in den Vordergrund zu bringen - Ebene 1
@@ -94,6 +100,10 @@ Partial Public Class wpfModulMain
         Me.ShowActivated = True
         Me.Show()
         Me.Activate()
+
+        'Hintergrundfarbe setzen
+        hintergrundWM = SDColorToWMColor(HintergrundFarbeSaver)
+        Me.Background = New SolidColorBrush(hintergrundWM)
 
         'Versuch, das Fenster in den Vordergrund zu bringen - Ebene 2
         ' Nach einem kleinen Delay erneut aktivieren
@@ -107,26 +117,70 @@ Partial Public Class wpfModulMain
                                             End Sub
         bringToFrontTimer.Start()
 
+        'Initialisierungslabel einstellen
+
+        'Handle des aktuellen Fensters holen
+        Dim helper As New WindowInteropHelper(Me)
+        Dim hwnd As IntPtr = helper.Handle
+
+        'Bildschirm ermitteln, auf dem sich das Fenster befindet
+        Dim currentScreen As Screen = Screen.FromHandle(hwnd)
+
+        'Maximalbreite = 90 % der aktuellen Bildschirmbreite
+        Dim maxWidth As Double = currentScreen.Bounds.Width * 0.9
+
+        'Label einstellen und anzeigen
+        imgAnzeige.Visibility = Visibility.Visible
+
+        pnlStatus.Visibility = Visibility.Visible
+
+        txbPräsentationsschirm.MaxWidth = maxWidth
+        txbPräsentationsschirm.TextAlignment = TextAlignment.Center
+        txbPräsentationsschirm.TextWrapping = TextWrapping.Wrap
+        txbPräsentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+        txbPräsentationsschirm.Visibility = Visibility.Visible
+
+        lblInitialisiereBilder.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+        lblInitialisiereBilder.Visibility = Visibility.Visible
+
+        lblInitialisiereVerzeichnisse.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+        lblInitialisiereVerzeichnisse.Visibility = Visibility.Visible
+
         CheckYourMail()
 
     End Sub
 
     Private Sub BildauswahlMain_ErsteVerzeichnisseGefunden()
-        LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteVerzeichnisseGefunden: Event ErsteVerzeichnisseGefunden empfangen.")
-        hasFirstVerzeichnisse = True
-        VersucheErstesBildZuLaden()
+        Dispatcher.Invoke(Sub()
+                              LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteVerzeichnisseGefunden: Event ErsteVerzeichnisseGefunden empfangen.")
+                              lblInitialisiereVerzeichnisse.Content &= "OK"
+                              hasFirstVerzeichnisse = True
+                              VersucheErstesBildZuLaden()
+                          End Sub)
     End Sub
 
     Private Sub BildauswahlMain_ErsteBilderGefunden()
-        LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteBilderGefunden: Event ErsteBilderGefunden empfangen.")
-        hasFirstBilder = True
-        VersucheErstesBildZuLaden()
+        Dispatcher.Invoke(Sub()
+                              LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteBilderGefunden: Event ErsteBilderGefunden empfangen.")
+                              lblInitialisiereBilder.Content &= "OK"
+                              hasFirstBilder = True
+                              VersucheErstesBildZuLaden()
+                          End Sub)
     End Sub
 
     Private Sub VersucheErstesBildZuLaden()
-        If hasFirstVerzeichnisse AndAlso hasFirstBilder Then
-            Dispatcher.Invoke(Sub() LadeErstesBild())
-        End If
+        Dispatcher.Invoke(Sub()
+                              'Erst laden, wenn beide Events eingetroffen sind
+                              If hasFirstBilder AndAlso hasFirstVerzeichnisse Then
+
+                                  'Init-Overlay ausblenden
+                                  pnlStatus.Visibility = Visibility.Collapsed
+                                  txbPräsentationsschirm.Visibility = Visibility.Collapsed
+
+                                  'Erstes Bild laden
+                                  LadeErstesBild()
+                              End If
+                          End Sub)
     End Sub
 
     Private Sub LadeErstesBild()
@@ -204,6 +258,8 @@ Partial Public Class wpfModulMain
         If Not präsentationAnzeigen Then
 
             imgAnzeige.Source = aktuellesBild
+            txbPräsentationsschirm.Visibility = Visibility.Collapsed
+            imgAnzeige.Visibility = Visibility.Visible
 
             'Bildinfo initialisieren - mit Werten von aktuellesBild
             If aktuelleSettings.BildInfoAnzeigen AndAlso bildPfade(0) IsNot Nothing Then
@@ -242,7 +298,7 @@ Partial Public Class wpfModulMain
         If transitionIstAktiv Then Exit Sub
         If warteAufDelay Then Exit Sub
 
-        lblPräsentationsschirm.Visibility = Visibility.Hidden
+        txbPräsentationsschirm.Visibility = Visibility.Collapsed
         imgAnzeige.Visibility = Visibility.Visible
         LadeNeueTransition(False)
 
@@ -361,10 +417,13 @@ Partial Public Class wpfModulMain
                     Loop Until aktuellesVerzeichnis.Count > 1
                     If aktuelleSettings.Präsentationsschirm Then
                         präsentationAnzeigen = True
+                    Else
+                        präsentationAnzeigen = False
                     End If
                 End If
                 bildPfade(0) = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
             Else
+                präsentationAnzeigen = False
                 bildPfade(0) = GetPictures(1).Item(0)
             End If
 
@@ -408,8 +467,8 @@ Partial Public Class wpfModulMain
         PräsentationsText = Path.GetFileName(Path.GetDirectoryName(aktuellesVerzeichnis(0)))
 
         If aktuellesVerzeichnis(0) IsNot Nothing Then
-            lblPräsentationsschirm.Content = PräsentationsText
-            lblPräsentationsschirm.Visibility = Visibility.Visible
+            txbPräsentationsschirm.Text = PräsentationsText
+            txbPräsentationsschirm.Visibility = Visibility.Visible
             imgAnzeige.Visibility = Visibility.Hidden
         End If
 
@@ -591,6 +650,12 @@ Partial Public Class wpfModulMain
 
         aktuelleSettings = GetSettings(Of ModulMain.SettingsModul_SSS)(ModulMain.nameModul)
 
+        'Hintergrund- und TextBox-Farbe setzen
+        hintergrundWM = SDColorToWMColor(HintergrundFarbeSaver)
+        Me.Background = New SolidColorBrush(hintergrundWM)
+        txbPräsentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+
+        'Timer anpassen
         tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
 
     End Sub
@@ -622,9 +687,24 @@ Partial Public Class wpfModulMain
 
         RemoveHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
         RemoveHandler tmrModul.Tick, AddressOf TmrModul_Tick
+        RemoveHandler tmrDelay.Tick, AddressOf tmrDelay_Tick
 
         tmrModul = Nothing
         tmrDelay = Nothing
+
+        RemoveHandler BildauswahlMain.ErsteBilderGefunden, AddressOf BildauswahlMain_ErsteBilderGefunden
+        RemoveHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf BildauswahlMain_ErsteVerzeichnisseGefunden
+
+        ' Bilder freigeben
+        imgAnzeige.Source = Nothing
+
+        ' Inhalte leeren
+        Me.Content = Nothing
+
+        ' GC (optional)
+        GC.Collect()
+        GC.WaitForPendingFinalizers()
+        GC.Collect()
 
     End Sub
 

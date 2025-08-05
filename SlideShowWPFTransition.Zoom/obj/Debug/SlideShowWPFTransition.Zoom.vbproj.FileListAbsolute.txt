@@ -69,3 +69,7 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\D
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\XmpCore.dll
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\MetadataExtractor.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\XmpCore.xml

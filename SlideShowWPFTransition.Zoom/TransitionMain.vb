@@ -3,10 +3,12 @@ Imports System.Windows.Forms
 Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging.LogHandling
+Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.SharedDataHandling
 
 Public Class TransitionMain
     Implements ISlideShowTransition
@@ -71,7 +73,7 @@ Public Class TransitionMain
 
         'Interne Initialisierungen & Formalitäten
         ReadTransitionSettingsFromRegistryOrDefaults()
-        StoreSettings(TransitionName, aktuelleSettings)
+        StoreSettings(nameTransition, aktuelleSettings)
 
         RaiseEvent TransitionIsRunning(True)
 
@@ -143,7 +145,7 @@ Public Class TransitionMain
         Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
 
         aktuelleSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Geschwindigkeit", defaults))
-        aktuelleSettings.ankerpunkte = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Richtungen", defaults))
+        aktuelleSettings.ankerpunkte = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Ankerpunkte", defaults))
 
     End Sub
 
@@ -188,6 +190,8 @@ Public Class TransitionMain
 
         Dim oldRect As Rect
         Dim newRect As Rect
+
+        Dim hintergrundBrush As New SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
 
         'Rectangles berechnen (linear interpoliert)
 
@@ -242,7 +246,7 @@ Public Class TransitionMain
         newRect = New Rect(newPoint, newSize)
 
         'Hintergrund füllen
-        dc.DrawRectangle(Media.Brushes.Black, Nothing, New Rect(0, 0, clntSize.Width, clntSize.Height))
+        dc.DrawRectangle(hintergrundBrush, Nothing, New Rect(0, 0, clntSize.Width, clntSize.Height))
 
         'Bilder zeichnen
         If progress <= 0.5 Then
@@ -283,12 +287,14 @@ Public Class TransitionMain
     End Sub
 
     Private Sub OnFrameTick(sender As Object, e As EventArgs)
+        Dim hintergrundBrush As New SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
+
         If drawAction Is Nothing Then Exit Sub
 
         ' Neuen Frame zeichnen
         Dim drawingVisual As New DrawingVisual()
         Using dc As DrawingContext = drawingVisual.RenderOpen()
-            dc.DrawRectangle(Media.Brushes.Black, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
+            dc.DrawRectangle(hintergrundBrush, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
             drawAction.Invoke(dc, renderSize)
         End Using
 

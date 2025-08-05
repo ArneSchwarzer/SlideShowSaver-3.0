@@ -4,6 +4,7 @@ Imports SlideShowTools
 Imports SlideShowMain.SaverMain
 Imports SlideShowLogging
 Imports SlideShowMain.My.Resources
+Imports SlideShowTools.SharedDataHandling
 
 Public Class frmFallbackSaver
     Inherits Form
@@ -18,7 +19,8 @@ Public Class frmFallbackSaver
     Private Sub frmFallbacksaver_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Fallbacksaver Form initialisieren
 
-        FormsHandling.InitialFormPreparation(Me, Color.Black)
+        FormsHandling.InitialFormPreparation(Me, HintergrundFarbeSaver)
+        Me.WindowState = FormWindowState.Maximized
 
     End Sub
 
@@ -121,4 +123,11 @@ Public Class frmFallbackSaver
         KeyAndMouseHandling.ForwardKeyDown(Me, e)
     End Sub
 
+    Public Sub CheckYourMail()
+        'Heißt nur wegen der Konsistenz mit den anderen Modulen so, es gibt keine Optionen einzulesen.
+        'Einzig ein Farbwechsel der Hintergrundfarbe wird ggf. von frmSaverMain angestoßen.
+
+        Me.BackColor = HintergrundFarbeSaver
+
+    End Sub
 End Class
