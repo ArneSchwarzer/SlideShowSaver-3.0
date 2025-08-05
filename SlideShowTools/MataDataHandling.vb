@@ -58,6 +58,8 @@ Public Class MataDataHandling
             ' Extracting keywords
             If iptcDirectory IsNot Nothing Then
                 metadata.Keywords.AddRange(iptcDirectory.GetKeywords())
+                metadata.Keywords.Sort()
+
                 If metadata.Author = String.Empty Then
                     metadata.Author = iptcDirectory.GetDescription(IptcDirectory.TagByLine)
                 End If
@@ -74,10 +76,13 @@ Public Class MataDataHandling
                 metadata.FocalLength = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagFocalLength)
             End If
 
-            ' Extracting geographic coordinates if available
+            'Extracting geographic coordinates if available
             If gpsDirectory IsNot Nothing Then
-                metadata.goeographicLatitude = gpsDirectory.GetGeoLocation().Latitude
-                metadata.geographicLongitude = gpsDirectory.GetGeoLocation().Longitude
+                If gpsDirectory.GetGeoLocation() IsNot Nothing Then
+                    metadata.goeographicLatitude = gpsDirectory.GetGeoLocation().Latitude
+                    metadata.geographicLongitude = gpsDirectory.GetGeoLocation().Longitude
+                End If
+
             End If
 
         Catch ex As Exception

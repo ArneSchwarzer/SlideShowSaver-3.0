@@ -15,7 +15,7 @@
     <Grid>
         <Label x:Name="lblPräsentationsschirm" 
                HorizontalAlignment="Center" 
-               VerticalAlignment="Center" 
+               VerticalAlignment="Center"                
                FontSize="48" 
                FontWeight="Bold"
                Foreground="White" 

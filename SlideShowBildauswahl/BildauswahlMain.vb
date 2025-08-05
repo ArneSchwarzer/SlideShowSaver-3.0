@@ -209,8 +209,8 @@ Public Class BildauswahlMain
         aktuelleSettings.BlackListTags.Sort()
 
         'Zur Absicherung gegen parallele Threads
-        metaRating = aktuelleSettings.Bewertung
-        settingsRating = metadaten.Rating
+        settingsRating = aktuelleSettings.Bewertung
+        metaRating = metadaten.Rating
         whitetags = aktuelleSettings.WhiteListTags.ToList()
         blacktags = aktuelleSettings.BlackListTags.ToList()
         keywords = metadaten.Keywords.ToList()
@@ -290,7 +290,7 @@ Public Class BildauswahlMain
 
             vorbereiteteDateien.Add(bild)
 
-            If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 20 Then
+            If Not hasFirstResultsPictues AndAlso vorbereiteteDateien.Count >= 50 Then
                 hasFirstResultsPictues = True
                 RaiseEvent ErsteBilderGefunden()
             End If
@@ -366,7 +366,7 @@ Public Class BildauswahlMain
                 If gefiltert.Count > 0 Then
                     vorbereiteteVerzeichnisse(unterverzeichnis) = gefiltert
 
-                    If Not hasFirstResultsVerzeichnisse AndAlso vorbereiteteVerzeichnisse.Count >= 5 Then
+                    If Not hasFirstResultsVerzeichnisse AndAlso vorbereiteteVerzeichnisse.Count >= 10 Then
                         hasFirstResultsVerzeichnisse = True
                         RaiseEvent ErsteVerzeichnisseGefunden()
                     End If
@@ -385,8 +385,10 @@ Public Class BildauswahlMain
 
         If targetDir = "" Then
             Dim zufallsKey = vorbereiteteVerzeichnisse.Keys(rnd.Next(0, vorbereiteteVerzeichnisse.Count))
+            vorbereiteteVerzeichnisse(zufallsKey).Sort()
             Return vorbereiteteVerzeichnisse(zufallsKey)
         ElseIf vorbereiteteVerzeichnisse.ContainsKey(targetDir) Then
+            vorbereiteteVerzeichnisse(targetDir).Sort()
             Return vorbereiteteVerzeichnisse(targetDir)
         Else
             Return New List(Of String)()
@@ -535,14 +537,12 @@ Public Class BildauswahlMain
 
     Private Shared Sub StarteVorbereitungenPictures()
 
-        Thread.Sleep(500)
         PreparePictures()
 
     End Sub
 
     Private Shared Sub StarteVorbereitungenVerzeichnisse()
 
-        Thread.Sleep(500)
         PreparePicturesByDirectory()
 
     End Sub

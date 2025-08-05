@@ -102,3 +102,4 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\obj\Debug\SlideShowWPFModul.SlideShowSaver 3.0.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\obj\Debug\SlideShowWPFModul.SlideShowSaver 3.0.pdb
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\obj\Debug\SlideShowWPFModul.SlideShowSaver_3._0.ucOptionsModul.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\obj\Debug\SlideShowWPFModul.SlideShowSaver_3._0.ucOptionsModul.resources

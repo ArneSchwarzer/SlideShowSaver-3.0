@@ -194,16 +194,6 @@ Public Class ModulMain
             sssInfo = Nothing
         End If
 
-        'Timer gemäß der neuen Anzeigedauer setzen. Stop/Start, um die
-        'Änderungen sofort wirken zu lassen (falls z.B. die Anzeigedauer von 2m auf 20s zurückgesetzt wurde,
-        'möchte der Benutzer keine 2 Minuten warten, bis die Änderung greift).
-
-        sekunden = If(aktuelleSettings.Anzeigedauer > 0, aktuelleSettings.Anzeigedauer, 20)
-
-        sssScreen.tmrModul.Stop()
-        sssScreen.tmrModul.Interval = TimeSpan.FromSeconds(sekunden)
-        sssScreen.tmrModul.Start()
-
     End Sub
 
     'Private Methoden

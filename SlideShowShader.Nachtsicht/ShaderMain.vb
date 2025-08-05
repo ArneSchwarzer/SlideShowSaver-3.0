@@ -84,7 +84,7 @@ Public Class ShaderMain
         Dim geoPosition As String
         Dim locationHelper As LocationHandling
         Dim schlagworte As String
-        Dim keywords As New List(Of String)
+        Dim stichworte As New List(Of String)
         Dim geheimstufe As String = "VS-Nur für den Dienstgebrauch" ' kann sich dynamisch ändern
         Dim geheimStufeFarbe As System.Drawing.Brush = System.Drawing.Brushes.LimeGreen
         Dim kameraCode As String
@@ -138,23 +138,25 @@ Public Class ShaderMain
 
         'Metadaten via MetaDataExtraktor und LocationHandling
         If Path.GetExtension(bildPfad) = ".jpg" OrElse Path.GetExtension(bildPfad) = ".jpeg" Then
-            ExtractMetadataFromImage(bildPfad)
+            metadaten = ExtractMetadataFromImage(bildPfad)
 
             'Keywords
             If metadaten.Keywords IsNot Nothing Then
-                keywords = metadaten.Keywords
-                If keywords.Count = 0 Then keywords.Add("-")
+                stichworte = metadaten.Keywords
+                If stichworte.Count = 0 Then
+                    stichworte.Add("- ")
+                End If
             Else
-                keywords.Add("-")
+                stichworte.Add("-")
             End If
 
             'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das Nichts bringt LocationHelper bemühen.
-            If Not String.IsNullOrEmpty(metadaten.geographicLongitude) AndAlso Not String.IsNullOrEmpty(metadaten.goeographicLatitude) Then
+            If Not metadaten.geographicLongitude = 0 AndAlso Not metadaten.goeographicLatitude = 0 Then
                 geoPosition = metadaten.goeographicLatitude & ", " & metadaten.geographicLongitude
             Else
                 locationHelper = New SlideShowTools.LocationHandling()
 
-                geoPosition = locationHelper.DetermineGPSLocation(keywords)
+                geoPosition = locationHelper.DetermineGPSLocation(stichworte)
 
                 If String.IsNullOrWhiteSpace(geoPosition) Then
                     geoPosition = "Unbekannt"
@@ -165,18 +167,18 @@ Public Class ShaderMain
             End If
 
             'Geheimstufe (Altersfreigabe) setzen und Schlagwort-String (Tags) vorbereiten
-            If keywords IsNot Nothing Then
-                If keywords.Any(Function(k) String.Equals(k.Trim(), "18+", StringComparison.OrdinalIgnoreCase)) Then
+            If stichworte IsNot Nothing Then
+                If stichworte.Any(Function(k) String.Equals(k.Trim(), "18+", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "Streng Geheim"
                     geheimStufeFarbe = System.Drawing.Brushes.Orange
-                ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Akt", StringComparison.OrdinalIgnoreCase)) Then
+                ElseIf stichworte.Any(Function(k) String.Equals(k.Trim(), "Akt", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "Geheim"
-                ElseIf keywords.Any(Function(k) String.Equals(k.Trim(), "Lingerie", StringComparison.OrdinalIgnoreCase)) Then
+                ElseIf stichworte.Any(Function(k) String.Equals(k.Trim(), "Lingerie", StringComparison.OrdinalIgnoreCase)) Then
                     geheimstufe = "VS-Vertraulich"
                 End If
 
-                keywords.Sort()
-                schlagworte = String.Join(" | ", keywords)
+                stichworte.Sort()
+                schlagworte = String.Join(" | ", stichworte)
             Else
                 schlagworte = ""
             End If

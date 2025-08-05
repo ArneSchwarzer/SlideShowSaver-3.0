@@ -148,10 +148,13 @@ Partial Public Class wpfModulMain
                 'Präsentationsmodus aktivieren, wenn eingestellt
                 If aktuelleSettings.Präsentationsschirm Then
                     präsentationAnzeigen = True
+                Else
+                    präsentationAnzeigen = False
                 End If
 
             Else
                 bildPfade = GetPictures(2)
+                präsentationAnzeigen = False
             End If
 
             aktuellesImage = GetPictureByName(bildPfade(0))
@@ -219,14 +222,12 @@ Partial Public Class wpfModulMain
 
         End If
 
-
-
-
         'Ab jetzt wird bildPfade(1) nicht mehr benötigt
         bildPfade(0) = bildPfade(1)
 
         'Jetzt den Timer starten, falls nicht schon über den Präsentationsschirm gestartet
-        If Not aktuelleSettings.Präsentationsschirm Then
+        If Not präsentationAnzeigen Then
+            tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
             tmrModul.Start()
         End If
 
@@ -412,6 +413,7 @@ Partial Public Class wpfModulMain
             imgAnzeige.Visibility = Visibility.Hidden
         End If
 
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
         tmrModul.Start()
 
     End Sub
@@ -588,6 +590,8 @@ Partial Public Class wpfModulMain
         'Liest die aktuelleSettings ein
 
         aktuelleSettings = GetSettings(Of ModulMain.SettingsModul_SSS)(ModulMain.nameModul)
+
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
 
     End Sub
 

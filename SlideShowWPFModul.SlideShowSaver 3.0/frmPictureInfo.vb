@@ -124,7 +124,6 @@ Public Class frmPictureInfo
 
             'Tags
             If metadaten.Keywords IsNot Nothing AndAlso metadaten.Keywords.Count > 0 Then
-                Array.Sort(metadaten.Keywords.ToArray(), StringComparer.CurrentCultureIgnoreCase)
                 lblTags.Text = String.Join(" | ", metadaten.Keywords)
             Else
                 lblTags.Text = "-"
