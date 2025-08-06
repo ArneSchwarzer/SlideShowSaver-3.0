@@ -4,6 +4,7 @@ Imports System.Reflection.Emit
 Imports System.Windows.Forms
 Imports System.Windows.Interop
 Imports System.Windows.Media
+Imports System.Windows.Media.Animation
 Imports System.Windows.Threading
 Imports SlideShowBildauswahl
 Imports SlideShowBildauswahl.BildauswahlMain
@@ -62,18 +63,19 @@ Partial Public Class wpfModulMain
     Public WithEvents tmrModul As New DispatcherTimer()
     Private WithEvents tmrDelay As New DispatcherTimer()
 
-    'Sonstiges
-    Private rnd As New Random()
-    Private Const SW_SHOWMAXIMIZED As Integer = 3
-    Private Const SW_RESTORE As Integer = 9
+    'Initialisierungsphase
     Private hasFirstVerzeichnisse As Boolean = False
     Private hasFirstBilder As Boolean = False
     Private hintergrundWM As Windows.Media.Color
+    Private sbBilder As Storyboard
+    Private sbVerz As Storyboard
+
+    'Sonstiges
+    Private rnd As New Random()
 
 #End Region
 
     'Initialisierungen
-
     Public Sub New()
         'Erzeugt und initialisiert das Fenster und seine Komponenten
 
@@ -146,26 +148,36 @@ Partial Public Class wpfModulMain
         lblInitialisiereVerzeichnisse.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
         lblInitialisiereVerzeichnisse.Visibility = Visibility.Visible
 
+        'Sanduhren starten
+        StartHourglassAnimation(rtBilder, sbBilder)
+        StartHourglassAnimation(rtVerz, sbVerz)
+
         CheckYourMail()
 
     End Sub
 
     Private Sub BildauswahlMain_ErsteVerzeichnisseGefunden()
+
         Dispatcher.Invoke(Sub()
-                              LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteVerzeichnisseGefunden: Event ErsteVerzeichnisseGefunden empfangen.")
                               lblInitialisiereVerzeichnisse.Content &= "OK"
+                              StopHourglassAnimation(sbVerz)
+                              'hourglassVerz.Visibility = Visibility.Collapsed
                               hasFirstVerzeichnisse = True
                               VersucheErstesBildZuLaden()
                           End Sub)
+
     End Sub
 
     Private Sub BildauswahlMain_ErsteBilderGefunden()
+
         Dispatcher.Invoke(Sub()
-                              LogHandling.LogDebug("Modul SSS 3.0 wpfModulMain.BildauswahlMain_ErsteBilderGefunden: Event ErsteBilderGefunden empfangen.")
                               lblInitialisiereBilder.Content &= "OK"
+                              StopHourglassAnimation(sbBilder)
+                              'hourglassBilder.Visibility = Visibility.Collapsed
                               hasFirstBilder = True
                               VersucheErstesBildZuLaden()
                           End Sub)
+
     End Sub
 
     Private Sub VersucheErstesBildZuLaden()
@@ -288,6 +300,25 @@ Partial Public Class wpfModulMain
         End If
 
     End Sub
+
+    Private Sub StartHourglassAnimation(target As RotateTransform, ByRef sb As Storyboard)
+        Dim anim As New DoubleAnimation() With {
+        .From = 0,
+        .To = 360,
+        .Duration = TimeSpan.FromSeconds(1),
+        .RepeatBehavior = RepeatBehavior.Forever
+    }
+        sb = New Storyboard()
+        Storyboard.SetTarget(anim, target)
+        Storyboard.SetTargetProperty(anim, New PropertyPath(RotateTransform.AngleProperty))
+        sb.Children.Add(anim)
+        sb.Begin(Me, True) ' <-- Wichtig: Owner angeben
+    End Sub
+
+    Private Sub StopHourglassAnimation(ByRef sb As Storyboard)
+        If sb IsNot Nothing Then sb.Stop()
+    End Sub
+
 
     'Hauptschleife
     Private Sub TmrModul_Tick(sender As Object, e As EventArgs)

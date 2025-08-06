@@ -111,7 +111,7 @@
     <Compile Include="SharedDataHandling.vb" />
     <Compile Include="TextureHandling.vb" />
     <Compile Include="ToolTipHandling.vb" />
-    <Compile Include="WPFHandling.vb" />
+    <Compile Include="RenderLoopKopiervorlage.vb" />
     <Compile Include="XMLHandling.vb" />
   </ItemGroup>
   <ItemGroup>

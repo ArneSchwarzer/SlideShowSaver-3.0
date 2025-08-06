@@ -1,7 +1,4 @@
 ﻿Imports System.Drawing
-Imports System.Drawing.Imaging
-Imports System.IO
-Imports System.Runtime.InteropServices
 Imports System.Windows
 Imports System.Windows.Forms
 Imports System.Windows.Media
@@ -57,9 +54,11 @@ Namespace TransitionMain_SuW
         Private sizeWinForms As System.Drawing.Size
 
         'Rendering
-        Private Shared drawAction As Action(Of DrawingContext, Windows.Size)
-        Private Shared frameTimer As DispatcherTimer
-        Private Shared renderSize As Windows.Size
+        Private drawAction As Action(Of DrawingContext, Windows.Size)
+        Private frameTimer As DispatcherTimer
+        Private renderSize As Windows.Size
+        Private rtbCache As RenderTargetBitmap
+        Private stopRequested As Boolean = False
 
         'Sonstiges
         Private bmp As Bitmap
@@ -188,6 +187,8 @@ Namespace TransitionMain_SuW
                 tmrDuration = Nothing
             End If
 
+            stopRequested = True
+
             RaiseEvent TransitionIsRunning(False)
 
         End Sub
@@ -273,54 +274,87 @@ Namespace TransitionMain_SuW
 
             ' Fertig?
             If progress >= 1.0 Then
-                StopRenderLoop()
                 StopTransition()
             End If
 
         End Sub
 
         Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
-                                          zielGroesse As Windows.Size)
+                           zielGroesse As Windows.Size)
+            'RenderLoop starten und einmaliges renderTargetBitmap anlegen
 
             drawAction = drawActionInput
             renderSize = zielGroesse
 
+            'Alten Timer stoppen
             StopRenderLoop()
 
+            ' Falls Größe geändert → neues RTB erzeugen
+            If rtbCache Is Nothing OrElse
+               rtbCache.PixelWidth <> CInt(renderSize.Width) OrElse
+               rtbCache.PixelHeight <> CInt(renderSize.Height) Then
+
+                rtbCache = New RenderTargetBitmap(CInt(renderSize.Width),
+                                          CInt(renderSize.Height),
+                                          96, 96, PixelFormats.Pbgra32)
+            End If
+
+            'Neuen Timer starten
             frameTimer = New DispatcherTimer()
             AddHandler frameTimer.Tick, AddressOf OnFrameTick
             frameTimer.Interval = TimeSpan.FromMilliseconds(1000 \ FPS)
             frameTimer.Start()
+        End Sub
 
+        Private Sub OnFrameTick(sender As Object, e As EventArgs)
+            'Zeichnet einen einzelnen Frame
+            Dim hintergrundBrush As New Media.SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
+
+            If rtbCache Is Nothing OrElse drawAction Is Nothing Then Exit Sub
+
+            Dim drawingVisual As New DrawingVisual()
+            Using dc As DrawingContext = drawingVisual.RenderOpen()
+                ' Hintergrund leeren
+                dc.DrawRectangle(hintergrundBrush, Nothing,
+                         New Rect(0, 0, renderSize.Width, renderSize.Height))
+                ' Benutzerdefinierte Zeichenlogik
+                drawAction.Invoke(dc, renderSize)
+            End Using
+
+            ' RTB mit neuem Inhalt füllen
+            ClearRTB(rtbCache)
+            rtbCache.Render(drawingVisual)
+
+            RaiseEvent TransitionFrameIstFertig(rtbCache)
+
+            'Aufräumen nach dem letzten Frame
+            If stopRequested Then
+                StopRenderLoop()
+                rtbCache = Nothing
+            End If
         End Sub
 
         Public Sub StopRenderLoop()
+            'RenderLoop beenden und aufräumen
+
             If frameTimer IsNot Nothing Then
                 frameTimer.Stop()
                 RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
                 frameTimer = Nothing
             End If
+
         End Sub
 
-        Private Sub OnFrameTick(sender As Object, e As EventArgs)
-            If drawAction Is Nothing Then Exit Sub
+        Public Sub ClearRTB(rtb As RenderTargetBitmap)
+            'rtbCache leeren
 
-            ' Neuen Frame zeichnen
-            Dim drawingVisual As New DrawingVisual()
-            Dim hintergrundBrush As New SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
-
-            Using dc As DrawingContext = drawingVisual.RenderOpen()
-                dc.DrawRectangle(hintergrundBrush, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
-                drawAction.Invoke(dc, renderSize)
+            If rtb Is Nothing Then Exit Sub
+            Dim dv As New DrawingVisual()
+            Using dc As DrawingContext = dv.RenderOpen()
+                dc.DrawRectangle(Media.Brushes.Transparent, Nothing,
+                             New Rect(0, 0, rtb.PixelWidth, rtb.PixelHeight))
             End Using
-
-            ' Rendern in Bitmap
-            Dim rtb As New RenderTargetBitmap(CInt(renderSize.Width),
-                                              CInt(renderSize.Height),
-                                              96, 96, PixelFormats.Pbgra32)
-            rtb.Render(drawingVisual)
-
-            RaiseEvent TransitionFrameIstFertig(rtb)
+            rtb.Render(dv)
 
         End Sub
 

@@ -18,22 +18,61 @@
                HorizontalAlignment="Center"
                VerticalAlignment="Center" />
 
-        <!-- Labels oben links -->
+        <!-- Labels und Sanduhren oben links -->
         <StackPanel x:Name="pnlStatus"
-                    Orientation="Vertical"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Margin="10"                    >
-            <!-- Standard: unsichtbar -->
-            <Label x:Name="lblInitialisiereBilder"
-                   FontSize="18"
-                   FontWeight="Bold"                   
-                   Content="Initialisiere Bilder... " />
-            <Label x:Name="lblInitialisiereVerzeichnisse"
-                   FontSize="18"
-                   FontWeight="Bold"                   
-                   Content="Initialisiere Verzeichnisse... " />
+            Orientation="Vertical"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="10">
+
+            <!-- Bilder -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <Label x:Name="lblInitialisiereBilder"
+               FontSize="12"
+               FontWeight="Bold"
+               Foreground="White"
+               Content="Initialisiere Bilder..." />
+                <Viewbox Width="16" Height="16" Margin="5,0,0,0">
+                    <Canvas Width="100" Height="100"
+                    RenderTransformOrigin="0.5,0.5"
+                    x:Name="hourglassBilder">
+                        <Canvas.RenderTransform>
+                            <RotateTransform x:Name="rtBilder" Angle="0"/>
+                        </Canvas.RenderTransform>
+                        <!-- Sanduhr -->
+                        <Polygon Points="10,10 90,10 55,50 90,90 10,90 45,50 10,10"
+                             Stroke="{Binding Foreground, ElementName=lblInitialisiereBilder}"
+                             StrokeThickness="6"
+                             Fill="Transparent" />
+                    </Canvas>
+                </Viewbox>
+            </StackPanel>
+
+            <!-- Verzeichnisse -->
+            <StackPanel Orientation="Horizontal">
+                <Label x:Name="lblInitialisiereVerzeichnisse"
+               FontSize="12"
+               FontWeight="Bold"
+               Foreground="White"
+               Content="Initialisiere Verzeichnisse..." />
+                <Viewbox Width="16" Height="16" Margin="5,0,0,0">
+                    <Canvas Width="100" Height="100"
+                    RenderTransformOrigin="0.5,0.5"
+                    x:Name="hourglassVerz">
+                        <Canvas.RenderTransform>
+                            <RotateTransform x:Name="rtVerz" Angle="0"/>
+                        </Canvas.RenderTransform>
+                        <!-- Sanduhr -->
+                        <Polygon Points="10,10 90,10 55,50 90,90 10,90 45,50 10,10"
+                             Stroke="{Binding Foreground, ElementName=lblInitialisiereVerzeichnisse}"
+                             StrokeThickness="6"
+                             Fill="Transparent" />
+                    </Canvas>
+                </Viewbox>
+            </StackPanel>
+
         </StackPanel>
+
 
         <!-- Präsentations‑TextBlock in Bildschirmmitte -->
         <TextBlock x:Name="txbPräsentationsschirm"
