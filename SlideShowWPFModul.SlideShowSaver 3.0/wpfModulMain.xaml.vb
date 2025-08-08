@@ -143,8 +143,8 @@ Partial Public Class wpfModulMain
         lblInitialisiereVerzeichnisse.Visibility = Visibility.Visible
 
         'Sanduhren starten
-        StartHourglassAnimation(rtBilder, sbBilder)
-        StartHourglassAnimation(rtVerz, sbVerz)
+        StartHourglassAnimation(hourglassBilder, rtBilder)
+        StartHourglassAnimation(hourglassVerz, rtVerz)
 
         CheckYourMail()
 
@@ -154,7 +154,7 @@ Partial Public Class wpfModulMain
 
         Dispatcher.Invoke(Sub()
                               lblInitialisiereVerzeichnisse.Content &= "OK"
-                              StopHourglassAnimation(sbVerz)
+                              StopHourglassAnimation(rtVerz)
                               'hourglassVerz.Visibility = Visibility.Collapsed
                               hasFirstVerzeichnisse = True
                               VersucheErstesBildZuLaden()
@@ -166,7 +166,7 @@ Partial Public Class wpfModulMain
 
         Dispatcher.Invoke(Sub()
                               lblInitialisiereBilder.Content &= "OK"
-                              StopHourglassAnimation(sbBilder)
+                              StopHourglassAnimation(rtBilder)
                               hourglassBilder.Visibility = Visibility.Collapsed
                               hasFirstBilder = True
                               VersucheErstesBildZuLaden()
@@ -240,23 +240,29 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-    Private Sub StartHourglassAnimation(target As RotateTransform, ByRef sb As Storyboard)
+    Private Sub StartHourglassAnimation(elem As UIElement, ByRef rt As RotateTransform)
+        If rt Is Nothing Then
+            rt = New RotateTransform(0)
+            Dim fe = TryCast(elem, FrameworkElement)
+            If fe IsNot Nothing Then fe.RenderTransformOrigin = New Windows.Point(0.5, 0.5)
+            fe.RenderTransform = rt
+        End If
+
         Dim anim As New DoubleAnimation() With {
-        .From = 0,
-        .To = 360,
+        .From = 0, .To = 360,
         .Duration = TimeSpan.FromSeconds(1),
         .RepeatBehavior = RepeatBehavior.Forever
     }
-        sb = New Storyboard()
-        Storyboard.SetTarget(anim, target)
-        Storyboard.SetTargetProperty(anim, New PropertyPath(RotateTransform.AngleProperty))
-        sb.Children.Add(anim)
-        sb.Begin(Me, True) ' <-- Wichtig: Owner angeben
+
+        rt.BeginAnimation(RotateTransform.AngleProperty, anim)
     End Sub
 
-    Private Sub StopHourglassAnimation(ByRef sb As Storyboard)
-        If sb IsNot Nothing Then sb.Stop()
+    Private Sub StopHourglassAnimation(rt As RotateTransform)
+        If rt IsNot Nothing Then
+            rt.BeginAnimation(RotateTransform.AngleProperty, Nothing)
+        End If
     End Sub
+
 
     'Hauptschleife
     Private Async Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
@@ -667,6 +673,29 @@ Partial Public Class wpfModulMain
 
         SlideShowTools.KeyAndMouseHandling.ForwardMouseDownWPF(Me, e)
 
+    End Sub
+
+    'Pause-Modus Veraltung
+    Public Sub FortsetzenNachPause()
+        ' Sicherstellen, dass wir im normalen Anzeigezustand sind
+        txbPräsentationsschirm.Visibility = Visibility.Collapsed
+        imgAnzeige.Visibility = Visibility.Visible
+        transitionIstAktiv = False
+
+        ' Das zuletzt aktive Bild wieder anzeigen
+        If aktuellesBild IsNot Nothing Then
+            imgAnzeige.Source = aktuellesBild
+        End If
+
+        ' Falls noch kein nächstes Bild vorbereitet ist, jetzt laden
+        If neuesBild Is Nothing Then
+            NächstesBildLaden()
+        End If
+
+        ' Timer sauber neu starten
+        tmrModul.Stop()
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
+        tmrModul.Start()
     End Sub
 
     'Ende

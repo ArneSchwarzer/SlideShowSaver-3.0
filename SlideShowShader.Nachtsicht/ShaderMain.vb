@@ -153,8 +153,8 @@ Public Class ShaderMain
             End If
 
             'Geo-Daten holen. Erst in den Exif-Daten suchen, falls das Nichts bringt LocationHelper bemühen.
-            If Not metadaten.geographicLongitude = 0 AndAlso Not metadaten.goeographicLatitude = 0 Then
-                geoPosition = metadaten.goeographicLatitude & ", " & metadaten.geographicLongitude
+            If Not metadaten.geographicLongitude = 0 AndAlso Not metadaten.geographicLatitude = 0 Then
+                geoPosition = metadaten.geographicLatitude & ", " & metadaten.geographicLongitude
             Else
                 locationHelper = New SlideShowTools.LocationHandling()
 

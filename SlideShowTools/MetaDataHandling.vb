@@ -1,14 +1,11 @@
 ﻿Imports System.IO
+Imports System.Text
 Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Exif
 Imports MetadataExtractor.Formats.Iptc
 Imports MetadataExtractor.Formats.Xmp
 
 Public Class MetaDataHandling
-
-    ' This class is responsible for handling metadata extraction from images.
-    ' It provides methods to extract metadata such as author, rating, keywords, and camera settings.
-    ' It also includes a structure to hold the metadata information.
 
     Public Structure Metadata
         Public Author As String
@@ -21,73 +18,156 @@ Public Class MetaDataHandling
         Public FNumber As String
         Public ISO As Integer
         Public FocalLength As String
-        Public goeographicLatitude As Double
+        Public geographicLatitude As Double
         Public geographicLongitude As Double
     End Structure
 
     Public Shared Function ExtractMetadataFromImage(imagePath As String) As Metadata
-
         Dim metadata As New Metadata()
-
         metadata.Keywords = New List(Of String)()
 
-        If Not File.Exists(imagePath) Then
-            ' Handle the case where the file does not exist
-            Return metadata
-        End If
+        If Not File.Exists(imagePath) Then Return metadata
 
-        If Not Path.GetExtension(imagePath).ToLowerInvariant().EndsWith(".jpg") AndAlso
-           Not Path.GetExtension(imagePath).ToLowerInvariant().EndsWith(".jpeg") Then
-            ' Handle unsupported file formats
-            Return metadata
-        End If
+        Dim ext As String = Path.GetExtension(imagePath).ToLowerInvariant()
+        If Not (ext.EndsWith(".jpg") OrElse ext.EndsWith(".jpeg")) Then Return metadata
 
         Try
             Dim directories = ImageMetadataReader.ReadMetadata(imagePath)
+
             Dim iptcDirectory = directories.OfType(Of IptcDirectory)().FirstOrDefault()
             Dim xmpDirectory = directories.OfType(Of XmpDirectory)().FirstOrDefault()
             Dim exifSubIfdDirectory = directories.OfType(Of ExifSubIfdDirectory)().FirstOrDefault()
+            Dim exifIfd0Directory = directories.OfType(Of ExifIfd0Directory)().FirstOrDefault() ' FIX: für Camera Model
             Dim gpsDirectory = directories.OfType(Of GpsDirectory)().FirstOrDefault()
 
-            ' Extracting author and rating
-            If xmpDirectory IsNot Nothing Then
-                metadata.Rating = xmpDirectory.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
-                metadata.Author = xmpDirectory.XmpMeta?.GetPropertyString("http://ns.adobe.com/xap/1.0/", "CreatorTool")
-            End If
+            ' --- XMP: Rating & (optional) Autor ---
+            If xmpDirectory IsNot Nothing AndAlso xmpDirectory.XmpMeta IsNot Nothing Then
+                Dim ratingStr As String = xmpDirectory.XmpMeta.GetPropertyString("http://ns.adobe.com/xap/1.0/", "Rating")
+                Dim ratingVal As Integer
+                If Integer.TryParse(ratingStr, ratingVal) Then
+                    metadata.Rating = ratingVal
+                End If
 
-            ' Extracting keywords
-            If iptcDirectory IsNot Nothing Then
-                metadata.Keywords.AddRange(iptcDirectory.GetKeywords())
-                metadata.Keywords.Sort()
-
-                If metadata.Author = String.Empty Then
-                    metadata.Author = iptcDirectory.GetDescription(IptcDirectory.TagByLine)
+                ' Versuche zuerst dc:creator (falls vorhanden)
+                Dim dcNs As String = "http://purl.org/dc/elements/1.1/"
+                Dim creatorCount As Integer = xmpDirectory.XmpMeta.CountArrayItems(dcNs, "creator")
+                If creatorCount > 0 Then
+                    Dim item = xmpDirectory.XmpMeta.GetArrayItem(dcNs, "creator", 1)
+                    If item IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(item.Value) Then
+                        metadata.Author = item.Value
+                    End If
                 End If
             End If
 
-            ' Extracting camera settings
+            ' --- IPTC: Keywords & Autor (Fallback) ---
+            If iptcDirectory IsNot Nothing Then
+                Dim iptcKeywords = iptcDirectory.GetKeywords()
+                If iptcKeywords IsNot Nothing AndAlso iptcKeywords.Any() Then
+                    metadata.Keywords.AddRange(iptcKeywords)
+                End If
+
+                If String.IsNullOrWhiteSpace(metadata.Author) Then
+                    Dim byLine = iptcDirectory.GetDescription(IptcDirectory.TagByLine)
+                    If Not String.IsNullOrWhiteSpace(byLine) Then metadata.Author = byLine
+                End If
+            End If
+
+            ' --- XMP: Keywords (Fallback, wenn IPTC leer oder ergänzend) ---
+            If xmpDirectory IsNot Nothing AndAlso xmpDirectory.XmpMeta IsNot Nothing Then
+                ' dc:subject
+                Dim dcNs As String = "http://purl.org/dc/elements/1.1/"
+                Dim subjCount As Integer = xmpDirectory.XmpMeta.CountArrayItems(dcNs, "subject")
+                For i As Integer = 1 To subjCount
+                    Dim it = xmpDirectory.XmpMeta.GetArrayItem(dcNs, "subject", i)
+                    If it IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(it.Value) Then
+                        metadata.Keywords.Add(it.Value)
+                    End If
+                Next
+
+                ' lr:hierarchicalSubject (Lightroom) – HIERARCHIE AUFTEILEN STATT PFAD SPEICHERN
+                Dim lrNs As String = "http://ns.adobe.com/lightroom/1.0/"
+                Dim hCount As Integer = xmpDirectory.XmpMeta.CountArrayItems(lrNs, "hierarchicalSubject")
+                For i As Integer = 1 To hCount
+                    Dim it = xmpDirectory.XmpMeta.GetArrayItem(lrNs, "hierarchicalSubject", i)
+                    If it IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(it.Value) Then
+                        ' z.B. "Orte|Europa|Deutschland" -> "Orte", "Europa", "Deutschland"
+                        For Each part In it.Value.Split("|"c)
+                            Dim seg As String = If(part, String.Empty).Trim()
+                            If seg.Length > 0 Then metadata.Keywords.Add(seg)
+                        Next
+                    End If
+                Next
+            End If
+
+            ' Deduplizieren & sortieren
+            ' --- Keywords normalisieren, deduplizieren, sortieren ---
+            If metadata.Keywords IsNot Nothing AndAlso metadata.Keywords.Count > 0 Then
+                Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                Dim cleaned As New List(Of String)
+
+                For Each raw In metadata.Keywords
+                    Dim k As String = NormalizeKeyword(raw)
+                    If k.Length > 0 AndAlso seen.Add(k) Then
+                        cleaned.Add(k)
+                    End If
+                Next
+
+                metadata.Keywords = cleaned.
+                    OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase).
+                    ToList()
+            End If
+
+
+            ' --- Kamera / EXIF ---
+            ' FIX: Kameramodell aus ExifIfd0Directory, NICHT aus ExifSubIfdDirectory
+            If exifIfd0Directory IsNot Nothing Then
+                Dim modelDesc = exifIfd0Directory.GetDescription(ExifDirectoryBase.TagModel)
+                If Not String.IsNullOrWhiteSpace(modelDesc) Then metadata.CameraModel = modelDesc
+            End If
+
             If exifSubIfdDirectory IsNot Nothing Then
-                metadata.CreatedDate = exifSubIfdDirectory.GetDateTime(ExifDirectoryBase.TagDateTimeOriginal)
-                metadata.CameraModel = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagModel)
+                ' Datum – mit Fallbacks
+                Dim dt As DateTime
+                If exifSubIfdDirectory.TryGetDateTime(ExifDirectoryBase.TagDateTimeOriginal, dt) Then
+                    metadata.CreatedDate = dt
+                ElseIf exifSubIfdDirectory.TryGetDateTime(ExifDirectoryBase.TagDateTimeDigitized, dt) Then
+                    metadata.CreatedDate = dt
+                End If
+
                 metadata.LensModel = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagLensModel)
                 metadata.ExposureTime = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagExposureTime)
                 metadata.FNumber = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagFNumber)
-                metadata.ISO = exifSubIfdDirectory.GetInt32(ExifDirectoryBase.TagIsoEquivalent)
+
+                Dim isoVal As Integer
+                If exifSubIfdDirectory.TryGetInt32(ExifDirectoryBase.TagIsoEquivalent, isoVal) Then
+                    metadata.ISO = isoVal
+                End If
+
                 metadata.FocalLength = exifSubIfdDirectory.GetDescription(ExifDirectoryBase.TagFocalLength)
             End If
 
-            'Extracting geographic coordinates if available
-            If gpsDirectory IsNot Nothing Then
-                If gpsDirectory.GetGeoLocation() IsNot Nothing Then
-                    metadata.goeographicLatitude = gpsDirectory.GetGeoLocation().Latitude
-                    metadata.geographicLongitude = gpsDirectory.GetGeoLocation().Longitude
-                End If
-
+            ' --- GPS ---
+            If gpsDirectory IsNot Nothing AndAlso gpsDirectory.GetGeoLocation() IsNot Nothing Then
+                metadata.geographicLatitude = gpsDirectory.GetGeoLocation().Latitude
+                metadata.geographicLongitude = gpsDirectory.GetGeoLocation().Longitude
             End If
 
         Catch ex As Exception
-            ' Handle exceptions (e.g., file not found, unsupported format, etc.)
+            ' optional: Logging
         End Try
+
         Return metadata
     End Function
+
+    Private Shared Function NormalizeKeyword(input As String) As String
+        If String.IsNullOrWhiteSpace(input) Then Return String.Empty
+
+        ' Trim, Mehrfach-Spaces zu einem Space, Unicode vereinheitlichen (NFC)
+        Dim s As String = input.Trim()
+        s = System.Text.RegularExpressions.Regex.Replace(s, "\s+", " ")
+        s = s.Normalize(NormalizationForm.FormC)
+
+        Return s
+    End Function
+
 End Class

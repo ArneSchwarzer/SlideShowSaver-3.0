@@ -161,6 +161,11 @@ Public Class frmPauseModusOverlay
 
         Cursor.Hide()
 
+        'Modul geordnet fortsetzen
+        If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen IsNot Nothing Then
+            meineInstanz.sssScreen.FortsetzenNachPause()
+        End If
+
     End Sub
 
     Private Sub frmPauseModusOverlay_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
