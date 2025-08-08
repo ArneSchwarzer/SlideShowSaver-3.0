@@ -88,7 +88,7 @@
     <Compile Include="KeyAndMouseHandling.vb" />
     <Compile Include="ListHandling.vb" />
     <Compile Include="LocationHandling.vb" />
-    <Compile Include="MataDataHandling.vb" />
+    <Compile Include="MetaDataHandling.vb" />
     <Compile Include="RegistryHandling.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

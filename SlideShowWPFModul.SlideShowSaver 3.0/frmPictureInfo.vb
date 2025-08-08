@@ -1,7 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.IO
 Imports System.Windows.Forms
-Imports SlideShowTools.MataDataHandling
+Imports SlideShowTools.MetaDataHandling
 Imports SlideShowLogging
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools.KeyAndMouseHandling

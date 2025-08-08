@@ -8,7 +8,7 @@ Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.SettingsHandling
 Imports System.Windows.Forms
-Imports SlideShowTools.MataDataHandling
+Imports SlideShowTools.MetaDataHandling
 Imports SlideShowLogging
 Imports System.Threading
 

@@ -4,7 +4,7 @@ Imports MetadataExtractor.Formats.Exif
 Imports MetadataExtractor.Formats.Iptc
 Imports MetadataExtractor.Formats.Xmp
 
-Public Class MataDataHandling
+Public Class MetaDataHandling
 
     ' This class is responsible for handling metadata extraction from images.
     ' It provides methods to extract metadata such as author, rating, keywords, and camera settings.

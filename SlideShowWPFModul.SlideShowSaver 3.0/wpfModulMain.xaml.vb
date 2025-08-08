@@ -1,9 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.IO
-Imports System.Reflection.Emit
 Imports System.Windows.Forms
 Imports System.Windows.Interop
-Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 Imports System.Windows.Threading
 Imports SlideShowBildauswahl
@@ -33,7 +31,7 @@ Partial Public Class wpfModulMain
     Private aktuellesImage As Image
     Private neuesBild As BitmapImage
     Private neuesImage As Image
-    Private bildPfade As List(Of String)
+    Private bildPfad As String
     Private aktuellesVerzeichnis As New List(Of String)
     Private aktuellesVerzeichnisCounter As Integer
 
@@ -49,8 +47,6 @@ Partial Public Class wpfModulMain
     Public transitionIstAktiv As Boolean = False
     Private listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Private listOfEnabledTransitions As List(Of String)
-    Private warteAufDelay As Boolean
-    Private stoppuhr As New Stopwatch
     Private sizeWinForm As System.Drawing.Size
 
     'Shader
@@ -61,7 +57,7 @@ Partial Public Class wpfModulMain
 
     'Timer
     Public WithEvents tmrModul As New DispatcherTimer()
-    Private WithEvents tmrDelay As New DispatcherTimer()
+    Public WithEvents tmrPresentation As New DispatcherTimer()
 
     'Initialisierungsphase
     Private hasFirstVerzeichnisse As Boolean = False
@@ -80,8 +76,6 @@ Partial Public Class wpfModulMain
         'Erzeugt und initialisiert das Fenster und seine Komponenten
 
         'Eventhandler
-        AddHandler tmrModul.Tick, AddressOf TmrModul_Tick
-        AddHandler tmrDelay.Tick, AddressOf tmrDelay_Tick
         AddHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
         AddHandler BildauswahlMain.ErsteBilderGefunden, AddressOf BildauswahlMain_ErsteBilderGefunden
         AddHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf BildauswahlMain_ErsteVerzeichnisseGefunden
@@ -173,7 +167,7 @@ Partial Public Class wpfModulMain
         Dispatcher.Invoke(Sub()
                               lblInitialisiereBilder.Content &= "OK"
                               StopHourglassAnimation(sbBilder)
-                              'hourglassBilder.Visibility = Visibility.Collapsed
+                              hourglassBilder.Visibility = Visibility.Collapsed
                               hasFirstBilder = True
                               VersucheErstesBildZuLaden()
                           End Sub)
@@ -198,18 +192,15 @@ Partial Public Class wpfModulMain
     Private Sub LadeErstesBild()
         'Wählt die ersten Bilder zur Anzeige aus. 
 
-        Dim fehlschlagZähler As Integer = -1
-
-        LogHandling.LogDebug("Modul SSS 3.0 - wpfModulMain.LadeErstesBild(): Methode LadeErstesBild() gestartet.")
-
-#Region "Erste Bilder laden"
+#Region "Erstes Bild laden"
         Do
             If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
                 Do
                     aktuellesVerzeichnis = GetPicturesByDirectory()
-                Loop Until aktuellesVerzeichnis.Count >= 2
-                aktuellesVerzeichnisCounter = 2
-                bildPfade = aktuellesVerzeichnis
+                Loop Until aktuellesVerzeichnis.Count >= 1
+                '.Count zählt von 1 bis 2, aktuellesVerzeichnisCounter von 0 bis 1...
+                aktuellesVerzeichnisCounter = 0
+                bildPfad = aktuellesVerzeichnis(0)
 
                 'Präsentationsmodus aktivieren, wenn eingestellt
                 If aktuelleSettings.Präsentationsschirm Then
@@ -219,84 +210,32 @@ Partial Public Class wpfModulMain
                 End If
 
             Else
-                bildPfade = GetPictures(2)
+                bildPfad = GetPictures(1).Item(0)
                 präsentationAnzeigen = False
             End If
 
-            aktuellesImage = GetPictureByName(bildPfade(0))
-            neuesImage = GetPictureByName(bildPfade(1))
+            aktuellesImage = GetPictureByName(bildPfad)
 
-            fehlschlagZähler += 1
-            If fehlschlagZähler > 0 Then
-                LogHandling.LogError("SSS 3.0 - wpfModulMain.LadeErstesBild(): Probleme beim Laden von initialen Bildern (Versuch #" & fehlschlagZähler & "):")
-                If aktuellesImage Is Nothing Then
-                    LogHandling.LogError("aktuellesImage konnte nicht geladen werden. Sollte '" & bildPfade(0) & "' sein.")
-                End If
-                If neuesImage Is Nothing Then
-                    LogHandling.LogError("neuesImage konnte nicht geladen werden. Sollte '" & bildPfade(1) & "' sein.")
-                End If
-            End If
-
-        Loop Until aktuellesImage IsNot Nothing AndAlso neuesImage IsNot Nothing
+        Loop Until aktuellesImage IsNot Nothing
 
         'Shader anwenden 
         LadeNeuenShader(True)
 
         If aktiverShader IsNot Nothing Then
-            aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfade(0), GetNativeScreenResolution())
+            aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfad, GetNativeScreenResolution())
         End If
 
-        LadeNeuenShader(False)
+        'Für Anzeige in imgAnzeige und in Transitionen konvertieren
+        aktuellesBild = ConvertImageToBitmapImage(aktuellesImage)
 
-        If aktiverShader IsNot Nothing AndAlso neuesImage IsNot Nothing Then
-            neuesImage = aktiverShader.RunShader(neuesImage, bildPfade(1), GetNativeScreenResolution())
-        End If
-
-        'Bilder für das Image-Objekt konvertieren
-        If aktuellesImage IsNot Nothing Then
-            aktuellesBild = ConvertImageToBitmapImage(aktuellesImage)
-        Else
-            LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.Bildwechsel(): §$)/§&=-aktuellesImage ist schon wieder Nothing. Trotz Schutz-Loop! Sollte '" & bildPfade(0) & "' sein.")
-        End If
-
-        If neuesImage IsNot Nothing Then
-            neuesBild = ConvertImageToBitmapImage(neuesImage)
-        Else
-            LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.Bildwechsel(): §$)/§&=-neuesImage ist schon wieder Nothing. Trotz Schutz-Loop! Sollte '" & bildPfade(1) & "' sein.")
-        End If
 #End Region
 
-        'Erstes Bild anzeigen
-        If Not präsentationAnzeigen Then
+        LogHandling.LogDebug("Modul SSS 3.0 - wpfModulMain.LadeErstesBild(): aktuellesBild ausgewählt: " & bildPfad)
 
-            imgAnzeige.Source = aktuellesBild
-            txbPräsentationsschirm.Visibility = Visibility.Collapsed
-            imgAnzeige.Visibility = Visibility.Visible
-
-            'Bildinfo initialisieren - mit Werten von aktuellesBild
-            If aktuelleSettings.BildInfoAnzeigen AndAlso bildPfade(0) IsNot Nothing Then
-                ModulMain.sssInfo.RefreshLabels(bildPfade(0))
-                ModulMain.sssInfo.Refresh()
-                ModulMain.sssInfo.BringToFront()
-            End If
-
-            'ListeDerZuletztAngezeigtenBilder initial befüllen. neuesBild wird erst im tmrTick-Loop gefüllt.
-            listeDerZuletztAngezeigtenBilder.Clear()
-            listeDerZuletztAngezeigtenBilder.Add(bildPfade(0))
-
-        Else
-
+        If präsentationAnzeigen Then
             PräsentationsschirmAnzeigen()
-
-        End If
-
-        'Ab jetzt wird bildPfade(1) nicht mehr benötigt
-        bildPfade(0) = bildPfade(1)
-
-        'Jetzt den Timer starten, falls nicht schon über den Präsentationsschirm gestartet
-        If Not präsentationAnzeigen Then
-            tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
-            tmrModul.Start()
+        Else
+            BildAnzeigen()
         End If
 
     End Sub
@@ -319,44 +258,57 @@ Partial Public Class wpfModulMain
         If sb IsNot Nothing Then sb.Stop()
     End Sub
 
-
     'Hauptschleife
-    Private Sub TmrModul_Tick(sender As Object, e As EventArgs)
+    Private Async Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
         'Nac Beendigung der Anzeige des Bildes gemäß Anzeigedauer startet der Timer die nächste Transition
-        'oder, falls keine ausgewählt ist, initiert den Bildwechsel.
-
+        'oder, falls keine ausgewählt ist, initiiert den Bildwechsel.
 
         If transitionIstAktiv Then Exit Sub
-        If warteAufDelay Then Exit Sub
 
-        txbPräsentationsschirm.Visibility = Visibility.Collapsed
-        imgAnzeige.Visibility = Visibility.Visible
-        LadeNeueTransition(False)
+        'Timer beenden
+        tmrModul.Stop()
 
-        If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
+        ' Kleine Verzögerung, damit Stop() garantiert fertig ist
+        Await Task.Delay(750)
 
-            If Not präsentationAnzeigen Then
-                'Transition starten, Status & Stoppuhr setzen
-                transitionIstAktiv = True
-                stoppuhr = Stopwatch.StartNew()
+        'Falls der Päsentationsschirm angezeigt werden soll, diesen starten
+        If präsentationAnzeigen Then
+
+            'Status setzen
+            transitionIstAktiv = False
+
+            'Präsentationsschirm anzeigen
+            BildWechseln()
+            PräsentationsschirmAnzeigen()
+
+        Else
+            'Sonst die Transition laufen lassen
+
+            txbPräsentationsschirm.Visibility = Visibility.Collapsed
+            imgAnzeige.Visibility = Visibility.Visible
+            LadeNeueTransition(False)
+
+            If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
+
+                'Transition vorbereiten und Status setzen
                 sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
+                transitionIstAktiv = True
+
+                'Transition starten
                 aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
 
-                'Timer beenden 
-                tmrModul.Stop()
             Else
-                präsentationAnzeigen = False
-                Bildwechsel()
+                'Wenn weder der Präsentationsschirm gezeigt werden soll, noch eine legitime Transition gefunden
+                'wurde, dann muss der Timer halt selber ran...
+
+                'Status setzen
                 transitionIstAktiv = False
-                warteAufDelay = False
+
+                'Bildanzeige starten
+                BildWechseln()
+                BildAnzeigen()
+
             End If
-        Else
-
-            'Dann muss der Timer halt selber ran...
-            Bildwechsel()
-            transitionIstAktiv = False
-            warteAufDelay = False
-
         End If
 
     End Sub
@@ -367,144 +319,152 @@ Partial Public Class wpfModulMain
         'Sofort raus, falls die Transition noch läuft
         If state Then Exit Sub
 
-        'Stoppuhr anhalten
-        stoppuhr.Stop()
+        'tmrModul sicherheitshalber noch einmal stoppen
         tmrModul.Stop()
 
-        'Für Transitionen, die so schnell fertig werden, dass es zu einer Racing-Condition mit tmrModul kommt.
-        If stoppuhr.ElapsedMilliseconds < 1000 Then
-            warteAufDelay = True
-            tmrDelay.Interval = TimeSpan.FromSeconds(1)
-            tmrDelay.Start()
-        Else
-            'Hier beginnt die Bildanzeige
-            Bildwechsel()
+        'Status setzen
+        transitionIstAktiv = False
 
-            'Status setzen und tmrModul starten
-            transitionIstAktiv = False
-            warteAufDelay = False
-            tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
-            tmrModul.Start()
-        End If
+        'Hier beginnt die Bildanzeige
+        BildWechseln()
+        BildAnzeigen()
 
     End Sub
 
     Private Sub Transition_TransitionFrameIstFertig(rtb As RenderTargetBitmap)
+        'Bildanzeige während Transitionen
+
         imgAnzeige.Source = Nothing
+
+        'Notwendig, um "Leere Frames" zu verhindern
         GC.Collect()
         GC.WaitForPendingFinalizers()
+
         imgAnzeige.Source = rtb
-    End Sub
-
-    Private Sub tmrDelay_Tick(sender As Object, e As EventArgs) Handles tmrDelay.Tick
-        'Falls eine Transition so schnell ist, dass frmModulMain das nicht rechtzeitig mitbekommt.
-        tmrDelay.Stop()
-        warteAufDelay = False
-
-        'Hier beginnt die Bildanzeige
-        Bildwechsel()
-
-        'Status setzen und tmrModul starten
-        transitionIstAktiv = False
-        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
-        tmrModul.Start()
 
     End Sub
 
-    Private Sub Bildwechsel()
-        'Eigentliche Anzeige des Bildes, Verwaltungsaufgaben und Auswahl des nächsten Bildes
+    Private Sub BildAnzeigen()
+        'Eigentliche Anzeige des aktuellen Bildes sowie dazugehörige Verwaltungsaufgaben
 
-        Dim fehlschlagZähler As Integer = -1
-
-        aktuellesImage = neuesImage
-        aktuellesBild = neuesBild
         imgAnzeige.Source = aktuellesBild
+        imgAnzeige.Visibility = Visibility.Visible
 
         'BildInfo des Bildes aktualisieren
         If aktuelleSettings.BildInfoAnzeigen Then
-            If ModulMain.sssInfo IsNot Nothing AndAlso bildPfade(0) IsNot Nothing Then
-                ModulMain.sssInfo.RefreshLabels(bildPfade(0))
+            If ModulMain.sssInfo IsNot Nothing AndAlso bildPfad IsNot Nothing Then
+                ModulMain.sssInfo.RefreshLabels(bildPfad)
                 ModulMain.sssInfo.Refresh()
                 ModulMain.sssInfo.BringToFront()
             End If
         End If
 
         'Liste der letzten 10 Bilder befüllen und ggf. das erste Element wieder aus der Liste löschen.
-        If bildPfade(0) IsNot Nothing Then
-            listeDerZuletztAngezeigtenBilder.Add(bildPfade(0))
+        If bildPfad IsNot Nothing Then
+            listeDerZuletztAngezeigtenBilder.Add(bildPfad)
             If listeDerZuletztAngezeigtenBilder.Count > 10 Then
                 listeDerZuletztAngezeigtenBilder.RemoveAt(0)
             End If
         End If
 
+        'Jetzt das nächste Bild laden
+        NächstesBildLaden()
+
+        'tmrModul starten
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
+        tmrModul.Start()
+
+    End Sub
+
+    Private Sub NächstesBildLaden()
+        'Sucht ein neues Bild aus und bestimmt, ob eine Transition oder der Präsentationsschirm als
+        'nächstes angezeigt werden soll
+
         'Neues Bild laden. 
         Do
             If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
+
                 aktuellesVerzeichnisCounter += 1
+
+                'Wenn wir das letzte Bild des aktuellen Verzeichnisses angezeigt haben, neues Verzeichnis laden
                 If aktuellesVerzeichnisCounter >= aktuellesVerzeichnis.Count Then
+
                     aktuellesVerzeichnisCounter = 0
+
                     Do
                         aktuellesVerzeichnis = GetPicturesByDirectory()
-                    Loop Until aktuellesVerzeichnis.Count > 1
+                    Loop Until aktuellesVerzeichnis.Count >= 1
+
                     If aktuelleSettings.Präsentationsschirm Then
                         präsentationAnzeigen = True
                     Else
                         präsentationAnzeigen = False
                     End If
+
                 End If
-                bildPfade(0) = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
+
+                bildPfad = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
+
             Else
                 präsentationAnzeigen = False
-                bildPfade(0) = GetPictures(1).Item(0)
+                bildPfad = GetPictures(1).Item(0)
             End If
 
-            neuesImage = GetPictureByName(bildPfade(0))
-
-            fehlschlagZähler += 1
-            If fehlschlagZähler > 0 Then
-                LogHandling.LogError("SSS 3.0 - wpfModulMain.Bildwechsel(): Probleme beim Laden vom nächsten Bild (Versuch #" & fehlschlagZähler & "):")
-
-                If aktuellesImage Is Nothing Then
-                    LogHandling.LogError("neuesImage konnte nicht geladen werden. Sollte '" & bildPfade(0) & "' sein.")
-                End If
-            End If
+            neuesImage = GetPictureByName(bildPfad)
 
         Loop Until neuesImage IsNot Nothing
 
         LadeNeuenShader(False)
 
         If aktiverShader IsNot Nothing Then
-            neuesImage = aktiverShader.RunShader(neuesImage, bildPfade(0), GetNativeScreenResolution())
+            neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
         End If
 
-        If neuesImage IsNot Nothing Then
-            neuesBild = ConvertImageToBitmapImage(neuesImage)
-        Else
-            LogHandling.LogError("Modul SSS 3.0 - wpfModulMain.Bildwechsel(): §$)/§&=-neuesImage ist schon wieder Nothing. Trotz Schutz-Loop! Sollte '" & bildPfade(0) & "' sein.")
-        End If
+        'Für Transitionen und imgAnzeige konvertieren
+        neuesBild = ConvertImageToBitmapImage(neuesImage)
 
-        If präsentationAnzeigen Then
-            PräsentationsschirmAnzeigen()
-            tmrModul.Stop()
-        End If
+    End Sub
+
+    Private Sub BildWechseln()
+        'Hilfsfunktion zum tatsächlichen Wechsel der Bilder (wird je nach Präsentationsschirm/Transition/direkter
+        'Wechsel zu unterschiedlichen Zeitpunkten aufgerufen)
+
+        aktuellesImage = neuesImage
+        aktuellesBild = neuesBild
 
     End Sub
 
     Private Sub PräsentationsschirmAnzeigen()
         'Zeigt den Präsentationsschirm an, der die Bilder in voller Größe anzeigt
         'und den Timer für die Präsentation startet
-        Dim PräsentationsText As String
 
-        PräsentationsText = Path.GetFileName(Path.GetDirectoryName(aktuellesVerzeichnis(0)))
+        Dim präsentationsText As String
+        Dim präsentationsZeit As Integer
 
-        If aktuellesVerzeichnis(0) IsNot Nothing Then
-            txbPräsentationsschirm.Text = PräsentationsText
-            txbPräsentationsschirm.Visibility = Visibility.Visible
-            imgAnzeige.Visibility = Visibility.Hidden
-        End If
+        präsentationsText = Path.GetFileName(Path.GetDirectoryName(aktuellesVerzeichnis(0)))
 
-        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
-        tmrModul.Start()
+        txbPräsentationsschirm.Text = präsentationsText
+        txbPräsentationsschirm.Visibility = Visibility.Visible
+        imgAnzeige.Visibility = Visibility.Hidden
+
+        präsentationAnzeigen = False
+
+        'Präsentationstext so lange wie ein Bild anzeigen, aber höchstens 15 Sekunden
+        präsentationsZeit = Math.Min(aktuelleSettings.Anzeigedauer, 15)
+        tmrPresentation.Interval = TimeSpan.FromSeconds(präsentationsZeit)
+        tmrPresentation.Start()
+
+        'Sicherheitshalber tmrModul anhalten
+        tmrModul.Stop()
+
+    End Sub
+
+    Private Sub tmrPresentation_Tick() Handles tmrPresentation.Tick
+        'Beendet die Anzeige des Präsentationsschirms
+
+        txbPräsentationsschirm.Visibility = Visibility.Collapsed
+        tmrPresentation.Stop()
+        BildAnzeigen()
 
     End Sub
 
@@ -633,9 +593,9 @@ Partial Public Class wpfModulMain
                     If istInitialisierung Then
                         neuerShader = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzterShader")
                         If neuerShader = Nothing Then neuerShader = ""
-                        neuerShader = GetNextAlphabeticItemName(listOfEnabledTransitions, neuerShader)
+                        neuerShader = GetNextAlphabeticItemName(listOfEnabledShaders, neuerShader)
                     Else
-                        neuerShader = GetNextAlphabeticItemName(listOfEnabledTransitions, aktiverShader.ShaderName)
+                        neuerShader = GetNextAlphabeticItemName(listOfEnabledShaders, aktiverShader.ShaderName)
                     End If
 
                 Case Else
@@ -716,15 +676,17 @@ Partial Public Class wpfModulMain
             aktiveTransition.StopTransition()
         End If
 
+        'Handler entfernen
         RemoveHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
-        RemoveHandler tmrModul.Tick, AddressOf TmrModul_Tick
-        RemoveHandler tmrDelay.Tick, AddressOf tmrDelay_Tick
-
-        tmrModul = Nothing
-        tmrDelay = Nothing
-
         RemoveHandler BildauswahlMain.ErsteBilderGefunden, AddressOf BildauswahlMain_ErsteBilderGefunden
         RemoveHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf BildauswahlMain_ErsteVerzeichnisseGefunden
+
+        'Shader & Transitionen freigeben
+        aktiverShader = Nothing
+        aktiveTransition = Nothing
+
+        'Timer freigeben
+        tmrModul = Nothing
 
         ' Bilder freigeben
         imgAnzeige.Source = Nothing
@@ -732,7 +694,7 @@ Partial Public Class wpfModulMain
         ' Inhalte leeren
         Me.Content = Nothing
 
-        ' GC (optional)
+        ' Garbage Collection
         GC.Collect()
         GC.WaitForPendingFinalizers()
         GC.Collect()

@@ -3,7 +3,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Windows.Forms
 Imports System.Windows.Media
-Imports SlideShowTools.MataDataHandling
+Imports SlideShowTools.MetaDataHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLogging
 Imports SlideShowTools
