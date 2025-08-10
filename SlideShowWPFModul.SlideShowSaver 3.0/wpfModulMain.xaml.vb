@@ -155,7 +155,7 @@ Partial Public Class wpfModulMain
         Dispatcher.Invoke(Sub()
                               lblInitialisiereVerzeichnisse.Content &= "OK"
                               StopHourglassAnimation(rtVerz)
-                              'hourglassVerz.Visibility = Visibility.Collapsed
+                              hourglassVerz.Visibility = Visibility.Collapsed
                               hasFirstVerzeichnisse = True
                               VersucheErstesBildZuLaden()
                           End Sub)

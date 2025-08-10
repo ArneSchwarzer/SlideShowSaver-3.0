@@ -4,6 +4,7 @@ Imports Transition_Überblenden.TransitionMain
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.SharedDataHandling
 
 Public Class ucOptionsTransition
     Inherits UserControl
@@ -40,7 +41,7 @@ Public Class ucOptionsTransition
             chkMorphing.Checked = False
             chkZufallsfarbe.Enabled = False
             lblNpicFarbton.Enabled = False
-            picFarbton.BackColor = Color.Black
+            picFarbton.BackColor = HintergrundFarbeSaver
             picFarbton.Enabled = False
         End If
 
@@ -108,7 +109,7 @@ Public Class ucOptionsTransition
             Else
                 chkZufallsfarbe.Enabled = False
                 lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = Color.Black
+                picFarbton.BackColor = HintergrundFarbeSaver
                 picFarbton.Enabled = False
             End If
 
@@ -157,7 +158,7 @@ Public Class ucOptionsTransition
             Else
                 chkZufallsfarbe.Enabled = False
                 lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = Color.Black
+                picFarbton.BackColor = HintergrundFarbeSaver
                 picFarbton.Enabled = False
             End If
 
@@ -223,7 +224,7 @@ Public Class ucOptionsTransition
                         Else
                             chkZufallsfarbe.Enabled = False
                             lblNpicFarbton.Enabled = False
-                            picFarbton.BackColor = Color.Black
+                            picFarbton.BackColor = HintergrundFarbeSaver
                             picFarbton.Enabled = False
                         End If
 

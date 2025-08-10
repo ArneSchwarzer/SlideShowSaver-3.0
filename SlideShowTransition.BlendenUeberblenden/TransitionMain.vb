@@ -13,6 +13,8 @@ Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.ImageConversionHandling
+Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.SharedDataHandling
 
 Public Class TransitionMain
     Implements ISlideShowTransition
@@ -101,20 +103,22 @@ Public Class TransitionMain
         LogDebug("sizeWF: " & sizeWF.ToString)
         LogDebug("screen.PrimaryScreen.bounds: " & Screen.PrimaryScreen.Bounds.ToString)
 
-        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...)
+        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...) #1
         oldImg = ConvertBitmapImageToImage(oldImage)
         newImg = ConvertBitmapImageToImage(newImage)
+
+        'Rechtecke vorbereiten
+        containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
+        drawRectOld = GetDrawRectangle(oldImg.Size, containerRect, picBoxModeOld)
+        drawRectNew = GetDrawRectangle(newImg.Size, containerRect, picBoxModeNew)
+
+        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...) #2
         oldRTB = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
         newRTB = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
         oldBmpSource = CType(oldRTB, ImageSource)
         newBmpSource = CType(newRTB, ImageSource)
         oldImg = ConvertRenderTargetBitmapToBitmap(oldRTB)
         newImg = ConvertRenderTargetBitmapToBitmap(newRTB)
-
-        'Rechtecke vorbereiten
-        containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
-        drawRectOld = GetDrawRectangle(oldImg.Size, containerRect, picBoxModeOld)
-        drawRectNew = GetDrawRectangle(newImg.Size, containerRect, picBoxModeNew)
 
         'Farbe setzen
         If aktuelleSettings.Modus = "Zufall" Then aktuelleSettings.Farbton = SetzeZufallsFarbe()
@@ -237,7 +241,7 @@ Public Class TransitionMain
 
         Dim bmp As New Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
         Dim gfx As Graphics = Graphics.FromImage(bmp)
-        gfx.Clear(System.Drawing.Color.Black)
+        gfx.Clear(HintergrundFarbeSaver)
 
         Dim progress As Double = (DateTime.Now - startTime).TotalMilliseconds / dauerInMS
         progress = Math.Min(progress, 1.0)

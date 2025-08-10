@@ -170,19 +170,7 @@ Public Class frmSaverMain
 
         ElseIf e.KeyCode = Keys.P Then
 
-            If fallbackIsActive Then
-                'PauseModus für Fallbacksaver
-                If fallbackPaused = False Then
-                    fallbackInstanz.tmrFallback.Stop()
-                    fallbackPaused = True
-                Else
-                    fallbackInstanz.tmrFallback.Start()
-                    fallbackPaused = False
-                End If
-            Else
-                'PauseModus für Modul aufrufen
-                activeModule.PauseModusModul()
-            End If
+            PauseModus()
 
         Else ' Alle anderen Tasten - Den Saver beenden
 
@@ -203,6 +191,10 @@ Public Class frmSaverMain
         ElseIf e.Button = MouseButtons.Right Then
 
             openOptionsDialog()
+
+        ElseIf e.Button = MouseButtons.Middle Then
+
+            PauseModus()
 
         End If
 
@@ -376,6 +368,25 @@ Public Class frmSaverMain
                 fallbackInstanz.CheckYourMail()
             End If
 
+        End If
+
+    End Sub
+
+    Private Sub PauseModus()
+        'Startet den Pause-Modus des Moduls, so implementiert
+
+        If fallbackIsActive Then
+            'PauseModus für Fallbacksaver
+            If fallbackPaused = False Then
+                fallbackInstanz.tmrFallback.Stop()
+                fallbackPaused = True
+            Else
+                fallbackInstanz.tmrFallback.Start()
+                fallbackPaused = False
+            End If
+        Else
+            'PauseModus für Modul aufrufen
+            activeModule.PauseModusModul()
         End If
 
     End Sub
