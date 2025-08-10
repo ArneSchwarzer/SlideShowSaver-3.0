@@ -47,9 +47,9 @@ Public Class ucOptionsTransition
 
         'Modus setzen
         Select Case aktuelleSettings.Modus
-            Case "Blenden"
+            Case "Fade"
                 rdoBlenden.Checked = True
-            Case "Überblenden"
+            Case "Crossfade"
                 rdoÜberblenden.Checked = True
                 chkMorphing.Enabled = False
                 chkZufallsfarbe.Enabled = False
@@ -69,12 +69,22 @@ Public Class ucOptionsTransition
     Private Sub picFarbton_Click(sender As Object, e As EventArgs) Handles picFarbton.Click
         'Behandelt PictureBox Farbton
 
-        Using dlg As New ColorDialog()
+        Dim bg As Color = HintergrundFarbeSaver
+        Dim inv As Color = InvertSDColor(HintergrundFarbeSaver)
 
-            dlg.Color = aktuelleSettings.Farbton
+        ' Array mit 16 Einträgen
+        Dim custom(15) As Integer
+        custom(0) = ColorTranslator.ToOle(bg)      ' Hintergrundfarbe
+        custom(1) = ColorTranslator.ToOle(inv)     ' Inversion
+
+        Using dlg As New ColorDialog()
             dlg.AllowFullOpen = True
             dlg.AnyColor = True
             dlg.FullOpen = True
+
+            ' WICHTIG: erst Color, dann CustomColors
+            dlg.Color = aktuelleSettings.Farbton
+            dlg.CustomColors = custom
 
             If dlg.ShowDialog() = DialogResult.OK Then
                 picFarbton.BackColor = dlg.Color

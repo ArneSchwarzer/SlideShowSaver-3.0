@@ -39,6 +39,8 @@ Public Class TransitionMain
     Private newBmpSource As BitmapSource
     Private oldRTB As RenderTargetBitmap
     Private newRTB As RenderTargetBitmap
+    Private oldSize As System.Drawing.Size
+    Private newSize As System.Drawing.Size
 
     'Animation
     Private drawRectOld As Rectangle
@@ -50,9 +52,12 @@ Public Class TransitionMain
     Private Shared sizeWF As System.Drawing.Size
     Private gdiFrameTimer As DispatcherTimer
     Private gdiStartTime As DateTime
-    Private gdiDauerInMs As Integer
     Private gdiRenderSize As Windows.Size
     Private gdiDrawAction As Action(Of Windows.Size)
+    Private requestEndOfTransition As Boolean = False
+
+    'Sonstiges
+    Private rnd As New Random
 
     Structure TransitionSettings_FadeCrossfade
         Public Farbton As System.Drawing.Color
@@ -103,16 +108,9 @@ Public Class TransitionMain
         LogDebug("sizeWF: " & sizeWF.ToString)
         LogDebug("screen.PrimaryScreen.bounds: " & Screen.PrimaryScreen.Bounds.ToString)
 
-        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...) #1
+        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...)
         oldImg = ConvertBitmapImageToImage(oldImage)
         newImg = ConvertBitmapImageToImage(newImage)
-
-        'Rechtecke vorbereiten
-        containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
-        drawRectOld = GetDrawRectangle(oldImg.Size, containerRect, picBoxModeOld)
-        drawRectNew = GetDrawRectangle(newImg.Size, containerRect, picBoxModeNew)
-
-        'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...) #2
         oldRTB = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
         newRTB = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
         oldBmpSource = CType(oldRTB, ImageSource)
@@ -120,8 +118,28 @@ Public Class TransitionMain
         oldImg = ConvertRenderTargetBitmapToBitmap(oldRTB)
         newImg = ConvertRenderTargetBitmapToBitmap(newRTB)
 
-        'Farbe setzen
-        If aktuelleSettings.Modus = "Zufall" Then aktuelleSettings.Farbton = SetzeZufallsFarbe()
+        'Bilder Sizes festlegen
+        oldSize = New System.Drawing.Size(oldImage.PixelWidth, oldImage.PixelHeight)
+        newSize = New System.Drawing.Size(newImage.PixelWidth, newImage.PixelHeight)
+
+        'Rechtecke vorbereiten (sichtbare Bildbereiche im Client)
+        containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
+        drawRectOld = GetDrawRectangle(oldSize, containerRect, picBoxModeOld)
+        drawRectNew = GetDrawRectangle(newSize, containerRect, picBoxModeNew)
+
+        'Moduls "Zufall" auflösen
+        If aktuelleSettings.Modus = "Zufall" Then
+            If rnd.Next(2) > 0 Then
+                aktuelleSettings.Modus = "Fade"
+            Else
+                aktuelleSettings.Modus = "Crossfade"
+            End If
+        End If
+
+        'Ggf. Zufalls-Farbe setzen
+        If aktuelleSettings.Zufallsfarbe Then
+            aktuelleSettings.Farbton = SetzeZufallsFarbe()
+        End If
 
         'Falls vom Modul gewünscht, Notbremse setzen.
         If durationMs > 0 Then
@@ -151,6 +169,8 @@ Public Class TransitionMain
             tmrDuration.Dispose()
             tmrDuration = Nothing
         End If
+
+        requestEndOfTransition = True
 
         RaiseEvent TransitionIsRunning(False)
 
@@ -233,11 +253,15 @@ Public Class TransitionMain
 
     End Sub
 
-    'Animation und rendern
+    'Animation und rendern 
     Private Sub DrawGDITransitionFrame(size As Windows.Size)
         Dim phasenDauer1 As Single
         Dim phasenDauer2 As Single
         Dim phasenDauer3 As Single
+
+        Dim morphColor As System.Drawing.Color = System.Drawing.Color.FromArgb(255, aktuelleSettings.Farbton.R, aktuelleSettings.Farbton.G, aktuelleSettings.Farbton.B)
+        Dim b As New SolidBrush(morphColor)
+        Dim p As New System.Drawing.Pen(System.Drawing.Color.DarkGray, 1)
 
         Dim bmp As New Bitmap(size.Width, size.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
         Dim gfx As Graphics = Graphics.FromImage(bmp)
@@ -250,7 +274,7 @@ Public Class TransitionMain
         If aktuelleSettings.Morphing Then
             phasenDauer1 = 0.33
             phasenDauer2 = 0.33
-            phasenDauer2 = 0.34
+            phasenDauer3 = 0.34
         Else
             phasenDauer1 = 0.495
             phasenDauer2 = 0.1
@@ -262,24 +286,31 @@ Public Class TransitionMain
                 ' Phase 1: Altes Bild ausblenden
                 Dim alpha As Double = 1.0 - (progress / phasenDauer1)
                 Dim cm As System.Drawing.Imaging.ColorMatrix = CreateAlphaColorMatrix(alpha)
+
                 Using ia As New System.Drawing.Imaging.ImageAttributes()
                     ia.SetColorMatrix(cm)
-                    gfx.DrawImage(oldImg, drawRectOld, 0, 0, oldImg.Width, oldImg.Height, GraphicsUnit.Pixel, ia)
+
+                    If aktuelleSettings.Morphing Then
+                        gfx.FillRectangle(New SolidBrush(aktuelleSettings.Farbton), drawRectOld)
+                        p.Alignment = Drawing2D.PenAlignment.Inset
+                        gfx.DrawRectangle(p, drawRectOld)
+                    End If
+
+                    gfx.DrawImage(oldImg, containerRect, 0, 0, oldImg.Width, oldImg.Height, GraphicsUnit.Pixel, ia)
                 End Using
-                gfx.FillRectangle(New SolidBrush(aktuelleSettings.Farbton), drawRectOld)
 
             ElseIf progress < (phasenDauer1 + phasenDauer2) Then
                 ' Phase 2: Farbfläche morphend (wenn aktiviert)
                 If aktuelleSettings.Morphing Then
                     Dim morphT As Double = (progress - phasenDauer1) / phasenDauer2
                     Dim rect As Rectangle = InterpolateRect(drawRectOld, drawRectNew, morphT)
-                    gfx.FillRectangle(New SolidBrush(aktuelleSettings.Farbton), rect)
-                    Using p As New System.Drawing.Pen(System.Drawing.Color.DarkGray, 1)
-                        p.Alignment = Drawing2D.PenAlignment.Inset
-                        gfx.DrawRectangle(p, rect)
-                    End Using
+
+                    gfx.FillRectangle(b, rect)
+                    p.Alignment = Drawing2D.PenAlignment.Inset
+                    gfx.DrawRectangle(p, rect)
+
                 Else
-                    gfx.Clear(System.Drawing.Color.Black)
+                    gfx.Clear(HintergrundFarbeSaver)
                 End If
 
             Else
@@ -288,8 +319,15 @@ Public Class TransitionMain
                 Dim cm As System.Drawing.Imaging.ColorMatrix = CreateAlphaColorMatrix(alpha)
                 Using ia As New System.Drawing.Imaging.ImageAttributes()
                     ia.SetColorMatrix(cm)
-                    gfx.FillRectangle(New SolidBrush(aktuelleSettings.Farbton), drawRectNew)
-                    gfx.DrawImage(newImg, drawRectNew, 0, 0, newImg.Width, newImg.Height, GraphicsUnit.Pixel, ia)
+
+                    If aktuelleSettings.Morphing Then
+                        gfx.FillRectangle(New SolidBrush(aktuelleSettings.Farbton), drawRectNew)
+                        p.Alignment = Drawing2D.PenAlignment.Inset
+                        gfx.DrawRectangle(p, drawRectNew)
+
+                    End If
+
+                    gfx.DrawImage(newImg, containerRect, 0, 0, newImg.Width, newImg.Height, GraphicsUnit.Pixel, ia)
                 End Using
             End If
 
@@ -300,12 +338,12 @@ Public Class TransitionMain
 
             Using iaOld As New System.Drawing.Imaging.ImageAttributes()
                 iaOld.SetColorMatrix(CreateAlphaColorMatrix(alphaOld))
-                gfx.DrawImage(oldImg, drawRectOld, 0, 0, oldImg.Width, oldImg.Height, GraphicsUnit.Pixel, iaOld)
+                gfx.DrawImage(oldImg, containerRect, 0, 0, oldImg.Width, oldImg.Height, GraphicsUnit.Pixel, iaOld)
             End Using
 
             Using iaNew As New System.Drawing.Imaging.ImageAttributes()
                 iaNew.SetColorMatrix(CreateAlphaColorMatrix(alphaNew))
-                gfx.DrawImage(newImg, drawRectNew, 0, 0, newImg.Width, newImg.Height, GraphicsUnit.Pixel, iaNew)
+                gfx.DrawImage(newImg, containerRect, 0, 0, newImg.Width, newImg.Height, GraphicsUnit.Pixel, iaNew)
             End Using
         End If
 
@@ -314,11 +352,12 @@ Public Class TransitionMain
         Dim rtb As RenderTargetBitmap = ConvertImageToRenderTargetBitmap(bmp)
         RaiseEvent TransitionFrameIstFertig(rtb)
 
+        'Abbruchkriterium
         If progress >= 1.0 Then
             EndBildZeichnen()
-            StopGDIRenderLoop()
             StopTransition()
         End If
+
     End Sub
 
     Private Function InterpolateRect(r1 As Rectangle, r2 As Rectangle, t As Double) As Rectangle
@@ -361,7 +400,6 @@ Public Class TransitionMain
         StopGDIRenderLoop() ' Falls noch läuft
 
         gdiDrawAction = drawAction
-        gdiDauerInMs = Math.Max(1, dauerInMS)
         gdiRenderSize = size
         gdiStartTime = DateTime.Now
 
@@ -369,6 +407,7 @@ Public Class TransitionMain
         AddHandler gdiFrameTimer.Tick, AddressOf OnGDIFrameTick
         gdiFrameTimer.Interval = TimeSpan.FromMilliseconds(33) ' ca. 30 FPS
         gdiFrameTimer.Start()
+
     End Sub
 
     Public Sub StopGDIRenderLoop()
@@ -384,11 +423,10 @@ Public Class TransitionMain
             gdiDrawAction.Invoke(gdiRenderSize)
         End If
 
-        ' Automatisches Stoppen nach Ablauf (failsafe)
-        Dim elapsed As Double = (DateTime.Now - gdiStartTime).TotalMilliseconds
-        If elapsed >= gdiDauerInMs Then
+        If requestEndOfTransition Then
             StopGDIRenderLoop()
         End If
+
     End Sub
 
 End Class

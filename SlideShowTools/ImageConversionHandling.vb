@@ -4,11 +4,39 @@ Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports System.Windows
+Imports System.Windows.Interop
 Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 
 Public Class ImageConversionHandling
+
+    'Helferfunktionen
+
+    <DllImport("gdi32.dll")>
+    Private Shared Function DeleteObject(hObject As IntPtr) As Boolean
+        'Native API für GDI-Bitmapfreigabe
+    End Function
+
+    Private Shared Function CreateBitmapSourceFromGdiBitmap(bmp As Bitmap) As BitmapSource
+        'Erzeugt pixelgenaue BitmapSource aus GDI-Bitmap (ohne DPI-Skalierung) ===
+        If bmp Is Nothing Then Return Nothing
+        Dim hBmp As IntPtr = bmp.GetHbitmap()
+        Try
+            Dim src = Imaging.CreateBitmapSourceFromHBitmap(
+                hBmp,
+                IntPtr.Zero,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromWidthAndHeight(bmp.Width, bmp.Height) ' 1:1 Pixel
+            )
+            src.Freeze()
+            Return src
+        Finally
+            DeleteObject(hBmp)
+        End Try
+    End Function
+
     'Konverter
+
     'Image to...
     Public Shared Function ConvertImageToBitmapImage(img As Image) As BitmapImage
         Using ms As New MemoryStream()
@@ -44,30 +72,43 @@ Public Class ImageConversionHandling
         End Using
     End Function
 
-    Public Shared Function ConvertImageToRenderTargetBitmap(bmp As Bitmap) As RenderTargetBitmap
+    Public Shared Function ConvertBitmapToImageSource(bmp As Bitmap) As ImageSource
+
         If bmp Is Nothing Then Return Nothing
 
-        ' Bitmap in MemoryStream speichern
-        Using ms As New MemoryStream()
-            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
-            ms.Seek(0, SeekOrigin.Begin)
+        Return CreateBitmapSourceFromGdiBitmap(bmp)
 
-            ' BitmapImage laden
-            Dim decoder As New PngBitmapDecoder(ms, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad)
-            Dim source As BitmapSource = decoder.Frames(0)
+    End Function
 
-            ' In DrawingVisual zeichnen
-            Dim drawingVisual As New DrawingVisual()
-            Using dc As DrawingContext = drawingVisual.RenderOpen()
-                dc.DrawImage(source, New Rect(0, 0, source.PixelWidth, source.PixelHeight))
+    Public Shared Function ConvertByteArrayToImageSource(imageData As Byte()) As ImageSource
+
+        If imageData Is Nothing OrElse imageData.Length = 0 Then Return Nothing
+
+        Using ms As New MemoryStream(imageData)
+            Using bmp As New Bitmap(ms)
+                Return CreateBitmapSourceFromGdiBitmap(bmp)
             End Using
-
-            ' RenderTargetBitmap erzeugen
-            Dim rtb As New RenderTargetBitmap(source.PixelWidth, source.PixelHeight, source.DpiX, source.DpiY, PixelFormats.Pbgra32)
-            rtb.Render(drawingVisual)
-
-            Return rtb
         End Using
+
+    End Function
+
+    Public Shared Function ConvertImageToRenderTargetBitmap(bmp As Bitmap) As RenderTargetBitmap
+
+        If bmp Is Nothing Then Return Nothing
+
+        Dim src As BitmapSource = CreateBitmapSourceFromGdiBitmap(bmp)
+        Dim rtb As New RenderTargetBitmap(bmp.Width, bmp.Height, 96, 96, PixelFormats.Pbgra32)
+        Dim dv As New DrawingVisual()
+
+        Using dc = dv.RenderOpen()
+            dc.DrawImage(src, New Rect(0, 0, bmp.Width, bmp.Height))
+        End Using
+
+        rtb.Render(dv)
+        rtb.Freeze()
+
+        Return rtb
+
     End Function
 
 
