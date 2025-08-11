@@ -34,7 +34,9 @@ Public Class TransitionMain
     Private newBmpGerahmt As RenderTargetBitmap
 
     'Animation
-    Private aktuellerAnkerpunkt As String
+    Private aktuellerAnkerpunktOld As String
+    Private aktuellerAnkerpunktNew As String
+
     Private clntSize As Windows.Size
 
     'Rendering
@@ -47,6 +49,7 @@ Public Class TransitionMain
     Public Structure SlideShowTransitionSettings_Zoom
         Public ankerpunkte As List(Of String)
         Public geschwindigkeit As Integer
+        Public gleicherAnkerpunkt As Boolean
     End Structure
 
     'Eigenschaften
@@ -76,6 +79,7 @@ Public Class TransitionMain
     Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
         'Bereitet die Animation vor und startet den Render-Loop
         Dim ankerArray() As String = {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "Z"}
+        Dim rnd As New Random
 
         'Interne Initialisierungen & Formalitäten
         ReadTransitionSettingsFromRegistryOrDefaults()
@@ -92,11 +96,21 @@ Public Class TransitionMain
         oldBmpSource = CType(oldBmpGerahmt, ImageSource)
         newBmpSource = CType(newBmpGerahmt, ImageSource)
 
-        'Zufälligen Ankerpunkt wählen
+        'Zufällige Ankerpunkte wählen
         If aktuelleSettings.ankerpunkte.Count > 0 Then
-            aktuellerAnkerpunkt = aktuelleSettings.ankerpunkte(New Random().Next(aktuelleSettings.ankerpunkte.Count))
+            aktuellerAnkerpunktOld = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
         Else
-            aktuellerAnkerpunkt = ankerArray(New Random().Next(9))
+            aktuellerAnkerpunktOld = ankerArray(rnd.Next(9))
+        End If
+
+        If aktuelleSettings.gleicherAnkerpunkt Then
+            aktuellerAnkerpunktNew = aktuellerAnkerpunktOld
+        Else
+            If aktuelleSettings.ankerpunkte.Count > 0 Then
+                aktuellerAnkerpunktNew = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
+            Else
+                aktuellerAnkerpunktNew = ankerArray(rnd.Next(9))
+            End If
         End If
 
         'Falls vom Modul gewünscht, Notbremse setzen.
@@ -154,6 +168,11 @@ Public Class TransitionMain
 
         aktuelleSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Geschwindigkeit", defaults))
         aktuelleSettings.ankerpunkte = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Ankerpunkte", defaults))
+        If ReadFromRegOrDefaults(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "GleicherAnkerpunkt", defaults) = "True" Then
+            aktuelleSettings.gleicherAnkerpunkt = True
+        Else
+            aktuelleSettings.gleicherAnkerpunkt = False
+        End If
 
     End Sub
 
@@ -162,6 +181,7 @@ Public Class TransitionMain
 
         defaults.Add("Geschwindigkeit", "10")
         defaults.Add("Ankerpunkte", "Z")
+        defaults.Add("GleicherAnkerpunkt", "True")
 
         Return defaults
 
@@ -218,33 +238,45 @@ Public Class TransitionMain
         End If
 
         '...und Eckpunkte
-        Select Case aktuellerAnkerpunkt
+        Select Case aktuellerAnkerpunktOld
             Case "NW"
                 oldPoint = New Windows.Point(0, 0)
-                newPoint = New Windows.Point(0, 0)
             Case "N"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, 0)
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, 0)
             Case "NO"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), 0)
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), 0)
             Case "O"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), (clntSize.Height - oldSize.Height) \ 2)
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height) \ 2)
             Case "SO"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), (clntSize.Height - oldSize.Height))
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height))
             Case "S"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, (clntSize.Height - oldSize.Height))
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, (clntSize.Height - newSize.Height))
             Case "SW"
                 oldPoint = New Windows.Point(0, (clntSize.Height - oldSize.Height))
-                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height))
             Case "W"
                 oldPoint = New Windows.Point(0, (clntSize.Height - oldSize.Height) \ 2)
-                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height) \ 2)
             Case "Z"
                 oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, (clntSize.Height - oldSize.Height) \ 2)
+        End Select
+
+        Select Case aktuellerAnkerpunktNew
+            Case "NW"
+                newPoint = New Windows.Point(0, 0)
+            Case "N"
+                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, 0)
+            Case "NO"
+                newPoint = New Windows.Point((clntSize.Width - newSize.Width), 0)
+            Case "O"
+                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height) \ 2)
+            Case "SO"
+                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height))
+            Case "S"
+                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, (clntSize.Height - newSize.Height))
+            Case "SW"
+                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height))
+            Case "W"
+                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height) \ 2)
+            Case "Z"
                 newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, (clntSize.Height - newSize.Height) \ 2)
         End Select
 

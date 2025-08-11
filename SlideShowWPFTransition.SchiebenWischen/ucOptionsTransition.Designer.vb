@@ -174,7 +174,7 @@ Partial Class ucOptionsTransition
         Me.tbtN.Checked = False
         Me.tbtN.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtN.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtN.Location = New System.Drawing.Point(495, 144)
+        Me.tbtN.Location = New System.Drawing.Point(554, 144)
         Me.tbtN.Name = "tbtN"
         Me.tbtN.Size = New System.Drawing.Size(75, 75)
         Me.tbtN.TabIndex = 36
@@ -188,7 +188,7 @@ Partial Class ucOptionsTransition
         Me.tbtNO.Checked = False
         Me.tbtNO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtNO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtNO.Location = New System.Drawing.Point(658, 144)
+        Me.tbtNO.Location = New System.Drawing.Point(776, 144)
         Me.tbtNO.Name = "tbtNO"
         Me.tbtNO.Size = New System.Drawing.Size(75, 75)
         Me.tbtNO.TabIndex = 37
@@ -216,7 +216,7 @@ Partial Class ucOptionsTransition
         Me.tbtO.Checked = False
         Me.tbtO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtO.Location = New System.Drawing.Point(658, 270)
+        Me.tbtO.Location = New System.Drawing.Point(777, 270)
         Me.tbtO.Name = "tbtO"
         Me.tbtO.Size = New System.Drawing.Size(75, 75)
         Me.tbtO.TabIndex = 39
@@ -244,7 +244,7 @@ Partial Class ucOptionsTransition
         Me.tbtS.Checked = False
         Me.tbtS.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtS.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtS.Location = New System.Drawing.Point(495, 396)
+        Me.tbtS.Location = New System.Drawing.Point(554, 396)
         Me.tbtS.Name = "tbtS"
         Me.tbtS.Size = New System.Drawing.Size(75, 75)
         Me.tbtS.TabIndex = 41
@@ -258,7 +258,7 @@ Partial Class ucOptionsTransition
         Me.tbtSO.Checked = False
         Me.tbtSO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtSO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtSO.Location = New System.Drawing.Point(658, 396)
+        Me.tbtSO.Location = New System.Drawing.Point(777, 396)
         Me.tbtSO.Name = "tbtSO"
         Me.tbtSO.RightToLeft = System.Windows.Forms.RightToLeft.Yes
         Me.tbtSO.Size = New System.Drawing.Size(75, 75)

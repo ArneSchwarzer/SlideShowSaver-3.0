@@ -38,6 +38,7 @@ Partial Class ucOptionsTransition
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.tbtZ = New MyControlsLibrary.ToggleButton()
+        Me.chkGleicherAnkerpunkt = New System.Windows.Forms.CheckBox()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -82,7 +83,7 @@ Partial Class ucOptionsTransition
         'lblNtrbGeschwindigkeit
         '
         Me.lblNtrbGeschwindigkeit.AutoSize = True
-        Me.lblNtrbGeschwindigkeit.Location = New System.Drawing.Point(41, 606)
+        Me.lblNtrbGeschwindigkeit.Location = New System.Drawing.Point(34, 728)
         Me.lblNtrbGeschwindigkeit.Name = "lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Size = New System.Drawing.Size(236, 41)
         Me.lblNtrbGeschwindigkeit.TabIndex = 28
@@ -90,7 +91,7 @@ Partial Class ucOptionsTransition
         '
         'trkGeschwindigkeit
         '
-        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(332, 606)
+        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(325, 728)
         Me.trkGeschwindigkeit.Maximum = 30
         Me.trkGeschwindigkeit.Minimum = 1
         Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
@@ -101,7 +102,7 @@ Partial Class ucOptionsTransition
         'lblGeschwindigkeit
         '
         Me.lblGeschwindigkeit.AutoSize = True
-        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(795, 606)
+        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(788, 728)
         Me.lblGeschwindigkeit.MinimumSize = New System.Drawing.Size(71, 0)
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
@@ -129,7 +130,7 @@ Partial Class ucOptionsTransition
         Me.tbtN.Checked = False
         Me.tbtN.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtN.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtN.Location = New System.Drawing.Point(495, 144)
+        Me.tbtN.Location = New System.Drawing.Point(553, 144)
         Me.tbtN.Name = "tbtN"
         Me.tbtN.Size = New System.Drawing.Size(75, 75)
         Me.tbtN.TabIndex = 36
@@ -143,7 +144,7 @@ Partial Class ucOptionsTransition
         Me.tbtNO.Checked = False
         Me.tbtNO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtNO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtNO.Location = New System.Drawing.Point(658, 144)
+        Me.tbtNO.Location = New System.Drawing.Point(774, 144)
         Me.tbtNO.Name = "tbtNO"
         Me.tbtNO.Size = New System.Drawing.Size(75, 75)
         Me.tbtNO.TabIndex = 37
@@ -171,7 +172,7 @@ Partial Class ucOptionsTransition
         Me.tbtO.Checked = False
         Me.tbtO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtO.Location = New System.Drawing.Point(658, 270)
+        Me.tbtO.Location = New System.Drawing.Point(775, 270)
         Me.tbtO.Name = "tbtO"
         Me.tbtO.Size = New System.Drawing.Size(75, 75)
         Me.tbtO.TabIndex = 39
@@ -199,7 +200,7 @@ Partial Class ucOptionsTransition
         Me.tbtS.Checked = False
         Me.tbtS.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtS.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtS.Location = New System.Drawing.Point(495, 396)
+        Me.tbtS.Location = New System.Drawing.Point(553, 396)
         Me.tbtS.Name = "tbtS"
         Me.tbtS.Size = New System.Drawing.Size(75, 75)
         Me.tbtS.TabIndex = 41
@@ -213,7 +214,7 @@ Partial Class ucOptionsTransition
         Me.tbtSO.Checked = False
         Me.tbtSO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtSO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtSO.Location = New System.Drawing.Point(658, 396)
+        Me.tbtSO.Location = New System.Drawing.Point(775, 396)
         Me.tbtSO.Name = "tbtSO"
         Me.tbtSO.RightToLeft = System.Windows.Forms.RightToLeft.Yes
         Me.tbtSO.Size = New System.Drawing.Size(75, 75)
@@ -228,7 +229,7 @@ Partial Class ucOptionsTransition
         Me.tbtZ.Checked = False
         Me.tbtZ.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtZ.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtZ.Location = New System.Drawing.Point(495, 270)
+        Me.tbtZ.Location = New System.Drawing.Point(553, 270)
         Me.tbtZ.Name = "tbtZ"
         Me.tbtZ.Size = New System.Drawing.Size(75, 75)
         Me.tbtZ.TabIndex = 43
@@ -236,10 +237,24 @@ Partial Class ucOptionsTransition
         Me.tbtZ.UncheckedBackColor = System.Drawing.SystemColors.Control
         Me.tbtZ.UseVisualStyleBackColor = False
         '
+        'chkGleicherAnkerpunkt
+        '
+        Me.chkGleicherAnkerpunkt.AutoSize = True
+        Me.chkGleicherAnkerpunkt.Location = New System.Drawing.Point(332, 586)
+        Me.chkGleicherAnkerpunkt.MaximumSize = New System.Drawing.Size(550, 0)
+        Me.chkGleicherAnkerpunkt.MinimumSize = New System.Drawing.Size(0, 90)
+        Me.chkGleicherAnkerpunkt.Name = "chkGleicherAnkerpunkt"
+        Me.chkGleicherAnkerpunkt.Size = New System.Drawing.Size(550, 90)
+        Me.chkGleicherAnkerpunkt.TabIndex = 44
+        Me.chkGleicherAnkerpunkt.Text = "Gleichen Ankerpunkt für Einblenden und Ausblenden verwenden"
+        Me.chkGleicherAnkerpunkt.TextAlign = System.Drawing.ContentAlignment.TopLeft
+        Me.chkGleicherAnkerpunkt.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.chkGleicherAnkerpunkt)
         Me.Controls.Add(Me.tbtZ)
         Me.Controls.Add(Me.tbtSO)
         Me.Controls.Add(Me.tbtS)
@@ -282,4 +297,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents tbtS As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtSO As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtZ As MyControlsLibrary.ToggleButton
+    Friend WithEvents chkGleicherAnkerpunkt As Forms.CheckBox
 End Class

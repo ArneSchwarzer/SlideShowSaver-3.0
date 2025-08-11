@@ -53,6 +53,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowWPFTransition.Zoom
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.BlendenÜberblenden", "SlideShowTransition.BlendenUeberblenden\SlideShowTransition.BlendenÜberblenden.vbproj", "{136EF778-9383-42F3-B4E4-36149597413E}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowTransition.GradientWischen", "SlideShowTransition.GradientWischen\SlideShowTransition.GradientWischen.vbproj", "{9B5B6975-D366-4E83-99A0-84904E736208}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{136EF778-9383-42F3-B4E4-36149597413E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{136EF778-9383-42F3-B4E4-36149597413E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{136EF778-9383-42F3-B4E4-36149597413E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B5B6975-D366-4E83-99A0-84904E736208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B5B6975-D366-4E83-99A0-84904E736208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B5B6975-D366-4E83-99A0-84904E736208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B5B6975-D366-4E83-99A0-84904E736208}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +158,7 @@ Global
 		{6C98C449-9B0B-4094-84B1-4BE380C4B380} = {78FC98FE-5E50-4C27-AA6C-21D2578EAC68}
 		{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{136EF778-9383-42F3-B4E4-36149597413E} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
+		{9B5B6975-D366-4E83-99A0-84904E736208} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {30992369-3D61-4821-9848-76A5250AE114}

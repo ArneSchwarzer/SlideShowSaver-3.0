@@ -1,0 +1,103 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+SlideShowInterfaces
+</name>
+</assembly>
+<members>
+<member name="T:SlideShowInterfaces.My.Resources.Resources">
+<summary>
+  Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+</summary>
+</member>
+<member name="P:SlideShowInterfaces.My.Resources.Resources.ResourceManager">
+<summary>
+  Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+</summary>
+</member>
+<member name="P:SlideShowInterfaces.My.Resources.Resources.Culture">
+<summary>
+  Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+  Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+</summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowModul">
+ <summary>
+ Dieses Interface definiert die Struktur eines Bildschirmschoner-Moduls.
+ 
+ 
+ Wichtige Hinweis zu Modul-Implementierung und Eventweiterleitung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte ein Modul auch immer
+eine Struktur ModulSettings_Modulname sowie diese beiden Methoden anbieten:
+
+ Private Function GetModulDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReadModulSettingsFromRegistryOrDefault()
+ 
+ Die frmModulMain sollte Tastatur- oder Mauseingaben standardmäßig über
+ SlideShowTools.KeyAndMouseHandling an das Hauptprogramm weiterleiten.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowTransition">
+ <summary>
+ Dieses Interface definiert die Struktur eines Bildübergangs (Transition) von einem
+ Bild zum nächsten.
+ 
+ 
+ Wichtige Hinweis zur Transition-Implementierung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte eine Transition auch immer
+eine Struktur TransitionSettings_TransitionName sowie diese beiden Methoden anbieten:
+
+ Private Function GetTransitionDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReaTransitionSettingsFromRegistryOrDefault()
+ 
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowShader">
+ <summary>
+ Dieses Interface definiert die Struktur eines Shaders.
+ 
+ 
+ Wichtige Hinweis zur Shader-Implementierung:
+
+Neben den in diesem Interface vorgegebenen Methoden sollte ein Shader auch immer eine Struktur
+ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
+
+ Private Function GetShaderDefaultSettings() as Dictionary(Of String, String)
+ Private Sub ReadShaderSettingsFromRegistryOrDefault()
+ 
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowTransitionCommunication">
+ <summary>
+ Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+ und der frmOptionsMain, um auf derer TabPage "Transition" das korrekte ucOptionsTransition zu
+ laden.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InterfaceDeclarations.ISlideShowShaderCommunication">
+ <summary>
+ Dieses Interface definiert die Kommunikation zwischen einer ucOptionsModul
+ und der frmOptionsMain, um auf derer TabPage "Shader" das korrekte ucOptionsShader zu
+ laden.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InfoHandling.SlideShowModulInfo">
+ <summary>
+ Struktur zur Beschreibung eines Bildschirmschoner-Moduls.
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InfoHandling.SlideShowTransitionInfo">
+ <summary>
+ Struktur zur Beschreibung eines Transitionseffektes
+ </summary>
+</member>
+<member name="T:SlideShowInterfaces.InfoHandling.SlideShowShaderInfo">
+<summary>
+Struktur zur Beschreibung eines Shaders
+ </summary>
+</member>
+</members>
+</doc>

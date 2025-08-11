@@ -60,6 +60,9 @@ Public Class ucOptionsTransition
             lblKeinAnkerpunkt.Visible = False
         End If
 
+        'Gleicher Ankerpunkt
+        chkGleicherAnkerpunkt.Checked = aktuelleSettings.gleicherAnkerpunkt
+
         'Geschwindigkeit
         trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
         lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
@@ -135,6 +138,14 @@ Public Class ucOptionsTransition
 
         'DirectCommit
         AnkerStringBauen()
+
+    End Sub
+
+    Private Sub chkGleicherAnkerpunkt_CheckedChanged(sender As Object, e As EventArgs) Handles chkGleicherAnkerpunkt.CheckedChanged
+        'Behandelt die Checkbox Gleicher Ankerpunkt
+
+        'Direct Commit
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "GleicherAnkerpunkt", chkGleicherAnkerpunkt.Checked.ToString)
 
     End Sub
 
