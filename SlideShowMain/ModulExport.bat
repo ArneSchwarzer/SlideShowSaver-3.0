@@ -46,6 +46,9 @@ set "SOURCE5=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransitio
 set "SOURCE6=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\bin\Debug\SlideShowWPFTransition.Zoom.pdb"
 set "SOURCE7=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.BlendenUeberblenden\bin\Debug\BlendenUeberblenden.dll"
 set "SOURCE8=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.BlendenUeberblenden\bin\Debug\BlendenUeberblenden.pdb"
+set "SOURCE9=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.GradientWischen\bin\Debug\SlideShowTransition.GradientWischen.dll"
+set "SOURCE10=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.GradientWischen\bin\Debug\SlideShowTransition.GradientWischen.pdb"
+
 :: Zielverzeichnis
 set "TARGET=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Transitions"
 
@@ -67,6 +70,8 @@ copy /Y "%SOURCE5%" "%TARGET%\Zoom.ssst"
 copy /Y "%SOURCE6%" "%TARGET%\Zoom.pdb"
 copy /Y "%SOURCE7%" "%TARGET%\Blenden und Ueberblenden.ssst"
 copy /Y "%SOURCE8%" "%TARGET%\Blenden und Ueberblenden.pdb"
+copy /Y "%SOURCE9%" "%TARGET%\GradientWischen.ssst"
+copy /Y "%SOURCE10%" "%TARGET%\GradientWischen.pdb"
 
 echo Transitionen kopiert.
 echo.

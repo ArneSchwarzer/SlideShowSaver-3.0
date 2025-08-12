@@ -9,6 +9,7 @@ Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
+Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
@@ -37,17 +38,11 @@ Namespace TransitionMain_GradientWischen
         'Transitions-Bilder
         Private oldBmpGerahmt As RenderTargetBitmap
         Private newBmpGerahmt As RenderTargetBitmap
-        Private oldPicBoxSizeMode As PictureBoxSizeMode
-        Private newPicBoxSizeMode As PictureBoxSizeMode
-        Private oldBmpSource As BitmapSource
-        Private newBmpSource As BitmapSource
+        Private oldBmp As Bitmap
+        Private newBmp As Bitmap
 
         'Animation, Positionen, Offsets etc. - Systems.Windows-Welt
-        Private startPosOldWPF As System.Windows.Point
-        Private zielPosOldWPF As System.Windows.Point
-        Private startPosNewWPF As System.Windows.Point
-        Private zielPosNewWPF As System.Windows.Point
-        Private sizeWPF As System.Windows.Size
+        Private richtung As String
 
         'Zielausgabe
         Private targetRect As Rectangle
@@ -102,7 +97,6 @@ Namespace TransitionMain_GradientWischen
 
             Dim dx As Integer = 0, dy As Integer = 0
             Dim richtungArray() As String = {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "ZOut", "ZIn"}
-            Dim richtung As String
 
             RaiseEvent TransitionIsRunning(True)
 
@@ -110,12 +104,14 @@ Namespace TransitionMain_GradientWischen
                 StopTransition()
             End If
 
-            'Überführen der Parameter in Klassenvariablen
-
-            'Bilder vorbereiten
-
             ReadTransitionSettingsFromRegistryOrDefaults()
             StoreSettings(TransitionName, aktuelleSettings)
+
+            'Überführen der Parameter in Klassenvariablen
+            oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
+            newBmpGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
+            oldBmp = ConvertRenderTargetBitmapToBitmap(oldBmpGerahmt)
+            newBmp = ConvertRenderTargetBitmapToBitmap(newBmpGerahmt)
 
             'Richtungsauswahl
             If aktuelleSettings.richtungen?.Count > 0 Then
@@ -123,22 +119,6 @@ Namespace TransitionMain_GradientWischen
             Else
                 richtung = richtungArray(New Random().Next(10))
             End If
-
-            'Animation initiieren
-
-            ' Koordinaten berechnen
-            Select Case richtung
-                Case "N"
-                Case "S"
-                Case "W"
-                Case "O"
-                Case "NW"
-                Case "NO"
-                Case "SW"
-                Case "SO"
-                Case "ZIn"
-                Case "ZOut"
-            End Select
 
             'Falls vom Modul gewünscht, Notbremse setzen.
             If durationMs > 0 Then
@@ -154,7 +134,7 @@ Namespace TransitionMain_GradientWischen
             dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
             startTime = DateTime.Now
 
-            StartRenderLoop(AddressOf DrawTransitionFrame, New Windows.Size(sizeWPF.Width, sizeWPF.Height))
+            StartRenderLoop(AddressOf DrawTransitionFrame, New Windows.Size(clientSize.Width, clientSize.Height))
 
         End Sub
 
@@ -230,19 +210,32 @@ Namespace TransitionMain_GradientWischen
 
         End Sub
 
-        'Animation und rendern
+        'Animation
         Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
             Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
             Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
+            Dim mask As Bitmap
+            Dim frame As Bitmap
+            Dim imgSource As ImageSource
 
-            'Hier die Animation einfügen
+            'Maske generieren
+            Select Case richtung
+                Case "ZIn"
+                    mask = GenerateRadialMask(size.Width, size.Height, progress, aktuelleSettings.breite, True)
+                Case "ZOut"
+                    mask = GenerateRadialMask(size.Width, size.Height, progress, aktuelleSettings.breite, False)
+                Case Else
+                    mask = GenerateLinearMask(size.Width, size.Height, progress, aktuelleSettings.breite)
+            End Select
 
-            'TODO:
-            'Maske generieren / Verschieben etc.
+            'Bilder per Maske mischen
+            frame = BlendWithMask(oldBmp, newBmp, mask)
 
-            ' Bilder zeichnen
-            dc.DrawImage(oldBmpSource, New Rect(0, 0, sizeWPF.Width, sizeWPF.Height))
-            dc.DrawImage(newBmpSource, New Rect(0, 0, sizeWPF.Width, sizeWPF.Height))
+            'In ImageSource umwandeln
+            imgSource = ConvertBitmapToImageSource(frame)
+
+            ' Bild zeichnen
+            dc.DrawImage(imgSource, New Rect(0, 0, size.Width, size.Height))
 
             ' Fertig?
             If progress >= 1.0 Then
@@ -251,13 +244,244 @@ Namespace TransitionMain_GradientWischen
 
         End Sub
 
-        Private Sub LineareMaskeGenerieren()
+        'Generierung der Masken
 
-        End Sub
+        'Lineare Maske
+        Private Function GenerateLinearMask(width As Integer, height As Integer, progress As Double, breite As Integer) As Bitmap
 
-        Private Sub RadialMaskeGenerieren()
+            Dim bmp As New Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb)
+            Dim rect As New Rectangle(0, 0, width, height)
+            Dim data As Imaging.BitmapData
+            Dim stride As Integer
+            Dim bpp As Integer
+            Dim buffer() As Byte
+            Dim weich As Integer
+            Dim startX As Integer
+            Dim startY As Integer
+            Dim useDirs As List(Of String)
 
-        End Sub
+            ' Variablen am Anfang (deine Regel)
+            data = bmp.LockBits(rect, Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat)
+            stride = data.Stride
+            bpp = 4
+            ReDim buffer(stride * height - 1)
+
+            Dim breiteFaktor As Double = Math.Max(0.0, Math.Min(1.0, breite / 100.0))
+            Dim basis As Integer
+            Select Case richtung
+                Case "W", "O"
+                    basis = width
+                Case "N", "S"
+                    basis = height
+                Case "NW", "NO", "SW", "SO"
+                    basis = (width + height) ' zur T-Projektion passend
+                Case Else
+                    basis = width
+            End Select
+
+            weich = Math.Max(1, CInt(basis * breiteFaktor))
+
+            For y As Integer = 0 To height - 1
+                For x As Integer = 0 To width - 1
+                    Dim alphaMax As Byte = 0
+                    Dim a As Byte = 0
+
+                    Select Case richtung
+                        Case "W"
+                            startX = CInt(progress * width)
+                            a = ComputeRamp(x, startX, weich)
+                        Case "O"
+                            startX = CInt((1.0 - progress) * width)
+                            a = ComputeRampInv(x, startX, weich)
+                        Case "N"
+                            startY = CInt(progress * height)
+                            a = ComputeRamp(y, startY, weich)
+                        Case "S"
+                            startY = CInt((1.0 - progress) * height)
+                            a = ComputeRampInv(y, startY, weich)
+                        Case "NW" ' oben-links → unten-rechts
+                            ' projiziere (x,y) auf Diagonale
+                            Dim t As Integer = x + y
+                            Dim startT As Integer = CInt(progress * (width + height))
+                            a = ComputeRamp(t, startT, weich)
+                        Case "NO" ' oben-rechts → unten-links
+                            Dim t As Integer = (width - 1 - x) + y
+                            Dim startT As Integer = CInt(progress * (width + height))
+                            a = ComputeRamp(t, startT, weich)
+                        Case "SW" ' unten-links → oben-rechts
+                            ' projiziere (x,y) auf Diagonale, aber y invertieren
+                            Dim t As Integer = x + (height - 1 - y)
+                            Dim startT As Integer = CInt(progress * (width + height))
+                            a = ComputeRamp(t, startT, weich)
+                        Case "SO" ' unten-rechts → oben-links
+                            ' projiziere (x,y) auf Diagonale, aber beide Achsen invertieren
+                            Dim t As Integer = (width - 1 - x) + (height - 1 - y)
+                            Dim startT As Integer = CInt(progress * (width + height))
+                            a = ComputeRamp(t, startT, weich)
+                        Case Else
+                            ' Fallback auf "von links nach rechts (W)"
+                            startX = CInt(progress * width)
+                            a = ComputeRamp(x, startX, weich)
+                    End Select
+
+                    If a > alphaMax Then alphaMax = a
+
+                    Dim ofs As Integer = y * stride + x * bpp
+
+                    'Zum Maske visualisieren:
+                    'buffer(ofs + 0) = alphaMax ' B
+                    'buffer(ofs + 1) = alphaMax ' G
+                    'buffer(ofs + 2) = alphaMax ' R
+                    'buffer(ofs + 3) = 255      ' A (voll deckend für die Vorschau)
+
+                    'Echte Darstellung fürs Blenden
+                    buffer(ofs + 0) = 255  ' B
+                    buffer(ofs + 1) = 255  ' G
+                    buffer(ofs + 2) = 255  ' R
+                    buffer(ofs + 3) = alphaMax ' A = Sichtbarkeit des NEUEN Bildes
+                Next
+            Next
+
+            Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, buffer.Length)
+            bmp.UnlockBits(data)
+            Return bmp
+        End Function
+
+        'Berechnung des Gradienten: 0..255 Rampen (weichBreite = Anzahl Pixel für Übergang)
+        Private Function ComputeRamp(pos As Integer, startPos As Integer, weichBreite As Integer) As Byte
+            If pos < startPos Then Return 0
+            If pos >= startPos + weichBreite Then Return 255
+            Dim t As Double = (pos - startPos) / Math.Max(1, weichBreite)
+            Return CByte(t * 255)
+        End Function
+
+        'Berechnung des inversen Gradienten (weiß vor der Kante, schwarz dahinter)
+        Private Function ComputeRampInv(pos As Integer, startPos As Integer, weichBreite As Integer) As Byte
+            If pos > startPos Then Return 0
+            If pos <= startPos - weichBreite Then Return 255
+            Dim t As Double = (startPos - pos) / Math.Max(1, weichBreite)
+            Return CByte(t * 255)
+        End Function
+
+        'Radiale Maske
+        Private Function GenerateRadialMask(width As Integer, height As Integer, progress As Double, breite As Double, inward As Boolean) As Bitmap
+            Dim bmp As New Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb)
+            Dim rect As New Rectangle(0, 0, width, height)
+            Dim data As Imaging.BitmapData
+            Dim stride As Integer
+            Dim bpp As Integer
+            Dim buffer() As Byte
+            Dim weich As Integer
+            Dim cx As Double
+            Dim cy As Double
+            Dim maxR As Double
+            Dim startR As Double
+
+            data = bmp.LockBits(rect, Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat)
+            stride = data.Stride
+            bpp = 4
+            ReDim buffer(stride * height - 1)
+
+            cx = (width - 1) / 2.0
+            cy = (height - 1) / 2.0
+            maxR = Math.Sqrt(cx * cx + cy * cy)
+            weich = Math.Max(1, CInt((If(breite < 0, 0, If(breite > 1, 1, breite))) * maxR))
+
+            ' progress bestimmt den Radius der „Kante“
+            startR = progress * maxR
+
+            For y As Integer = 0 To height - 1
+                For x As Integer = 0 To width - 1
+                    Dim dx As Double = x - cx
+                    Dim dy As Double = y - cy
+                    Dim r As Double = Math.Sqrt(dx * dx + dy * dy)
+
+                    Dim a As Byte
+                    If inward Then
+                        ' nach innen: weißer Bereich kollabiert zum Zentrum
+                        ' innen (klein r) zuerst weiß → nach und nach verschwindet außen
+                        a = ComputeRadial(r, startR, weich, True)
+                    Else
+                        ' nach außen: Weiß-Ring wächst
+                        a = ComputeRadial(r, startR, weich, False)
+                    End If
+
+                    Dim ofs As Integer = y * stride + x * bpp
+                    buffer(ofs + 0) = 255
+                    buffer(ofs + 1) = 255
+                    buffer(ofs + 2) = 255
+                    buffer(ofs + 3) = a
+                Next
+            Next
+
+            Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, buffer.Length)
+            bmp.UnlockBits(data)
+            Return bmp
+        End Function
+
+        'Radialen Gradenten berechnen: outward=False (Ring wächst), inward=True (Ring schrumpft nach innen)
+        Private Function ComputeRadial(r As Double, startR As Double, weich As Integer, inward As Boolean) As Byte
+            If Not inward Then
+                If r < startR Then Return 0
+                If r >= startR + weich Then Return 255
+                Dim t As Double = (r - startR) / Math.Max(1, weich)
+                Return CByte(t * 255)
+            Else
+                If r > startR Then Return 0
+                If r <= startR - weich Then Return 255
+                Dim t As Double = (startR - r) / Math.Max(1, weich)
+                Return CByte(t * 255)
+            End If
+        End Function
+
+        'Bilder über die Maske ineinander blenden.
+        Private Function BlendWithMask(oldBmp As Bitmap, newBmp As Bitmap, mask As Bitmap) As Bitmap
+            Dim w As Integer = oldBmp.Width
+            Dim h As Integer = oldBmp.Height
+            Dim rect As New Rectangle(0, 0, w, h)
+
+            Dim outBmp As New Bitmap(w, h, Imaging.PixelFormat.Format32bppArgb)
+
+            Dim dOld = oldBmp.LockBits(rect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+            Dim dNew = newBmp.LockBits(rect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+            Dim dMsk = mask.LockBits(rect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+            Dim dOut = outBmp.LockBits(rect, Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
+
+            Dim stride As Integer = dOut.Stride
+            Dim bufOld(stride * h - 1) As Byte
+            Dim bufNew(stride * h - 1) As Byte
+            Dim bufMsk(stride * h - 1) As Byte
+            Dim bufOut(stride * h - 1) As Byte
+
+            Runtime.InteropServices.Marshal.Copy(dOld.Scan0, bufOld, 0, bufOld.Length)
+            Runtime.InteropServices.Marshal.Copy(dNew.Scan0, bufNew, 0, bufNew.Length)
+            Runtime.InteropServices.Marshal.Copy(dMsk.Scan0, bufMsk, 0, bufMsk.Length)
+
+            For y As Integer = 0 To h - 1
+                For x As Integer = 0 To w - 1
+                    Dim ofs As Integer = y * stride + x * 4
+                    Dim a As Double = bufMsk(ofs + 3) / 255.0
+
+                    ' B,G,R (A = 255)
+                    For c As Integer = 0 To 2
+                        Dim v As Double = bufOld(ofs + c) * a + bufNew(ofs + c) * (1 - a)
+                        bufOut(ofs + c) = CByte(Math.Min(255, Math.Max(0, v)))
+                    Next
+                    bufOut(ofs + 3) = 255
+                Next
+            Next
+
+            Runtime.InteropServices.Marshal.Copy(bufOut, 0, dOut.Scan0, bufOut.Length)
+
+            oldBmp.UnlockBits(dOld)
+            newBmp.UnlockBits(dNew)
+            mask.UnlockBits(dMsk)
+            outBmp.UnlockBits(dOut)
+
+            Return outBmp
+        End Function
+
+        'Render-Loop
         Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
                            zielGroesse As Windows.Size)
             'RenderLoop starten und einmaliges renderTargetBitmap anlegen
