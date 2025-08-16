@@ -72,6 +72,47 @@ Public Class ImageConversionHandling
         End Using
     End Function
 
+    Public Shared Function ConvertBitmapToWriteableBitmap(bmp As Bitmap) As WriteableBitmap
+        If bmp Is Nothing Then Return Nothing
+        Dim wb As New WriteableBitmap(bmp.Width, bmp.Height, 96, 96, PixelFormats.Pbgra32, Nothing)
+
+        Dim rect As New Rectangle(0, 0, bmp.Width, bmp.Height)
+        Dim data = bmp.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb)
+        Try
+            wb.Lock()
+            Dim bufferSize = data.Stride * data.Height
+            Dim bytes(bufferSize - 1) As Byte
+            Marshal.Copy(data.Scan0, bytes, 0, bufferSize)
+            Marshal.Copy(bytes, 0, wb.BackBuffer, bufferSize)
+            wb.AddDirtyRect(New Int32Rect(0, 0, bmp.Width, bmp.Height))
+            wb.Unlock()
+        Finally
+            bmp.UnlockBits(data)
+        End Try
+        Return wb
+    End Function
+
+    ' WriteableBitmap -> Bitmap (32bppArgb)
+    Public Shared Function ConvertWriteableBitmapToBitmap(wb As WriteableBitmap) As Bitmap
+        If wb Is Nothing Then Return Nothing
+        Dim bmp As New Bitmap(wb.PixelWidth, wb.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+        bmp.SetResolution(96, 96)
+
+        Dim rect As New Rectangle(0, 0, bmp.Width, bmp.Height)
+        Dim data = bmp.LockBits(rect, ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+        Try
+            wb.Lock()
+            Dim bufferSize = wb.BackBufferStride * wb.PixelHeight
+            Dim bytes(bufferSize - 1) As Byte
+            Marshal.Copy(wb.BackBuffer, bytes, 0, bufferSize)
+            Marshal.Copy(bytes, 0, data.Scan0, bufferSize)
+            wb.Unlock()
+        Finally
+            bmp.UnlockBits(data)
+        End Try
+        Return bmp
+    End Function
+
     Public Shared Function ConvertBitmapToImageSource(bmp As Bitmap) As ImageSource
 
         If bmp Is Nothing Then Return Nothing
