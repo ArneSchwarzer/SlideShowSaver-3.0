@@ -397,11 +397,12 @@ Namespace TransitionMain_GradientWischen
         End Function
 
         'Diagonal
-        ' Diagonal – immer NW→SO erzeugen, NICHT spiegeln
-        ' Diagonale Maske erzeugen – intern 45°-Basis (NW→SO), danach je Richtung flippen
         Private Function BuildDiagonalMask(imgW As Integer, imgH As Integer, breitePxAxis As Integer) As Bitmap
             Dim weich45 As Integer = Math.Max(1, CInt(breitePxAxis / Math.Sqrt(2.0)))
-            Dim mw As Integer = imgW * 2 + imgH
+
+            ' Mittelteil MUSS um die Verlaufsbreite erweitert werden:
+            Dim midW As Integer = imgH + weich45        ' <— NEU: statt nur imgH
+            Dim mw As Integer = imgW * 2 + midW
             Dim mh As Integer = imgH
 
             Dim bmp As New Bitmap(mw, mh, Imaging.PixelFormat.Format32bppArgb)
@@ -418,32 +419,30 @@ Namespace TransitionMain_GradientWischen
                 farbe = 255
             End If
 
-            'linker Block
+            ' linker Block
             For y As Integer = 0 To mh - 1
                 Dim row = y * stride
                 For x As Integer = 0 To imgW - 1
                     Dim ofs = row + x * bpp
-                    buf(ofs + 3) = farbe  'A
-                    buf(ofs + 2) = farbe : buf(ofs + 1) = farbe : buf(ofs + 0) = farbe ' RGB nur Vorschau
+                    buf(ofs + 3) = CByte(farbe)  ' A
+                    buf(ofs + 2) = CByte(farbe) : buf(ofs + 1) = CByte(farbe) : buf(ofs + 0) = CByte(farbe)
                 Next
             Next
 
-            'mittleres Diagonalquadrat (imgH × imgH) 
-            '
-            'NW Diagonale von unten links nach oben rechts, weiß unterhalb/rechts der Diagonale (erscheint zuerst oben-links)
-            'NO Diagonale von oben links nach unten rechts, weiß unterhalb/links der Diagonale (erscheint zuerst oben-rechts)
-            'SW Diagonale von oben links nach unten rechts, weiß oberhalb/rechts der Diagonale (erscheint zuerst unten-links)
-            'SO Diagonale von unten links nach oben rechts, weiß oberhalb/links der Diagonale (erscheint zuerst unten-rechts)
-
+            ' mittleres Diagonal-„Quadrat“ — jetzt midW breit (imgH + weich45)
+            ' NW: Diagonale von unten links nach oben rechts, weiß unterhalb/rechts
+            ' NO: Diagonale von oben links nach unten rechts, weiß unterhalb/links
+            ' SW: Diagonale von oben links nach unten rechts, weiß oberhalb/rechts
+            ' SO: Diagonale von unten links nach oben rechts, weiß oberhalb/links
             For y As Integer = 0 To mh - 1
                 Dim row = y * stride
-                For u As Integer = 0 To imgH - 1
+                For u As Integer = 0 To midW - 1
                     Dim x As Integer = imgW + u
                     Dim ofs = row + x * bpp
-                    Dim a As Byte = 0
+                    Dim a As Integer
 
                     If richtung = "SW" OrElse richtung = "NO" Then
-                        'd = Abstand zur Diagonale v = u (positiv auf weißer Seite)
+                        ' Abstand zu v = u
                         Dim d As Integer = u - y
                         If d <= 0 Then
                             a = farbe
@@ -453,7 +452,7 @@ Namespace TransitionMain_GradientWischen
                             a = Math.Abs(farbe - CInt((d / Math.Max(1, weich45)) * 255))
                         End If
                     Else
-                        'NW/SO Diagonale
+                        ' NW / SO: Abstand zu v = (H-1 - u)
                         Dim d As Integer = (u + y) - (imgH - 1)
                         If d <= 0 Then
                             a = farbe
@@ -464,34 +463,38 @@ Namespace TransitionMain_GradientWischen
                         End If
                     End If
 
-                    buf(ofs + 3) = a
-                    buf(ofs + 2) = a : buf(ofs + 1) = a : buf(ofs + 0) = a
+                    Dim aa As Byte = CByte(Math.Max(0, Math.Min(255, a)))
+                    buf(ofs + 3) = aa
+                    buf(ofs + 2) = aa : buf(ofs + 1) = aa : buf(ofs + 0) = aa
                 Next
             Next
 
-            'rechter Block
+            ' rechter Block — beginnt jetzt bei imgW + midW
             For y As Integer = 0 To mh - 1
                 Dim row = y * stride
-                For x As Integer = imgW + imgH To mw - 1
+                For x As Integer = imgW + midW To mw - 1
                     Dim ofs = row + x * bpp
-                    buf(ofs + 3) = 255 - farbe
-                    buf(ofs + 2) = 255 - farbe : buf(ofs + 1) = 255 - farbe : buf(ofs + 0) = 255 - farbe
+                    Dim val As Byte = CByte(255 - farbe)
+                    buf(ofs + 3) = val
+                    buf(ofs + 2) = val : buf(ofs + 1) = val : buf(ofs + 0) = val
                 Next
             Next
 
             Runtime.InteropServices.Marshal.Copy(buf, 0, data.Scan0, buf.Length)
             bmp.UnlockBits(data)
 
+            ' Bewegungsspanne anpassen: travel = imgW + midW
+            Dim travel As Integer = imgW + midW
             If richtung = "NW" OrElse richtung = "SW" Then
-                startX = imgW + imgH : endX = 0
-                startY = 0 : endY = 0
+                startX = travel : endX = 0
             Else
-                startX = 0 : endX = imgH + imgW
-                startY = 0 : endY = 0
+                startX = 0 : endX = travel
             End If
+            startY = 0 : endY = 0
 
             Return bmp
         End Function
+
 
         'Lineare Masken verschieben
         Private Function ShiftMaskRectangle(progress As Double, sizeDrawingFrame As System.Windows.Size) As Rectangle
