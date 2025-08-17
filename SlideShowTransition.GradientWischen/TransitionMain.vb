@@ -7,6 +7,7 @@ Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowLogging
 Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
 Imports SlideShowTools.ColorHandling
@@ -254,10 +255,6 @@ Namespace TransitionMain_GradientWischen
             If mask Is Nothing Then
                 ConvertRenderTargetBitmapToBitmap(newBmpGerahmt) ' Fallback
                 StopTransition()
-            End If
-
-            If maskRectangle.Width <> CInt(size.Width) OrElse maskRectangle.Height <> CInt(size.Height) Then
-                maskRectangle = New Rectangle(0, 0, CInt(size.Width), CInt(size.Height))
             End If
 
             'Bilder per Maske mischen
@@ -541,7 +538,7 @@ Namespace TransitionMain_GradientWischen
 
             ' progress bestimmt den Radius der „Kante“
             If inward Then
-                startR = (1 - progress) * maxR
+                startR = (maxR + weich) - progress * (maxR + weich)
             Else
                 startR = -weich + progress * (maxR + weich)
             End If
@@ -575,53 +572,75 @@ Namespace TransitionMain_GradientWischen
             Return bmp
         End Function
 
-        'Bilder über die Maske ineinander blenden.
-        ' Bilder über die Maske ineinander blenden (Maske = Sichtbarkeit des NEUEN Bildes).
+        ' Bilder mit Maske blenden.
+        ' Semantik: Weiß (Alpha 255) der Maske = ALT voll sichtbar, Schwarz (Alpha 0) = NEU voll sichtbar.
         Private Function BlendWithMask(oldBmp As Bitmap, newBmp As Bitmap, bigMask As Bitmap, maskSrcRect As Rectangle) As Bitmap
-            Dim w = oldBmp.Width, h = oldBmp.Height
+            Dim w As Integer = oldBmp.Width
+            Dim h As Integer = oldBmp.Height
             Dim outBmp As New Bitmap(w, h, Imaging.PixelFormat.Format32bppArgb)
             Dim fullRect As New Rectangle(0, 0, w, h)
 
-            Dim dOld As BitmapData = Nothing, dNew As BitmapData = Nothing, dMsk As BitmapData = Nothing, dOut As BitmapData = Nothing
+            ' WICHTIG: ggf. in 32bppARGB konvertieren, bevor gelockt wird
+            If bigMask.PixelFormat <> Imaging.PixelFormat.Format32bppArgb Then
+                bigMask = bigMask.Clone(New Rectangle(0, 0, bigMask.Width, bigMask.Height), Imaging.PixelFormat.Format32bppArgb)
+            End If
+
+            Dim dOld As Imaging.BitmapData = Nothing
+            Dim dNew As Imaging.BitmapData = Nothing
+            Dim dMsk As Imaging.BitmapData = Nothing
+            Dim dOut As Imaging.BitmapData = Nothing
+
             Try
-                dOld = oldBmp.LockBits(fullRect, ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dNew = newBmp.LockBits(fullRect, ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dMsk = bigMask.LockBits(maskSrcRect, ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dOut = outBmp.LockBits(fullRect, ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
+                dOld = oldBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+                dNew = newBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+                dMsk = bigMask.LockBits(maskSrcRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
+                dOut = outBmp.LockBits(fullRect, Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
 
-                If bigMask.PixelFormat <> Imaging.PixelFormat.Format32bppArgb Then
-                    bigMask = bigMask.Clone(New Rectangle(0, 0, bigMask.Width, bigMask.Height), Imaging.PixelFormat.Format32bppArgb)
-                End If
+                Dim sOld As Integer = dOld.Stride
+                Dim sNew As Integer = dNew.Stride
+                Dim sMsk As Integer = dMsk.Stride           ' Stride der GESAMT-Maske (nicht Rect-Breite!)
+                Dim sOut As Integer = dOut.Stride
 
-                Dim sOld = dOld.Stride, sNew = dNew.Stride, sMsk = dMsk.Stride, sOut = dOut.Stride
+                ' Vollbild-Puffer (Stride-basiert) für alt/neu/out
                 Dim bufOld(sOld * h - 1) As Byte
                 Dim bufNew(sNew * h - 1) As Byte
-                Dim bufMsk(sMsk * h - 1) As Byte
                 Dim bufOut(sOut * h - 1) As Byte
 
+                ' Maske: COMPACT-Puffer in Rechteck-BREITE (w * 4) – zeilenweise kopieren!
+                Dim rowBytesMsk As Integer = w * 4
+                Dim bufMsk(rowBytesMsk * h - 1) As Byte
+
+                ' Kopieren
                 Runtime.InteropServices.Marshal.Copy(dOld.Scan0, bufOld, 0, bufOld.Length)
                 Runtime.InteropServices.Marshal.Copy(dNew.Scan0, bufNew, 0, bufNew.Length)
-                Runtime.InteropServices.Marshal.Copy(dMsk.Scan0, bufMsk, 0, bufMsk.Length)
 
+                ' Maske: pro Zeile nur die eigentliche Rect-Breite kopieren
                 For y As Integer = 0 To h - 1
-                    Dim oRow = y * sOld
-                    Dim nRow = y * sNew
-                    Dim mRow = y * sMsk
-                    Dim outRow = y * sOut
+                    Dim srcPtr As IntPtr = IntPtr.Add(dMsk.Scan0, y * sMsk)
+                    Runtime.InteropServices.Marshal.Copy(srcPtr, bufMsk, y * rowBytesMsk, rowBytesMsk)
+                Next
+
+                ' Mischen: weiß = ALT, schwarz = NEU
+                For y As Integer = 0 To h - 1
+                    Dim oRow As Integer = y * sOld
+                    Dim nRow As Integer = y * sNew
+                    Dim mRow As Integer = y * rowBytesMsk
+                    Dim outRow As Integer = y * sOut
 
                     For x As Integer = 0 To w - 1
-                        Dim oOfs = oRow + x * 4
-                        Dim nOfs = nRow + x * 4
-                        Dim mOfs = mRow + x * 4
-                        Dim outOfs = outRow + x * 4
+                        Dim oOfs As Integer = oRow + x * 4
+                        Dim nOfs As Integer = nRow + x * 4
+                        Dim mOfs As Integer = mRow + x * 4
+                        Dim outOfs As Integer = outRow + x * 4
 
-                        ' Alpha der MASKE = Sichtbarkeit des NEUEN Bildes
-                        Dim a As Double = bufMsk(mOfs + 3) / 255.0
+                        ' aAlt = Masken-Alpha normiert: 1.0 => ALT voll sichtbar (weiß), 0.0 => ALT unsichtbar (schwarz)
+                        Dim aAlt As Double = bufMsk(mOfs + 3) / 255.0
+                        Dim aNeu As Double = 1.0 - aAlt
 
-                        ' B, G, R
-                        Dim b As Double = bufOld(oOfs + 0) * (a) + bufNew(nOfs + 0) * (1 - a)
-                        Dim g As Double = bufOld(oOfs + 1) * (a) + bufNew(nOfs + 1) * (1 - a)
-                        Dim r As Double = bufOld(oOfs + 2) * (a) + bufNew(nOfs + 2) * (1 - a)
+                        ' B, G, R (Reihenfolge: BGRA)
+                        Dim b As Double = bufOld(oOfs + 0) * aAlt + bufNew(nOfs + 0) * aNeu
+                        Dim g As Double = bufOld(oOfs + 1) * aAlt + bufNew(nOfs + 1) * aNeu
+                        Dim r As Double = bufOld(oOfs + 2) * aAlt + bufNew(nOfs + 2) * aNeu
 
                         bufOut(outOfs + 0) = CByte(If(b < 0, 0, If(b > 255, 255, b)))
                         bufOut(outOfs + 1) = CByte(If(g < 0, 0, If(g > 255, 255, g)))
@@ -641,6 +660,7 @@ Namespace TransitionMain_GradientWischen
 
             Return outBmp
         End Function
+
 
         'Render-Loop
         Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
