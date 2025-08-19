@@ -39,6 +39,7 @@ Partial Class ucOptionsTransition
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.tbtZ = New MyControlsLibrary.ToggleButton()
         Me.chkGleicherAnkerpunkt = New System.Windows.Forms.CheckBox()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -91,12 +92,14 @@ Partial Class ucOptionsTransition
         '
         'trkGeschwindigkeit
         '
+        Me.trkGeschwindigkeit.AutoSize = False
         Me.trkGeschwindigkeit.Location = New System.Drawing.Point(325, 728)
         Me.trkGeschwindigkeit.Maximum = 30
         Me.trkGeschwindigkeit.Minimum = 1
         Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
-        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
+        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 53)
         Me.trkGeschwindigkeit.TabIndex = 29
+        Me.trkGeschwindigkeit.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkGeschwindigkeit.Value = 15
         '
         'lblGeschwindigkeit
@@ -250,10 +253,20 @@ Partial Class ucOptionsTransition
         Me.chkGleicherAnkerpunkt.TextAlign = System.Drawing.ContentAlignment.TopLeft
         Me.chkGleicherAnkerpunkt.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(671, 19)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(188, 54)
+        Me.btnDefaults.TabIndex = 45
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.chkGleicherAnkerpunkt)
         Me.Controls.Add(Me.tbtZ)
         Me.Controls.Add(Me.tbtSO)
@@ -298,4 +311,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents tbtSO As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtZ As MyControlsLibrary.ToggleButton
     Friend WithEvents chkGleicherAnkerpunkt As Forms.CheckBox
+    Friend WithEvents btnDefaults As Forms.Button
 End Class

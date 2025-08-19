@@ -17,35 +17,8 @@ Public Class ucOptionsShader
         'Settings abholen
         CheckYourMail()
 
-        'Farbton picFarbton setzen
-        picFarbton.BackColor = aktuelleSettings.Farbton
-
-        'chkZufallsfarbe setzen
-        If aktuelleSettings.Zufallsfarbe Then
-            chkZufallsfarbe.Checked = True
-            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
-            lblNpicFarbton.Enabled = False
-            picFarbton.Enabled = False
-        Else
-            chkZufallsfarbe.Checked = False
-            picFarbton.BackColor = aktuelleSettings.Farbton
-            lblNpicFarbton.Enabled = True
-            picFarbton.Enabled = True
-        End If
-
-        'trkIntensität setzen
-        trkIntensität.Value = aktuelleSettings.Intensitaet
-        lblIntensität.Text = trkIntensität.Value & " %"
-
-        'Modus setzen
-        Select Case aktuelleSettings.Modus
-            Case ShaderModus.Toenen
-                rdoTönen.Checked = True
-            Case ShaderModus.Faerben
-                rdoFärben.Checked = True
-            Case ShaderModus.Zufaellig
-                rdoZufall.Checked = True
-        End Select
+        'Steuerelemente setzen
+        IniOrReinitialise()
 
     End Sub
 
@@ -131,4 +104,62 @@ Public Class ucOptionsShader
 
     End Sub
 
+    Private Sub IniOrReinitialise()
+        'Farbton picFarbton setzen
+        picFarbton.BackColor = aktuelleSettings.Farbton
+
+        'chkZufallsfarbe setzen
+        If aktuelleSettings.Zufallsfarbe Then
+            chkZufallsfarbe.Checked = True
+            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
+            lblNpicFarbton.Enabled = False
+            picFarbton.Enabled = False
+        Else
+            chkZufallsfarbe.Checked = False
+            picFarbton.BackColor = aktuelleSettings.Farbton
+            lblNpicFarbton.Enabled = True
+            picFarbton.Enabled = True
+        End If
+
+        'trkIntensität setzen
+        trkIntensität.Value = aktuelleSettings.Intensitaet
+        lblIntensität.Text = trkIntensität.Value & " %"
+
+        'Modus setzen
+        Select Case aktuelleSettings.Modus
+            Case ShaderModus.Toenen
+                rdoTönen.Checked = True
+            Case ShaderModus.Faerben
+                rdoFärben.Checked = True
+            Case ShaderModus.Zufaellig
+                rdoZufall.Checked = True
+        End Select
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Liest die Default-Werte ein und setzt die Steuerelemente entsprechend
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetShaderDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.Farbton = StringToColor(defaults("Farbton"))
+        aktuelleSettings.Zufallsfarbe = CBool(defaults("Zufallsfarbe"))
+        aktuelleSettings.Intensitaet = CInt(defaults("Intensität"))
+        Select Case defaults("Modus")
+            Case "Tönen"
+                aktuelleSettings.Modus = ShaderModus.Toenen
+            Case "Färben"
+                aktuelleSettings.Modus = ShaderModus.Faerben
+            Case "Zufall"
+                aktuelleSettings.Modus = ShaderModus.Zufaellig
+        End Select
+
+        'Steuerelemente setzen
+        IniOrReinitialise()
+
+    End Sub
 End Class

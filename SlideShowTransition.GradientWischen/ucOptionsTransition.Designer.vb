@@ -42,6 +42,8 @@ Partial Class ucOptionsTransition
         Me.tbtZOut = New MyControlsLibrary.ToggleButton()
         Me.trkBreite = New System.Windows.Forms.TrackBar()
         Me.lblNBreite = New System.Windows.Forms.Label()
+        Me.lblBreiteProzent = New System.Windows.Forms.Label()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkBreite, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -84,7 +86,7 @@ Partial Class ucOptionsTransition
         'lblNtrbGeschwindigkeit
         '
         Me.lblNtrbGeschwindigkeit.AutoSize = True
-        Me.lblNtrbGeschwindigkeit.Location = New System.Drawing.Point(41, 705)
+        Me.lblNtrbGeschwindigkeit.Location = New System.Drawing.Point(41, 660)
         Me.lblNtrbGeschwindigkeit.Name = "lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Size = New System.Drawing.Size(236, 41)
         Me.lblNtrbGeschwindigkeit.TabIndex = 28
@@ -92,21 +94,23 @@ Partial Class ucOptionsTransition
         '
         'trkGeschwindigkeit
         '
-        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(332, 705)
+        Me.trkGeschwindigkeit.AutoSize = False
+        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(332, 660)
         Me.trkGeschwindigkeit.Maximum = 30
         Me.trkGeschwindigkeit.Minimum = 1
         Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
-        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
+        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(450, 57)
         Me.trkGeschwindigkeit.TabIndex = 29
+        Me.trkGeschwindigkeit.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkGeschwindigkeit.Value = 15
         '
         'lblGeschwindigkeit
         '
         Me.lblGeschwindigkeit.AutoSize = True
-        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(795, 705)
-        Me.lblGeschwindigkeit.MinimumSize = New System.Drawing.Size(71, 0)
+        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(779, 660)
+        Me.lblGeschwindigkeit.MinimumSize = New System.Drawing.Size(99, 0)
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
-        Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
+        Me.lblGeschwindigkeit.Size = New System.Drawing.Size(99, 41)
         Me.lblGeschwindigkeit.TabIndex = 34
         Me.lblGeschwindigkeit.Text = "15 s"
         Me.lblGeschwindigkeit.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -131,7 +135,7 @@ Partial Class ucOptionsTransition
         Me.tbtN.Checked = False
         Me.tbtN.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtN.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtN.Location = New System.Drawing.Point(554, 144)
+        Me.tbtN.Location = New System.Drawing.Point(567, 144)
         Me.tbtN.Name = "tbtN"
         Me.tbtN.Size = New System.Drawing.Size(75, 75)
         Me.tbtN.TabIndex = 36
@@ -145,7 +149,7 @@ Partial Class ucOptionsTransition
         Me.tbtNO.Checked = False
         Me.tbtNO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtNO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtNO.Location = New System.Drawing.Point(776, 144)
+        Me.tbtNO.Location = New System.Drawing.Point(802, 144)
         Me.tbtNO.Name = "tbtNO"
         Me.tbtNO.Size = New System.Drawing.Size(75, 75)
         Me.tbtNO.TabIndex = 37
@@ -173,7 +177,7 @@ Partial Class ucOptionsTransition
         Me.tbtO.Checked = False
         Me.tbtO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtO.Location = New System.Drawing.Point(777, 270)
+        Me.tbtO.Location = New System.Drawing.Point(802, 270)
         Me.tbtO.Name = "tbtO"
         Me.tbtO.Size = New System.Drawing.Size(75, 75)
         Me.tbtO.TabIndex = 39
@@ -201,7 +205,7 @@ Partial Class ucOptionsTransition
         Me.tbtS.Checked = False
         Me.tbtS.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtS.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtS.Location = New System.Drawing.Point(554, 396)
+        Me.tbtS.Location = New System.Drawing.Point(567, 396)
         Me.tbtS.Name = "tbtS"
         Me.tbtS.Size = New System.Drawing.Size(75, 75)
         Me.tbtS.TabIndex = 41
@@ -215,7 +219,7 @@ Partial Class ucOptionsTransition
         Me.tbtSO.Checked = False
         Me.tbtSO.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtSO.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtSO.Location = New System.Drawing.Point(777, 396)
+        Me.tbtSO.Location = New System.Drawing.Point(803, 396)
         Me.tbtSO.Name = "tbtSO"
         Me.tbtSO.RightToLeft = System.Windows.Forms.RightToLeft.Yes
         Me.tbtSO.Size = New System.Drawing.Size(75, 75)
@@ -242,7 +246,7 @@ Partial Class ucOptionsTransition
         Me.tbtZIn.Checked = False
         Me.tbtZIn.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtZIn.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtZIn.Location = New System.Drawing.Point(592, 257)
+        Me.tbtZIn.Location = New System.Drawing.Point(637, 257)
         Me.tbtZIn.Name = "tbtZIn"
         Me.tbtZIn.Size = New System.Drawing.Size(100, 100)
         Me.tbtZIn.TabIndex = 47
@@ -257,7 +261,7 @@ Partial Class ucOptionsTransition
         Me.tbtZOut.Checked = False
         Me.tbtZOut.CheckedBackColor = System.Drawing.SystemColors.Highlight
         Me.tbtZOut.Font = New System.Drawing.Font("Wingdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-        Me.tbtZOut.Location = New System.Drawing.Point(474, 257)
+        Me.tbtZOut.Location = New System.Drawing.Point(472, 257)
         Me.tbtZOut.Name = "tbtZOut"
         Me.tbtZOut.Size = New System.Drawing.Size(100, 100)
         Me.tbtZOut.TabIndex = 43
@@ -266,12 +270,14 @@ Partial Class ucOptionsTransition
         '
         'trkBreite
         '
+        Me.trkBreite.AutoSize = False
         Me.trkBreite.Location = New System.Drawing.Point(332, 598)
         Me.trkBreite.Maximum = 100
         Me.trkBreite.Minimum = 1
         Me.trkBreite.Name = "trkBreite"
-        Me.trkBreite.Size = New System.Drawing.Size(520, 101)
+        Me.trkBreite.Size = New System.Drawing.Size(450, 57)
         Me.trkBreite.TabIndex = 49
+        Me.trkBreite.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkBreite.Value = 33
         '
         'lblNBreite
@@ -283,10 +289,32 @@ Partial Class ucOptionsTransition
         Me.lblNBreite.TabIndex = 48
         Me.lblNBreite.Text = "Breite Gradient"
         '
+        'lblBreiteProzent
+        '
+        Me.lblBreiteProzent.AutoSize = True
+        Me.lblBreiteProzent.Location = New System.Drawing.Point(779, 598)
+        Me.lblBreiteProzent.MinimumSize = New System.Drawing.Size(99, 0)
+        Me.lblBreiteProzent.Name = "lblBreiteProzent"
+        Me.lblBreiteProzent.Size = New System.Drawing.Size(99, 41)
+        Me.lblBreiteProzent.TabIndex = 50
+        Me.lblBreiteProzent.Text = "33 %"
+        Me.lblBreiteProzent.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(704, 20)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(174, 52)
+        Me.btnDefaults.TabIndex = 51
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
+        Me.Controls.Add(Me.lblBreiteProzent)
         Me.Controls.Add(Me.trkBreite)
         Me.Controls.Add(Me.lblNBreite)
         Me.Controls.Add(Me.tbtZIn)
@@ -338,4 +366,6 @@ Partial Class ucOptionsTransition
     Friend WithEvents tbtZIn As MyControlsLibrary.ToggleButton
     Friend WithEvents trkBreite As Forms.TrackBar
     Friend WithEvents lblNBreite As Forms.Label
+    Friend WithEvents lblBreiteProzent As Forms.Label
+    Friend WithEvents btnDefaults As Forms.Button
 End Class

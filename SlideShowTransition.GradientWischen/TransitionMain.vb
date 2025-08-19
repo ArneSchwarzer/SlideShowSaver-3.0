@@ -222,7 +222,6 @@ Namespace TransitionMain_GradientWischen
 
         Sub tmrDuration_Tick() Handles tmrDuration.Tick
             'Bricht die Transition nach Ende von DurationMS ab.
-            LogDebug("Transition Gradient-Wischen - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
             'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
             EndBildZeichnen()
@@ -339,8 +338,6 @@ Namespace TransitionMain_GradientWischen
             Dim stride As Integer = data.Stride
             Dim bpp As Integer = 4
             Dim buf(stride * mh - 1) As Byte
-
-            LogDebug("Maskengröße bei Richtung: " & richtung & " und Breite: " & aktuelleSettings.breite.ToString & " ist gleich: " & mw.ToString & " x " & mh.ToString)
 
             'oberer Schwarz-Block
             For y As Integer = 0 To imgH - 1

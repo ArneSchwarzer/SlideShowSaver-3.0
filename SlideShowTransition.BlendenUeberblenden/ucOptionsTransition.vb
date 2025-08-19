@@ -5,6 +5,7 @@ Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.SharedDataHandling
+Imports SlideShowTools
 
 Public Class ucOptionsTransition
     Inherits UserControl
@@ -18,51 +19,8 @@ Public Class ucOptionsTransition
         'Settings abholen
         CheckYourMail()
 
-        'Farbton picFarbton setzen
-        picFarbton.BackColor = aktuelleSettings.Farbton
-
-        'chkZufallsfarbe setzen
-        If aktuelleSettings.Zufallsfarbe Then
-            chkZufallsfarbe.Checked = True
-            picFarbton.BackColor = Color.Transparent
-            lblNpicFarbton.Enabled = False
-            picFarbton.Enabled = False
-        Else
-            chkZufallsfarbe.Checked = False
-            picFarbton.BackColor = aktuelleSettings.Farbton
-            lblNpicFarbton.Enabled = True
-            picFarbton.Enabled = True
-        End If
-
-        'chkMorphing setzen
-        If aktuelleSettings.Morphing Then
-            chkMorphing.Checked = True
-        Else
-            chkMorphing.Checked = False
-            chkZufallsfarbe.Enabled = False
-            lblNpicFarbton.Enabled = False
-            picFarbton.BackColor = HintergrundFarbeSaver
-            picFarbton.Enabled = False
-        End If
-
-        'Modus setzen
-        Select Case aktuelleSettings.Modus
-            Case "Fade"
-                rdoBlenden.Checked = True
-            Case "Crossfade"
-                rdoÜberblenden.Checked = True
-                chkMorphing.Enabled = False
-                chkZufallsfarbe.Enabled = False
-                lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = Color.Transparent
-                picFarbton.Enabled = False
-            Case "Zufall"
-                rdoZufall.Checked = True
-        End Select
-
-        'Geschwindigkeit
-        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        'Steuerelemente setzen
+        IniOrReinitialise()
 
     End Sub
 
@@ -241,5 +199,85 @@ Public Class ucOptionsTransition
                         WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Morphing", chkMorphing.Checked.ToString)
 
                     End Sub)
+    End Sub
+
+    Private Sub IniOrReinitialise()
+        'Farbton picFarbton setzen
+        picFarbton.BackColor = aktuelleSettings.Farbton
+
+        'chkZufallsfarbe setzen
+        If aktuelleSettings.Zufallsfarbe Then
+            chkZufallsfarbe.Checked = True
+            picFarbton.BackColor = Color.Transparent
+            lblNpicFarbton.Enabled = False
+            picFarbton.Enabled = False
+        Else
+            chkZufallsfarbe.Checked = False
+            picFarbton.BackColor = aktuelleSettings.Farbton
+            lblNpicFarbton.Enabled = True
+            picFarbton.Enabled = True
+        End If
+
+        'chkMorphing setzen
+        If aktuelleSettings.Morphing Then
+            chkMorphing.Checked = True
+        Else
+            chkMorphing.Checked = False
+            chkZufallsfarbe.Enabled = False
+            lblNpicFarbton.Enabled = False
+            picFarbton.BackColor = HintergrundFarbeSaver
+            picFarbton.Enabled = False
+        End If
+
+        'Modus setzen
+        Select Case aktuelleSettings.Modus
+            Case "Fade"
+                rdoBlenden.Checked = True
+            Case "Crossfade"
+                rdoÜberblenden.Checked = True
+                chkMorphing.Enabled = False
+                chkZufallsfarbe.Enabled = False
+                lblNpicFarbton.Enabled = False
+                picFarbton.BackColor = Color.Transparent
+                picFarbton.Enabled = False
+            Case "Zufall"
+                rdoZufall.Checked = True
+        End Select
+
+        'Geschwindigkeit
+        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.Geschwindigkeit
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Defaults einlesen und Steuerelemente setzen
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetTransitionDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.Farbton = ColorHandling.StringToColor(defaults("Farbton"))
+
+        If defaults("Zufallsfarbe") = "True" Then
+            aktuelleSettings.Zufallsfarbe = True
+        Else
+            aktuelleSettings.Zufallsfarbe = False
+        End If
+
+        If defaults("Morphing") = "True" Then
+            aktuelleSettings.Morphing = True
+        Else
+            aktuelleSettings.Morphing = False
+        End If
+
+        aktuelleSettings.Modus = defaults("Modus")
+        aktuelleSettings.Geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+
+        'Steuerelemente setzen
+        IniOrReinitialise()
+
     End Sub
 End Class

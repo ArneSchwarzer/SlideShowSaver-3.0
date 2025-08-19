@@ -26,6 +26,8 @@ Partial Class frmOptionsMain
         Me.lblNTitel = New System.Windows.Forms.Label()
         Me.tabOptions = New System.Windows.Forms.TabControl()
         Me.tpAllgemein = New System.Windows.Forms.TabPage()
+        Me.picHintergrundfarbe = New System.Windows.Forms.PictureBox()
+        Me.lblNHintergrundfarbe = New System.Windows.Forms.Label()
         Me.lblKeineTransitionsModule = New System.Windows.Forms.Label()
         Me.lblNcmbAbspielmodusTransitionsModule = New System.Windows.Forms.Label()
         Me.cmbTransitionsReihenfolge = New System.Windows.Forms.ComboBox()
@@ -46,12 +48,11 @@ Partial Class frmOptionsMain
         Me.tpShader = New System.Windows.Forms.TabPage()
         Me.btnOK = New System.Windows.Forms.Button()
         Me.pnlLanguages = New System.Windows.Forms.Panel()
-        Me.lblNHintergrundfarbe = New System.Windows.Forms.Label()
-        Me.picHintergrundfarbe = New System.Windows.Forms.PictureBox()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
-        CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblNTitel
@@ -82,6 +83,7 @@ Partial Class frmOptionsMain
         '
         'tpAllgemein
         '
+        Me.tpAllgemein.Controls.Add(Me.btnDefaults)
         Me.tpAllgemein.Controls.Add(Me.picHintergrundfarbe)
         Me.tpAllgemein.Controls.Add(Me.lblNHintergrundfarbe)
         Me.tpAllgemein.Controls.Add(Me.lblKeineTransitionsModule)
@@ -106,6 +108,24 @@ Partial Class frmOptionsMain
         Me.tpAllgemein.TabIndex = 0
         Me.tpAllgemein.Text = "Allgemein"
         Me.tpAllgemein.UseVisualStyleBackColor = True
+        '
+        'picHintergrundfarbe
+        '
+        Me.picHintergrundfarbe.BackColor = System.Drawing.Color.Black
+        Me.picHintergrundfarbe.Location = New System.Drawing.Point(489, 924)
+        Me.picHintergrundfarbe.Name = "picHintergrundfarbe"
+        Me.picHintergrundfarbe.Size = New System.Drawing.Size(387, 50)
+        Me.picHintergrundfarbe.TabIndex = 15
+        Me.picHintergrundfarbe.TabStop = False
+        '
+        'lblNHintergrundfarbe
+        '
+        Me.lblNHintergrundfarbe.AutoSize = True
+        Me.lblNHintergrundfarbe.Location = New System.Drawing.Point(27, 933)
+        Me.lblNHintergrundfarbe.Name = "lblNHintergrundfarbe"
+        Me.lblNHintergrundfarbe.Size = New System.Drawing.Size(247, 41)
+        Me.lblNHintergrundfarbe.TabIndex = 14
+        Me.lblNHintergrundfarbe.Text = "Hintergrundfarbe"
         '
         'lblKeineTransitionsModule
         '
@@ -162,7 +182,7 @@ Partial Class frmOptionsMain
         Me.lblKeineModule.AutoSize = True
         Me.lblKeineModule.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
         Me.lblKeineModule.ForeColor = System.Drawing.Color.Red
-        Me.lblKeineModule.Location = New System.Drawing.Point(148, 11)
+        Me.lblKeineModule.Location = New System.Drawing.Point(148, 65)
         Me.lblKeineModule.Name = "lblKeineModule"
         Me.lblKeineModule.Size = New System.Drawing.Size(651, 41)
         Me.lblKeineModule.TabIndex = 8
@@ -182,7 +202,7 @@ Partial Class frmOptionsMain
         'lblDauerModuswechsel
         '
         Me.lblDauerModuswechsel.AutoSize = True
-        Me.lblDauerModuswechsel.Location = New System.Drawing.Point(794, 451)
+        Me.lblDauerModuswechsel.Location = New System.Drawing.Point(794, 505)
         Me.lblDauerModuswechsel.Name = "lblDauerModuswechsel"
         Me.lblDauerModuswechsel.Size = New System.Drawing.Size(84, 41)
         Me.lblDauerModuswechsel.TabIndex = 6
@@ -191,18 +211,20 @@ Partial Class frmOptionsMain
         '
         'trkDauerModulwechsel
         '
-        Me.trkDauerModulwechsel.Location = New System.Drawing.Point(28, 451)
+        Me.trkDauerModulwechsel.AutoSize = False
+        Me.trkDauerModulwechsel.Location = New System.Drawing.Point(28, 505)
         Me.trkDauerModulwechsel.Maximum = 60
         Me.trkDauerModulwechsel.Minimum = 1
         Me.trkDauerModulwechsel.Name = "trkDauerModulwechsel"
-        Me.trkDauerModulwechsel.Size = New System.Drawing.Size(744, 101)
+        Me.trkDauerModulwechsel.Size = New System.Drawing.Size(744, 52)
         Me.trkDauerModulwechsel.TabIndex = 5
+        Me.trkDauerModulwechsel.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkDauerModulwechsel.Value = 15
         '
         'lblNtrkDauerModulwechsel
         '
         Me.lblNtrkDauerModulwechsel.AutoSize = True
-        Me.lblNtrkDauerModulwechsel.Location = New System.Drawing.Point(21, 407)
+        Me.lblNtrkDauerModulwechsel.Location = New System.Drawing.Point(21, 461)
         Me.lblNtrkDauerModulwechsel.Name = "lblNtrkDauerModulwechsel"
         Me.lblNtrkDauerModulwechsel.Size = New System.Drawing.Size(343, 41)
         Me.lblNtrkDauerModulwechsel.TabIndex = 4
@@ -211,7 +233,7 @@ Partial Class frmOptionsMain
         'lblNcmbModulWechsel
         '
         Me.lblNcmbModulWechsel.AutoSize = True
-        Me.lblNcmbModulWechsel.Location = New System.Drawing.Point(21, 333)
+        Me.lblNcmbModulWechsel.Location = New System.Drawing.Point(21, 387)
         Me.lblNcmbModulWechsel.Name = "lblNcmbModulWechsel"
         Me.lblNcmbModulWechsel.Size = New System.Drawing.Size(319, 41)
         Me.lblNcmbModulWechsel.TabIndex = 3
@@ -221,7 +243,7 @@ Partial Class frmOptionsMain
         '
         Me.cmbModulwechsel.FormattingEnabled = True
         Me.cmbModulwechsel.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
-        Me.cmbModulwechsel.Location = New System.Drawing.Point(489, 333)
+        Me.cmbModulwechsel.Location = New System.Drawing.Point(489, 387)
         Me.cmbModulwechsel.Name = "cmbModulwechsel"
         Me.cmbModulwechsel.Size = New System.Drawing.Size(388, 49)
         Me.cmbModulwechsel.TabIndex = 2
@@ -230,7 +252,7 @@ Partial Class frmOptionsMain
         '
         Me.clbModule.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.clbModule.FormattingEnabled = True
-        Me.clbModule.Location = New System.Drawing.Point(26, 58)
+        Me.clbModule.Location = New System.Drawing.Point(26, 112)
         Me.clbModule.Margin = New System.Windows.Forms.Padding(4)
         Me.clbModule.Name = "clbModule"
         Me.clbModule.Size = New System.Drawing.Size(850, 268)
@@ -239,7 +261,7 @@ Partial Class frmOptionsMain
         'lblNcblModule
         '
         Me.lblNcblModule.AutoSize = True
-        Me.lblNcblModule.Location = New System.Drawing.Point(20, 11)
+        Me.lblNcblModule.Location = New System.Drawing.Point(20, 65)
         Me.lblNcblModule.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblNcblModule.Name = "lblNcblModule"
         Me.lblNcblModule.Size = New System.Drawing.Size(121, 41)
@@ -304,23 +326,14 @@ Partial Class frmOptionsMain
         Me.pnlLanguages.Size = New System.Drawing.Size(922, 84)
         Me.pnlLanguages.TabIndex = 4
         '
-        'lblNHintergrundfarbe
+        'btnDefaults
         '
-        Me.lblNHintergrundfarbe.AutoSize = True
-        Me.lblNHintergrundfarbe.Location = New System.Drawing.Point(27, 933)
-        Me.lblNHintergrundfarbe.Name = "lblNHintergrundfarbe"
-        Me.lblNHintergrundfarbe.Size = New System.Drawing.Size(247, 41)
-        Me.lblNHintergrundfarbe.TabIndex = 14
-        Me.lblNHintergrundfarbe.Text = "Hintergrundfarbe"
-        '
-        'picHintergrundfarbe
-        '
-        Me.picHintergrundfarbe.BackColor = System.Drawing.Color.Black
-        Me.picHintergrundfarbe.Location = New System.Drawing.Point(489, 924)
-        Me.picHintergrundfarbe.Name = "picHintergrundfarbe"
-        Me.picHintergrundfarbe.Size = New System.Drawing.Size(387, 50)
-        Me.picHintergrundfarbe.TabIndex = 15
-        Me.picHintergrundfarbe.TabStop = False
+        Me.btnDefaults.Location = New System.Drawing.Point(691, 8)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(187, 54)
+        Me.btnDefaults.TabIndex = 16
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
         '
         'frmOptionsMain
         '
@@ -339,8 +352,8 @@ Partial Class frmOptionsMain
         Me.tabOptions.ResumeLayout(False)
         Me.tpAllgemein.ResumeLayout(False)
         Me.tpAllgemein.PerformLayout()
-        CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkDauerModulwechsel, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -371,4 +384,5 @@ Partial Class frmOptionsMain
     Friend WithEvents pnlLanguages As Panel
     Friend WithEvents picHintergrundfarbe As PictureBox
     Friend WithEvents lblNHintergrundfarbe As Label
+    Friend WithEvents btnDefaults As Button
 End Class

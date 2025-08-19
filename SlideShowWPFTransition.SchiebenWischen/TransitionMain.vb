@@ -67,7 +67,6 @@ Namespace TransitionMain_SuW
             Public geschwindigkeit As Integer
             Public richtungen As List(Of String)
             Public modus As String
-            Public FPS As Integer
         End Structure
 
 #End Region
@@ -217,7 +216,7 @@ Namespace TransitionMain_SuW
             aktuelleSettings.geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults))
             aktuelleSettings.richtungen = SplitSemicolonList(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults))
             aktuelleSettings.modus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults)
-            aktuelleSettings.FPS = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_SuW_FULLPATH & "FPS", defaults))
+
 
         End Sub
 
@@ -227,7 +226,6 @@ Namespace TransitionMain_SuW
             defaults.Add("Geschwindigkeit", "20")
             defaults.Add("Richtungen", "W; O")
             defaults.Add("Modus", "Wischen")
-            defaults.Add("FPS", "60")
 
             Return defaults
 
@@ -243,7 +241,6 @@ Namespace TransitionMain_SuW
 
         Sub tmrDuration_Tick() Handles tmrDuration.Tick
             'Bricht die Transition nach Ende von DurationMS ab.
-            LogDebug("Transition SuW - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
             'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
             EndBildZeichnen()

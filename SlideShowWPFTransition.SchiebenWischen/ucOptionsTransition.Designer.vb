@@ -41,6 +41,7 @@ Partial Class ucOptionsTransition
         Me.tbtSW = New MyControlsLibrary.ToggleButton()
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -93,12 +94,14 @@ Partial Class ucOptionsTransition
         '
         'trkGeschwindigkeit
         '
+        Me.trkGeschwindigkeit.AutoSize = False
         Me.trkGeschwindigkeit.Location = New System.Drawing.Point(332, 606)
         Me.trkGeschwindigkeit.Maximum = 30
         Me.trkGeschwindigkeit.Minimum = 1
         Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
-        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
+        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 59)
         Me.trkGeschwindigkeit.TabIndex = 29
+        Me.trkGeschwindigkeit.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkGeschwindigkeit.Value = 15
         '
         'lblNModus
@@ -267,10 +270,20 @@ Partial Class ucOptionsTransition
         Me.tbtSO.UncheckedBackColor = System.Drawing.SystemColors.Control
         Me.tbtSO.UseVisualStyleBackColor = False
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(709, 20)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(157, 52)
+        Me.btnDefaults.TabIndex = 43
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.tbtSO)
         Me.Controls.Add(Me.tbtS)
         Me.Controls.Add(Me.tbtSW)
@@ -319,4 +332,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents tbtSW As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtS As MyControlsLibrary.ToggleButton
     Friend WithEvents tbtSO As MyControlsLibrary.ToggleButton
+    Friend WithEvents btnDefaults As Windows.Forms.Button
 End Class

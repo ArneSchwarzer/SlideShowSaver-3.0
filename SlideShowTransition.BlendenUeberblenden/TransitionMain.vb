@@ -103,11 +103,6 @@ Public Class TransitionMain
         sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
         sizeWF = clientSize
 
-        LogDebug("clientSize: " & clientSize.ToString)
-        LogDebug("sizeWPF: " & sizeWPF.ToString)
-        LogDebug("sizeWF: " & sizeWF.ToString)
-        LogDebug("screen.PrimaryScreen.bounds: " & Screen.PrimaryScreen.Bounds.ToString)
-
         'Bilder vorbereiten (ein ewiges hin- und herkonvertieren...)
         oldImg = ConvertBitmapImageToImage(oldImage)
         newImg = ConvertBitmapImageToImage(newImage)
@@ -244,7 +239,6 @@ Public Class TransitionMain
 
     Sub tmrDuration_Tick() Handles tmrDuration.Tick
         'Bricht die Transition nach Ende von DurationMS ab.
-        LogDebug("Transition SuW - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
         'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
         EndBildZeichnen()

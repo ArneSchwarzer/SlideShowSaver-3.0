@@ -140,12 +140,10 @@ Public Class frmPictureInfo
     End Sub
 
     Private Sub frmPictureInfo_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
-        LogDebug("SlideShowModul SSS 3.0\BildInfo hat den Key: " & e.KeyValue.ToString & " empfangen. Leite Weiter an Eventhandler")
         ForwardKeyDown(Me, e)
     End Sub
 
     Private Sub frmPictureInfo_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
-        LogDebug("SlideShowModul SSS 3.0\BildInfo hat den MouseButton: " & e.Button.ToString & " empfangen. Leite Weiter an Eventhandler")
         ForwardMouseDown(Me, e)
     End Sub
 End Class

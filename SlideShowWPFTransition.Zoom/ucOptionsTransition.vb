@@ -16,56 +16,7 @@ Public Class ucOptionsTransition
         CheckYourMail()
 
         'Steuerelemente initialisieren
-
-        'Ankerpunkte
-        tbtN.Checked = False
-        tbtNO.Checked = False
-        tbtO.Checked = False
-        tbtSO.Checked = False
-        tbtS.Checked = False
-        tbtSW.Checked = False
-        tbtW.Checked = False
-        tbtNW.Checked = False
-        tbtZ.Checked = False
-
-        For Each ankerpunkt In aktuelleSettings.ankerpunkte
-
-            Select Case ankerpunkt
-                Case "N"
-                    tbtN.Checked = True
-                Case "NO"
-                    tbtNO.Checked = True
-                Case "O"
-                    tbtO.Checked = True
-                Case "SO"
-                    tbtSO.Checked = True
-                Case "S"
-                    tbtS.Checked = True
-                Case "SW"
-                    tbtSW.Checked = True
-                Case "W"
-                    tbtW.Checked = True
-                Case "NW"
-                    tbtNW.Checked = True
-                Case "Z"
-                    tbtZ.Checked = True
-            End Select
-
-        Next
-
-        'Label "Kein Ankerpunkt ausgewählt"
-        If aktuelleSettings.ankerpunkte.Count = 0 Then
-            lblKeinAnkerpunkt.Visible = True
-        Else
-            lblKeinAnkerpunkt.Visible = False
-        End If
-
-        'Gleicher Ankerpunkt
-        chkGleicherAnkerpunkt.Checked = aktuelleSettings.gleicherAnkerpunkt
-
-        'Geschwindigkeit
-        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        IniOrReinitialise()
 
     End Sub
 
@@ -197,4 +148,78 @@ Public Class ucOptionsTransition
 
     End Sub
 
+    Private Sub IniOrReinitialise()
+        'Ankerpunkte
+        tbtN.Checked = False
+        tbtNO.Checked = False
+        tbtO.Checked = False
+        tbtSO.Checked = False
+        tbtS.Checked = False
+        tbtSW.Checked = False
+        tbtW.Checked = False
+        tbtNW.Checked = False
+        tbtZ.Checked = False
+
+        For Each ankerpunkt In aktuelleSettings.ankerpunkte
+
+            Select Case ankerpunkt
+                Case "N"
+                    tbtN.Checked = True
+                Case "NO"
+                    tbtNO.Checked = True
+                Case "O"
+                    tbtO.Checked = True
+                Case "SO"
+                    tbtSO.Checked = True
+                Case "S"
+                    tbtS.Checked = True
+                Case "SW"
+                    tbtSW.Checked = True
+                Case "W"
+                    tbtW.Checked = True
+                Case "NW"
+                    tbtNW.Checked = True
+                Case "Z"
+                    tbtZ.Checked = True
+            End Select
+
+        Next
+
+        'Label "Kein Ankerpunkt ausgewählt"
+        If aktuelleSettings.ankerpunkte.Count = 0 Then
+            lblKeinAnkerpunkt.Visible = True
+        Else
+            lblKeinAnkerpunkt.Visible = False
+        End If
+
+        'Gleicher Ankerpunkt
+        chkGleicherAnkerpunkt.Checked = aktuelleSettings.gleicherAnkerpunkt
+
+        'Geschwindigkeit
+        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Default-Werte einlesen und Steuerelemente entsprechend setzten
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetTransitionDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+        aktuelleSettings.ankerpunkte = SplitSemicolonList(defaults("Ankerpunkte"))
+        If defaults("GleicherAnkerpunkt") = "True" Then
+            aktuelleSettings.gleicherAnkerpunkt = True
+        Else
+            aktuelleSettings.gleicherAnkerpunkt = False
+        End If
+
+        'Steuerelemente aktualisieren
+        IniOrReinitialise()
+
+    End Sub
 End Class

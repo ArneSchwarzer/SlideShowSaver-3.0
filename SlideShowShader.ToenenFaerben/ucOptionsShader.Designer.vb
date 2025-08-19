@@ -36,6 +36,7 @@ Partial Class ucOptionsShader
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
         Me.rdoFärben = New System.Windows.Forms.RadioButton()
         Me.rdoTönen = New System.Windows.Forms.RadioButton()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkIntensität, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlModus.SuspendLayout()
@@ -89,12 +90,14 @@ Partial Class ucOptionsShader
         '
         'trkIntensität
         '
+        Me.trkIntensität.AutoSize = False
         Me.trkIntensität.Location = New System.Drawing.Point(282, 267)
         Me.trkIntensität.Maximum = 100
         Me.trkIntensität.Minimum = 1
         Me.trkIntensität.Name = "trkIntensität"
-        Me.trkIntensität.Size = New System.Drawing.Size(453, 101)
+        Me.trkIntensität.Size = New System.Drawing.Size(453, 56)
         Me.trkIntensität.TabIndex = 24
+        Me.trkIntensität.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkIntensität.Value = 34
         '
         'lblIntensität
@@ -111,7 +114,7 @@ Partial Class ucOptionsShader
         'lblNModus
         '
         Me.lblNModus.AutoSize = True
-        Me.lblNModus.Location = New System.Drawing.Point(15, 392)
+        Me.lblNModus.Location = New System.Drawing.Point(15, 344)
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 29
@@ -132,7 +135,7 @@ Partial Class ucOptionsShader
         Me.pnlModus.Controls.Add(Me.rdoZufall)
         Me.pnlModus.Controls.Add(Me.rdoFärben)
         Me.pnlModus.Controls.Add(Me.rdoTönen)
-        Me.pnlModus.Location = New System.Drawing.Point(257, 392)
+        Me.pnlModus.Location = New System.Drawing.Point(257, 344)
         Me.pnlModus.Name = "pnlModus"
         Me.pnlModus.Size = New System.Drawing.Size(604, 164)
         Me.pnlModus.TabIndex = 31
@@ -170,10 +173,20 @@ Partial Class ucOptionsShader
         Me.rdoTönen.Text = "Tönen"
         Me.rdoTönen.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(676, 23)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(185, 55)
+        Me.btnDefaults.TabIndex = 32
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsShader
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.pnlModus)
         Me.Controls.Add(Me.chkZufallsfarbe)
         Me.Controls.Add(Me.lblNModus)
@@ -211,4 +224,5 @@ Partial Class ucOptionsShader
     Friend WithEvents rdoZufall As Windows.Forms.RadioButton
     Friend WithEvents rdoFärben As Windows.Forms.RadioButton
     Friend WithEvents rdoTönen As Windows.Forms.RadioButton
+    Friend WithEvents btnDefaults As Windows.Forms.Button
 End Class

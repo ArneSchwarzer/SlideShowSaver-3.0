@@ -14,15 +14,8 @@ Public Class ucOptionsShader
         'Aktuelle Settings einlesen
         CheckYourMail()
 
-        'RadioButtons setzen
-        Select Case aktuelleSettings.Modus
-            Case "Farbe"
-                rdoFarbe.Checked = True
-            Case "Weiss-Schwarz"
-                rdoWS.Checked = True
-            Case "Zufall"
-                rdoZufall.Checked = True
-        End Select
+        'Steuerelemente setzen
+        IniOrReinitialise()
 
     End Sub
 
@@ -54,5 +47,35 @@ Public Class ucOptionsShader
         'Liest aktuelleSettings aus der SettingsInbox aus
 
         aktuelleSettings = GetSettings(Of ShaderSettings_Invertieren)(nameShader)
+    End Sub
+
+    Private Sub IniOrReinitialise()
+
+        'RadioButtons setzen
+        Select Case aktuelleSettings.Modus
+            Case "Farbe"
+                rdoFarbe.Checked = True
+            Case "Weiss-Schwarz"
+                rdoWS.Checked = True
+            Case "Zufall"
+                rdoZufall.Checked = True
+        End Select
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Liest die Default-Werte ein und setzt die Steuerelemente entsprechend
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defauls einlesen
+        defaults = GetShaderDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.Modus = defaults("Modus")
+
+        'Steuerelemente reinitialisieren
+        IniOrReinitialise()
+
     End Sub
 End Class

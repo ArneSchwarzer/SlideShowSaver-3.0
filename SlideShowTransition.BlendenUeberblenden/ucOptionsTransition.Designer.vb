@@ -37,6 +37,7 @@ Partial Class ucOptionsTransition
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
         Me.chkMorphing = New System.Windows.Forms.CheckBox()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlModus.SuspendLayout()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -46,7 +47,7 @@ Partial Class ucOptionsTransition
         '
         Me.lblTransitionname.AutoSize = True
         Me.lblTransitionname.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblTransitionname.Location = New System.Drawing.Point(299, 30)
+        Me.lblTransitionname.Location = New System.Drawing.Point(272, 30)
         Me.lblTransitionname.Name = "lblTransitionname"
         Me.lblTransitionname.Size = New System.Drawing.Size(358, 41)
         Me.lblTransitionname.TabIndex = 20
@@ -73,9 +74,9 @@ Partial Class ucOptionsTransition
         'picFarbton
         '
         Me.picFarbton.BackColor = System.Drawing.Color.Sienna
-        Me.picFarbton.Location = New System.Drawing.Point(306, 342)
+        Me.picFarbton.Location = New System.Drawing.Point(279, 342)
         Me.picFarbton.Name = "picFarbton"
-        Me.picFarbton.Size = New System.Drawing.Size(555, 50)
+        Me.picFarbton.Size = New System.Drawing.Size(582, 50)
         Me.picFarbton.TabIndex = 22
         Me.picFarbton.TabStop = False
         '
@@ -91,7 +92,7 @@ Partial Class ucOptionsTransition
         'chkZufallsfarbe
         '
         Me.chkZufallsfarbe.AutoSize = True
-        Me.chkZufallsfarbe.Location = New System.Drawing.Point(306, 398)
+        Me.chkZufallsfarbe.Location = New System.Drawing.Point(279, 398)
         Me.chkZufallsfarbe.Name = "chkZufallsfarbe"
         Me.chkZufallsfarbe.Size = New System.Drawing.Size(203, 45)
         Me.chkZufallsfarbe.TabIndex = 30
@@ -103,15 +104,15 @@ Partial Class ucOptionsTransition
         Me.pnlModus.Controls.Add(Me.rdoZufall)
         Me.pnlModus.Controls.Add(Me.rdoÜberblenden)
         Me.pnlModus.Controls.Add(Me.rdoBlenden)
-        Me.pnlModus.Location = New System.Drawing.Point(276, 128)
+        Me.pnlModus.Location = New System.Drawing.Point(264, 128)
         Me.pnlModus.Name = "pnlModus"
-        Me.pnlModus.Size = New System.Drawing.Size(585, 164)
+        Me.pnlModus.Size = New System.Drawing.Size(597, 164)
         Me.pnlModus.TabIndex = 31
         '
         'rdoZufall
         '
         Me.rdoZufall.AutoSize = True
-        Me.rdoZufall.Location = New System.Drawing.Point(30, 98)
+        Me.rdoZufall.Location = New System.Drawing.Point(15, 97)
         Me.rdoZufall.Name = "rdoZufall"
         Me.rdoZufall.Size = New System.Drawing.Size(146, 45)
         Me.rdoZufall.TabIndex = 31
@@ -122,7 +123,7 @@ Partial Class ucOptionsTransition
         'rdoÜberblenden
         '
         Me.rdoÜberblenden.AutoSize = True
-        Me.rdoÜberblenden.Location = New System.Drawing.Point(30, 47)
+        Me.rdoÜberblenden.Location = New System.Drawing.Point(15, 46)
         Me.rdoÜberblenden.Name = "rdoÜberblenden"
         Me.rdoÜberblenden.Size = New System.Drawing.Size(223, 45)
         Me.rdoÜberblenden.TabIndex = 30
@@ -133,7 +134,7 @@ Partial Class ucOptionsTransition
         'rdoBlenden
         '
         Me.rdoBlenden.AutoSize = True
-        Me.rdoBlenden.Location = New System.Drawing.Point(30, -4)
+        Me.rdoBlenden.Location = New System.Drawing.Point(15, -5)
         Me.rdoBlenden.Name = "rdoBlenden"
         Me.rdoBlenden.Size = New System.Drawing.Size(157, 45)
         Me.rdoBlenden.TabIndex = 29
@@ -144,7 +145,7 @@ Partial Class ucOptionsTransition
         'lblGeschwindigkeit
         '
         Me.lblGeschwindigkeit.AutoSize = True
-        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(769, 563)
+        Me.lblGeschwindigkeit.Location = New System.Drawing.Point(790, 563)
         Me.lblGeschwindigkeit.MinimumSize = New System.Drawing.Size(71, 0)
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
@@ -154,12 +155,14 @@ Partial Class ucOptionsTransition
         '
         'trkGeschwindigkeit
         '
-        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(306, 563)
+        Me.trkGeschwindigkeit.AutoSize = False
+        Me.trkGeschwindigkeit.Location = New System.Drawing.Point(279, 563)
         Me.trkGeschwindigkeit.Maximum = 30
         Me.trkGeschwindigkeit.Minimum = 1
         Me.trkGeschwindigkeit.Name = "trkGeschwindigkeit"
-        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(456, 101)
+        Me.trkGeschwindigkeit.Size = New System.Drawing.Size(505, 57)
         Me.trkGeschwindigkeit.TabIndex = 36
+        Me.trkGeschwindigkeit.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkGeschwindigkeit.Value = 15
         '
         'lblNtrbGeschwindigkeit
@@ -174,17 +177,27 @@ Partial Class ucOptionsTransition
         'chkMorphing
         '
         Me.chkMorphing.AutoSize = True
-        Me.chkMorphing.Location = New System.Drawing.Point(306, 449)
+        Me.chkMorphing.Location = New System.Drawing.Point(279, 449)
         Me.chkMorphing.Name = "chkMorphing"
         Me.chkMorphing.Size = New System.Drawing.Size(219, 45)
         Me.chkMorphing.TabIndex = 39
         Me.chkMorphing.Text = "Morphphase"
         Me.chkMorphing.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(678, 25)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(183, 51)
+        Me.btnDefaults.TabIndex = 40
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.chkMorphing)
         Me.Controls.Add(Me.lblGeschwindigkeit)
         Me.Controls.Add(Me.pnlModus)
@@ -224,4 +237,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents trkGeschwindigkeit As Windows.Forms.TrackBar
     Friend WithEvents lblNtrbGeschwindigkeit As Windows.Forms.Label
     Friend WithEvents chkMorphing As Windows.Forms.CheckBox
+    Friend WithEvents btnDefaults As Windows.Forms.Button
 End Class

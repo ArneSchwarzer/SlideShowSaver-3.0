@@ -28,6 +28,7 @@ Partial Class ucOptionsShader
         Me.rdoFarbe = New System.Windows.Forms.RadioButton()
         Me.rdoWS = New System.Windows.Forms.RadioButton()
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'lblShadername
@@ -91,10 +92,20 @@ Partial Class ucOptionsShader
         Me.rdoZufall.Text = "Zufällig"
         Me.rdoZufall.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(652, 26)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(197, 52)
+        Me.btnDefaults.TabIndex = 22
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsShader
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.rdoZufall)
         Me.Controls.Add(Me.rdoWS)
         Me.Controls.Add(Me.rdoFarbe)
@@ -116,4 +127,5 @@ Partial Class ucOptionsShader
     Friend WithEvents rdoFarbe As RadioButton
     Friend WithEvents rdoWS As RadioButton
     Friend WithEvents rdoZufall As RadioButton
+    Friend WithEvents btnDefaults As Button
 End Class

@@ -17,59 +17,7 @@ Public Class ucOptionsTransition
         CheckYourMail()
 
         'Steuerelemente initialisieren
-
-        'Ankerpunkte
-        tbtN.Checked = False
-        tbtNO.Checked = False
-        tbtO.Checked = False
-        tbtSO.Checked = False
-        tbtS.Checked = False
-        tbtSW.Checked = False
-        tbtW.Checked = False
-        tbtNW.Checked = False
-        tbtZOut.Checked = False
-        tbtZIn.Checked = False
-
-        For Each richtung In aktuelleSettings.richtungen
-
-            Select Case richtung
-                Case "N"
-                    tbtN.Checked = True
-                Case "NO"
-                    tbtNO.Checked = True
-                Case "O"
-                    tbtO.Checked = True
-                Case "SO"
-                    tbtSO.Checked = True
-                Case "S"
-                    tbtS.Checked = True
-                Case "SW"
-                    tbtSW.Checked = True
-                Case "W"
-                    tbtW.Checked = True
-                Case "NW"
-                    tbtNW.Checked = True
-                Case "ZOut"
-                    tbtZOut.Checked = True
-                Case "ZIn"
-                    tbtZIn.Checked = True
-            End Select
-
-        Next
-
-        'Label "Kein Ankerpunkt ausgewählt"
-        If aktuelleSettings.richtungen.Count = 0 Then
-            lblKeineRichtung.Visible = True
-        Else
-            lblKeineRichtung.Visible = False
-        End If
-
-        'Breite
-        trkBreite.Value = aktuelleSettings.breite
-
-        'Geschwindigkeit
-        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        IniOrReinitialise()
 
     End Sub
 
@@ -166,6 +114,8 @@ Public Class ucOptionsTransition
     Private Sub trkBreite_ValueChanged(sender As Object, e As EventArgs) Handles trkBreite.ValueChanged
         'TrackBar Breite
 
+        lblBreiteProzent.Text = trkBreite.Value.ToString & " %"
+
         'Direct Commit
         WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Breite", trkBreite.Value.ToString)
 
@@ -208,6 +158,81 @@ Public Class ucOptionsTransition
         'Liest die aktuellen Settings aus der SetttingsInbox
 
         aktuelleSettings = GetSettings(Of SlideShowTransitionSettings_GradientWischen)(nameTransition)
+
+    End Sub
+
+    Private Sub IniOrReinitialise()
+        'Ankerpunkte
+        tbtN.Checked = False
+        tbtNO.Checked = False
+        tbtO.Checked = False
+        tbtSO.Checked = False
+        tbtS.Checked = False
+        tbtSW.Checked = False
+        tbtW.Checked = False
+        tbtNW.Checked = False
+        tbtZOut.Checked = False
+        tbtZIn.Checked = False
+
+        For Each richtung In aktuelleSettings.richtungen
+
+            Select Case richtung
+                Case "N"
+                    tbtN.Checked = True
+                Case "NO"
+                    tbtNO.Checked = True
+                Case "O"
+                    tbtO.Checked = True
+                Case "SO"
+                    tbtSO.Checked = True
+                Case "S"
+                    tbtS.Checked = True
+                Case "SW"
+                    tbtSW.Checked = True
+                Case "W"
+                    tbtW.Checked = True
+                Case "NW"
+                    tbtNW.Checked = True
+                Case "ZOut"
+                    tbtZOut.Checked = True
+                Case "ZIn"
+                    tbtZIn.Checked = True
+            End Select
+
+        Next
+
+        'Label "Kein Ankerpunkt ausgewählt"
+        If aktuelleSettings.richtungen.Count = 0 Then
+            lblKeineRichtung.Visible = True
+        Else
+            lblKeineRichtung.Visible = False
+        End If
+
+        'Breite
+        trkBreite.Value = aktuelleSettings.breite
+        lblBreiteProzent.Text = aktuelleSettings.breite.ToString & " %"
+
+        'Geschwindigkeit
+        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Defaults einlesen und Steuerelemente entsprechend setzen
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetTransitionDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+        aktuelleSettings.richtungen = SplitSemicolonList(defaults("Richtungen"))
+        aktuelleSettings.breite = CInt(defaults("Breite"))
+
+        'Steuerelemente setzen
+        IniOrReinitialise()
 
     End Sub
 

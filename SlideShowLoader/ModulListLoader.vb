@@ -30,7 +30,7 @@ Public Class ModulListLoader
                             .ModulVersion = dummy.ModulVersion
                             }
                         modulInfos.Add(info)
-                        'LogHandling.LogDebug("SlideShowLoader - ModullistLoader.LadeModulInfoListe: Modul " & info.ModulName & " erfolgreich geladen")
+
                         dummy = Nothing ' Dummy-Instanz sofort wieder freigeben
                         Exit For
                     End If

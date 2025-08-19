@@ -15,60 +15,7 @@ Public Class ucOptionsTransition
         CheckYourMail()
 
         'Steuerelemente initialisieren
-
-        'Richtungsbuttons
-        tbtN.Checked = False
-        tbtNO.Checked = False
-        tbtO.Checked = False
-        tbtSO.Checked = False
-        tbtS.Checked = False
-        tbtSW.Checked = False
-        tbtW.Checked = False
-        tbtNW.Checked = False
-
-        For Each richtung In aktuelleSettings.richtungen
-
-            Select Case richtung
-                Case "N"
-                    tbtN.Checked = True
-                Case "NO"
-                    tbtNO.Checked = True
-                Case "O"
-                    tbtO.Checked = True
-                Case "SO"
-                    tbtSO.Checked = True
-                Case "S"
-                    tbtS.Checked = True
-                Case "SW"
-                    tbtSW.Checked = True
-                Case "W"
-                    tbtW.Checked = True
-                Case "NW"
-                    tbtNW.Checked = True
-            End Select
-
-        Next
-
-        'Label "Keine Richtung Ausgewählt"
-        If aktuelleSettings.richtungen.Count = 0 Then
-            lblKeineRichtungInfo.Visible = True
-        Else
-            lblKeineRichtungInfo.Visible = False
-        End If
-
-        'Geschwindigkeit
-        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
-
-        'Modus
-        Select Case aktuelleSettings.modus
-            Case "Schieben"
-                rbSchieben.Checked = True
-            Case "Wischen"
-                rbWischen.Checked = True
-            Case "Zufällig"
-                rbZufall.Checked = True
-        End Select
+        IniOrReinitialise()
 
     End Sub
 
@@ -213,4 +160,78 @@ Public Class ucOptionsTransition
 
     End Sub
 
+    Private Sub IniOrReinitialise()
+        'Richtungsbuttons
+        tbtN.Checked = False
+        tbtNO.Checked = False
+        tbtO.Checked = False
+        tbtSO.Checked = False
+        tbtS.Checked = False
+        tbtSW.Checked = False
+        tbtW.Checked = False
+        tbtNW.Checked = False
+
+        For Each richtung In aktuelleSettings.richtungen
+
+            Select Case richtung
+                Case "N"
+                    tbtN.Checked = True
+                Case "NO"
+                    tbtNO.Checked = True
+                Case "O"
+                    tbtO.Checked = True
+                Case "SO"
+                    tbtSO.Checked = True
+                Case "S"
+                    tbtS.Checked = True
+                Case "SW"
+                    tbtSW.Checked = True
+                Case "W"
+                    tbtW.Checked = True
+                Case "NW"
+                    tbtNW.Checked = True
+            End Select
+
+        Next
+
+        'Label "Keine Richtung Ausgewählt"
+        If aktuelleSettings.richtungen.Count = 0 Then
+            lblKeineRichtungInfo.Visible = True
+        Else
+            lblKeineRichtungInfo.Visible = False
+        End If
+
+        'Geschwindigkeit
+        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+
+        'Modus
+        Select Case aktuelleSettings.modus
+            Case "Schieben"
+                rbSchieben.Checked = True
+            Case "Wischen"
+                rbWischen.Checked = True
+            Case "Zufällig"
+                rbZufall.Checked = True
+        End Select
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Liest Default-Werte ein und setzt Steuerelemente entsprechend
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetTransitionDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+        aktuelleSettings.richtungen = SplitSemicolonList(defaults("Richtungen"))
+        aktuelleSettings.modus = defaults("Modus")
+
+        'Steuerelemente aktualisieren
+        IniOrReinitialise()
+
+    End Sub
 End Class

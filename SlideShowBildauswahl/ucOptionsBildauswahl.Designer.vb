@@ -44,12 +44,13 @@ Partial Class ucOptionsBildauswahl
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
         Me.rdoJugendfrei = New System.Windows.Forms.RadioButton()
         Me.sbcBewertung = New MyControlsLibrary.SterneBewertungControl()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'lblNlstVerzeichnisse
         '
         Me.lblNlstVerzeichnisse.AutoSize = True
-        Me.lblNlstVerzeichnisse.Location = New System.Drawing.Point(19, 13)
+        Me.lblNlstVerzeichnisse.Location = New System.Drawing.Point(26, 85)
         Me.lblNlstVerzeichnisse.Name = "lblNlstVerzeichnisse"
         Me.lblNlstVerzeichnisse.Size = New System.Drawing.Size(195, 41)
         Me.lblNlstVerzeichnisse.TabIndex = 0
@@ -60,14 +61,14 @@ Partial Class ucOptionsBildauswahl
         '
         Me.lstVerzeichnisse.FormattingEnabled = True
         Me.lstVerzeichnisse.ItemHeight = 41
-        Me.lstVerzeichnisse.Location = New System.Drawing.Point(26, 57)
+        Me.lstVerzeichnisse.Location = New System.Drawing.Point(26, 139)
         Me.lstVerzeichnisse.Name = "lstVerzeichnisse"
-        Me.lstVerzeichnisse.Size = New System.Drawing.Size(765, 291)
+        Me.lstVerzeichnisse.Size = New System.Drawing.Size(765, 209)
         Me.lstVerzeichnisse.TabIndex = 1
         '
         'btnVerzeichnisHinzufügen
         '
-        Me.btnVerzeichnisHinzufügen.Location = New System.Drawing.Point(812, 57)
+        Me.btnVerzeichnisHinzufügen.Location = New System.Drawing.Point(812, 139)
         Me.btnVerzeichnisHinzufügen.Name = "btnVerzeichnisHinzufügen"
         Me.btnVerzeichnisHinzufügen.Size = New System.Drawing.Size(50, 50)
         Me.btnVerzeichnisHinzufügen.TabIndex = 2
@@ -76,7 +77,7 @@ Partial Class ucOptionsBildauswahl
         '
         'btnVerzeichnisseLöschen
         '
-        Me.btnVerzeichnisseLöschen.Location = New System.Drawing.Point(812, 117)
+        Me.btnVerzeichnisseLöschen.Location = New System.Drawing.Point(812, 199)
         Me.btnVerzeichnisseLöschen.Name = "btnVerzeichnisseLöschen"
         Me.btnVerzeichnisseLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnVerzeichnisseLöschen.TabIndex = 3
@@ -87,7 +88,7 @@ Partial Class ucOptionsBildauswahl
         '
         Me.btnVerzeichnisseListeLöschen.BackgroundImage = Global.SlideShowBildauswahl.My.Resources.Resources.Trashbin
         Me.btnVerzeichnisseListeLöschen.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.btnVerzeichnisseListeLöschen.Location = New System.Drawing.Point(812, 177)
+        Me.btnVerzeichnisseListeLöschen.Location = New System.Drawing.Point(812, 259)
         Me.btnVerzeichnisseListeLöschen.Name = "btnVerzeichnisseListeLöschen"
         Me.btnVerzeichnisseListeLöschen.Size = New System.Drawing.Size(50, 50)
         Me.btnVerzeichnisseListeLöschen.TabIndex = 4
@@ -263,10 +264,20 @@ Partial Class ucOptionsBildauswahl
         Me.sbcBewertung.TabIndex = 21
         Me.sbcBewertung.Text = "SterneBewertungControl1"
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(656, 24)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(206, 51)
+        Me.btnDefaults.TabIndex = 22
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsBildauswahl
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.sbcBewertung)
         Me.Controls.Add(Me.rdoJugendfrei)
         Me.Controls.Add(Me.rdoLingerie)
@@ -320,4 +331,5 @@ Partial Class ucOptionsBildauswahl
     Friend WithEvents rdoLingerie As Windows.Forms.RadioButton
     Friend WithEvents rdoJugendfrei As Windows.Forms.RadioButton
     Friend WithEvents sbcBewertung As MyControlsLibrary.SterneBewertungControl
+    Friend WithEvents btnDefaults As Windows.Forms.Button
 End Class

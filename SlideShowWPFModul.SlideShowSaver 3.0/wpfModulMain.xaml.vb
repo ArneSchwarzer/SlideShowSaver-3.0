@@ -230,8 +230,6 @@ Partial Public Class wpfModulMain
 
 #End Region
 
-        LogHandling.LogDebug("Modul SSS 3.0 - wpfModulMain.LadeErstesBild(): aktuellesBild ausgewählt: " & bildPfad)
-
         If präsentationAnzeigen Then
             PräsentationsschirmAnzeigen()
         Else

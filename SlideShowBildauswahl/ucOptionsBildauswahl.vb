@@ -18,77 +18,7 @@ Public Class ucOptionsBildauswahl
         CheckYourMail()
 
         'Steuerelemente initialisieren
-
-        'lstVerzeichnisse
-        For Each item In aktuelleSettings.Verzeichnisse
-            lstVerzeichnisse.Items.Add(item)
-        Next
-        btnVerzeichnisseLöschen.Enabled = False
-        If lstVerzeichnisse.Items.Count = 0 Then
-            btnVerzeichnisseListeLöschen.Enabled = False
-        End If
-
-        'White-List
-        For Each item In aktuelleSettings.WhiteListTags
-            lstWhiteList.Items.Add(item)
-        Next
-        btnWhiteListLöschen.Enabled = False
-        If lstWhiteList.Items.Count = 0 Then
-            btnWhiteListListeLöschen.Enabled = False
-        End If
-
-        'Black-List
-        For Each item In aktuelleSettings.BlackListTags
-            lstBlackList.Items.Add(item)
-        Next
-        btnBlackListLöschen.Enabled = False
-        If lstBlackList.Items.Count = 0 Then
-            btnBlackListListeLöschen.Enabled = False
-        End If
-
-        'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
-        sbcBewertung.Bewertung = aktuelleSettings.Bewertung
-        sbcBewertung.EndInitialization()
-
-        'Altersfreigabe - RadioButtons & Black-List Einträge
-        Select Case aktuelleSettings.Altersfreigabe
-            Case "18+"
-                rdo18.Checked = True
-                'Blacklist Tags setzen/löschen
-                lstBlackList.Items.Remove("18+")
-                lstBlackList.Items.Remove("Akt")
-                lstBlackList.Items.Remove("Lingerie")
-            Case "Akt"
-                rdoAkt.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
-                End If
-                lstBlackList.Items.Remove("Akt")
-                lstBlackList.Items.Remove("Lingerie")
-            Case "Lingerie"
-                rdoLingerie.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
-                End If
-                If Not lstBlackList.Items.Contains("Akt") Then
-                    lstBlackList.Items.Add("Akt")
-                End If
-                lstBlackList.Items.Remove("Lingerie")
-            Case "Jugendfrei"
-                rdoJugendfrei.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
-                End If
-                If Not lstBlackList.Items.Contains("Akt") Then
-                    lstBlackList.Items.Add("Akt")
-                End If
-                If Not lstBlackList.Items.Contains("Lingerie") Then
-                    lstBlackList.Items.Add("Lingerie")
-                End If
-        End Select
+        IniOrReinitialise()
 
     End Sub
 
@@ -414,5 +344,98 @@ Public Class ucOptionsBildauswahl
 
     End Sub
 
+    Private Sub IniOrReinitialise()
+        'lstVerzeichnisse
+        For Each item In aktuelleSettings.Verzeichnisse
+            lstVerzeichnisse.Items.Add(item)
+        Next
+        btnVerzeichnisseLöschen.Enabled = False
+        If lstVerzeichnisse.Items.Count = 0 Then
+            btnVerzeichnisseListeLöschen.Enabled = False
+        End If
+
+        'White-List
+        For Each item In aktuelleSettings.WhiteListTags
+            lstWhiteList.Items.Add(item)
+        Next
+        btnWhiteListLöschen.Enabled = False
+        If lstWhiteList.Items.Count = 0 Then
+            btnWhiteListListeLöschen.Enabled = False
+        End If
+
+        'Black-List
+        For Each item In aktuelleSettings.BlackListTags
+            lstBlackList.Items.Add(item)
+        Next
+        btnBlackListLöschen.Enabled = False
+        If lstBlackList.Items.Count = 0 Then
+            btnBlackListListeLöschen.Enabled = False
+        End If
+
+        'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
+        sbcBewertung.Bewertung = aktuelleSettings.Bewertung
+        sbcBewertung.EndInitialization()
+
+        'Altersfreigabe - RadioButtons & Black-List Einträge
+        Select Case aktuelleSettings.Altersfreigabe
+            Case "18+"
+                rdo18.Checked = True
+                'Blacklist Tags setzen/löschen
+                lstBlackList.Items.Remove("18+")
+                lstBlackList.Items.Remove("Akt")
+                lstBlackList.Items.Remove("Lingerie")
+            Case "Akt"
+                rdoAkt.Checked = True
+                'Blacklist Tags setzen/löschen
+                If Not lstBlackList.Items.Contains("18+") Then
+                    lstBlackList.Items.Add("18+")
+                End If
+                lstBlackList.Items.Remove("Akt")
+                lstBlackList.Items.Remove("Lingerie")
+            Case "Lingerie"
+                rdoLingerie.Checked = True
+                'Blacklist Tags setzen/löschen
+                If Not lstBlackList.Items.Contains("18+") Then
+                    lstBlackList.Items.Add("18+")
+                End If
+                If Not lstBlackList.Items.Contains("Akt") Then
+                    lstBlackList.Items.Add("Akt")
+                End If
+                lstBlackList.Items.Remove("Lingerie")
+            Case "Jugendfrei"
+                rdoJugendfrei.Checked = True
+                'Blacklist Tags setzen/löschen
+                If Not lstBlackList.Items.Contains("18+") Then
+                    lstBlackList.Items.Add("18+")
+                End If
+                If Not lstBlackList.Items.Contains("Akt") Then
+                    lstBlackList.Items.Add("Akt")
+                End If
+                If Not lstBlackList.Items.Contains("Lingerie") Then
+                    lstBlackList.Items.Add("Lingerie")
+                End If
+        End Select
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Default-Werte einlesen und Steuerelemente entsprechend setzen
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetBildauswahlDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.Verzeichnisse = SplitSemicolonList(defaults("Verzeichnisse"))
+        aktuelleSettings.WhiteListTags = SplitSemicolonList(defaults("WhiteListTags"))
+        aktuelleSettings.BlackListTags = SplitSemicolonList(defaults("BlackListTags"))
+        aktuelleSettings.Altersfreigabe = defaults("Altersfreigabe")
+        aktuelleSettings.Bewertung = CInt(defaults("Bewertung"))
+
+        'Steuerelemente setzen
+        IniOrReinitialise()
+
+    End Sub
 End Class
 

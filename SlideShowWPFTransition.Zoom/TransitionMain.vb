@@ -197,7 +197,6 @@ Public Class TransitionMain
 
     Sub tmrDuration_Tick() Handles tmrDuration.Tick
         'Bricht die Transition nach Ende von DurationMS ab.
-        LogDebug("Transition SuW - TransitionMain.tmrDuration_Tick() wurde aufgerufen.")
 
         'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
         EndBildZeichnen()

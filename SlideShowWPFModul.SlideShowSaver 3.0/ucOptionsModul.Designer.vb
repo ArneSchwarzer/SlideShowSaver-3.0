@@ -39,13 +39,14 @@ Partial Class ucOptionsModul
         Me.lblModulname = New System.Windows.Forms.Label()
         Me.lblNModulname = New System.Windows.Forms.Label()
         Me.chkPräsentationsschirm = New System.Windows.Forms.CheckBox()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblNcmbBildauswahl
         '
         Me.lblNcmbBildauswahl.AutoSize = True
-        Me.lblNcmbBildauswahl.Location = New System.Drawing.Point(22, 100)
+        Me.lblNcmbBildauswahl.Location = New System.Drawing.Point(22, 123)
         Me.lblNcmbBildauswahl.Name = "lblNcmbBildauswahl"
         Me.lblNcmbBildauswahl.Size = New System.Drawing.Size(173, 41)
         Me.lblNcmbBildauswahl.TabIndex = 0
@@ -55,15 +56,15 @@ Partial Class ucOptionsModul
         '
         Me.cmbBildauswahl.FormattingEnabled = True
         Me.cmbBildauswahl.Items.AddRange(New Object() {"Zufallsbild", "Zufallsverzeichnis"})
-        Me.cmbBildauswahl.Location = New System.Drawing.Point(500, 92)
+        Me.cmbBildauswahl.Location = New System.Drawing.Point(296, 115)
         Me.cmbBildauswahl.Name = "cmbBildauswahl"
-        Me.cmbBildauswahl.Size = New System.Drawing.Size(361, 49)
+        Me.cmbBildauswahl.Size = New System.Drawing.Size(565, 49)
         Me.cmbBildauswahl.TabIndex = 1
         '
         'lblNtrbAnzeigedauer
         '
         Me.lblNtrbAnzeigedauer.AutoSize = True
-        Me.lblNtrbAnzeigedauer.Location = New System.Drawing.Point(19, 183)
+        Me.lblNtrbAnzeigedauer.Location = New System.Drawing.Point(19, 250)
         Me.lblNtrbAnzeigedauer.Name = "lblNtrbAnzeigedauer"
         Me.lblNtrbAnzeigedauer.Size = New System.Drawing.Size(201, 41)
         Me.lblNtrbAnzeigedauer.TabIndex = 2
@@ -72,18 +73,20 @@ Partial Class ucOptionsModul
         '
         'trkAnzeigedauer
         '
-        Me.trkAnzeigedauer.Location = New System.Drawing.Point(36, 227)
+        Me.trkAnzeigedauer.AutoSize = False
+        Me.trkAnzeigedauer.Location = New System.Drawing.Point(296, 250)
         Me.trkAnzeigedauer.Maximum = 120
         Me.trkAnzeigedauer.Minimum = 5
         Me.trkAnzeigedauer.Name = "trkAnzeigedauer"
-        Me.trkAnzeigedauer.Size = New System.Drawing.Size(687, 101)
+        Me.trkAnzeigedauer.Size = New System.Drawing.Size(427, 56)
         Me.trkAnzeigedauer.TabIndex = 3
+        Me.trkAnzeigedauer.TickStyle = System.Windows.Forms.TickStyle.None
         Me.trkAnzeigedauer.Value = 15
         '
         'lblAnzeigedauer
         '
         Me.lblAnzeigedauer.AutoSize = True
-        Me.lblAnzeigedauer.Location = New System.Drawing.Point(729, 227)
+        Me.lblAnzeigedauer.Location = New System.Drawing.Point(729, 250)
         Me.lblAnzeigedauer.MaximumSize = New System.Drawing.Size(129, 41)
         Me.lblAnzeigedauer.MinimumSize = New System.Drawing.Size(129, 41)
         Me.lblAnzeigedauer.Name = "lblAnzeigedauer"
@@ -123,15 +126,15 @@ Partial Class ucOptionsModul
         '
         Me.cmbEffektauswahl.FormattingEnabled = True
         Me.cmbEffektauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
-        Me.cmbEffektauswahl.Location = New System.Drawing.Point(497, 568)
+        Me.cmbEffektauswahl.Location = New System.Drawing.Point(296, 568)
         Me.cmbEffektauswahl.Name = "cmbEffektauswahl"
-        Me.cmbEffektauswahl.Size = New System.Drawing.Size(361, 49)
+        Me.cmbEffektauswahl.Size = New System.Drawing.Size(562, 49)
         Me.cmbEffektauswahl.TabIndex = 8
         '
         'chkBildinformationen
         '
         Me.chkBildinformationen.AutoSize = True
-        Me.chkBildinformationen.Location = New System.Drawing.Point(26, 972)
+        Me.chkBildinformationen.Location = New System.Drawing.Point(26, 963)
         Me.chkBildinformationen.Name = "chkBildinformationen"
         Me.chkBildinformationen.Size = New System.Drawing.Size(414, 45)
         Me.chkBildinformationen.TabIndex = 9
@@ -160,9 +163,9 @@ Partial Class ucOptionsModul
         '
         Me.cmbShaderauswahl.FormattingEnabled = True
         Me.cmbShaderauswahl.Items.AddRange(New Object() {"Zufällig bei Start", "Zufällig", "In Reihenfolge bei Start", "In Reihenfolge"})
-        Me.cmbShaderauswahl.Location = New System.Drawing.Point(500, 896)
+        Me.cmbShaderauswahl.Location = New System.Drawing.Point(296, 896)
         Me.cmbShaderauswahl.Name = "cmbShaderauswahl"
-        Me.cmbShaderauswahl.Size = New System.Drawing.Size(361, 49)
+        Me.cmbShaderauswahl.Size = New System.Drawing.Size(565, 49)
         Me.cmbShaderauswahl.TabIndex = 13
         '
         'lblNcmbShaderauswahl
@@ -178,7 +181,7 @@ Partial Class ucOptionsModul
         '
         Me.lblModulname.AutoSize = True
         Me.lblModulname.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblModulname.Location = New System.Drawing.Point(252, 29)
+        Me.lblModulname.Location = New System.Drawing.Point(289, 29)
         Me.lblModulname.Name = "lblModulname"
         Me.lblModulname.Size = New System.Drawing.Size(292, 41)
         Me.lblModulname.TabIndex = 15
@@ -197,17 +200,27 @@ Partial Class ucOptionsModul
         'chkPräsentationsschirm
         '
         Me.chkPräsentationsschirm.AutoSize = True
-        Me.chkPräsentationsschirm.Location = New System.Drawing.Point(500, 147)
+        Me.chkPräsentationsschirm.Location = New System.Drawing.Point(296, 170)
         Me.chkPräsentationsschirm.Name = "chkPräsentationsschirm"
         Me.chkPräsentationsschirm.Size = New System.Drawing.Size(315, 45)
         Me.chkPräsentationsschirm.TabIndex = 16
         Me.chkPräsentationsschirm.Text = "Präsentationsschirm"
         Me.chkPräsentationsschirm.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(673, 21)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(185, 57)
+        Me.btnDefaults.TabIndex = 17
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.chkPräsentationsschirm)
         Me.Controls.Add(Me.lblModulname)
         Me.Controls.Add(Me.lblNModulname)
@@ -252,4 +265,5 @@ Partial Class ucOptionsModul
     Friend WithEvents lblModulname As Windows.Forms.Label
     Friend WithEvents lblNModulname As Windows.Forms.Label
     Friend WithEvents chkPräsentationsschirm As Forms.CheckBox
+    Friend WithEvents btnDefaults As Forms.Button
 End Class

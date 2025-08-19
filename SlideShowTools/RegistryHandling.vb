@@ -43,7 +43,7 @@ Public Class RegistryHandling
                 End If
             End Using
 
-            LogHandling.LogDebug($"Wert '{value}' für den Eintrag '{valueName}' erfolgreich in die Registry unter '{subPath}' geschrieben.")
+
         Catch ex As Exception
             LogHandling.LogError("Fehler beim Schreiben in die Registry: " & ex.Message)
         End Try

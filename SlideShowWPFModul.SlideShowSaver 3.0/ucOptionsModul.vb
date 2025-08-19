@@ -1,17 +1,15 @@
-﻿Imports System.Drawing
-Imports SlideShowTools.ToolTipHandling
-Imports SlideShowTools.CheckedListBoxHandling
-Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.ListHandling
-Imports SlideShowTools.SettingsHandling
-Imports Modul_SlideShowSaver_3
+﻿Imports System.Windows.Forms
 Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
-Imports System.Windows.Forms
-Imports SlideShowInterfaces
-Imports SlideShowTools
 Imports SlideShowLogging
+Imports SlideShowTools
+Imports SlideShowTools.CheckedListBoxHandling
+Imports SlideShowTools.ListHandling
+Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
+Imports SlideShowTools.ToolTipHandling
+Imports SlideShowWPFModul.SlideShowSaver_3._0.ModulMain
 
 Public Class ucOptionsModul
     Implements ISlideShowTransitionCommunication
@@ -19,7 +17,7 @@ Public Class ucOptionsModul
 
 #Region "Variablendeklaration"
     'Variablendeklaration
-    Private aktuelleSettings As ModulMain.SettingsModul_SSS
+    Private aktuelleSettings As SettingsModul_SSS
     Private transitionInfos As List(Of SlideShowTransitionInfo)
     Private shaderInfos As List(Of SlideShowShaderInfo)
     Private markierteTransitions As List(Of String)
@@ -36,118 +34,12 @@ Public Class ucOptionsModul
 #End Region
 
     Private Sub ucOptionsModul_Load(sender As Object, e As EventArgs) Handles Me.Load
-#Region "ucOptionsModul.Load Header"
+
         'Settings aus dem Zwischenspeicher holen
         CheckYourMail()
 
-        'Initialisieren
-        transitionInfos = TransitionListLoader.LadeTransitionInfoListe()
-        shaderInfos = ShaderListLoader.LadeShaderInfoListe()
-        markierteTransitions = aktuelleSettings.Transitionseffekte
-        markierteShader = aktuelleSettings.Shader
-#End Region
-
-#Region "cmbBildauswahl Initialisieren"
-        'cmbBildauswahl
-        cmbBildauswahl.SelectedItem = aktuelleSettings.Bildauswahl
-        If aktuelleSettings.Bildauswahl = "Zufallsbild" Then
-            chkPräsentationsschirm.Enabled = False
-        Else
-            chkPräsentationsschirm.Enabled = True
-        End If
-#End Region
-
-#Region "chkPräsentationsschirm Initialisieren"
-        'chkPräsentationsschirm
-        chkPräsentationsschirm.Checked = aktuelleSettings.Präsentationsschirm
-#End Region
-
-#Region "clbTransitions Initialisierung"
-        'clbTransitions
-        clbTransitions.Items.Clear()
-        For Each transitionInfo In transitionInfos
-            clbTransitions.Items.Add(transitionInfo)
-        Next
-
-        EnableToolTipsForCLB(clbTransitions)
-
-        SetCheckedItemsByName(Of SlideShowTransitionInfo)(
-            clbTransitions,
-            JoinSemicolonList(markierteTransitions),
-            Function(m) m.TransitionName
-            )
-
-        If clbTransitions.Items.Count = 1 Then
-            clbTransitions.SetItemCheckState(0, CheckState.Checked)
-        End If
-#End Region
-
-#Region "cmbEffektauswahl Initialisieren"
-        'cmbEffektauswahl
-        If clbTransitions.CheckedItems.Count = 1 Then
-            cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
-            cmbEffektauswahl.Enabled = False
-            lblNcmbEffektauswahl.Enabled = False
-            clbTransitions.Enabled = True
-        Else
-            cmbEffektauswahl.SelectedItem = aktuelleSettings.TransitionsReihenfolge
-            cmbEffektauswahl.Enabled = True
-            lblNcmbEffektauswahl.Enabled = True
-            clbTransitions.Enabled = True
-        End If
-#End Region
-
-#Region "clbShader Initialisieren"
-        'clbShader
-        clbShader.Items.Clear()
-        For Each shaderInfo In shaderInfos
-            clbShader.Items.Add(shaderInfo)
-        Next
-
-        EnableToolTipsForCLB(clbShader)
-
-        SetCheckedItemsByName(Of SlideShowShaderInfo)(
-            clbShader,
-            JoinSemicolonList(markierteShader),
-            Function(m) m.ShaderName
-            )
-#End Region
-
-#Region "cmbShader Initialisieren"
-        'cmbShader
-        If clbShader.CheckedItems.Count = 1 Then
-            cmbShaderauswahl.SelectedIndex = 0 'Zufällig bei Start
-            cmbShaderauswahl.Enabled = False
-            lblNcmbShaderauswahl.Enabled = False
-            clbShader.Enabled = True
-        Else
-            cmbShaderauswahl.SelectedItem = aktuelleSettings.ShaderReihenfolge
-            cmbShaderauswahl.Enabled = True
-            lblNcmbShaderauswahl.Enabled = True
-            clbShader.Enabled = True
-        End If
-#End Region
-
-#Region "trbAnzeigedauer Initialisieren"
-        'trbAnzeigedauer
-        trkAnzeigedauer.Value = aktuelleSettings.Anzeigedauer
-
-        minuten = trkAnzeigedauer.Value \ 60
-        sekunden = trkAnzeigedauer.Value Mod 60
-        If minuten > 0 Then
-            lblAnzeigedauer.Text = minuten.ToString & "m"
-            If sekunden <> 0 Then
-                lblAnzeigedauer.Text = lblAnzeigedauer.Text & " " & sekunden.ToString & "s"
-            End If
-        Else
-            lblAnzeigedauer.Text = sekunden.ToString & "s"
-        End If
-#End Region
-
-#Region "chkBildInfoAnzeigen"
-        'chkBildInfoAnzeigen
-        chkBildinformationen.Checked = aktuelleSettings.BildInfoAnzeigen
-#End Region
+        'Steuerelemente Initialisieren
+        IniAndReinitialise()
 
     End Sub
 
@@ -276,9 +168,142 @@ Public Class ucOptionsModul
     Private Sub CheckYourMail()
         'Liest die aktuellen Settings aus der SettingsInbox ein.
 
-        aktuelleSettings = GetSettings(Of ModulMain.SettingsModul_SSS)(ModulMain.nameModul)
+        aktuelleSettings = GetSettings(Of SettingsModul_SSS)(nameModul)
 
     End Sub
 
+    Private Sub IniAndReinitialise()
+
+        'Initialisieren
+        transitionInfos = TransitionListLoader.LadeTransitionInfoListe()
+        shaderInfos = ShaderListLoader.LadeShaderInfoListe()
+        markierteTransitions = aktuelleSettings.Transitionseffekte
+        markierteShader = aktuelleSettings.Shader
+
+#Region "cmbBildauswahl Initialisieren"
+        'cmbBildauswahl
+        cmbBildauswahl.SelectedItem = aktuelleSettings.Bildauswahl
+        If aktuelleSettings.Bildauswahl = "Zufallsbild" Then
+            chkPräsentationsschirm.Enabled = False
+        Else
+            chkPräsentationsschirm.Enabled = True
+        End If
+#End Region
+
+#Region "chkPräsentationsschirm Initialisieren"
+        'chkPräsentationsschirm
+        chkPräsentationsschirm.Checked = aktuelleSettings.Präsentationsschirm
+#End Region
+
+#Region "clbTransitions Initialisierung"
+        'clbTransitions
+        clbTransitions.Items.Clear()
+        For Each transitionInfo In transitionInfos
+            clbTransitions.Items.Add(transitionInfo)
+        Next
+
+        EnableToolTipsForCLB(clbTransitions)
+
+        SetCheckedItemsByName(Of SlideShowTransitionInfo)(
+            clbTransitions,
+            JoinSemicolonList(markierteTransitions),
+            Function(m) m.TransitionName
+            )
+
+        If clbTransitions.Items.Count = 1 Then
+            clbTransitions.SetItemCheckState(0, CheckState.Checked)
+        End If
+#End Region
+
+#Region "cmbEffektauswahl Initialisieren"
+        'cmbEffektauswahl
+        If clbTransitions.CheckedItems.Count = 1 Then
+            cmbEffektauswahl.SelectedIndex = 0 'Zufällig bei Start
+            cmbEffektauswahl.Enabled = False
+            lblNcmbEffektauswahl.Enabled = False
+            clbTransitions.Enabled = True
+        Else
+            cmbEffektauswahl.SelectedItem = aktuelleSettings.TransitionsReihenfolge
+            cmbEffektauswahl.Enabled = True
+            lblNcmbEffektauswahl.Enabled = True
+            clbTransitions.Enabled = True
+        End If
+#End Region
+
+#Region "clbShader Initialisieren"
+        'clbShader
+        clbShader.Items.Clear()
+        For Each shaderInfo In shaderInfos
+            clbShader.Items.Add(shaderInfo)
+        Next
+
+        EnableToolTipsForCLB(clbShader)
+
+        SetCheckedItemsByName(Of SlideShowShaderInfo)(
+            clbShader,
+            JoinSemicolonList(markierteShader),
+            Function(m) m.ShaderName
+            )
+#End Region
+
+#Region "cmbShader Initialisieren"
+        'cmbShader
+        If clbShader.CheckedItems.Count = 1 Then
+            cmbShaderauswahl.SelectedIndex = 0 'Zufällig bei Start
+            cmbShaderauswahl.Enabled = False
+            lblNcmbShaderauswahl.Enabled = False
+            clbShader.Enabled = True
+        Else
+            cmbShaderauswahl.SelectedItem = aktuelleSettings.ShaderReihenfolge
+            cmbShaderauswahl.Enabled = True
+            lblNcmbShaderauswahl.Enabled = True
+            clbShader.Enabled = True
+        End If
+#End Region
+
+#Region "trbAnzeigedauer Initialisieren"
+        'trbAnzeigedauer
+        trkAnzeigedauer.Value = aktuelleSettings.Anzeigedauer
+
+        minuten = trkAnzeigedauer.Value \ 60
+        sekunden = trkAnzeigedauer.Value Mod 60
+        If minuten > 0 Then
+            lblAnzeigedauer.Text = minuten.ToString & "m"
+            If sekunden <> 0 Then
+                lblAnzeigedauer.Text = lblAnzeigedauer.Text & " " & sekunden.ToString & "s"
+            End If
+        Else
+            lblAnzeigedauer.Text = sekunden.ToString & "s"
+        End If
+#End Region
+
+#Region "chkBildInfoAnzeigen"
+        'chkBildInfoAnzeigen
+        chkBildinformationen.Checked = aktuelleSettings.BildInfoAnzeigen
+#End Region
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Liest die Defaultwerte ein und setzt die Steuerelemente entsprechend
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetModulDefaultSettings()
+
+        'AktuelleSettingsAktualisieren
+        aktuelleSettings.Bildauswahl = defaults("Bildauswahl")
+        aktuelleSettings.Präsentationsschirm = CBool(defaults("Präsentationsschirm"))
+        aktuelleSettings.Anzeigedauer = CInt(defaults("Anzeigedauer"))
+        aktuelleSettings.Transitionseffekte = SplitSemicolonList(defaults("Transitionseffekte"))
+        aktuelleSettings.TransitionsReihenfolge = defaults("TransitionsReihenfolge")
+        aktuelleSettings.Shader = SplitSemicolonList(defaults("Shader"))
+        aktuelleSettings.ShaderReihenfolge = defaults("ShaderReihenfolge")
+        aktuelleSettings.BildInfoAnzeigen = CBool(defaults("BildInfoAnzeigen"))
+
+        'Steuerelemente Setzen
+        IniAndReinitialise()
+
+    End Sub
 End Class
 

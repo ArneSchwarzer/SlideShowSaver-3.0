@@ -49,8 +49,6 @@ Public Class frmOptionsMain
 #End Region
 
     Private Sub frmOptionsMain_Load(sender As Object, e As EventArgs) Handles Me.Load
-#Region "Header frmOptionMain_Load"
-        Dim anzahlMarkierteModule As Integer
 
         Me.TopMost = True
         Me.BringToFront()
@@ -64,127 +62,8 @@ Public Class frmOptionsMain
         'Aktuelle Settings einlesen
         CheckYourMail()
 
-        ' Modul-Liste laden
-        Dim moduleInfos = ModulListLoader.LadeModulInfoListe()
-        clbModule.Items.Clear()
-
-        ' ModulTransition Liste vorbereiten
-        transitionList = TransitionListLoader.LadeTransitionInfoListe()
-
-#End Region
-
-#Region "Trackbar Initialisierung"
-        ' Trackbar trkDauerModulwechsel und dazugehöriges Label lblDauerModulwechsel
-        trkDauerModulwechsel.Minimum = 1
-        trkDauerModulwechsel.Maximum = 60
-        trkDauerModulwechsel.Value = aktuelleSettings.ModulDauer
-        If trkDauerModulwechsel.Value = 60 Then
-            lblDauerModuswechsel.Text = "1 h"
-        Else
-            lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
-        End If
-#End Region
-
-#Region "clbModule Initialisierung"
-        ' Modulliste clbModule
-        clbModule.Items.Clear()
-        For Each modulInfo In moduleInfos
-            clbModule.Items.Add(modulInfo)
-        Next
-
-        EnableToolTipsForCLB(clbModule)
-
-        markierteModule = JoinSemicolonList(aktuelleSettings.ModulAktivListe)
-        SetCheckedItemsByName(Of SlideShowModulInfo)(
-            clbModule,
-            markierteModule,
-            Function(m) m.ModulName
-            )
-
-        clbModule.Sorted = True
-#End Region
-
-#Region "cmbModulWechsel Initialisierung"
-        'Combobox cmbModulwechsel
-
-        cmbModulwechsel.SelectedItem = aktuelleSettings.ModulReihenfolge
-
-        If cmbModulwechsel.SelectedIndex = 0 OrElse cmbModulwechsel.SelectedIndex = 2 Then '"Zufällig bei Start" oder "In Reihenfolge bei Start"
-            lblNtrkDauerModulwechsel.Enabled = False
-            lblDauerModuswechsel.Enabled = False
-            trkDauerModulwechsel.Enabled = False
-        Else
-            lblNtrkDauerModulwechsel.Enabled = True
-            lblDauerModuswechsel.Enabled = True
-            trkDauerModulwechsel.Enabled = True
-        End If
-#End Region
-
-#Region "Label 'Keine Module'"
-        'Label lblKeineModule
-        anzahlMarkierteModule = clbModule.CheckedItems.Count
-        KeineModuleLabelLogik(anzahlMarkierteModule)
-#End Region
-
-#Region "clbTransitionsModule Initialisieren"
-        'Checklistbox clbTransitionsModule
-        If transitionList.Count = 0 Then
-            clbTransitionsModule.Enabled = False
-            lblNclbTransitionsModule.Enabled = False
-            cmbTransitionsReihenfolge.Enabled = False
-            lblNcmbAbspielmodusTransitionsModule.Enabled = False
-            lblKeineTransitionsModule.Visible = True
-        Else
-            lblKeineTransitionsModule.Visible = False
-            clbTransitionsModule.Items.Clear()
-            For Each transition In transitionList
-                clbTransitionsModule.Items.Add(transition)
-            Next
-
-            EnableToolTipsForCLB(clbTransitionsModule)
-
-            markierteTransitionen = JoinSemicolonList(aktuelleSettings.ModulTransitionListe)
-            SetCheckedItemsByName(Of SlideShowTransitionInfo)(
-            clbTransitionsModule,
-            markierteTransitionen,
-            Function(m) m.TransitionName
-            )
-
-            clbTransitionsModule.Sorted = True
-        End If
-#End Region
-
-#Region "cmbTransitionsReihenfolge für Module Initialisieren"
-        'Combobox cmbTransitionsReihenfolge
-        cmbTransitionsReihenfolge.SelectedItem = aktuelleSettings.ModulTransitionReihenfolge
-
-        If clbTransitionsModule.CheckedItems.Count <= 1 Then
-            cmbTransitionsReihenfolge.Enabled = False
-            lblNcmbAbspielmodusTransitionsModule.Enabled = False
-        Else
-            cmbTransitionsReihenfolge.Enabled = True
-            lblNcmbAbspielmodusTransitionsModule.Enabled = True
-        End If
-
-#End Region
-
-#Region "chkMultiMonitor Initialisieren"
-        'Checkbox MultiMonitor Support
-
-        'Solange noch kein MultiMonitor Support implementiert ist
-        '
-        'chkMultiMonitor.Checked = aktuelleSettings.MultiMonitor
-
-        chkMultiMonitor.Visible = False
-        chkMultiMonitor.Checked = False
-#End Region
-
-#Region "picHintergrundfarbe Initialisieren"
-        'Hintergrundfarbe für den Schoner
-
-        picHintergrundfarbe.BackColor = aktuelleSettings.Hintergrundfarbe
-
-#End Region
+        'Steuerelemente initialisieren
+        IniOrReinitialise()
 
 #Region "Sprachauswahl-Leiste laden"
         'Sprachauswahl-Leiste laden
@@ -628,5 +507,152 @@ Public Class frmOptionsMain
                 WriteToRegistry(SLIDESHOWMAIN_PATH & "Hintergrundfarbe", ColorToString(dlg.Color))
             End If
         End Using
+    End Sub
+
+    Private Sub IniOrReinitialise()
+        ' Modul-Liste laden
+        Dim anzahlMarkierteModule As Integer
+        Dim moduleInfos = ModulListLoader.LadeModulInfoListe()
+
+        clbModule.Items.Clear()
+
+        ' ModulTransition Liste vorbereiten
+        transitionList = TransitionListLoader.LadeTransitionInfoListe()
+
+#Region "Trackbar Initialisierung"
+        ' Trackbar trkDauerModulwechsel und dazugehöriges Label lblDauerModulwechsel
+        trkDauerModulwechsel.Minimum = 1
+        trkDauerModulwechsel.Maximum = 60
+        trkDauerModulwechsel.Value = aktuelleSettings.ModulDauer
+        If trkDauerModulwechsel.Value = 60 Then
+            lblDauerModuswechsel.Text = "1 h"
+        Else
+            lblDauerModuswechsel.Text = trkDauerModulwechsel.Value.ToString & " m"
+        End If
+#End Region
+
+#Region "clbModule Initialisierung"
+        ' Modulliste clbModule
+        clbModule.Items.Clear()
+        For Each modulInfo In moduleInfos
+            clbModule.Items.Add(modulInfo)
+        Next
+
+        EnableToolTipsForCLB(clbModule)
+
+        markierteModule = JoinSemicolonList(aktuelleSettings.ModulAktivListe)
+        SetCheckedItemsByName(Of SlideShowModulInfo)(
+            clbModule,
+            markierteModule,
+            Function(m) m.ModulName
+            )
+
+        clbModule.Sorted = True
+#End Region
+
+#Region "cmbModulWechsel Initialisierung"
+        'Combobox cmbModulwechsel
+
+        cmbModulwechsel.SelectedItem = aktuelleSettings.ModulReihenfolge
+
+        If cmbModulwechsel.SelectedIndex = 0 OrElse cmbModulwechsel.SelectedIndex = 2 Then '"Zufällig bei Start" oder "In Reihenfolge bei Start"
+            lblNtrkDauerModulwechsel.Enabled = False
+            lblDauerModuswechsel.Enabled = False
+            trkDauerModulwechsel.Enabled = False
+        Else
+            lblNtrkDauerModulwechsel.Enabled = True
+            lblDauerModuswechsel.Enabled = True
+            trkDauerModulwechsel.Enabled = True
+        End If
+#End Region
+
+#Region "Label 'Keine Module'"
+        'Label lblKeineModule
+        anzahlMarkierteModule = clbModule.CheckedItems.Count
+        KeineModuleLabelLogik(anzahlMarkierteModule)
+#End Region
+
+#Region "clbTransitionsModule Initialisieren"
+        'Checklistbox clbTransitionsModule
+        If transitionList.Count = 0 Then
+            clbTransitionsModule.Enabled = False
+            lblNclbTransitionsModule.Enabled = False
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+            lblKeineTransitionsModule.Visible = True
+        Else
+            lblKeineTransitionsModule.Visible = False
+            clbTransitionsModule.Items.Clear()
+            For Each transition In transitionList
+                clbTransitionsModule.Items.Add(transition)
+            Next
+
+            EnableToolTipsForCLB(clbTransitionsModule)
+
+            markierteTransitionen = JoinSemicolonList(aktuelleSettings.ModulTransitionListe)
+            SetCheckedItemsByName(Of SlideShowTransitionInfo)(
+            clbTransitionsModule,
+            markierteTransitionen,
+            Function(m) m.TransitionName
+            )
+
+            clbTransitionsModule.Sorted = True
+        End If
+#End Region
+
+#Region "cmbTransitionsReihenfolge für Module Initialisieren"
+        'Combobox cmbTransitionsReihenfolge
+        cmbTransitionsReihenfolge.SelectedItem = aktuelleSettings.ModulTransitionReihenfolge
+
+        If clbTransitionsModule.CheckedItems.Count <= 1 Then
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+        Else
+            cmbTransitionsReihenfolge.Enabled = True
+            lblNcmbAbspielmodusTransitionsModule.Enabled = True
+        End If
+
+#End Region
+
+#Region "chkMultiMonitor Initialisieren"
+        'Checkbox MultiMonitor Support
+
+        'Solange noch kein MultiMonitor Support implementiert ist
+        '
+        'chkMultiMonitor.Checked = aktuelleSettings.MultiMonitor
+
+        chkMultiMonitor.Visible = False
+        chkMultiMonitor.Checked = False
+#End Region
+
+#Region "picHintergrundfarbe Initialisieren"
+        'Hintergrundfarbe für den Schoner
+
+        picHintergrundfarbe.BackColor = aktuelleSettings.Hintergrundfarbe
+
+#End Region
+
+    End Sub
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Default-Werte einlesen und Steuerelemente setzen
+
+        Dim defaults As Dictionary(Of String, String)
+
+        'Defaults einlesen
+        defaults = GetMainDefaultSettings()
+
+        'AktuelleSettings aktualisieren
+        aktuelleSettings.ModulDauer = CInt(defaults("ModulDauer"))
+        aktuelleSettings.ModulReihenfolge = defaults("ModulReihenfolge")
+        aktuelleSettings.ModulAktivListe = SplitSemicolonList(defaults("ModulAktivListe"))
+        aktuelleSettings.MultiMonitor = CBool(defaults("MultiMonitor"))
+        aktuelleSettings.ModulTransitionListe = SplitSemicolonList(defaults("ModulTransitionListe"))
+        aktuelleSettings.ModulTransitionReihenfolge = defaults("ModulTransitionReihenfolge")
+        aktuelleSettings.Hintergrundfarbe = StringToColor(defaults("Hintergrundfarbe"))
+
+        'Steuerelemente setzen
+        IniOrReinitialise()
+
     End Sub
 End Class
