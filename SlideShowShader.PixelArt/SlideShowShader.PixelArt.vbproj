@@ -72,11 +72,6 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HalftonePixelArtShader.Designer.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>HalftonePixelArtShader.fx</DependentUpon>
-    </Compile>
     <Compile Include="ucOptionsShader.Designer.vb">
       <DependentUpon>ucOptionsShader.vb</DependentUpon>
     </Compile>
@@ -152,12 +147,14 @@
       <Name>SlideShowTools</Name>
     </ProjectReference>
   </ItemGroup>
+  
   <ItemGroup>
-    <Content Include="HalftonePixelArtShader.fx">
-      <CustomToolNamespace>My.Resources</CustomToolNamespace>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>HalftonePixelArtShader.Designer.vb</LastGenOutput>
-    </Content>
+    <ShaderSource Include="Shaders\HalftonePixelArtShader.fx" />
   </ItemGroup>
+
+  <Target Name="CompileShaders" BeforeTargets="BeforeBuild">
+    <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe&quot; /nologo /T ps_2_0 /E mainPS /Fo &quot;$(ProjectDir)Shaders\HalftonePixelArtShader.ps&quot; &quot;$(ProjectDir)Shaders\HalftonePixelArtShader.fx&quot;" />
+  </Target>
+
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
