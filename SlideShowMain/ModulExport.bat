@@ -90,6 +90,8 @@ set "SOURCE7=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Schwa
 set "SOURCE8=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\bin\Debug\SlideShowShader.SchwarzWeiss.pdb"
 set "SOURCE9=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\bin\Debug\SlideShowShader.ToenenFaerben.dll"
 set "SOURCE10=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\bin\Debug\SlideShowShader.ToenenFaerben.pdb"
+set "SOURCE11=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowShader.PixelArt.dll"
+set "SOURCE12=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowShader.PixelArt.pdb"
 
 :: Zielverzeichnis
 set "TARGET=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Shader"
@@ -114,6 +116,8 @@ copy /Y "%SOURCE7%" "%TARGET%\Schwarz-Weiss.ssss"
 copy /Y "%SOURCE8%" "%TARGET%\Schwarz-Weiss.pdb"
 copy /Y "%SOURCE9%" "%TARGET%\Toenen und Faerben.ssss"
 copy /Y "%SOURCE10%" "%TARGET%\Toenen und Faerben.pdb"
+copy /Y "%SOURCE11%" "%TARGET%\PixelArt.ssss"
+copy /Y "%SOURCE12%" "%TARGET%\PixelArt.pdb"
 
 echo Shader kopiert.
 echo.

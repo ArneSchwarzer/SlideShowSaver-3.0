@@ -433,6 +433,11 @@ Public Class ucOptionsBildauswahl
         aktuelleSettings.Altersfreigabe = defaults("Altersfreigabe")
         aktuelleSettings.Bewertung = CInt(defaults("Bewertung"))
 
+        'Listen leeren
+        lstVerzeichnisse.Items.Clear()
+        lstWhiteList.Items.Clear()
+        lstBlackList.Items.Clear()
+
         'Steuerelemente setzen
         IniOrReinitialise()
 

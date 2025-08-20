@@ -21,8 +21,13 @@ Public Class ShaderMain
     'Allgemeines
     Public aktuelleSettings As ShaderSettings_PixelArt
     Public Const SLIDESHOWSHADER_PIXELART_FULLPATH As String = SLIDESHOWSHADER_PATH & "PixelArt\"
-    Public Const nameShader As String = "PixelArt und Halftone"
+    Public Const nameShader As String = "PixelArt"
 
+    'Für den Shader
+    Dim inputBmp As System.Drawing.Bitmap = Nothing
+    Dim outputBmp As System.Drawing.Bitmap = Nothing
+    Dim cellSize As Single = 0.0F
+    Dim levels As Integer = 0
 
     Structure ShaderSettings_PixelArt
         Public modus As String
@@ -30,14 +35,8 @@ Public Class ShaderMain
         Public raster As Integer
         Public rasterZufall As Boolean
         'Der Faktor pro Kanal wird gespeichert
-        Public posterise As Integer
-        Public gamma As Single
-        Public dotsMax As Integer
-        Public dotsMin As Integer
-        'kleiner Missbrauch von "Color" als CMYK-Datenstruktur: C = B, M = R, Y = G, K = A
-        Public dotsWinkel As System.Drawing.Color
-        Public papier As Boolean
-        Public papierFaktor As Integer
+        Public farbraum As Integer
+        Public farbraumZufall As Boolean
     End Structure
 
     Public ReadOnly Property ShaderName As String Implements ISlideShowShader.ShaderName
@@ -48,7 +47,7 @@ Public Class ShaderMain
 
     Public ReadOnly Property ShaderKurzBeschreibung As String Implements ISlideShowShader.ShaderKurzBeschreibung
         Get
-            Return "Stellt das Bild als PixelArt oder als 4-Farb bzw. SW Druck dar"
+            Return "Stellt das Bild als PixelArt dar"
         End Get
     End Property
 
@@ -60,11 +59,28 @@ Public Class ShaderMain
 
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
         'Der eigentliche Shader
+        Dim rnd As New Random
 
         'Aktuelle Settings abholen und in SettingsInbox speichern
         ReadShaderSettingsFromRegistryOrDefaults()
         StoreSettings(nameShader, aktuelleSettings)
 
+        'Zufallssettings & Rastergröße auflösen
+        If aktuelleSettings.rasterZufall Then
+            aktuelleSettings.raster = rnd.Next(6) + 1
+        End If
+
+        If aktuelleSettings.farbraumZufall Then
+            aktuelleSettings.farbraum = rnd.Next(7) + 2
+        End If
+
+        cellSize = CInt(Math.Pow(2, aktuelleSettings.raster))
+        levels = aktuelleSettings.farbraum
+        inputBmp = CType(baseImage, System.Drawing.Bitmap)
+
+        outputBmp = WpfShaderRunner.ApplyPixelArtEffect(inputBmp, cellSize, levels)
+
+        Return CType(outputBmp, Image)
     End Function
 
     'Dialog & Optionen
@@ -87,19 +103,12 @@ Public Class ShaderMain
 
         Dim defaults As New Dictionary(Of String, String)
 
-        defaults("Modus") = "Zufall"
         'Die Potenz zur Basis 2 wird gespeichert - d.h. 2^4 = 16 px
         defaults("Raster") = "4"
         defaults("RasterZufall") = "False"
         'Der Faktor pro Kanal wird gespeichert - d.h. 6 x 6 x 6 = 216 Farben
-        defaults("Posterise") = "6"
-        defaults("Gamma") = "1,6"
-        defaults("DotsMax") = "45"
-        defaults("DotsMin") = "6"
-        'kleiner Missbrauch von "Color" als CMYK-Datenstruktur: C = B, M = R, Y = G, K = A
-        defaults("DotsWinkel") = "75,0,15,45"
-        defaults("Papier") = "True"
-        defaults("PapierFaktor") = "33"
+        defaults("Farbraum") = "6"
+        defaults("FarbraumZufall") = "False"
 
         Return defaults
 
@@ -113,32 +122,11 @@ Public Class ShaderMain
         aktuelleSettings.modus = ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Modus", defaults)
         'Die Potenz zur Basis 2 wird gespeichert!
         aktuelleSettings.raster = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Raster", defaults))
-        If ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "RasterZufall", defaults) = "True" Then
-            aktuelleSettings.rasterZufall = True
-        Else
-            aktuelleSettings.rasterZufall = False
-        End If
+        aktuelleSettings.rasterZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "RasterZufall", defaults))
         'Der Faktor pro Kanal wird gespeichert
-        aktuelleSettings.posterise = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Posterise", defaults))
-
-        'Gleitkommazahlen sind doof...
-        Dim sGamma As String = ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Gamma", defaults)
-        Dim g As Single
-        If Not Single.TryParse(sGamma, Globalization.NumberStyles.Float, Globalization.CultureInfo.CurrentCulture, g) Then
-            Single.TryParse(sGamma, Globalization.NumberStyles.Float, Globalization.CultureInfo.InvariantCulture, g)
-        End If
-        aktuelleSettings.gamma = g
-
-        aktuelleSettings.dotsMax = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "DotsMax", defaults))
-        aktuelleSettings.dotsMin = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "DotsMin", defaults))
-        'kleiner Missbrauch von "Color" als CMYK-Datenstruktur: C = B, M = R, Y = G, K = A
-        aktuelleSettings.dotsWinkel = StringToColor(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "DotsWinkel", defaults))
-        If ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Papier", defaults) = "True" Then
-            aktuelleSettings.papier = True
-        Else
-            aktuelleSettings.papier = False
-        End If
-        aktuelleSettings.papierFaktor = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "PapierFaktor", defaults))
+        aktuelleSettings.farbraum = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "Farbraum", defaults))
+        aktuelleSettings.farbraumZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWSHADER_PIXELART_FULLPATH & "FarbraumZufall", defaults))
 
     End Sub
+
 End Class

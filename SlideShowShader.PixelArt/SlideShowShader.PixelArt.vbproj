@@ -72,10 +72,12 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PixelArtEffect.vb" />
     <Compile Include="ucOptionsShader.Designer.vb">
       <DependentUpon>ucOptionsShader.vb</DependentUpon>
     </Compile>
     <Compile Include="ShaderMain.vb" />
+    <Compile Include="WpfShaderRunner.vb" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="System.Threading.Tasks" />
@@ -147,14 +149,20 @@
       <Name>SlideShowTools</Name>
     </ProjectReference>
   </ItemGroup>
-  
   <ItemGroup>
-    <ShaderSource Include="Shaders\HalftonePixelArtShader.fx" />
+    <Content Include="Shaders\PixelArtShader.fxh" />
   </ItemGroup>
-
   <Target Name="CompileShaders" BeforeTargets="BeforeBuild">
-    <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe&quot; /nologo /T ps_2_0 /E mainPS /Fo &quot;$(ProjectDir)Shaders\HalftonePixelArtShader.ps&quot; &quot;$(ProjectDir)Shaders\HalftonePixelArtShader.fx&quot;" />
-  </Target>
-
+    <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe&quot; /nologo /T ps_2_0 /E mainPS /Fo &quot;$(ProjectDir)Shaders\PixelArtShader.ps&quot; &quot;$(ProjectDir)Shaders\PixelArtShader.fxh&quot;" />
+  </Target>  
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <ItemGroup>
+  <!-- HLSL-Quelle optional im Projekt -->
+  <None Include="Shaders\PixelArtShader.fxh" />
+
+  <!-- KOMPILE-ERGEBNIS als WPF-Resource einbetten -->
+  <Resource Include="Shaders\PixelArtShader.ps">
+    <Generator>MSBuild:Compile</Generator>
+  </Resource>
+</ItemGroup>
 </Project>
