@@ -1,67 +1,65 @@
 ﻿Imports System.Drawing
-Imports System.IO
 Imports System.Windows
 Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 Imports System.Windows.Controls
+Imports SlideShowTools.ImageConversionHandling  ' <— wichtig
 
 Public NotInheritable Class WpfShaderRunner
-
-    ' *** Variablen am Anfang ***
     Private Sub New()
     End Sub
 
     Public Shared Function ApplyPixelArtEffect(srcBitmap As Bitmap,
                                                cellSize As Single,
                                                levelsPerChannel As Integer) As Bitmap
-        Dim bmpSource As BitmapSource = Nothing
-        Dim vis As New DrawingVisual()
-        Dim rtb As RenderTargetBitmap = Nothing
-        Dim finalBitmap As Bitmap = Nothing
+        If srcBitmap Is Nothing Then Return Nothing
+
         Dim width As Integer = srcBitmap.Width
         Dim height As Integer = srcBitmap.Height
-        Dim fx As PixelArtEffect = Nothing
-        Dim p0 As Media.Color
 
-        ' WinForms Bitmap -> WPF BitmapSource
-        Using ms As New MemoryStream()
-            srcBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png)
-            ms.Position = 0
-            bmpSource = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad)
-        End Using
+        ' 1) GDI -> WPF ohne PNG: nutzt HBITMAP + DeleteObject (kein Leak)
+        Dim bmpSource As BitmapSource = ConvertBitmapToImageSource(srcBitmap) ' liefert bereits Frozen. :contentReference[oaicite:0]{index=0}
 
-        ' Params packen: (cellSize, levels, _, _)
-        p0 = Media.Color.FromScRgb(1.0F, cellSize, CSng(levelsPerChannel), 0.0F)
-
-        fx = New PixelArtEffect() With {
-            .Input = New ImageBrush(bmpSource) With {.Stretch = Stretch.Fill},
-            .Params0 = p0
+        ' 2) Effekt vorbereiten (TexelSize = 1/px, Params = (cellPx, levels))
+        Dim fx As New PixelArtEffect() With {
+            .TexelSize = New System.Windows.Point(1.0 / width, 1.0 / height),
+            .Params01 = New System.Windows.Point(Math.Max(1.0, cellSize), CDbl(Math.Max(2, levelsPerChannel)))
         }
 
-        ' Effekt auf ein Visual anwenden
-        Using dc = vis.RenderOpen()
-            Dim rect As New Rect(0, 0, width, height)
-            Dim vb As New VisualBrush() With {.Visual = New Border With {.Effect = fx, .Width = width, .Height = height}}
-            dc.DrawRectangle(vb, Nothing, rect)
-        End Using
+        ' 3) Ein echtes Element rendern
+        Dim img As New System.Windows.Controls.Image() With {
+            .Source = bmpSource,
+            .Width = width,
+            .Height = height,
+            .Stretch = Stretch.Fill,
+            .Effect = fx
+        }
+        img.Measure(New System.Windows.Size(width, height))
+        img.Arrange(New Rect(0, 0, width, height))
+        img.UpdateLayout()
 
-        rtb = New RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32)
-        rtb.Render(vis)
-
-        finalBitmap = BitmapFromSource(rtb)
-        Return finalBitmap
-    End Function
-
-    Private Shared Function BitmapFromSource(source As BitmapSource) As Bitmap
-        Dim bmp As Bitmap = Nothing
-        Dim encoder As New PngBitmapEncoder()
-        encoder.Frames.Add(BitmapFrame.Create(source))
-        Using ms As New MemoryStream()
-            encoder.Save(ms)
-            Using temp As New Bitmap(ms)
-                bmp = New Bitmap(temp)
+        ' 4) Reuse eines RTB (optional, aber gut gegen LOH-Fragmentierung)
+        Static rtb As RenderTargetBitmap = Nothing
+        If rtb Is Nothing OrElse rtb.PixelWidth <> width OrElse rtb.PixelHeight <> height Then
+            rtb = New RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32)
+        Else
+            ' "Löschen": transparent drüberzeichnen
+            Dim dv As New DrawingVisual()
+            Using dc = dv.RenderOpen()
+                dc.DrawRectangle(System.Windows.Media.Brushes.Transparent, Nothing, New Rect(0, 0, width, height))
             End Using
-        End Using
-        Return bmp
+            rtb.Render(dv)
+        End If
+
+        rtb.Render(img)
+
+        ' 5) WPF -> GDI ohne PNG: direkt per CopyPixels
+        Dim result As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)  ' :contentReference[oaicite:1]{index=1}
+
+        ' 6) Referenzen lösen, damit GC räumen kann
+        img.Source = Nothing
+        img.Effect = Nothing
+
+        Return result
     End Function
 End Class
