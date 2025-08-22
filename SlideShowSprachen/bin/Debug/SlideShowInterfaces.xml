@@ -99,5 +99,10 @@ ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
 Struktur zur Beschreibung eines Shaders
  </summary>
 </member>
+<member name="T:SlideShowInterfaces.InfoHandling.LutInfo">
+<summary>
+Struktur zur Beschreibung eines Color-Lookup-Tabels (LUT)
+ </summary>
+</member>
 </members>
 </doc>

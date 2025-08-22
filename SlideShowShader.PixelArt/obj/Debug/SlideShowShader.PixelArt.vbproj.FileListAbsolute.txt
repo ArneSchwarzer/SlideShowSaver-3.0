@@ -25,3 +25,5 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\obj\Debug
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\obj\Debug\SlideShowShader.PixelArt.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\obj\Debug\SlideShowShader.PixelArt.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\obj\Debug\SlideShowShader.PixelArt.g.resources
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowLoader.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowLoader.pdb

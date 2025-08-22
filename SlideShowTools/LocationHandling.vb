@@ -49,8 +49,6 @@ Public Class LocationHandling
                            Select ort).FirstOrDefault()
             If treffer IsNot Nothing Then
                 Return $"{treffer.<Latitude>.Value}, {treffer.<Longitude>.Value}"
-            Else
-                LogDebug("SlideShowTools - LocationHandling.DetermineGPSLocation(): Tag '" & tag & "' konnte nicht in der Ortsdatenbank gefunden werden")
             End If
 
         Next

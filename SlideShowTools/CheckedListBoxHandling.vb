@@ -1,4 +1,5 @@
 ﻿Imports System.Windows.Forms
+Imports SlideShowLogging
 
 Public Class CheckedListBoxHandling
 

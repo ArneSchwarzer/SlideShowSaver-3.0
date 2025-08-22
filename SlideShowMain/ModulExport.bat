@@ -92,6 +92,8 @@ set "SOURCE9=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Toene
 set "SOURCE10=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\bin\Debug\SlideShowShader.ToenenFaerben.pdb"
 set "SOURCE11=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowShader.PixelArt.dll"
 set "SOURCE12=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\bin\Debug\SlideShowShader.PixelArt.pdb"
+set "SOURCE13=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.LUT\bin\Debug\SlideShowShader.LUT.dll"
+set "SOURCE14=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.LUT\bin\Debug\SlideShowShader.LUT.pdb"
 
 :: Zielverzeichnis
 set "TARGET=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\Shader"
@@ -108,8 +110,8 @@ echo.
 
 copy /Y "%SOURCE1%" "%TARGET%\Invertieren.ssss"
 copy /Y "%SOURCE2%" "%TARGET%\Invertieren.pdb"
-copy /Y "%SOURCE3%" "%TARGET%\Nachtsicht.ssss"
-copy /Y "%SOURCE4%" "%TARGET%\Nachtsicht.pdb"
+copy /Y "%SOURCE3%" "%TARGET%\Verschwoerung.ssss"
+copy /Y "%SOURCE4%" "%TARGET%\Verschwoerung.pdb"
 copy /Y "%SOURCE5%" "%TARGET%\Originalbild.ssss"
 copy /Y "%SOURCE6%" "%TARGET%\Originalbild.pdb"
 copy /Y "%SOURCE7%" "%TARGET%\Schwarz-Weiss.ssss"
@@ -118,6 +120,8 @@ copy /Y "%SOURCE9%" "%TARGET%\Toenen und Faerben.ssss"
 copy /Y "%SOURCE10%" "%TARGET%\Toenen und Faerben.pdb"
 copy /Y "%SOURCE11%" "%TARGET%\PixelArt.ssss"
 copy /Y "%SOURCE12%" "%TARGET%\PixelArt.pdb"
+copy /Y "%SOURCE13%" "%TARGET%\LUT.ssss"
+copy /Y "%SOURCE14%" "%TARGET%\LUT.pdb"
 
 echo Shader kopiert.
 echo.

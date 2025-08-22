@@ -47,7 +47,7 @@ Public Class ShaderMain
 
     Public ReadOnly Property ShaderKurzBeschreibung As String Implements ISlideShowShader.ShaderKurzBeschreibung
         Get
-            Return "Stellt das Bild als PixelArt dar"
+            Return "Die 80er Jahre haben angerufen. Sie wollen ihre Pixel zurück."
         End Get
     End Property
 

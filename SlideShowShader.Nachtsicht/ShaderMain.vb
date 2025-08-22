@@ -17,7 +17,7 @@ Public Class ShaderMain
     'Variablendeklarationen
 #Region "Variablendeklaration"
     'Verwaltung
-    Public Shared nameShader As String = "Nachtsicht"
+    Public Shared nameShader As String = "Verschwörung"
     Private Shared aktuelleSettings As ShaderSettings_Nachtsicht
     Public Shared SLIDESHOWSHADER_NACHTSICHT_FULLPATH As String = SLIDESHOWSHADER_PATH & "Nachtsicht\"
 
@@ -46,7 +46,7 @@ Public Class ShaderMain
 
     Public ReadOnly Property ShaderKurzBeschreibung As String Implements ISlideShowShader.ShaderKurzBeschreibung
         Get
-            Return "Simuliert eine Nachtsichtkamera des BND mit grünem Farbton, Rauschen, Scanlines... und 'Geheiminformationen'."
+            Return "SIE beobachten Dich! Überall haben SIE ihre Nachtsichtkameras installiert, um Informationen über Dich zu sammeln!"
         End Get
     End Property
 

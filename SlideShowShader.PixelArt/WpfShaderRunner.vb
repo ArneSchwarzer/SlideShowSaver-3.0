@@ -54,7 +54,7 @@ Public NotInheritable Class WpfShaderRunner
         rtb.Render(img)
 
         ' 5) WPF -> GDI ohne PNG: direkt per CopyPixels
-        Dim result As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)  ' :contentReference[oaicite:1]{index=1}
+        Dim result As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
 
         ' 6) Referenzen lösen, damit GC räumen kann
         img.Source = Nothing

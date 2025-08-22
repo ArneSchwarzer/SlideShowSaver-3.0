@@ -140,6 +140,10 @@
       <Project>{7f07849f-94c6-4f94-9713-6d5fd4cc76ac}</Project>
       <Name>SlideShowInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SlideShowLoader\SlideShowLoader.vbproj">
+      <Project>{19b1a160-9bd1-45ef-9544-96c967e8c17c}</Project>
+      <Name>SlideShowLoader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SlideShowLogging\SlideShowLogging.vbproj">
       <Project>{4de43745-d2ce-442c-acc5-49e2bcb0c87f}</Project>
       <Name>SlideShowLogging</Name>
@@ -154,11 +158,11 @@
   </ItemGroup>
   <Target Name="CompileShaders" BeforeTargets="BeforeBuild">
     <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe&quot; /nologo /T ps_2_0 /E mainPS /Fo &quot;$(ProjectDir)Shaders\PixelArtShader.ps&quot; &quot;$(ProjectDir)Shaders\PixelArtShader.fxh&quot;" />
-  </Target>  
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <ItemGroup>  
-  <Resource Include="Shaders\PixelArtShader.ps">
-    <Generator>MSBuild:Compile</Generator>
-  </Resource>
-</ItemGroup>
+  <ItemGroup>
+    <Resource Include="Shaders\PixelArtShader.ps">
+      <Generator>MSBuild:Compile</Generator>
+    </Resource>
+  </ItemGroup>
 </Project>
