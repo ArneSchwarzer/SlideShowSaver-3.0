@@ -7,6 +7,12 @@ Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 Imports SlideShowInterfaces.InfoHandling
 
+
+Public Enum CubeTableOrder
+    RGB   ' R läuft am schnellsten (innere Schleife)
+    BGR   ' B läuft am schnellsten (innere Schleife) – „Blue-fastest“
+End Enum
+
 ' Ergebnisobjekt: 2D-Atlas + effektives N
 Public Structure LutAtlas
         Public Atlas As BitmapSource      ' WriteableBitmap (Frozen), BGRA32, Größe: (N*N) x N
@@ -84,19 +90,22 @@ Public Structure LutAtlas
         ' ---------- Dispatcher: Datei -> 3D-Gitter ----------
         Private Function LoadLutToGrid(lut As LutInfo, ByRef N As Integer) As Vec3F(,,)
             Select Case lut.Type
-                Case LutType.Cube3D : Return LoadCube3D(lut.FullPath, N)
-                Case LutType.HaldPng : Return LoadHaldPng(lut.FullPath, N)
+            Case LutType.Cube3D
+                ' Standard: RGB wie Photoshop-Default
+                Return LoadCube3D(lut.FullPath, N, CubeTableOrder.RGB)
+            Case LutType.HaldPng : Return LoadHaldPng(lut.FullPath, N)
                 Case Else : Throw New NotSupportedException("Nicht unterstützter LUT-Typ.")
             End Select
         End Function
 
-        ' ---------- .cube laden (IRIDAS/Adobe) ----------
-        ' Erwartete Datenreihenfolge in .cube: Blue läuft am schnellsten, dann Green, dann Red.
-        Private Function LoadCube3D(path As String, ByRef N As Integer) As Vec3F(,,)
-            Dim list As New List(Of Vec3F)(32768)
-            N = 0
+    ' ---------- .cube laden (IRIDAS/Adobe) ----------
+    ' Erwartete Datenreihenfolge in .cube: Blue läuft am schnellsten, dann Green, dann Red.
+    Private Function LoadCube3D(path As String, ByRef N As Integer,
+                            Optional order As CubeTableOrder = CubeTableOrder.RGB) As Vec3F(,,)
+        Dim list As New List(Of Vec3F)(32768)
+        N = 0
 
-            Using sr As New StreamReader(path, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks:=True)
+        Using sr As New StreamReader(path, System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks:=True)
                 While Not sr.EndOfStream
                     Dim line = sr.ReadLine()
                     If line Is Nothing Then Exit While
@@ -121,24 +130,41 @@ Public Structure LutAtlas
                 End While
             End Using
 
-            If N <= 1 Then Throw New InvalidOperationException("Ungültiges/fehlendes LUT_3D_SIZE.")
-            If list.Count < N * N * N Then Throw New InvalidOperationException("Zu wenige Einträge in .cube.")
+        If N <= 1 Then Throw New InvalidOperationException("Ungültiges/fehlendes LUT_3D_SIZE.")
+        If list.Count < N * N * N Then Throw New InvalidOperationException("Zu wenige Einträge in .cube.")
 
-            Dim grid(N - 1, N - 1, N - 1) As Vec3F
-            Dim idx As Integer = 0
-            For r As Integer = 0 To N - 1
-                For g As Integer = 0 To N - 1
-                    For b As Integer = 0 To N - 1
-                        grid(r, g, b) = list(idx) : idx += 1
+        Dim grid(N - 1, N - 1, N - 1) As Vec3F
+        Dim idx As Integer = 0
+
+        Select Case order
+            Case CubeTableOrder.RGB
+                ' R innere Schleife (schnellste Achse), dann G, dann B
+                For b As Integer = 0 To N - 1
+                    For g As Integer = 0 To N - 1
+                        For r As Integer = 0 To N - 1
+                            grid(r, g, b) = list(idx) : idx += 1
+                        Next
                     Next
                 Next
-            Next
-            Return grid
-        End Function
 
-        ' ---------- Hald-PNG laden ----------
-        ' side = (L*L) * scale; wir lesen zentrisch aus jedem Block.
-        Private Function LoadHaldPng(path As String, ByRef L As Integer) As Vec3F(,,)
+            Case CubeTableOrder.BGR
+                ' B innere Schleife (Blue-fastest), dann G, dann R
+                For r As Integer = 0 To N - 1
+                    For g As Integer = 0 To N - 1
+                        For b As Integer = 0 To N - 1
+                            grid(r, g, b) = list(idx) : idx += 1
+                        Next
+                    Next
+                Next
+        End Select
+
+        Return grid
+
+    End Function
+
+    ' ---------- Hald-PNG laden ----------
+    ' side = (L*L) * scale; wir lesen zentrisch aus jedem Block.
+    Private Function LoadHaldPng(path As String, ByRef L As Integer) As Vec3F(,,)
             Using srcBmp As New Bitmap(path)
                 If srcBmp.Width <> srcBmp.Height Then Throw New InvalidOperationException("PNG ist nicht quadratisch.")
                 Dim side As Integer = srcBmp.Width

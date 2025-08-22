@@ -22,7 +22,7 @@ float4 lutParams : register(c1);
 // swizzlen wir hier zentral. Bei echter RGBA-Sampling-Pipeline: Define auf 0.
 // (Per Build umschaltbar: /D LUT_ATLAS_BGRA=0)
 #ifndef LUT_ATLAS_BGRA
-#define LUT_ATLAS_BGRA 1
+#define LUT_ATLAS_BGRA 0
 #endif
 
 inline float3 NormalizeLutRead(float3 v)

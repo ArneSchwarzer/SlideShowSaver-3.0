@@ -47,14 +47,13 @@
     ''' </summary>
     Public Structure LutInfo
         Public FullPath As String
-        Public DisplayName As String
+        Public LUTName As String
+        Public LUTBeschreibung As String
         Public Type As LutType
         Public SizeN As Integer          ' 3D-Würfel-Kantenlänge (z.B. 17, 32, 33)
         Public ErrorMessage As String
         Public Overrides Function ToString() As String
-            Dim t As String = If(Type = LutType.Cube3D, "CUBE", If(Type = LutType.HaldPng, "HALD", "???"))
-            Dim n As String = If(SizeN > 0, $" (N={SizeN})", "")
-            Return $"{DisplayName}  [{t}{n}]"
+            Return LUTName
         End Function
     End Structure
 

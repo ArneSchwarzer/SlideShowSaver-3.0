@@ -65,3 +65,7 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\XmpCore.dll
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\MetadataExtractor.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\XmpCore.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\MetadataExtractor.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\XmpCore.dll
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\MetadataExtractor.xml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\bin\Debug\XmpCore.xml

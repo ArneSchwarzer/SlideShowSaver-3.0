@@ -46,7 +46,7 @@ Public Module LUTListLoader
             Next
         Next
 
-        result.Sort(Function(a, b) StringComparer.CurrentCultureIgnoreCase.Compare(a.DisplayName, b.DisplayName))
+        result.Sort(Function(a, b) StringComparer.CurrentCultureIgnoreCase.Compare(a.LUTName, b.LUTName))
         Return result
     End Function
 

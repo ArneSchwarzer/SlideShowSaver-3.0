@@ -4,6 +4,7 @@ Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Text
 Imports SlideShowInterfaces.InfoHandling
+Imports System.Security.Policy
 
 Public NotInheritable Class LUTSniffer
     Private Sub New()
@@ -11,19 +12,23 @@ Public NotInheritable Class LUTSniffer
 
     Public Shared Function SniffFile(fp As String) As LutInfo
         Dim info As New LutInfo With {
-            .FullPath = fp,
-            .DisplayName = Path.GetFileName(fp),
-            .Type = LutType.Unknown,
-            .SizeN = 0,
-            .ErrorMessage = ""
-        }
+        .FullPath = fp,
+        .LUTName = Path.GetFileNameWithoutExtension(fp),
+        .LUTBeschreibung = Path.GetFileName(fp),
+        .Type = LutType.Unknown,
+        .SizeN = 0,
+        .ErrorMessage = ""
+    }
 
         If Not File.Exists(fp) Then
             info.ErrorMessage = "Datei nicht gefunden."
+            GenerateFullLUTBeschreibung(info)
             Return info
         End If
 
-        ' --- 1) Bildversuch zuerst: PNG-Hald (auch wenn Endung .lut ist)
+        Dim detected As Boolean = False
+
+        ' --- 1) Bildversuch: PNG-Hald (auch wenn Endung .lut) ---
         Try
             Using img As Image = Image.FromFile(fp)
                 If img.RawFormat.Guid = ImageFormat.Png.Guid AndAlso img.Width = img.Height Then
@@ -32,45 +37,55 @@ Public NotInheritable Class LUTSniffer
                     If L > 1 Then
                         info.Type = LutType.HaldPng
                         info.SizeN = L
-                        Return info
+                        detected = True
                     End If
                 End If
             End Using
         Catch
-            ' kein Bild / kein PNG → weiter mit Text
+            ' kein PNG → weiter
         End Try
 
-        ' --- 2) Textversuch: .cube (IRIDAS)
-        Try
-            Using sr As New StreamReader(fp, Encoding.UTF8, detectEncodingFromByteOrderMarks:=True)
-                Dim n As Integer = 0
-                While Not sr.EndOfStream
-                    Dim line As String = sr.ReadLine()
-                    If line Is Nothing Then Exit While
-                    line = line.Trim()
-                    If line.Length = 0 OrElse line.StartsWith("#") Then Continue While
+        ' --- 2) Textversuch: .cube (IRIDAS) ---
+        If Not detected Then
+            Try
+                Using sr As New StreamReader(fp, Encoding.UTF8, detectEncodingFromByteOrderMarks:=True)
+                    Dim n As Integer = 0
+                    While Not sr.EndOfStream
+                        Dim line As String = sr.ReadLine()
+                        If line Is Nothing Then Exit While
+                        line = line.Trim()
+                        If line.Length = 0 OrElse line.StartsWith("#") Then Continue While
 
-                    If line.StartsWith("LUT_3D_SIZE", StringComparison.OrdinalIgnoreCase) Then
-                        Dim parts = line.Split({" "c, vbTab}, StringSplitOptions.RemoveEmptyEntries)
-                        If parts.Length >= 2 AndAlso Integer.TryParse(parts(1), NumberStyles.Integer, CultureInfo.InvariantCulture, n) Then
-                            If n > 1 Then
-                                info.Type = LutType.Cube3D
-                                info.SizeN = n
-                                Return info
+                        If line.StartsWith("LUT_3D_SIZE", StringComparison.OrdinalIgnoreCase) Then
+                            Dim parts = line.Split({" "c, vbTab}, StringSplitOptions.RemoveEmptyEntries)
+                            If parts.Length >= 2 AndAlso Integer.TryParse(parts(1), NumberStyles.Integer, CultureInfo.InvariantCulture, n) Then
+                                If n > 1 Then
+                                    info.Type = LutType.Cube3D
+                                    info.SizeN = n
+                                    detected = True
+                                    Exit While
+                                End If
                             End If
                         End If
-                    End If
-                End While
-            End Using
-        Catch ex As Exception
-            info.ErrorMessage = ex.Message
-        End Try
-
-        If info.Type = LutType.Unknown Then
-            info.ErrorMessage = "Unbekanntes/inkompatibles LUT-Format."
+                    End While
+                End Using
+            Catch ex As Exception
+                info.ErrorMessage = ex.Message
+            End Try
         End If
+
+        If Not detected AndAlso info.Type = LutType.Unknown Then
+            info.ErrorMessage = If(String.IsNullOrEmpty(info.ErrorMessage),
+                               "Unbekanntes/inkompatibles LUT-Format.",
+                               info.ErrorMessage)
+        End If
+
+        ' --- immer am Ende zusammensetzen ---
+        GenerateFullLUTBeschreibung(info)
         Return info
+
     End Function
+
 
     ''' <summary>
     ''' Ermittelt das Hald-Level L aus der Seitenlänge einer quadratischen PNG.
@@ -108,7 +123,16 @@ Public NotInheritable Class LUTSniffer
         Next
         ' deduplizieren + sortieren
         Dim unique = res.GroupBy(Function(x) x.FullPath, StringComparer.OrdinalIgnoreCase).Select(Function(g) g.First()).ToList()
-        unique.Sort(Function(a, b) StringComparer.CurrentCultureIgnoreCase.Compare(a.DisplayName, b.DisplayName))
+        unique.Sort(Function(a, b) StringComparer.CurrentCultureIgnoreCase.Compare(a.LUTName, b.LUTName))
         Return unique
     End Function
+
+    Private Shared Sub GenerateFullLUTBeschreibung(ByRef lut As LutInfo)
+
+        Dim t As String = If(lut.Type = LutType.Cube3D, "CUBE", If(lut.Type = LutType.HaldPng, "HALD", "???"))
+        Dim n As String = If(lut.SizeN > 0, $" (N={lut.SizeN})", "")
+        lut.LUTBeschreibung &= $" [{t}{n}]"
+
+    End Sub
+
 End Class

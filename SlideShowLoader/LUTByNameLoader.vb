@@ -42,7 +42,7 @@ Public Module LUTByNameLoader
         Dim all As List(Of LutInfo) = LUTListLoader.LUTListLoader()
 
         ' harte Priorisierung: erst exakter Filename (mit Ext), UserRoot vor InstallRoot
-        Dim candidates = all.Where(Function(li) li.DisplayName.Equals(nameOnly, StringComparison.CurrentCultureIgnoreCase)).ToList()
+        Dim candidates = all.Where(Function(li) li.LUTName.Equals(nameOnly, StringComparison.CurrentCultureIgnoreCase)).ToList()
         Dim chosen As LutInfo
         If candidates.Count > 0 Then
             chosen = PreferUserFolder(candidates)
@@ -50,7 +50,7 @@ Public Module LUTByNameLoader
         End If
 
         ' ansonsten: Vergleich ohne Extension
-        candidates = all.Where(Function(li) Path.GetFileNameWithoutExtension(li.DisplayName).Equals(nameNoExt, StringComparison.CurrentCultureIgnoreCase)).ToList()
+        candidates = all.Where(Function(li) Path.GetFileNameWithoutExtension(li.LUTName).Equals(nameNoExt, StringComparison.CurrentCultureIgnoreCase)).ToList()
         If candidates.Count > 0 Then
             chosen = PreferUserFolder(candidates)
             Return chosen
@@ -71,7 +71,8 @@ Public Module LUTByNameLoader
     Private Function NotFound(msg As String) As LutInfo
         Return New LutInfo With {
             .FullPath = "",
-            .DisplayName = "",
+            .LUTName = "",
+            .LUTBeschreibung = "",
             .Type = LutType.Unknown,
             .SizeN = 0,
             .ErrorMessage = msg

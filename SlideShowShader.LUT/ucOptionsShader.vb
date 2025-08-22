@@ -1,12 +1,12 @@
-﻿Imports SlideShowTools.CheckedListBoxHandling
+﻿Imports System.Windows.Forms
+Imports SlideShowInterfaces.InfoHandling
+Imports SlideShowShader.LUT.ShaderMain
+Imports SlideShowTools
+Imports SlideShowTools.CheckedListBoxHandling
+Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
-Imports SlideShowShader.LUT.ShaderMain
-Imports SlideShowTools.ListHandling
-Imports SlideShowInterfaces.InfoHandling
-Imports System.Windows.Forms
-Imports SlideShowTools
-Imports SlideShowLoader
+Imports SlideShowTools.ToolTipHandling
 
 Public Class ucOptionsShader
 
@@ -42,18 +42,20 @@ Public Class ucOptionsShader
         trkIntensitaet.Value = aktuelleSettings.intensitaet
         lblIntensitaet.Text = aktuelleSettings.intensitaet.ToString & " %"
 
-        'Combobox "LUTs"
-        clbLUTs.DisplayMember = "DisplayName"
+        'CheckedListBox "LUTs"
+        clbLUTs.DisplayMember = "LUTName"
         clbLUTs.Items.Clear()
         For Each LUT In LUTList
             clbLUTs.Items.Add(LUT)
         Next
 
+        EnableToolTipsForCLB(clbLUTs)
+
         markierteLUTs = JoinSemicolonList(aktuelleSettings.LUTs)
         SetCheckedItemsByName(Of LutInfo)(
             clbLUTs,
             markierteLUTs,
-            Function(m) m.DisplayName
+            Function(m) m.LUTName
             )
 
         clbLUTs.Sorted = True

@@ -144,6 +144,14 @@ SlideShowTools
  <param name="defaultXmlPath">Pfad zur Standard-XML-Datei</param>
  <returns>Anzahl der neu hinzugefügten Orte</returns>
 </member>
+<member name="M:SlideShowTools.LUTHandling.BuildAtlas(SlideShowInterfaces.InfoHandling.LutInfo,System.Int32,System.Boolean)">
+ <summary>
+ Baut aus einer LUT-Datei (.cube oder Hald-PNG) einen 2D-Atlas (N*N x N, BGRA32).
+ Optionales Resample auf targetN (Standard 33). Ergebnisse werden gecached.
+ NOTE: WPF-Effects erwarten BGRA8. Wir schreiben B,G,R,A (Bytes 0..3).
+ Der Shader swizzelt ggf. (return lut.bgr), siehe z.B. LUTShader.fxh.
+ </summary>
+</member>
 <member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution(System.Windows.Forms.Control)">
  <summary>
  Gibt die native Auflösung des Bildschirms zurück, auf dem sich das angegebene Control befindet.

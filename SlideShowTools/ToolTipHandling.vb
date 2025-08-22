@@ -44,6 +44,8 @@ Public Class ToolTipHandling
             Return DirectCast(item, InfoHandling.SlideShowTransitionInfo).TransitionBeschreibung
         ElseIf TypeOf item Is InfoHandling.SlideShowShaderInfo Then
             Return DirectCast(item, InfoHandling.SlideShowShaderInfo).ShaderBeschreibung
+        ElseIf TypeOf item Is InfoHandling.LutInfo Then
+            Return DirectCast(item, InfoHandling.LutInfo).LUTBeschreibung
         Else
             Return item.ToString()
         End If
