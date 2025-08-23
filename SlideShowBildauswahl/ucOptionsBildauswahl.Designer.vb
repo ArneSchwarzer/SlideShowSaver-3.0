@@ -23,9 +23,7 @@ Partial Class ucOptionsBildauswahl
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblNlstVerzeichnisse = New System.Windows.Forms.Label()
-Me.lblNlstVerzeichnisse.Tag = "langKey=lblNlstVerzeichnisse"
         Me.lstVerzeichnisse = New System.Windows.Forms.ListBox()
-Me.lstVerzeichnisse.Tag = "langKey=lstVerzeichnisse"
         Me.btnVerzeichnisHinzufügen = New System.Windows.Forms.Button()
         Me.btnVerzeichnisseLöschen = New System.Windows.Forms.Button()
         Me.btnVerzeichnisseListeLöschen = New System.Windows.Forms.Button()
@@ -36,28 +34,17 @@ Me.lstVerzeichnisse.Tag = "langKey=lstVerzeichnisse"
         Me.btnBlackListLöschen = New System.Windows.Forms.Button()
         Me.btnBlackListHinzufügen = New System.Windows.Forms.Button()
         Me.lblNlstWhiteList = New System.Windows.Forms.Label()
-Me.lblNlstWhiteList.Tag = "langKey=lblNlstWhiteList"
         Me.lstWhiteList = New System.Windows.Forms.ListBox()
-Me.lstWhiteList.Tag = "langKey=lstWhiteList"
         Me.lstBlackList = New System.Windows.Forms.ListBox()
-Me.lstBlackList.Tag = "langKey=lstBlackList"
         Me.lblNlstBlakcList = New System.Windows.Forms.Label()
-Me.lblNlstBlakcList.Tag = "langKey=lblNlstBlakcList"
         Me.lblNAltersfreigabe = New System.Windows.Forms.Label()
-Me.lblNAltersfreigabe.Tag = "langKey=lblNAltersfreigabe"
         Me.lblNBewertung = New System.Windows.Forms.Label()
-Me.lblNBewertung.Tag = "langKey=lblNBewertung"
         Me.rdo18 = New System.Windows.Forms.RadioButton()
-Me.rdo18.Tag = "langKey=rdo18"
         Me.rdoAkt = New System.Windows.Forms.RadioButton()
-Me.rdoAkt.Tag = "langKey=rdoAkt"
         Me.rdoLingerie = New System.Windows.Forms.RadioButton()
-Me.rdoLingerie.Tag = "langKey=rdoLingerie"
         Me.rdoJugendfrei = New System.Windows.Forms.RadioButton()
-Me.rdoJugendfrei.Tag = "langKey=rdoJugendfrei"
         Me.sbcBewertung = New MyControlsLibrary.SterneBewertungControl()
         Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.SuspendLayout()
         '
         'lblNlstVerzeichnisse
@@ -78,6 +65,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lstVerzeichnisse.Name = "lstVerzeichnisse"
         Me.lstVerzeichnisse.Size = New System.Drawing.Size(765, 209)
         Me.lstVerzeichnisse.TabIndex = 1
+        Me.lstVerzeichnisse.Tag = "langKey=lstVerzeichnisse"
         '
         'btnVerzeichnisHinzufügen
         '
@@ -181,6 +169,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lstWhiteList.Name = "lstWhiteList"
         Me.lstWhiteList.Size = New System.Drawing.Size(337, 291)
         Me.lstWhiteList.TabIndex = 12
+        Me.lstWhiteList.Tag = "langKey=lstWhiteList"
         '
         'lstBlackList
         '
@@ -190,6 +179,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lstBlackList.Name = "lstBlackList"
         Me.lstBlackList.Size = New System.Drawing.Size(337, 291)
         Me.lstBlackList.TabIndex = 13
+        Me.lstBlackList.Tag = "langKey=lstBlackList"
         '
         'lblNlstBlakcList
         '
@@ -229,6 +219,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rdo18.Size = New System.Drawing.Size(102, 45)
         Me.rdo18.TabIndex = 17
         Me.rdo18.TabStop = True
+        Me.rdo18.Tag = "langKey=rdo18"
         Me.rdo18.Text = "18+"
         Me.rdo18.UseVisualStyleBackColor = True
         '
@@ -275,6 +266,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.sbcBewertung.Name = "sbcBewertung"
         Me.sbcBewertung.Size = New System.Drawing.Size(213, 45)
         Me.sbcBewertung.TabIndex = 21
+        Me.sbcBewertung.Tag = "STYLE_KLINGON"
         Me.sbcBewertung.Text = "SterneBewertungControl1"
         '
         'btnDefaults
@@ -283,6 +275,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(206, 51)
         Me.btnDefaults.TabIndex = 22
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '

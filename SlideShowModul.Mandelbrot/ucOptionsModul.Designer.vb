@@ -22,25 +22,24 @@ Partial Class ucOptionsModul
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.lblModulname = New System.Windows.Forms.Label()
+        Me.lblModul = New System.Windows.Forms.Label()
         Me.lblNModul = New System.Windows.Forms.Label()
         Me.cmbGradient = New System.Windows.Forms.ComboBox()
-Me.cmbGradient.Tag = "langKey=cmbGradient"
         Me.lblNcmbGradient = New System.Windows.Forms.Label()
         Me.chkGradientAnimieren = New System.Windows.Forms.CheckBox()
         Me.chkKoordinatenAnzeigen = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
-        'lblModulname
+        'lblModul
         '
-        Me.lblModulname.AutoSize = True
-        Me.lblModulname.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblModulname.Location = New System.Drawing.Point(257, 30)
-        Me.lblModulname.Name = "lblModulname"
-        Me.lblModulname.Size = New System.Drawing.Size(186, 41)
-        Me.lblModulname.TabIndex = 17
-        Me.lblModulname.Tag = "langKey=lblModulname"
-        Me.lblModulname.Text = "Mandelbrot"
+        Me.lblModul.AutoSize = True
+        Me.lblModul.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblModul.Location = New System.Drawing.Point(257, 30)
+        Me.lblModul.Name = "lblModul"
+        Me.lblModul.Size = New System.Drawing.Size(186, 41)
+        Me.lblModul.TabIndex = 17
+        Me.lblModul.Tag = "langKey=lblModulname"
+        Me.lblModul.Text = "Mandelbrot"
         '
         'lblNModul
         '
@@ -60,6 +59,7 @@ Me.cmbGradient.Tag = "langKey=cmbGradient"
         Me.cmbGradient.Name = "cmbGradient"
         Me.cmbGradient.Size = New System.Drawing.Size(604, 49)
         Me.cmbGradient.TabIndex = 19
+        Me.cmbGradient.Tag = "langKey=cmbGradient"
         '
         'lblNcmbGradient
         '
@@ -101,7 +101,7 @@ Me.cmbGradient.Tag = "langKey=cmbGradient"
         Me.Controls.Add(Me.chkGradientAnimieren)
         Me.Controls.Add(Me.cmbGradient)
         Me.Controls.Add(Me.lblNcmbGradient)
-        Me.Controls.Add(Me.lblModulname)
+        Me.Controls.Add(Me.lblModul)
         Me.Controls.Add(Me.lblNModul)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
@@ -112,7 +112,7 @@ Me.cmbGradient.Tag = "langKey=cmbGradient"
 
     End Sub
 
-    Friend WithEvents lblModulname As Windows.Forms.Label
+    Friend WithEvents lblModul As Windows.Forms.Label
     Friend WithEvents lblNModul As Windows.Forms.Label
     Friend WithEvents cmbGradient As Windows.Forms.ComboBox
     Friend WithEvents lblNcmbGradient As Windows.Forms.Label

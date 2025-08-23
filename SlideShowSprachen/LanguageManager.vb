@@ -40,10 +40,6 @@ Public Class SprachSpezialHandling
             If TypeOf ctrl Is SterneBewertungControl Then
                 DirectCast(ctrl, SterneBewertungControl).SternFarbeAktiv = Color.DarkRed
             End If
-        ElseIf stilFlag = "STYLE_MATRIX" AndAlso aktuelleSprache = "ZH" Then
-            If TypeOf ctrl Is Label Then
-                ctrl.ForeColor = Color.Lime
-            End If
         End If
     End Sub
 

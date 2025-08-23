@@ -23,16 +23,11 @@ Partial Class frmInputBildauswahl
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblTitel = New System.Windows.Forms.Label()
-Me.lblTitel.Tag = "langKey=lblTitel"
         Me.btnOK = New System.Windows.Forms.Button()
-Me.btnOK.Tag = "langKey=btnOK"
         Me.picLogo = New System.Windows.Forms.PictureBox()
-Me.picLogo.Tag = "langKey=picLogo"
         Me.txtTag = New System.Windows.Forms.TextBox()
         Me.lblNtxtTag = New System.Windows.Forms.Label()
-Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.btnCancel = New System.Windows.Forms.Button()
-Me.btnCancel.Tag = "langKey=btnCancel"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -44,6 +39,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.lblTitel.Name = "lblTitel"
         Me.lblTitel.Size = New System.Drawing.Size(239, 48)
         Me.lblTitel.TabIndex = 5
+        Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblTitel.Text = "Tag einfügen"
         '
         'btnOK
@@ -52,6 +48,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(168, 71)
         Me.btnOK.TabIndex = 4
+        Me.btnOK.Tag = "langKey=btnOK"
         Me.btnOK.Text = "OK"
         Me.btnOK.UseVisualStyleBackColor = True
         '
@@ -64,6 +61,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.picLogo.TabIndex = 3
         Me.picLogo.TabStop = False
+        Me.picLogo.Tag = "langKey=picLogo"
         '
         'txtTag
         '
@@ -79,6 +77,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.lblNtxtTag.Name = "lblNtxtTag"
         Me.lblNtxtTag.Size = New System.Drawing.Size(156, 41)
         Me.lblNtxtTag.TabIndex = 7
+        Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.lblNtxtTag.Text = "Neues Tag"
         '
         'btnCancel
@@ -87,6 +86,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(218, 71)
         Me.btnCancel.TabIndex = 8
+        Me.btnCancel.Tag = "langKey=btnCancel"
         Me.btnCancel.Text = "Abbrechen"
         Me.btnCancel.UseVisualStyleBackColor = True
         '
@@ -104,6 +104,7 @@ Me.btnCancel.Tag = "langKey=btnCancel"
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmInputBildauswahl"
+        Me.Tag = "langKey=frmInputBoldauswahl"
         Me.Text = "Tag hinzufügen"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)

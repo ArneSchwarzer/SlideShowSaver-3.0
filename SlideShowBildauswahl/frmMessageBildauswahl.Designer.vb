@@ -24,13 +24,9 @@ Partial Class frmMessageBildauswahl
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMessageBildauswahl))
         Me.picLogo = New System.Windows.Forms.PictureBox()
-Me.picLogo.Tag = "langKey=picLogo"
         Me.btnOK = New System.Windows.Forms.Button()
-Me.btnOK.Tag = "langKey=btnOK"
         Me.lblTitel = New System.Windows.Forms.Label()
-Me.lblTitel.Tag = "langKey=lblTitel"
         Me.rtxMessage = New System.Windows.Forms.RichTextBox()
-Me.rtxMessage.Tag = "langKey=rtxMessage"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -43,6 +39,7 @@ Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.picLogo.TabIndex = 0
         Me.picLogo.TabStop = False
+        Me.picLogo.Tag = "langKey=picLogo"
         '
         'btnOK
         '
@@ -50,6 +47,7 @@ Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(168, 86)
         Me.btnOK.TabIndex = 1
+        Me.btnOK.Tag = "langKey=btnOK"
         Me.btnOK.Text = "OK"
         Me.btnOK.UseVisualStyleBackColor = True
         '
@@ -61,6 +59,7 @@ Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.lblTitel.Name = "lblTitel"
         Me.lblTitel.Size = New System.Drawing.Size(450, 48)
         Me.lblTitel.TabIndex = 2
+        Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblTitel.Text = "Uuups... ein Tag-Konflikt!"
         '
         'rtxMessage
@@ -73,6 +72,7 @@ Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.rtxMessage.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None
         Me.rtxMessage.Size = New System.Drawing.Size(638, 361)
         Me.rtxMessage.TabIndex = 4
+        Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.rtxMessage.Text = resources.GetString("rtxMessage.Text")
         '
         'frmMessageBildauswahl
@@ -87,6 +87,7 @@ Me.rtxMessage.Tag = "langKey=rtxMessage"
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmMessageBildauswahl"
+        Me.Tag = "langKey=frmMessageBildauswahl"
         Me.Text = "Tag-Konflikt"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)

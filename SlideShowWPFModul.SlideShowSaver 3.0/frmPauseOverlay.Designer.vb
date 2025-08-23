@@ -24,19 +24,12 @@ Partial Class frmPauseModusOverlay
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.lblPauseAnzahl = New System.Windows.Forms.Label()
-Me.lblPauseAnzahl.Tag = "langKey=lblPauseAnzahl"
         Me.btnPauseBack = New System.Windows.Forms.Button()
-Me.btnPauseBack.Tag = "langKey=btnPauseBack"
         Me.btnPausePause = New System.Windows.Forms.Button()
-Me.btnPausePause.Tag = "langKey=btnPausePause"
         Me.btnPauseForward = New System.Windows.Forms.Button()
-Me.btnPauseForward.Tag = "langKey=btnPauseForward"
         Me.chkPauseMarkPicture = New System.Windows.Forms.CheckBox()
-Me.chkPauseMarkPicture.Tag = "langKey=chkPauseMarkPicture"
         Me.chkBewerten = New System.Windows.Forms.CheckBox()
-Me.chkBewerten.Tag = "langKey=chkBewerten"
         Me.lblOptionsDialogDisabled = New System.Windows.Forms.Label()
-Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.tmrWarnLabelAnzeige = New System.Windows.Forms.Timer(Me.components)
         Me.sbcBewerten = New MyControlsLibrary.SterneBewertungControl()
         Me.SuspendLayout()
@@ -56,7 +49,7 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         '
         'btnPauseBack
         '
-        Me.btnPauseBack.BackgroundImage = My.Resources.Resources.Zurück_Transparent
+        Me.btnPauseBack.BackgroundImage = Global.SlideShowWPFModul.SlideShowSaver_3._0.My.Resources.Resources.Zurück_Transparent
         Me.btnPauseBack.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPauseBack.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPauseBack.Location = New System.Drawing.Point(25, 100)
@@ -64,11 +57,12 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.btnPauseBack.Name = "btnPauseBack"
         Me.btnPauseBack.Size = New System.Drawing.Size(150, 150)
         Me.btnPauseBack.TabIndex = 1
+        Me.btnPauseBack.Tag = "langKey=btnPauseBack"
         Me.btnPauseBack.UseVisualStyleBackColor = True
         '
         'btnPausePause
         '
-        Me.btnPausePause.BackgroundImage = My.Resources.Resources.Pause_Transparent
+        Me.btnPausePause.BackgroundImage = Global.SlideShowWPFModul.SlideShowSaver_3._0.My.Resources.Resources.Pause_Transparent
         Me.btnPausePause.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPausePause.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPausePause.Location = New System.Drawing.Point(221, 100)
@@ -76,11 +70,12 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.btnPausePause.Name = "btnPausePause"
         Me.btnPausePause.Size = New System.Drawing.Size(150, 150)
         Me.btnPausePause.TabIndex = 2
+        Me.btnPausePause.Tag = "langKey=btnPausePause"
         Me.btnPausePause.UseVisualStyleBackColor = True
         '
         'btnPauseForward
         '
-        Me.btnPauseForward.BackgroundImage = My.Resources.Resources.Vor_Transparent
+        Me.btnPauseForward.BackgroundImage = Global.SlideShowWPFModul.SlideShowSaver_3._0.My.Resources.Resources.Vor_Transparent
         Me.btnPauseForward.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
         Me.btnPauseForward.Font = New System.Drawing.Font("Webdings", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.btnPauseForward.Location = New System.Drawing.Point(416, 100)
@@ -88,6 +83,7 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.btnPauseForward.Name = "btnPauseForward"
         Me.btnPauseForward.Size = New System.Drawing.Size(150, 150)
         Me.btnPauseForward.TabIndex = 3
+        Me.btnPauseForward.Tag = "langKey=btnPauseForward"
         Me.btnPauseForward.UseVisualStyleBackColor = True
         '
         'chkPauseMarkPicture
@@ -100,6 +96,7 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.chkPauseMarkPicture.Name = "chkPauseMarkPicture"
         Me.chkPauseMarkPicture.Size = New System.Drawing.Size(179, 40)
         Me.chkPauseMarkPicture.TabIndex = 4
+        Me.chkPauseMarkPicture.Tag = "langKey=chkPauseMarkPicture"
         Me.chkPauseMarkPicture.Text = "Markieren"
         Me.chkPauseMarkPicture.UseVisualStyleBackColor = True
         '
@@ -127,6 +124,7 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.lblOptionsDialogDisabled.Name = "lblOptionsDialogDisabled"
         Me.lblOptionsDialogDisabled.Size = New System.Drawing.Size(575, 82)
         Me.lblOptionsDialogDisabled.TabIndex = 8
+        Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.lblOptionsDialogDisabled.Text = "Im PauseModus ist kein Options-Dialog  aufrufbar"
         Me.lblOptionsDialogDisabled.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
@@ -141,7 +139,7 @@ Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.sbcBewerten.Name = "sbcBewerten"
         Me.sbcBewerten.Size = New System.Drawing.Size(258, 54)
         Me.sbcBewerten.TabIndex = 9
-        Me.sbcBewerten.Tag = "STYLE_KLINGON; STYLE_MATRIX"
+        Me.sbcBewerten.Tag = "STYLE_KLINGON"
         Me.sbcBewerten.Text = "SterneBewertungControl1"
         '
         'frmPauseModusOverlay

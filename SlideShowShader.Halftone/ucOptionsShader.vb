@@ -211,7 +211,7 @@ Public Class ucOptionsShader
         End If
     End Sub
 
-    Private Sub rdoModusPixelArt_CheckedChanged(sender As Object, e As EventArgs) Handles rdoModusPixelArt.CheckedChanged
+    Private Sub rdoModusPixelArt_CheckedChanged(sender As Object, e As EventArgs)
         'Behandelt Radio Button "PixelArt"
 
         If rdoModusPixelArt.Checked Then
@@ -286,4 +286,5 @@ Public Class ucOptionsShader
         WriteToRegistry(SLIDESHOWSHADER_PIXELART_FULLPATH & "Raster", trkRaster.Value.ToString)
 
     End Sub
+
 End Class

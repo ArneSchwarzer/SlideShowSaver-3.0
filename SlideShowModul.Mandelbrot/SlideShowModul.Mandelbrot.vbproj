@@ -151,5 +151,16 @@
   <ItemGroup>
     <None Include="Resources\mandelbrot_SpashScreen.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lang\DE\" />
+    <Folder Include="Lang\EN\" />
+    <Folder Include="Lang\ES\" />
+    <Folder Include="Lang\FR\" />
+    <Folder Include="Lang\HI\" />
+    <Folder Include="Lang\PL\" />
+    <Folder Include="Lang\RU\" />
+    <Folder Include="Lang\THL\" />
+    <Folder Include="Lang\ZH\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

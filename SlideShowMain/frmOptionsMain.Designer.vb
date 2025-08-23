@@ -24,55 +24,31 @@ Partial Class frmOptionsMain
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmOptionsMain))
         Me.lblNTitel = New System.Windows.Forms.Label()
-Me.lblNTitel.Tag = "langKey=lblNTitel"
         Me.tabOptions = New System.Windows.Forms.TabControl()
-Me.tabOptions.Tag = "langKey=tabOptions"
         Me.tpAllgemein = New System.Windows.Forms.TabPage()
-Me.tpAllgemein.Tag = "langKey=tpAllgemein"
+        Me.btnDefaults = New System.Windows.Forms.Button()
         Me.picHintergrundfarbe = New System.Windows.Forms.PictureBox()
-Me.picHintergrundfarbe.Tag = "langKey=picHintergrundfarbe"
         Me.lblNHintergrundfarbe = New System.Windows.Forms.Label()
-Me.lblNHintergrundfarbe.Tag = "langKey=lblNHintergrundfarbe"
         Me.lblKeineTransitionsModule = New System.Windows.Forms.Label()
-Me.lblKeineTransitionsModule.Tag = "langKey=lblKeineTransitionsModule"
         Me.lblNcmbAbspielmodusTransitionsModule = New System.Windows.Forms.Label()
-Me.lblNcmbAbspielmodusTransitionsModule.Tag = "langKey=lblNcmbAbspielmodusTransitionsModule"
         Me.cmbTransitionsReihenfolge = New System.Windows.Forms.ComboBox()
-Me.cmbTransitionsReihenfolge.Tag = "langKey=cmbTransitionsReihenfolge"
         Me.clbTransitionsModule = New System.Windows.Forms.CheckedListBox()
-Me.clbTransitionsModule.Tag = "langKey=clbTransitionsModule"
         Me.lblNclbTransitionsModule = New System.Windows.Forms.Label()
-Me.lblNclbTransitionsModule.Tag = "langKey=lblNclbTransitionsModule"
         Me.lblKeineModule = New System.Windows.Forms.Label()
-Me.lblKeineModule.Tag = "langKey=lblKeineModule"
         Me.chkMultiMonitor = New System.Windows.Forms.CheckBox()
-Me.chkMultiMonitor.Tag = "langKey=chkMultiMonitor"
         Me.lblDauerModuswechsel = New System.Windows.Forms.Label()
-Me.lblDauerModuswechsel.Tag = "langKey=lblDauerModuswechsel"
         Me.trkDauerModulwechsel = New System.Windows.Forms.TrackBar()
         Me.lblNtrkDauerModulwechsel = New System.Windows.Forms.Label()
-Me.lblNtrkDauerModulwechsel.Tag = "langKey=lblNtrkDauerModulwechsel"
         Me.lblNcmbModulWechsel = New System.Windows.Forms.Label()
-Me.lblNcmbModulWechsel.Tag = "langKey=lblNcmbModulWechsel"
         Me.cmbModulwechsel = New System.Windows.Forms.ComboBox()
-Me.cmbModulwechsel.Tag = "langKey=cmbModulwechsel"
         Me.clbModule = New System.Windows.Forms.CheckedListBox()
-Me.clbModule.Tag = "langKey=clbModule"
         Me.lblNcblModule = New System.Windows.Forms.Label()
-Me.lblNcblModule.Tag = "langKey=lblNcblModule"
         Me.tpModul = New System.Windows.Forms.TabPage()
-Me.tpModul.Tag = "langKey=tpModul"
         Me.tpBildauswahl = New System.Windows.Forms.TabPage()
-Me.tpBildauswahl.Tag = "langKey=tpBildauswahl"
         Me.tpTransitions = New System.Windows.Forms.TabPage()
-Me.tpTransitions.Tag = "langKey=tpTransitions"
         Me.tpShader = New System.Windows.Forms.TabPage()
-Me.tpShader.Tag = "langKey=tpShader"
         Me.btnOK = New System.Windows.Forms.Button()
-Me.btnOK.Tag = "langKey=btnOK"
         Me.pnlLanguages = New System.Windows.Forms.Panel()
-        Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
         CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -89,6 +65,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNTitel.Name = "lblNTitel"
         Me.lblNTitel.Size = New System.Drawing.Size(468, 65)
         Me.lblNTitel.TabIndex = 0
+        Me.lblNTitel.Tag = "langKey=lblNTitel"
         Me.lblNTitel.Text = "SlideShowSaver 3.0"
         '
         'tabOptions
@@ -104,6 +81,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tabOptions.SelectedIndex = 0
         Me.tabOptions.Size = New System.Drawing.Size(922, 1108)
         Me.tabOptions.TabIndex = 1
+        Me.tabOptions.Tag = "langKey=tabOptions"
         '
         'tpAllgemein
         '
@@ -130,8 +108,19 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tpAllgemein.Padding = New System.Windows.Forms.Padding(4)
         Me.tpAllgemein.Size = New System.Drawing.Size(902, 1039)
         Me.tpAllgemein.TabIndex = 0
+        Me.tpAllgemein.Tag = "langKey=tpAllgemein"
         Me.tpAllgemein.Text = "Allgemein"
         Me.tpAllgemein.UseVisualStyleBackColor = True
+        '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(691, 8)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(187, 54)
+        Me.btnDefaults.TabIndex = 16
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
         '
         'picHintergrundfarbe
         '
@@ -141,6 +130,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.picHintergrundfarbe.Size = New System.Drawing.Size(387, 50)
         Me.picHintergrundfarbe.TabIndex = 15
         Me.picHintergrundfarbe.TabStop = False
+        Me.picHintergrundfarbe.Tag = "langKey=picHintergrundfarbe"
         '
         'lblNHintergrundfarbe
         '
@@ -149,6 +139,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNHintergrundfarbe.Name = "lblNHintergrundfarbe"
         Me.lblNHintergrundfarbe.Size = New System.Drawing.Size(247, 41)
         Me.lblNHintergrundfarbe.TabIndex = 14
+        Me.lblNHintergrundfarbe.Tag = "langKey=lblNHintergrundfarbe"
         Me.lblNHintergrundfarbe.Text = "Hintergrundfarbe"
         '
         'lblKeineTransitionsModule
@@ -160,6 +151,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblKeineTransitionsModule.Name = "lblKeineTransitionsModule"
         Me.lblKeineTransitionsModule.Size = New System.Drawing.Size(382, 41)
         Me.lblKeineTransitionsModule.TabIndex = 13
+        Me.lblKeineTransitionsModule.Tag = "langKey=lblKeineTransitionsModule"
         Me.lblKeineTransitionsModule.Text = "Keine Übergänge geladen"
         Me.lblKeineTransitionsModule.Visible = False
         '
@@ -170,6 +162,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNcmbAbspielmodusTransitionsModule.Name = "lblNcmbAbspielmodusTransitionsModule"
         Me.lblNcmbAbspielmodusTransitionsModule.Size = New System.Drawing.Size(365, 41)
         Me.lblNcmbAbspielmodusTransitionsModule.TabIndex = 12
+        Me.lblNcmbAbspielmodusTransitionsModule.Tag = "langKey=lblNcmbAbspielmodusTransitionsModule"
         Me.lblNcmbAbspielmodusTransitionsModule.Text = "Abspielmodus Übergänge"
         '
         'cmbTransitionsReihenfolge
@@ -180,6 +173,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.cmbTransitionsReihenfolge.Name = "cmbTransitionsReihenfolge"
         Me.cmbTransitionsReihenfolge.Size = New System.Drawing.Size(388, 49)
         Me.cmbTransitionsReihenfolge.TabIndex = 11
+        Me.cmbTransitionsReihenfolge.Tag = "langKey=cmbTransitionsReihenfolge"
         '
         'clbTransitionsModule
         '
@@ -190,6 +184,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.clbTransitionsModule.Name = "clbTransitionsModule"
         Me.clbTransitionsModule.Size = New System.Drawing.Size(850, 224)
         Me.clbTransitionsModule.TabIndex = 10
+        Me.clbTransitionsModule.Tag = "langKey=clbTransitionsModule"
         '
         'lblNclbTransitionsModule
         '
@@ -199,6 +194,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNclbTransitionsModule.Name = "lblNclbTransitionsModule"
         Me.lblNclbTransitionsModule.Size = New System.Drawing.Size(410, 41)
         Me.lblNclbTransitionsModule.TabIndex = 9
+        Me.lblNclbTransitionsModule.Tag = "langKey=lblNclbTransitionsModule"
         Me.lblNclbTransitionsModule.Text = "Übergangseffekte für Module"
         '
         'lblKeineModule
@@ -210,6 +206,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblKeineModule.Name = "lblKeineModule"
         Me.lblKeineModule.Size = New System.Drawing.Size(651, 41)
         Me.lblKeineModule.TabIndex = 8
+        Me.lblKeineModule.Tag = "langKey=lblKeineModule"
         Me.lblKeineModule.Text = "Keine Module geladen, spiele Bouncing Logo"
         Me.lblKeineModule.Visible = False
         '
@@ -220,6 +217,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkMultiMonitor.Name = "chkMultiMonitor"
         Me.chkMultiMonitor.Size = New System.Drawing.Size(338, 45)
         Me.chkMultiMonitor.TabIndex = 7
+        Me.chkMultiMonitor.Tag = "langKey=chkMultiMonitor"
         Me.chkMultiMonitor.Text = "Multi-Monitor Modus"
         Me.chkMultiMonitor.UseVisualStyleBackColor = True
         '
@@ -230,6 +228,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblDauerModuswechsel.Name = "lblDauerModuswechsel"
         Me.lblDauerModuswechsel.Size = New System.Drawing.Size(84, 41)
         Me.lblDauerModuswechsel.TabIndex = 6
+        Me.lblDauerModuswechsel.Tag = "langKey=lblDauerModuswechsel"
         Me.lblDauerModuswechsel.Text = "15 m"
         Me.lblDauerModuswechsel.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -252,6 +251,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNtrkDauerModulwechsel.Name = "lblNtrkDauerModulwechsel"
         Me.lblNtrkDauerModulwechsel.Size = New System.Drawing.Size(343, 41)
         Me.lblNtrkDauerModulwechsel.TabIndex = 4
+        Me.lblNtrkDauerModulwechsel.Tag = "langKey=lblNtrkDauerModulwechsel"
         Me.lblNtrkDauerModulwechsel.Text = "Dauer bis Modulwechsel"
         '
         'lblNcmbModulWechsel
@@ -261,6 +261,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNcmbModulWechsel.Name = "lblNcmbModulWechsel"
         Me.lblNcmbModulWechsel.Size = New System.Drawing.Size(319, 41)
         Me.lblNcmbModulWechsel.TabIndex = 3
+        Me.lblNcmbModulWechsel.Tag = "langKey=lblNcmbModulWechsel"
         Me.lblNcmbModulWechsel.Text = "Abspielmodus Module"
         '
         'cmbModulwechsel
@@ -271,6 +272,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.cmbModulwechsel.Name = "cmbModulwechsel"
         Me.cmbModulwechsel.Size = New System.Drawing.Size(388, 49)
         Me.cmbModulwechsel.TabIndex = 2
+        Me.cmbModulwechsel.Tag = "langKey=cmbModulwechsel"
         '
         'clbModule
         '
@@ -281,6 +283,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.clbModule.Name = "clbModule"
         Me.clbModule.Size = New System.Drawing.Size(850, 268)
         Me.clbModule.TabIndex = 1
+        Me.clbModule.Tag = "langKey=clbModule"
         '
         'lblNcblModule
         '
@@ -290,6 +293,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNcblModule.Name = "lblNcblModule"
         Me.lblNcblModule.Size = New System.Drawing.Size(121, 41)
         Me.lblNcblModule.TabIndex = 0
+        Me.lblNcblModule.Tag = "langKey=lblNcblModule"
         Me.lblNcblModule.Text = "Module"
         '
         'tpModul
@@ -301,6 +305,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tpModul.Padding = New System.Windows.Forms.Padding(4)
         Me.tpModul.Size = New System.Drawing.Size(902, 1039)
         Me.tpModul.TabIndex = 1
+        Me.tpModul.Tag = "langKey=tpModul"
         Me.tpModul.Text = "Modul"
         Me.tpModul.UseVisualStyleBackColor = True
         '
@@ -311,6 +316,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tpBildauswahl.Padding = New System.Windows.Forms.Padding(3)
         Me.tpBildauswahl.Size = New System.Drawing.Size(902, 1039)
         Me.tpBildauswahl.TabIndex = 2
+        Me.tpBildauswahl.Tag = "langKey=tpBildauswahl"
         Me.tpBildauswahl.Text = "Bildauswahl"
         Me.tpBildauswahl.UseVisualStyleBackColor = True
         '
@@ -321,7 +327,8 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tpTransitions.Padding = New System.Windows.Forms.Padding(3)
         Me.tpTransitions.Size = New System.Drawing.Size(902, 1039)
         Me.tpTransitions.TabIndex = 3
-        Me.tpTransitions.Text = "Transitionseffekt"
+        Me.tpTransitions.Tag = "langKey=tpTransitions"
+        Me.tpTransitions.Text = "Übergangseffekt"
         Me.tpTransitions.UseVisualStyleBackColor = True
         '
         'tpShader
@@ -331,6 +338,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tpShader.Padding = New System.Windows.Forms.Padding(3)
         Me.tpShader.Size = New System.Drawing.Size(902, 1039)
         Me.tpShader.TabIndex = 4
+        Me.tpShader.Tag = "langKey=tpShader"
         Me.tpShader.Text = "Shader"
         Me.tpShader.UseVisualStyleBackColor = True
         '
@@ -340,6 +348,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(185, 71)
         Me.btnOK.TabIndex = 2
+        Me.btnOK.Tag = "langKey=btnOK"
         Me.btnOK.Text = "Fertig"
         Me.btnOK.UseVisualStyleBackColor = True
         '
@@ -349,15 +358,6 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.pnlLanguages.Name = "pnlLanguages"
         Me.pnlLanguages.Size = New System.Drawing.Size(922, 84)
         Me.pnlLanguages.TabIndex = 4
-        '
-        'btnDefaults
-        '
-        Me.btnDefaults.Location = New System.Drawing.Point(691, 8)
-        Me.btnDefaults.Name = "btnDefaults"
-        Me.btnDefaults.Size = New System.Drawing.Size(187, 54)
-        Me.btnDefaults.TabIndex = 16
-        Me.btnDefaults.Text = "Standards"
-        Me.btnDefaults.UseVisualStyleBackColor = True
         '
         'frmOptionsMain
         '
@@ -372,6 +372,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmOptionsMain"
+        Me.Tag = "langKey=frmOptionsMain"
         Me.Text = "Einstellungen"
         Me.tabOptions.ResumeLayout(False)
         Me.tpAllgemein.ResumeLayout(False)

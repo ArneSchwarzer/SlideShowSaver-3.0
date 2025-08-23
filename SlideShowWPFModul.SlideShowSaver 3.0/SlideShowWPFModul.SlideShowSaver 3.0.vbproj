@@ -136,6 +136,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="frmPauseOverlay.resx">
+      <DependentUpon>frmPauseOverlay.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmPictureInfo.resx">
+      <DependentUpon>frmPictureInfo.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
@@ -198,6 +204,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Zurück Transparent.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lang\DE\" />
+    <Folder Include="Lang\EN\" />
+    <Folder Include="Lang\ES\" />
+    <Folder Include="Lang\FR\" />
+    <Folder Include="Lang\HI\" />
+    <Folder Include="Lang\PL\" />
+    <Folder Include="Lang\RU\" />
+    <Folder Include="Lang\THL\" />
+    <Folder Include="Lang\ZH\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

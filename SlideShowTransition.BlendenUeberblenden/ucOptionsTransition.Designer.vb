@@ -23,33 +23,21 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblTransitionname = New System.Windows.Forms.Label()
-Me.lblTransitionname.Tag = "langKey=lblTransitionname"
         Me.lblNTransitionName = New System.Windows.Forms.Label()
-Me.lblNTransitionName.Tag = "langKey=lblNTransitionName"
         Me.lblNpicFarbton = New System.Windows.Forms.Label()
-Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
         Me.picFarbton = New System.Windows.Forms.PictureBox()
-Me.picFarbton.Tag = "langKey=picFarbton"
         Me.cdFarbton = New System.Windows.Forms.ColorDialog()
         Me.lblNModus = New System.Windows.Forms.Label()
-Me.lblNModus.Tag = "langKey=lblNModus"
         Me.chkZufallsfarbe = New System.Windows.Forms.CheckBox()
-Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
         Me.pnlModus = New System.Windows.Forms.Panel()
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
-Me.rdoZufall.Tag = "langKey=rdoZufall"
         Me.rdoÜberblenden = New System.Windows.Forms.RadioButton()
         Me.rdoBlenden = New System.Windows.Forms.RadioButton()
-Me.rdoBlenden.Tag = "langKey=rdoBlenden"
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.chkMorphing = New System.Windows.Forms.CheckBox()
-Me.chkMorphing.Tag = "langKey=chkMorphing"
         Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlModus.SuspendLayout()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -63,6 +51,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblTransitionname.Name = "lblTransitionname"
         Me.lblTransitionname.Size = New System.Drawing.Size(358, 41)
         Me.lblTransitionname.TabIndex = 20
+        Me.lblTransitionname.Tag = "langKey=lblTransitionname"
         Me.lblTransitionname.Text = "Blenden && Überblenden"
         '
         'lblNTransitionName
@@ -72,6 +61,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNTransitionName.Name = "lblNTransitionName"
         Me.lblNTransitionName.Size = New System.Drawing.Size(151, 41)
         Me.lblNTransitionName.TabIndex = 19
+        Me.lblNTransitionName.Tag = "langKey=lblNTransitionName"
         Me.lblNTransitionName.Text = "Übergang"
         '
         'lblNpicFarbton
@@ -81,6 +71,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNpicFarbton.Name = "lblNpicFarbton"
         Me.lblNpicFarbton.Size = New System.Drawing.Size(258, 41)
         Me.lblNpicFarbton.TabIndex = 21
+        Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
         Me.lblNpicFarbton.Text = "Blende zu Farbton"
         '
         'picFarbton
@@ -91,6 +82,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.picFarbton.Size = New System.Drawing.Size(582, 50)
         Me.picFarbton.TabIndex = 22
         Me.picFarbton.TabStop = False
+        Me.picFarbton.Tag = "langKey=picFarbton"
         '
         'lblNModus
         '
@@ -99,6 +91,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 29
+        Me.lblNModus.Tag = "langKey=lblNModus"
         Me.lblNModus.Text = "Modus"
         '
         'chkZufallsfarbe
@@ -108,6 +101,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkZufallsfarbe.Name = "chkZufallsfarbe"
         Me.chkZufallsfarbe.Size = New System.Drawing.Size(203, 45)
         Me.chkZufallsfarbe.TabIndex = 30
+        Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
         Me.chkZufallsfarbe.Text = "Zufallsfarbe"
         Me.chkZufallsfarbe.UseVisualStyleBackColor = True
         '
@@ -129,6 +123,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rdoZufall.Size = New System.Drawing.Size(146, 45)
         Me.rdoZufall.TabIndex = 31
         Me.rdoZufall.TabStop = True
+        Me.rdoZufall.Tag = "langKey=rdoZufall"
         Me.rdoZufall.Text = "Zufällig"
         Me.rdoZufall.UseVisualStyleBackColor = True
         '
@@ -140,6 +135,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rdoÜberblenden.Size = New System.Drawing.Size(223, 45)
         Me.rdoÜberblenden.TabIndex = 30
         Me.rdoÜberblenden.TabStop = True
+        Me.rdoÜberblenden.Tag = "langKey=rdoÜberblenden"
         Me.rdoÜberblenden.Text = "Überblenden"
         Me.rdoÜberblenden.UseVisualStyleBackColor = True
         '
@@ -151,6 +147,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rdoBlenden.Size = New System.Drawing.Size(157, 45)
         Me.rdoBlenden.TabIndex = 29
         Me.rdoBlenden.TabStop = True
+        Me.rdoBlenden.Tag = "langKey=rdoBlenden"
         Me.rdoBlenden.Text = "Blenden"
         Me.rdoBlenden.UseVisualStyleBackColor = True
         '
@@ -162,6 +159,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
         Me.lblGeschwindigkeit.TabIndex = 37
+        Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Text = "15 s"
         Me.lblGeschwindigkeit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -184,6 +182,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNtrbGeschwindigkeit.Name = "lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Size = New System.Drawing.Size(236, 41)
         Me.lblNtrbGeschwindigkeit.TabIndex = 35
+        Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Text = "Geschwindigkeit"
         '
         'chkMorphing
@@ -193,6 +192,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkMorphing.Name = "chkMorphing"
         Me.chkMorphing.Size = New System.Drawing.Size(219, 45)
         Me.chkMorphing.TabIndex = 39
+        Me.chkMorphing.Tag = "langKey=chkMorphing"
         Me.chkMorphing.Text = "Morphphase"
         Me.chkMorphing.UseVisualStyleBackColor = True
         '
@@ -202,6 +202,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(183, 51)
         Me.btnDefaults.TabIndex = 40
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '

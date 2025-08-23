@@ -23,16 +23,11 @@ Partial Class frmInputModul
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.btnCancel = New System.Windows.Forms.Button()
-Me.btnCancel.Tag = "langKey=btnCancel"
         Me.lblNtxtTag = New System.Windows.Forms.Label()
-Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.txtTag = New System.Windows.Forms.TextBox()
         Me.lblTitel = New System.Windows.Forms.Label()
-Me.lblTitel.Tag = "langKey=lblTitel"
         Me.btnOK = New System.Windows.Forms.Button()
-Me.btnOK.Tag = "langKey=btnOK"
         Me.picLogo = New System.Windows.Forms.PictureBox()
-Me.picLogo.Tag = "langKey=picLogo"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -42,6 +37,7 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(218, 71)
         Me.btnCancel.TabIndex = 14
+        Me.btnCancel.Tag = "langKey=btnCancel"
         Me.btnCancel.Text = "Abbrechen"
         Me.btnCancel.UseVisualStyleBackColor = True
         '
@@ -52,6 +48,7 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.lblNtxtTag.Name = "lblNtxtTag"
         Me.lblNtxtTag.Size = New System.Drawing.Size(160, 41)
         Me.lblNtxtTag.TabIndex = 13
+        Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.lblNtxtTag.Text = "Neuer Text"
         '
         'txtTag
@@ -69,6 +66,7 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.lblTitel.Name = "lblTitel"
         Me.lblTitel.Size = New System.Drawing.Size(407, 48)
         Me.lblTitel.TabIndex = 11
+        Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblTitel.Text = "Highlighttext einfügen"
         '
         'btnOK
@@ -77,6 +75,7 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(168, 71)
         Me.btnOK.TabIndex = 10
+        Me.btnOK.Tag = "langKey=btnOK"
         Me.btnOK.Text = "OK"
         Me.btnOK.UseVisualStyleBackColor = True
         '
@@ -89,8 +88,9 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.picLogo.TabIndex = 9
         Me.picLogo.TabStop = False
+        Me.picLogo.Tag = "langKey=picLogo"
         '
-        'frmModulInput
+        'frmInputModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -102,8 +102,9 @@ Me.picLogo.Tag = "langKey=picLogo"
         Me.Controls.Add(Me.btnOK)
         Me.Controls.Add(Me.picLogo)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
-        Me.Name = "frmModulInput"
+        Me.Margin = New System.Windows.Forms.Padding(4)
+        Me.Name = "frmInputModul"
+        Me.Tag = "langKey=Highlighttext eingeben"
         Me.Text = "Highlighttext eingeben"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)

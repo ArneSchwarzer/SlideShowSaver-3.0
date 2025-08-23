@@ -23,60 +23,35 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
-Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblShaderName = New System.Windows.Forms.Label()
-Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
         Me.grbAllgemeineOptionen = New System.Windows.Forms.GroupBox()
-Me.grbAllgemeineOptionen.Tag = "langKey=grbAllgemeineOptionen"
         Me.chkRasterZufall = New System.Windows.Forms.CheckBox()
-Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
         Me.lblGamma = New System.Windows.Forms.Label()
-Me.lblGamma.Tag = "langKey=lblGamma"
         Me.lblRaster = New System.Windows.Forms.Label()
-Me.lblRaster.Tag = "langKey=lblRaster"
         Me.cmbPosterise = New System.Windows.Forms.ComboBox()
-Me.cmbPosterise.Tag = "langKey=cmbPosterise"
         Me.lblNPosterise = New System.Windows.Forms.Label()
-Me.lblNPosterise.Tag = "langKey=lblNPosterise"
         Me.lblNGamma = New System.Windows.Forms.Label()
-Me.lblNGamma.Tag = "langKey=lblNGamma"
         Me.trkGamma = New System.Windows.Forms.TrackBar()
         Me.trkRaster = New System.Windows.Forms.TrackBar()
         Me.rdoModusHTCMYK = New System.Windows.Forms.RadioButton()
-Me.rdoModusHTCMYK.Tag = "langKey=rdoModusHTCMYK"
         Me.rdoModusZufall = New System.Windows.Forms.RadioButton()
-Me.rdoModusZufall.Tag = "langKey=rdoModusZufall"
         Me.rdoModusHTSW = New System.Windows.Forms.RadioButton()
-Me.rdoModusHTSW.Tag = "langKey=rdoModusHTSW"
-        Me.rdoModusPixelArt = New System.Windows.Forms.RadioButton()
-Me.rdoModusPixelArt.Tag = "langKey=rdoModusPixelArt"
         Me.lblNRaster = New System.Windows.Forms.Label()
-Me.lblNRaster.Tag = "langKey=lblNRaster"
         Me.lblNModus = New System.Windows.Forms.Label()
-Me.lblNModus.Tag = "langKey=lblNModus"
         Me.grbHalftoneOptionen = New System.Windows.Forms.GroupBox()
-Me.grbHalftoneOptionen.Tag = "langKey=grbHalftoneOptionen"
         Me.lblPapierintensität = New System.Windows.Forms.Label()
         Me.trkPapierIntensität = New System.Windows.Forms.TrackBar()
         Me.lblNPapierIntensität = New System.Windows.Forms.Label()
         Me.chkPapierTextur = New System.Windows.Forms.CheckBox()
-Me.chkPapierTextur.Tag = "langKey=chkPapierTextur"
         Me.cmbDotsWinkel = New System.Windows.Forms.ComboBox()
-Me.cmbDotsWinkel.Tag = "langKey=cmbDotsWinkel"
         Me.lblNDotsWinkel = New System.Windows.Forms.Label()
-Me.lblNDotsWinkel.Tag = "langKey=lblNDotsWinkel"
         Me.lblDotsMin = New System.Windows.Forms.Label()
-Me.lblDotsMin.Tag = "langKey=lblDotsMin"
         Me.trkDotsMin = New System.Windows.Forms.TrackBar()
         Me.lblNDotsMin = New System.Windows.Forms.Label()
-Me.lblNDotsMin.Tag = "langKey=lblNDotsMin"
         Me.lblDotsMax = New System.Windows.Forms.Label()
-Me.lblDotsMax.Tag = "langKey=lblDotsMax"
         Me.trkDotsMax = New System.Windows.Forms.TrackBar()
         Me.lblNDotsMax = New System.Windows.Forms.Label()
-Me.lblNDotsMax.Tag = "langKey=lblNDotsMax"
         Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.grbAllgemeineOptionen.SuspendLayout()
         CType(Me.trkGamma, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkRaster, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -92,9 +67,10 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblShadername.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold)
         Me.lblShadername.Location = New System.Drawing.Point(264, 22)
         Me.lblShadername.Name = "lblShadername"
-        Me.lblShadername.Size = New System.Drawing.Size(298, 41)
+        Me.lblShadername.Size = New System.Drawing.Size(143, 41)
         Me.lblShadername.TabIndex = 19
-        Me.lblShadername.Text = "PixelArt && Halftone"
+        Me.lblShadername.Tag = "langKey=lblShadername"
+        Me.lblShadername.Text = "Halftone"
         '
         'lblNlblShaderName
         '
@@ -103,6 +79,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNlblShaderName.Name = "lblNlblShaderName"
         Me.lblNlblShaderName.Size = New System.Drawing.Size(110, 41)
         Me.lblNlblShaderName.TabIndex = 18
+        Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
         Me.lblNlblShaderName.Text = "Shader"
         '
         'grbAllgemeineOptionen
@@ -118,25 +95,26 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.grbAllgemeineOptionen.Controls.Add(Me.rdoModusHTCMYK)
         Me.grbAllgemeineOptionen.Controls.Add(Me.rdoModusZufall)
         Me.grbAllgemeineOptionen.Controls.Add(Me.rdoModusHTSW)
-        Me.grbAllgemeineOptionen.Controls.Add(Me.rdoModusPixelArt)
         Me.grbAllgemeineOptionen.Controls.Add(Me.lblNRaster)
         Me.grbAllgemeineOptionen.Controls.Add(Me.lblNModus)
         Me.grbAllgemeineOptionen.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Italic)
         Me.grbAllgemeineOptionen.Location = New System.Drawing.Point(23, 80)
         Me.grbAllgemeineOptionen.Name = "grbAllgemeineOptionen"
-        Me.grbAllgemeineOptionen.Size = New System.Drawing.Size(855, 448)
+        Me.grbAllgemeineOptionen.Size = New System.Drawing.Size(855, 414)
         Me.grbAllgemeineOptionen.TabIndex = 20
         Me.grbAllgemeineOptionen.TabStop = False
+        Me.grbAllgemeineOptionen.Tag = "langKey=grbAllgemeineOptionen"
         Me.grbAllgemeineOptionen.Text = "Allgemeine Optionen"
         '
         'chkRasterZufall
         '
         Me.chkRasterZufall.AutoSize = True
         Me.chkRasterZufall.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.chkRasterZufall.Location = New System.Drawing.Point(248, 270)
+        Me.chkRasterZufall.Location = New System.Drawing.Point(248, 217)
         Me.chkRasterZufall.Name = "chkRasterZufall"
         Me.chkRasterZufall.Size = New System.Drawing.Size(315, 45)
         Me.chkRasterZufall.TabIndex = 13
+        Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
         Me.chkRasterZufall.Text = "Rastergröße Zufällig"
         Me.chkRasterZufall.UseVisualStyleBackColor = True
         '
@@ -144,12 +122,13 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         '
         Me.lblGamma.AutoSize = True
         Me.lblGamma.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.lblGamma.Location = New System.Drawing.Point(745, 386)
+        Me.lblGamma.Location = New System.Drawing.Point(745, 333)
         Me.lblGamma.MaximumSize = New System.Drawing.Size(90, 41)
         Me.lblGamma.MinimumSize = New System.Drawing.Size(90, 41)
         Me.lblGamma.Name = "lblGamma"
         Me.lblGamma.Size = New System.Drawing.Size(90, 41)
         Me.lblGamma.TabIndex = 12
+        Me.lblGamma.Tag = "langKey=lblGamma"
         Me.lblGamma.Text = "1.4"
         Me.lblGamma.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -157,12 +136,13 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         '
         Me.lblRaster.AutoSize = True
         Me.lblRaster.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.lblRaster.Location = New System.Drawing.Point(745, 214)
+        Me.lblRaster.Location = New System.Drawing.Point(745, 161)
         Me.lblRaster.MaximumSize = New System.Drawing.Size(90, 41)
         Me.lblRaster.MinimumSize = New System.Drawing.Size(90, 41)
         Me.lblRaster.Name = "lblRaster"
         Me.lblRaster.Size = New System.Drawing.Size(90, 41)
         Me.lblRaster.TabIndex = 11
+        Me.lblRaster.Tag = "langKey=lblRaster"
         Me.lblRaster.Text = "16 px"
         Me.lblRaster.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -171,35 +151,38 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.cmbPosterise.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.cmbPosterise.FormattingEnabled = True
         Me.cmbPosterise.Items.AddRange(New Object() {"8 Farben (2 pro Kanal)", "27 Farben (3 pro Kanal)", "64 Farben (4 pro Kanal)", "125 Farben (5 pro Kanal)", "216 Farben (6 pro Kanal)", "343 Farben (7 pro Kanal)", "512 Farben (8 pro Kanal)"})
-        Me.cmbPosterise.Location = New System.Drawing.Point(248, 328)
+        Me.cmbPosterise.Location = New System.Drawing.Point(248, 275)
         Me.cmbPosterise.Name = "cmbPosterise"
         Me.cmbPosterise.Size = New System.Drawing.Size(595, 49)
         Me.cmbPosterise.TabIndex = 10
+        Me.cmbPosterise.Tag = "langKey=cmbPosterise"
         '
         'lblNPosterise
         '
         Me.lblNPosterise.AutoSize = True
         Me.lblNPosterise.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.lblNPosterise.Location = New System.Drawing.Point(10, 330)
+        Me.lblNPosterise.Location = New System.Drawing.Point(10, 277)
         Me.lblNPosterise.Name = "lblNPosterise"
-        Me.lblNPosterise.Size = New System.Drawing.Size(108, 41)
+        Me.lblNPosterise.Size = New System.Drawing.Size(143, 41)
         Me.lblNPosterise.TabIndex = 9
-        Me.lblNPosterise.Text = "Farben"
+        Me.lblNPosterise.Tag = "langKey=lblNPosterise"
+        Me.lblNPosterise.Text = "Farbraum"
         '
         'lblNGamma
         '
         Me.lblNGamma.AutoSize = True
         Me.lblNGamma.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.lblNGamma.Location = New System.Drawing.Point(13, 386)
+        Me.lblNGamma.Location = New System.Drawing.Point(13, 333)
         Me.lblNGamma.Name = "lblNGamma"
         Me.lblNGamma.Size = New System.Drawing.Size(121, 41)
         Me.lblNGamma.TabIndex = 8
+        Me.lblNGamma.Tag = "langKey=lblNGamma"
         Me.lblNGamma.Text = "Gamma"
         '
         'trkGamma
         '
         Me.trkGamma.AutoSize = False
-        Me.trkGamma.Location = New System.Drawing.Point(248, 386)
+        Me.trkGamma.Location = New System.Drawing.Point(248, 333)
         Me.trkGamma.Maximum = 22
         Me.trkGamma.Minimum = 8
         Me.trkGamma.Name = "trkGamma"
@@ -211,7 +194,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         'trkRaster
         '
         Me.trkRaster.AutoSize = False
-        Me.trkRaster.Location = New System.Drawing.Point(248, 214)
+        Me.trkRaster.Location = New System.Drawing.Point(248, 161)
         Me.trkRaster.Maximum = 6
         Me.trkRaster.Minimum = 1
         Me.trkRaster.Name = "trkRaster"
@@ -224,11 +207,12 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         '
         Me.rdoModusHTCMYK.AutoSize = True
         Me.rdoModusHTCMYK.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.rdoModusHTCMYK.Location = New System.Drawing.Point(581, 92)
+        Me.rdoModusHTCMYK.Location = New System.Drawing.Point(581, 39)
         Me.rdoModusHTCMYK.Name = "rdoModusHTCMYK"
         Me.rdoModusHTCMYK.Size = New System.Drawing.Size(268, 45)
         Me.rdoModusHTCMYK.TabIndex = 5
         Me.rdoModusHTCMYK.TabStop = True
+        Me.rdoModusHTCMYK.Tag = "langKey=rdoModusHTCMYK"
         Me.rdoModusHTCMYK.Text = "Halftone (CMYK)"
         Me.rdoModusHTCMYK.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         Me.rdoModusHTCMYK.UseVisualStyleBackColor = True
@@ -237,11 +221,12 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         '
         Me.rdoModusZufall.AutoSize = True
         Me.rdoModusZufall.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.rdoModusZufall.Location = New System.Drawing.Point(248, 137)
+        Me.rdoModusZufall.Location = New System.Drawing.Point(248, 84)
         Me.rdoModusZufall.Name = "rdoModusZufall"
         Me.rdoModusZufall.Size = New System.Drawing.Size(146, 45)
         Me.rdoModusZufall.TabIndex = 4
         Me.rdoModusZufall.TabStop = True
+        Me.rdoModusZufall.Tag = "langKey=rdoModusZufall"
         Me.rdoModusZufall.Text = "Zufällig"
         Me.rdoModusZufall.UseVisualStyleBackColor = True
         '
@@ -249,34 +234,24 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         '
         Me.rdoModusHTSW.AutoSize = True
         Me.rdoModusHTSW.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.rdoModusHTSW.Location = New System.Drawing.Point(248, 92)
+        Me.rdoModusHTSW.Location = New System.Drawing.Point(248, 39)
         Me.rdoModusHTSW.Name = "rdoModusHTSW"
         Me.rdoModusHTSW.Size = New System.Drawing.Size(232, 45)
         Me.rdoModusHTSW.TabIndex = 3
         Me.rdoModusHTSW.TabStop = True
+        Me.rdoModusHTSW.Tag = "langKey=rdoModusHTSW"
         Me.rdoModusHTSW.Text = "Halftone (SW)"
         Me.rdoModusHTSW.UseVisualStyleBackColor = True
-        '
-        'rdoModusPixelArt
-        '
-        Me.rdoModusPixelArt.AutoSize = True
-        Me.rdoModusPixelArt.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.rdoModusPixelArt.Location = New System.Drawing.Point(248, 47)
-        Me.rdoModusPixelArt.Name = "rdoModusPixelArt"
-        Me.rdoModusPixelArt.Size = New System.Drawing.Size(149, 45)
-        Me.rdoModusPixelArt.TabIndex = 2
-        Me.rdoModusPixelArt.TabStop = True
-        Me.rdoModusPixelArt.Text = "PixelArt"
-        Me.rdoModusPixelArt.UseVisualStyleBackColor = True
         '
         'lblNRaster
         '
         Me.lblNRaster.AutoSize = True
         Me.lblNRaster.Font = New System.Drawing.Font("Segoe UI", 10.0!)
-        Me.lblNRaster.Location = New System.Drawing.Point(9, 214)
+        Me.lblNRaster.Location = New System.Drawing.Point(9, 161)
         Me.lblNRaster.Name = "lblNRaster"
         Me.lblNRaster.Size = New System.Drawing.Size(178, 41)
         Me.lblNRaster.TabIndex = 1
+        Me.lblNRaster.Tag = "langKey=lblNRaster"
         Me.lblNRaster.Text = "Rastergröße"
         '
         'lblNModus
@@ -287,6 +262,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 0
+        Me.lblNModus.Tag = "langKey=lblNModus"
         Me.lblNModus.Text = "Modus"
         '
         'grbHalftoneOptionen
@@ -304,11 +280,12 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.grbHalftoneOptionen.Controls.Add(Me.trkDotsMax)
         Me.grbHalftoneOptionen.Controls.Add(Me.lblNDotsMax)
         Me.grbHalftoneOptionen.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Italic)
-        Me.grbHalftoneOptionen.Location = New System.Drawing.Point(23, 534)
+        Me.grbHalftoneOptionen.Location = New System.Drawing.Point(23, 500)
         Me.grbHalftoneOptionen.Name = "grbHalftoneOptionen"
-        Me.grbHalftoneOptionen.Size = New System.Drawing.Size(855, 472)
+        Me.grbHalftoneOptionen.Size = New System.Drawing.Size(855, 506)
         Me.grbHalftoneOptionen.TabIndex = 21
         Me.grbHalftoneOptionen.TabStop = False
+        Me.grbHalftoneOptionen.Tag = "langKey=grbHalftoneOptionen"
         Me.grbHalftoneOptionen.Text = "Halftone && CMYK Optionen"
         '
         'lblPapierintensität
@@ -355,6 +332,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkPapierTextur.Name = "chkPapierTextur"
         Me.chkPapierTextur.Size = New System.Drawing.Size(209, 45)
         Me.chkPapierTextur.TabIndex = 20
+        Me.chkPapierTextur.Tag = "langKey=chkPapierTextur"
         Me.chkPapierTextur.Text = "Papiertextur"
         Me.chkPapierTextur.UseVisualStyleBackColor = True
         '
@@ -367,6 +345,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.cmbDotsWinkel.Name = "cmbDotsWinkel"
         Me.cmbDotsWinkel.Size = New System.Drawing.Size(595, 49)
         Me.cmbDotsWinkel.TabIndex = 19
+        Me.cmbDotsWinkel.Tag = "langKey=cmbDotsWinkel"
         '
         'lblNDotsWinkel
         '
@@ -376,6 +355,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNDotsWinkel.Name = "lblNDotsWinkel"
         Me.lblNDotsWinkel.Size = New System.Drawing.Size(178, 41)
         Me.lblNDotsWinkel.TabIndex = 18
+        Me.lblNDotsWinkel.Tag = "langKey=lblNDotsWinkel"
         Me.lblNDotsWinkel.Text = "Dots Winkel"
         '
         'lblDotsMin
@@ -388,6 +368,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblDotsMin.Name = "lblDotsMin"
         Me.lblDotsMin.Size = New System.Drawing.Size(90, 41)
         Me.lblDotsMin.TabIndex = 17
+        Me.lblDotsMin.Tag = "langKey=lblDotsMin"
         Me.lblDotsMin.Text = "5 %"
         Me.lblDotsMin.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -409,6 +390,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNDotsMin.Name = "lblNDotsMin"
         Me.lblNDotsMin.Size = New System.Drawing.Size(220, 41)
         Me.lblNDotsMin.TabIndex = 15
+        Me.lblNDotsMin.Tag = "langKey=lblNDotsMin"
         Me.lblNDotsMin.Text = "Dots MinGröße"
         '
         'lblDotsMax
@@ -421,6 +403,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblDotsMax.Name = "lblDotsMax"
         Me.lblDotsMax.Size = New System.Drawing.Size(90, 41)
         Me.lblDotsMax.TabIndex = 14
+        Me.lblDotsMax.Tag = "langKey=lblDotsMax"
         Me.lblDotsMax.Text = "40 %"
         Me.lblDotsMax.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -444,6 +427,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNDotsMax.Name = "lblNDotsMax"
         Me.lblNDotsMax.Size = New System.Drawing.Size(225, 41)
         Me.lblNDotsMax.TabIndex = 0
+        Me.lblNDotsMax.Tag = "langKey=lblNDotsMax"
         Me.lblNDotsMax.Text = "Dots MaxGröße"
         '
         'btnDefaults
@@ -452,6 +436,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(181, 52)
         Me.btnDefaults.TabIndex = 22
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '
@@ -491,7 +476,6 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
     Friend WithEvents rdoModusHTCMYK As Forms.RadioButton
     Friend WithEvents rdoModusZufall As Forms.RadioButton
     Friend WithEvents rdoModusHTSW As Forms.RadioButton
-    Friend WithEvents rdoModusPixelArt As Forms.RadioButton
     Friend WithEvents trkRaster As Forms.TrackBar
     Friend WithEvents lblNGamma As Forms.Label
     Friend WithEvents trkGamma As Forms.TrackBar

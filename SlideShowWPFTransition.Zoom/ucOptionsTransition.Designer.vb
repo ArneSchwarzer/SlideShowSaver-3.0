@@ -23,18 +23,12 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
-Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblTransitionname = New System.Windows.Forms.Label()
-Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNAnkerpunkt = New System.Windows.Forms.Label()
-Me.lblNAnkerpunkt.Tag = "langKey=lblNAnkerpunkt"
         Me.lblKeinAnkerpunkt = New System.Windows.Forms.Label()
-Me.lblKeinAnkerpunkt.Tag = "langKey=lblKeinAnkerpunkt"
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtNW = New MyControlsLibrary.ToggleButton()
         Me.tbtN = New MyControlsLibrary.ToggleButton()
         Me.tbtNO = New MyControlsLibrary.ToggleButton()
@@ -45,9 +39,7 @@ Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.tbtZ = New MyControlsLibrary.ToggleButton()
         Me.chkGleicherAnkerpunkt = New System.Windows.Forms.CheckBox()
-Me.chkGleicherAnkerpunkt.Tag = "langKey=chkGleicherAnkerpunkt"
         Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -59,6 +51,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblShadername.Name = "lblShadername"
         Me.lblShadername.Size = New System.Drawing.Size(99, 41)
         Me.lblShadername.TabIndex = 17
+        Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblShadername.Text = "Zoom"
         '
         'lblNlblTransitionname
@@ -68,6 +61,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNlblTransitionname.Name = "lblNlblTransitionname"
         Me.lblNlblTransitionname.Size = New System.Drawing.Size(151, 41)
         Me.lblNlblTransitionname.TabIndex = 16
+        Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNlblTransitionname.Text = "Übergang"
         '
         'lblNAnkerpunkt
@@ -77,6 +71,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNAnkerpunkt.Name = "lblNAnkerpunkt"
         Me.lblNAnkerpunkt.Size = New System.Drawing.Size(188, 41)
         Me.lblNAnkerpunkt.TabIndex = 18
+        Me.lblNAnkerpunkt.Tag = "langKey=lblNAnkerpunkt"
         Me.lblNAnkerpunkt.Text = "Ankerpunkte"
         '
         'lblKeinAnkerpunkt
@@ -87,6 +82,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblKeinAnkerpunkt.Name = "lblKeinAnkerpunkt"
         Me.lblKeinAnkerpunkt.Size = New System.Drawing.Size(547, 82)
         Me.lblKeinAnkerpunkt.TabIndex = 27
+        Me.lblKeinAnkerpunkt.Tag = "langKey=lblKeinAnkerpunkt"
         Me.lblKeinAnkerpunkt.Text = "Kein Ankerpunkt ausgewählt, verwende zufälligen Ankerpunkt"
         '
         'lblNtrbGeschwindigkeit
@@ -96,6 +92,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNtrbGeschwindigkeit.Name = "lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Size = New System.Drawing.Size(236, 41)
         Me.lblNtrbGeschwindigkeit.TabIndex = 28
+        Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Text = "Geschwindigkeit"
         '
         'trkGeschwindigkeit
@@ -118,6 +115,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
         Me.lblGeschwindigkeit.TabIndex = 34
+        Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Text = "15 s"
         Me.lblGeschwindigkeit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -257,7 +255,8 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkGleicherAnkerpunkt.Name = "chkGleicherAnkerpunkt"
         Me.chkGleicherAnkerpunkt.Size = New System.Drawing.Size(550, 90)
         Me.chkGleicherAnkerpunkt.TabIndex = 44
-        Me.chkGleicherAnkerpunkt.Text = "Gleichen Ankerpunkt für Einblenden und Ausblenden verwenden"
+        Me.chkGleicherAnkerpunkt.Tag = "langKey=chkGleicherAnkerpunkt"
+        Me.chkGleicherAnkerpunkt.Text = "Gleichen Ankerpunkt für Ausblenden und Einblenden verwenden"
         Me.chkGleicherAnkerpunkt.TextAlign = System.Drawing.ContentAlignment.TopLeft
         Me.chkGleicherAnkerpunkt.UseVisualStyleBackColor = True
         '
@@ -267,6 +266,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(188, 54)
         Me.btnDefaults.TabIndex = 45
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '

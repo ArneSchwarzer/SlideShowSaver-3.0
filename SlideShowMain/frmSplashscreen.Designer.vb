@@ -22,36 +22,31 @@ Partial Class frmSplashscreen
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-Me.GroupBox1.Tag = "langKey=GroupBox1"
+        Me.grpSplashscreen = New System.Windows.Forms.GroupBox()
         Me.lblJahr = New System.Windows.Forms.Label()
-Me.lblJahr.Tag = "langKey=lblJahr"
         Me.lblAutor = New System.Windows.Forms.Label()
-Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblMarketingslogan = New System.Windows.Forms.Label()
-Me.lblMarketingslogan.Tag = "langKey=lblMarketingslogan"
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-Me.PictureBox1.Tag = "langKey=PictureBox1"
+        Me.picLogo = New System.Windows.Forms.PictureBox()
         Me.lblTitel = New System.Windows.Forms.Label()
-Me.lblTitel.Tag = "langKey=lblTitel"
-        Me.GroupBox1.SuspendLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.grpSplashscreen.SuspendLayout()
+        CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'GroupBox1
+        'grpSplashscreen
         '
-        Me.GroupBox1.Controls.Add(Me.lblJahr)
-        Me.GroupBox1.Controls.Add(Me.lblAutor)
-        Me.GroupBox1.Controls.Add(Me.lblMarketingslogan)
-        Me.GroupBox1.Controls.Add(Me.PictureBox1)
-        Me.GroupBox1.Controls.Add(Me.lblTitel)
-        Me.GroupBox1.Location = New System.Drawing.Point(16, 29)
-        Me.GroupBox1.Margin = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(4)
-        Me.GroupBox1.Size = New System.Drawing.Size(860, 437)
-        Me.GroupBox1.TabIndex = 1
-        Me.GroupBox1.TabStop = False
+        Me.grpSplashscreen.Controls.Add(Me.lblJahr)
+        Me.grpSplashscreen.Controls.Add(Me.lblAutor)
+        Me.grpSplashscreen.Controls.Add(Me.lblMarketingslogan)
+        Me.grpSplashscreen.Controls.Add(Me.picLogo)
+        Me.grpSplashscreen.Controls.Add(Me.lblTitel)
+        Me.grpSplashscreen.Location = New System.Drawing.Point(16, 29)
+        Me.grpSplashscreen.Margin = New System.Windows.Forms.Padding(4)
+        Me.grpSplashscreen.Name = "grpSplashscreen"
+        Me.grpSplashscreen.Padding = New System.Windows.Forms.Padding(4)
+        Me.grpSplashscreen.Size = New System.Drawing.Size(860, 437)
+        Me.grpSplashscreen.TabIndex = 1
+        Me.grpSplashscreen.TabStop = False
+        Me.grpSplashscreen.Tag = "langKey=GroupBox1"
         '
         'lblJahr
         '
@@ -61,6 +56,7 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblJahr.Name = "lblJahr"
         Me.lblJahr.Size = New System.Drawing.Size(82, 41)
         Me.lblJahr.TabIndex = 4
+        Me.lblJahr.Tag = "langKey=lblJahr"
         Me.lblJahr.Text = "2025"
         '
         'lblAutor
@@ -71,6 +67,7 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblAutor.Name = "lblAutor"
         Me.lblAutor.Size = New System.Drawing.Size(257, 41)
         Me.lblAutor.TabIndex = 3
+        Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblAutor.Text = "© Arne Schwarzer"
         '
         'lblMarketingslogan
@@ -82,18 +79,20 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblMarketingslogan.Name = "lblMarketingslogan"
         Me.lblMarketingslogan.Size = New System.Drawing.Size(523, 82)
         Me.lblMarketingslogan.TabIndex = 2
+        Me.lblMarketingslogan.Tag = "langKey=lblMarketingslogan"
         Me.lblMarketingslogan.Text = "Der modulare Screensaver speziell für Diashows!"
         '
-        'PictureBox1
+        'picLogo
         '
-        Me.PictureBox1.Image = Global.SlideShowMain.My.Resources.Resources.Flying_Kitchen_Aid_Logo_Transparent
-        Me.PictureBox1.Location = New System.Drawing.Point(548, 134)
-        Me.PictureBox1.Margin = New System.Windows.Forms.Padding(4)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(311, 300)
-        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
-        Me.PictureBox1.TabIndex = 1
-        Me.PictureBox1.TabStop = False
+        Me.picLogo.Image = Global.SlideShowMain.My.Resources.Resources.Flying_Kitchen_Aid_Logo_Transparent
+        Me.picLogo.Location = New System.Drawing.Point(548, 134)
+        Me.picLogo.Margin = New System.Windows.Forms.Padding(4)
+        Me.picLogo.Name = "picLogo"
+        Me.picLogo.Size = New System.Drawing.Size(311, 300)
+        Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
+        Me.picLogo.TabIndex = 1
+        Me.picLogo.TabStop = False
+        Me.picLogo.Tag = "langKey=PictureBox1"
         '
         'lblTitel
         '
@@ -105,6 +104,7 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblTitel.Name = "lblTitel"
         Me.lblTitel.Size = New System.Drawing.Size(695, 96)
         Me.lblTitel.TabIndex = 0
+        Me.lblTitel.Tag = "langKey=lblTitel"
         Me.lblTitel.Text = "SlideShowSaver 3.0"
         Me.lblTitel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
@@ -114,7 +114,7 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(898, 495)
         Me.ControlBox = False
-        Me.Controls.Add(Me.GroupBox1)
+        Me.Controls.Add(Me.grpSplashscreen)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Margin = New System.Windows.Forms.Padding(4)
@@ -124,17 +124,17 @@ Me.lblTitel.Tag = "langKey=lblTitel"
         Me.ShowIcon = False
         Me.ShowInTaskbar = False
         Me.Text = "Splashscreen"
-        Me.GroupBox1.ResumeLayout(False)
-        Me.GroupBox1.PerformLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpSplashscreen.ResumeLayout(False)
+        Me.grpSplashscreen.PerformLayout()
+        CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub
 
-    Friend WithEvents GroupBox1 As GroupBox
+    Friend WithEvents grpSplashscreen As GroupBox
     Friend WithEvents lblTitel As Label
     Friend WithEvents lblMarketingslogan As Label
-    Friend WithEvents PictureBox1 As PictureBox
+    Friend WithEvents picLogo As PictureBox
     Friend WithEvents lblJahr As Label
     Friend WithEvents lblAutor As Label
 End Class

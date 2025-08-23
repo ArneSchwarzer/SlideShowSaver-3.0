@@ -23,21 +23,14 @@ Partial Class frmPictureInfo
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.grpDatei = New System.Windows.Forms.GroupBox()
-Me.grpDatei.Tag = "langKey=grpDatei"
         Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
         Me.lblBewertung = New System.Windows.Forms.Label()
-Me.lblBewertung.Tag = "langKey=lblBewertung"
         Me.LblNBewertung = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
-Me.lblTags.Tag = "langKey=lblTags"
         Me.lblAutor = New System.Windows.Forms.Label()
-Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblErstellungsdatum = New System.Windows.Forms.Label()
-Me.lblErstellungsdatum.Tag = "langKey=lblErstellungsdatum"
         Me.lblDateipfad = New System.Windows.Forms.Label()
-Me.lblDateipfad.Tag = "langKey=lblDateipfad"
         Me.lblDateiname = New System.Windows.Forms.Label()
-Me.lblDateiname.Tag = "langKey=lblDateiname"
         Me.lblNTags = New System.Windows.Forms.Label()
         Me.lblNAutor = New System.Windows.Forms.Label()
         Me.lblNErstellungsdatum = New System.Windows.Forms.Label()
@@ -45,30 +38,20 @@ Me.lblDateiname.Tag = "langKey=lblDateiname"
         Me.lblNDateiname = New System.Windows.Forms.Label()
         Me.lblNDatei = New System.Windows.Forms.Label()
         Me.grpKamera = New System.Windows.Forms.GroupBox()
-Me.grpKamera.Tag = "langKey=grpKamera"
         Me.lblBlende = New System.Windows.Forms.Label()
-Me.lblBlende.Tag = "langKey=lblBlende"
         Me.lblISO = New System.Windows.Forms.Label()
-Me.lblISO.Tag = "langKey=lblISO"
         Me.lblVerschlusszeit = New System.Windows.Forms.Label()
-Me.lblVerschlusszeit.Tag = "langKey=lblVerschlusszeit"
         Me.lblObjektiv = New System.Windows.Forms.Label()
-Me.lblObjektiv.Tag = "langKey=lblObjektiv"
         Me.lblBrennweite = New System.Windows.Forms.Label()
-Me.lblBrennweite.Tag = "langKey=lblBrennweite"
         Me.lblKamera = New System.Windows.Forms.Label()
-Me.lblKamera.Tag = "langKey=lblKamera"
         Me.lblNBlende = New System.Windows.Forms.Label()
         Me.lblNISO = New System.Windows.Forms.Label()
         Me.lblNVerschlusszeit = New System.Windows.Forms.Label()
         Me.lblNObjektiv = New System.Windows.Forms.Label()
-Me.lblNObjektiv.Tag = "langKey=lblNObjektiv"
         Me.lblNBrennweite = New System.Windows.Forms.Label()
-Me.lblNBrennweite.Tag = "langKey=lblNBrennweite"
         Me.lblNlblKamera = New System.Windows.Forms.Label()
         Me.lblNKamera = New System.Windows.Forms.Label()
         Me.lblNBildinformationen = New System.Windows.Forms.Label()
-Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.grpDatei.SuspendLayout()
         Me.grpKamera.SuspendLayout()
         Me.SuspendLayout()
@@ -94,6 +77,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.grpDatei.Size = New System.Drawing.Size(903, 538)
         Me.grpDatei.TabIndex = 1
         Me.grpDatei.TabStop = False
+        Me.grpDatei.Tag = "langKey=grpDatei"
         '
         'slbBewertung
         '
@@ -102,6 +86,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.slbBewertung.Name = "slbBewertung"
         Me.slbBewertung.Size = New System.Drawing.Size(221, 45)
         Me.slbBewertung.TabIndex = 14
+        Me.slbBewertung.Tag = "STYLE_KLINGON"
         Me.slbBewertung.Text = "SterneAnzeigeLabel1"
         '
         'lblBewertung
@@ -111,6 +96,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblBewertung.Name = "lblBewertung"
         Me.lblBewertung.Size = New System.Drawing.Size(30, 41)
         Me.lblBewertung.TabIndex = 13
+        Me.lblBewertung.Tag = "langKey=lblBewertung"
         Me.lblBewertung.Text = "-"
         Me.lblBewertung.Visible = False
         '
@@ -132,6 +118,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblTags.Name = "lblTags"
         Me.lblTags.Size = New System.Drawing.Size(243, 41)
         Me.lblTags.TabIndex = 9
+        Me.lblTags.Tag = "langKey=lblTags"
         Me.lblTags.Text = "Verwendete Tags"
         '
         'lblAutor
@@ -142,6 +129,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblAutor.Name = "lblAutor"
         Me.lblAutor.Size = New System.Drawing.Size(92, 41)
         Me.lblAutor.TabIndex = 8
+        Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblAutor.Text = "Autor"
         '
         'lblErstellungsdatum
@@ -152,6 +140,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblErstellungsdatum.Name = "lblErstellungsdatum"
         Me.lblErstellungsdatum.Size = New System.Drawing.Size(247, 41)
         Me.lblErstellungsdatum.TabIndex = 7
+        Me.lblErstellungsdatum.Tag = "langKey=lblErstellungsdatum"
         Me.lblErstellungsdatum.Text = "Erstellungsdatum"
         '
         'lblDateipfad
@@ -162,6 +151,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblDateipfad.Name = "lblDateipfad"
         Me.lblDateipfad.Size = New System.Drawing.Size(147, 41)
         Me.lblDateipfad.TabIndex = 6
+        Me.lblDateipfad.Tag = "langKey=lblDateipfad"
         Me.lblDateipfad.Text = "Dateipfad"
         '
         'lblDateiname
@@ -171,6 +161,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblDateiname.Name = "lblDateiname"
         Me.lblDateiname.Size = New System.Drawing.Size(161, 41)
         Me.lblDateiname.TabIndex = 5
+        Me.lblDateiname.Tag = "langKey=lblDateiname"
         Me.lblDateiname.Text = "Dateiname"
         '
         'lblNTags
@@ -253,6 +244,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.grpKamera.Size = New System.Drawing.Size(485, 538)
         Me.grpKamera.TabIndex = 3
         Me.grpKamera.TabStop = False
+        Me.grpKamera.Tag = "langKey=grpKamera"
         '
         'lblBlende
         '
@@ -261,6 +253,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblBlende.Name = "lblBlende"
         Me.lblBlende.Size = New System.Drawing.Size(109, 41)
         Me.lblBlende.TabIndex = 12
+        Me.lblBlende.Tag = "langKey=lblBlende"
         Me.lblBlende.Text = "Blende"
         '
         'lblISO
@@ -270,6 +263,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblISO.Name = "lblISO"
         Me.lblISO.Size = New System.Drawing.Size(65, 41)
         Me.lblISO.TabIndex = 11
+        Me.lblISO.Tag = "langKey=lblISO"
         Me.lblISO.Text = "ISO"
         '
         'lblVerschlusszeit
@@ -279,6 +273,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblVerschlusszeit.Name = "lblVerschlusszeit"
         Me.lblVerschlusszeit.Size = New System.Drawing.Size(202, 41)
         Me.lblVerschlusszeit.TabIndex = 10
+        Me.lblVerschlusszeit.Tag = "langKey=lblVerschlusszeit"
         Me.lblVerschlusszeit.Text = "Verschlusszeit"
         '
         'lblObjektiv
@@ -289,6 +284,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblObjektiv.Name = "lblObjektiv"
         Me.lblObjektiv.Size = New System.Drawing.Size(128, 41)
         Me.lblObjektiv.TabIndex = 9
+        Me.lblObjektiv.Tag = "langKey=lblObjektiv"
         Me.lblObjektiv.Text = "Objektiv"
         '
         'lblBrennweite
@@ -298,6 +294,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblBrennweite.Name = "lblBrennweite"
         Me.lblBrennweite.Size = New System.Drawing.Size(166, 41)
         Me.lblBrennweite.TabIndex = 8
+        Me.lblBrennweite.Tag = "langKey=lblBrennweite"
         Me.lblBrennweite.Text = "Brennweite"
         '
         'lblKamera
@@ -308,6 +305,7 @@ Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.lblKamera.Name = "lblKamera"
         Me.lblKamera.Size = New System.Drawing.Size(117, 41)
         Me.lblKamera.TabIndex = 7
+        Me.lblKamera.Tag = "langKey=lblKamera"
         Me.lblKamera.Text = "Kamera"
         '
         'lblNBlende

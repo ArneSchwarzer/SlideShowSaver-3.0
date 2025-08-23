@@ -22,27 +22,17 @@ Partial Class ucOptionsTransition
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.lblShadername = New System.Windows.Forms.Label()
-Me.lblShadername.Tag = "langKey=lblShadername"
+        Me.lblTransitionname = New System.Windows.Forms.Label()
         Me.lblNlblTransitionname = New System.Windows.Forms.Label()
-Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
-        Me.lblNoOptions = New System.Windows.Forms.Label()
-Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+        Me.lblNRichtungen = New System.Windows.Forms.Label()
         Me.lblKeineRichtungInfo = New System.Windows.Forms.Label()
-Me.lblKeineRichtungInfo.Tag = "langKey=lblKeineRichtungInfo"
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNModus = New System.Windows.Forms.Label()
-Me.lblNModus.Tag = "langKey=lblNModus"
         Me.rbZufall = New System.Windows.Forms.RadioButton()
-Me.rbZufall.Tag = "langKey=rbZufall"
         Me.rbWischen = New System.Windows.Forms.RadioButton()
-Me.rbWischen.Tag = "langKey=rbWischen"
         Me.rbSchieben = New System.Windows.Forms.RadioButton()
-Me.rbSchieben.Tag = "langKey=rbSchieben"
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
-Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtNW = New MyControlsLibrary.ToggleButton()
         Me.tbtN = New MyControlsLibrary.ToggleButton()
         Me.tbtNO = New MyControlsLibrary.ToggleButton()
@@ -52,19 +42,19 @@ Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.btnDefaults = New System.Windows.Forms.Button()
-Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'lblShadername
+        'lblTransitionname
         '
-        Me.lblShadername.AutoSize = True
-        Me.lblShadername.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.lblShadername.Location = New System.Drawing.Point(325, 26)
-        Me.lblShadername.Name = "lblShadername"
-        Me.lblShadername.Size = New System.Drawing.Size(304, 41)
-        Me.lblShadername.TabIndex = 17
-        Me.lblShadername.Text = "Schieben && Wischen"
+        Me.lblTransitionname.AutoSize = True
+        Me.lblTransitionname.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblTransitionname.Location = New System.Drawing.Point(325, 26)
+        Me.lblTransitionname.Name = "lblTransitionname"
+        Me.lblTransitionname.Size = New System.Drawing.Size(304, 41)
+        Me.lblTransitionname.TabIndex = 17
+        Me.lblTransitionname.Tag = "langKey=lblShadername"
+        Me.lblTransitionname.Text = "Schieben && Wischen"
         '
         'lblNlblTransitionname
         '
@@ -73,16 +63,18 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNlblTransitionname.Name = "lblNlblTransitionname"
         Me.lblNlblTransitionname.Size = New System.Drawing.Size(151, 41)
         Me.lblNlblTransitionname.TabIndex = 16
+        Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNlblTransitionname.Text = "Übergang"
         '
-        'lblNoOptions
+        'lblNRichtungen
         '
-        Me.lblNoOptions.AutoSize = True
-        Me.lblNoOptions.Location = New System.Drawing.Point(34, 144)
-        Me.lblNoOptions.Name = "lblNoOptions"
-        Me.lblNoOptions.Size = New System.Drawing.Size(169, 41)
-        Me.lblNoOptions.TabIndex = 18
-        Me.lblNoOptions.Text = "Richtungen"
+        Me.lblNRichtungen.AutoSize = True
+        Me.lblNRichtungen.Location = New System.Drawing.Point(34, 144)
+        Me.lblNRichtungen.Name = "lblNRichtungen"
+        Me.lblNRichtungen.Size = New System.Drawing.Size(169, 41)
+        Me.lblNRichtungen.TabIndex = 18
+        Me.lblNRichtungen.Tag = "langKey=lblNoOptions"
+        Me.lblNRichtungen.Text = "Richtungen"
         '
         'lblKeineRichtungInfo
         '
@@ -92,6 +84,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblKeineRichtungInfo.Name = "lblKeineRichtungInfo"
         Me.lblKeineRichtungInfo.Size = New System.Drawing.Size(527, 82)
         Me.lblKeineRichtungInfo.TabIndex = 27
+        Me.lblKeineRichtungInfo.Tag = "langKey=lblKeineRichtungInfo"
         Me.lblKeineRichtungInfo.Text = "Keine Richtung ausgewählt, verwende zufällige Richtung"
         '
         'lblNtrbGeschwindigkeit
@@ -101,6 +94,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNtrbGeschwindigkeit.Name = "lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Size = New System.Drawing.Size(236, 41)
         Me.lblNtrbGeschwindigkeit.TabIndex = 28
+        Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.lblNtrbGeschwindigkeit.Text = "Geschwindigkeit"
         '
         'trkGeschwindigkeit
@@ -122,6 +116,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblNModus.Name = "lblNModus"
         Me.lblNModus.Size = New System.Drawing.Size(111, 41)
         Me.lblNModus.TabIndex = 33
+        Me.lblNModus.Tag = "langKey=lblNModus"
         Me.lblNModus.Text = "Modus"
         '
         'rbZufall
@@ -132,6 +127,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rbZufall.Size = New System.Drawing.Size(146, 45)
         Me.rbZufall.TabIndex = 32
         Me.rbZufall.TabStop = True
+        Me.rbZufall.Tag = "langKey=rbZufall"
         Me.rbZufall.Text = "Zufällig"
         Me.rbZufall.UseVisualStyleBackColor = True
         '
@@ -143,6 +139,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rbWischen.Size = New System.Drawing.Size(161, 45)
         Me.rbWischen.TabIndex = 31
         Me.rbWischen.TabStop = True
+        Me.rbWischen.Tag = "langKey=rbWischen"
         Me.rbWischen.Text = "Wischen"
         Me.rbWischen.UseVisualStyleBackColor = True
         '
@@ -154,6 +151,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.rbSchieben.Size = New System.Drawing.Size(170, 45)
         Me.rbSchieben.TabIndex = 30
         Me.rbSchieben.TabStop = True
+        Me.rbSchieben.Tag = "langKey=rbSchieben"
         Me.rbSchieben.Text = "Schieben"
         Me.rbSchieben.UseVisualStyleBackColor = True
         '
@@ -165,6 +163,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.lblGeschwindigkeit.Name = "lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Size = New System.Drawing.Size(71, 41)
         Me.lblGeschwindigkeit.TabIndex = 34
+        Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.lblGeschwindigkeit.Text = "15 s"
         Me.lblGeschwindigkeit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -287,6 +286,7 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(157, 52)
         Me.btnDefaults.TabIndex = 43
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '
@@ -311,8 +311,8 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.Controls.Add(Me.trkGeschwindigkeit)
         Me.Controls.Add(Me.lblNtrbGeschwindigkeit)
         Me.Controls.Add(Me.lblKeineRichtungInfo)
-        Me.Controls.Add(Me.lblNoOptions)
-        Me.Controls.Add(Me.lblShadername)
+        Me.Controls.Add(Me.lblNRichtungen)
+        Me.Controls.Add(Me.lblTransitionname)
         Me.Controls.Add(Me.lblNlblTransitionname)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
         Me.Margin = New System.Windows.Forms.Padding(4)
@@ -324,9 +324,9 @@ Me.btnDefaults.Tag = "langKey=btnDefaults"
 
     End Sub
 
-    Friend WithEvents lblShadername As Windows.Forms.Label
+    Friend WithEvents lblTransitionname As Windows.Forms.Label
     Friend WithEvents lblNlblTransitionname As Windows.Forms.Label
-    Friend WithEvents lblNoOptions As Windows.Forms.Label
+    Friend WithEvents lblNRichtungen As Windows.Forms.Label
     Friend WithEvents lblKeineRichtungInfo As Windows.Forms.Label
     Friend WithEvents lblNtrbGeschwindigkeit As Windows.Forms.Label
     Friend WithEvents trkGeschwindigkeit As Windows.Forms.TrackBar

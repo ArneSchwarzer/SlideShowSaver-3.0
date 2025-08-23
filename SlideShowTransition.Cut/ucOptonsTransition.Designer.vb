@@ -23,11 +23,8 @@ Partial Class ucOptonsTransition
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblNoOptions = New System.Windows.Forms.Label()
-Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblTransitonName = New System.Windows.Forms.Label()
-Me.lblTransitonName.Tag = "langKey=lblTransitonName"
         Me.lblNlblTransitionName = New System.Windows.Forms.Label()
-Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.SuspendLayout()
         '
         'lblNoOptions
@@ -37,6 +34,7 @@ Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.lblNoOptions.Name = "lblNoOptions"
         Me.lblNoOptions.Size = New System.Drawing.Size(717, 41)
         Me.lblNoOptions.TabIndex = 21
+        Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblNoOptions.Text = "Dieser Übergang bietet keine einstellbaren Optionen"
         '
         'lblTransitonName
@@ -47,6 +45,7 @@ Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.lblTransitonName.Name = "lblTransitonName"
         Me.lblTransitonName.Size = New System.Drawing.Size(283, 41)
         Me.lblTransitonName.TabIndex = 20
+        Me.lblTransitonName.Tag = "langKey=lblTransitonName"
         Me.lblTransitonName.Text = "Direkter Übergang"
         '
         'lblNlblTransitionName
@@ -56,6 +55,7 @@ Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.lblNlblTransitionName.Name = "lblNlblTransitionName"
         Me.lblNlblTransitionName.Size = New System.Drawing.Size(151, 41)
         Me.lblNlblTransitionName.TabIndex = 19
+        Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.lblNlblTransitionName.Text = "Übergang"
         '
         'ucOptonsTransition
@@ -66,7 +66,7 @@ Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.Controls.Add(Me.lblTransitonName)
         Me.Controls.Add(Me.lblNlblTransitionName)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptonsTransition"
         Me.Size = New System.Drawing.Size(890, 1020)
         Me.ResumeLayout(False)

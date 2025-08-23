@@ -598,6 +598,11 @@ Public Class frmOptionsMain
 
             clbTransitionsModule.Sorted = True
         End If
+
+        'Solange die Funktion noch nicht implementiert ist
+        lblNclbTransitionsModule.Enabled = False
+        clbTransitionsModule.Enabled = False
+
 #End Region
 
 #Region "cmbTransitionsReihenfolge für Module Initialisieren"
@@ -612,6 +617,10 @@ Public Class frmOptionsMain
             lblNcmbAbspielmodusTransitionsModule.Enabled = True
         End If
 
+        'Solange die Funktion noch nicht implementiert ist
+        cmbTransitionsReihenfolge.Enabled = False
+        lblNcmbAbspielmodusTransitionsModule.Enabled = False
+
 #End Region
 
 #Region "chkMultiMonitor Initialisieren"
@@ -621,7 +630,7 @@ Public Class frmOptionsMain
         '
         'chkMultiMonitor.Checked = aktuelleSettings.MultiMonitor
 
-        chkMultiMonitor.Visible = False
+        chkMultiMonitor.Enabled = False
         chkMultiMonitor.Checked = False
 #End Region
 
