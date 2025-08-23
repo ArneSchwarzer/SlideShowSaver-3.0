@@ -24,31 +24,55 @@ Partial Class frmOptionsMain
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmOptionsMain))
         Me.lblNTitel = New System.Windows.Forms.Label()
+Me.lblNTitel.Tag = "langKey=lblNTitel"
         Me.tabOptions = New System.Windows.Forms.TabControl()
+Me.tabOptions.Tag = "langKey=tabOptions"
         Me.tpAllgemein = New System.Windows.Forms.TabPage()
+Me.tpAllgemein.Tag = "langKey=tpAllgemein"
         Me.picHintergrundfarbe = New System.Windows.Forms.PictureBox()
+Me.picHintergrundfarbe.Tag = "langKey=picHintergrundfarbe"
         Me.lblNHintergrundfarbe = New System.Windows.Forms.Label()
+Me.lblNHintergrundfarbe.Tag = "langKey=lblNHintergrundfarbe"
         Me.lblKeineTransitionsModule = New System.Windows.Forms.Label()
+Me.lblKeineTransitionsModule.Tag = "langKey=lblKeineTransitionsModule"
         Me.lblNcmbAbspielmodusTransitionsModule = New System.Windows.Forms.Label()
+Me.lblNcmbAbspielmodusTransitionsModule.Tag = "langKey=lblNcmbAbspielmodusTransitionsModule"
         Me.cmbTransitionsReihenfolge = New System.Windows.Forms.ComboBox()
+Me.cmbTransitionsReihenfolge.Tag = "langKey=cmbTransitionsReihenfolge"
         Me.clbTransitionsModule = New System.Windows.Forms.CheckedListBox()
+Me.clbTransitionsModule.Tag = "langKey=clbTransitionsModule"
         Me.lblNclbTransitionsModule = New System.Windows.Forms.Label()
+Me.lblNclbTransitionsModule.Tag = "langKey=lblNclbTransitionsModule"
         Me.lblKeineModule = New System.Windows.Forms.Label()
+Me.lblKeineModule.Tag = "langKey=lblKeineModule"
         Me.chkMultiMonitor = New System.Windows.Forms.CheckBox()
+Me.chkMultiMonitor.Tag = "langKey=chkMultiMonitor"
         Me.lblDauerModuswechsel = New System.Windows.Forms.Label()
+Me.lblDauerModuswechsel.Tag = "langKey=lblDauerModuswechsel"
         Me.trkDauerModulwechsel = New System.Windows.Forms.TrackBar()
         Me.lblNtrkDauerModulwechsel = New System.Windows.Forms.Label()
+Me.lblNtrkDauerModulwechsel.Tag = "langKey=lblNtrkDauerModulwechsel"
         Me.lblNcmbModulWechsel = New System.Windows.Forms.Label()
+Me.lblNcmbModulWechsel.Tag = "langKey=lblNcmbModulWechsel"
         Me.cmbModulwechsel = New System.Windows.Forms.ComboBox()
+Me.cmbModulwechsel.Tag = "langKey=cmbModulwechsel"
         Me.clbModule = New System.Windows.Forms.CheckedListBox()
+Me.clbModule.Tag = "langKey=clbModule"
         Me.lblNcblModule = New System.Windows.Forms.Label()
+Me.lblNcblModule.Tag = "langKey=lblNcblModule"
         Me.tpModul = New System.Windows.Forms.TabPage()
+Me.tpModul.Tag = "langKey=tpModul"
         Me.tpBildauswahl = New System.Windows.Forms.TabPage()
+Me.tpBildauswahl.Tag = "langKey=tpBildauswahl"
         Me.tpTransitions = New System.Windows.Forms.TabPage()
+Me.tpTransitions.Tag = "langKey=tpTransitions"
         Me.tpShader = New System.Windows.Forms.TabPage()
+Me.tpShader.Tag = "langKey=tpShader"
         Me.btnOK = New System.Windows.Forms.Button()
+Me.btnOK.Tag = "langKey=btnOK"
         Me.pnlLanguages = New System.Windows.Forms.Panel()
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.tabOptions.SuspendLayout()
         Me.tpAllgemein.SuspendLayout()
         CType(Me.picHintergrundfarbe, System.ComponentModel.ISupportInitialize).BeginInit()

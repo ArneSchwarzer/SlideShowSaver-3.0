@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptonsTransition
     Inherits System.Windows.Forms.UserControl
 
@@ -23,8 +23,11 @@ Partial Class ucOptonsTransition
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblNoOptions = New System.Windows.Forms.Label()
+Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblTransitonName = New System.Windows.Forms.Label()
+Me.lblTransitonName.Tag = "langKey=lblTransitonName"
         Me.lblNlblTransitionName = New System.Windows.Forms.Label()
+Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
         Me.SuspendLayout()
         '
         'lblNoOptions

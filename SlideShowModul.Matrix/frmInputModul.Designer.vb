@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmInputModul
     Inherits System.Windows.Forms.Form
 
@@ -23,11 +23,16 @@ Partial Class frmInputModul
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.btnCancel = New System.Windows.Forms.Button()
+Me.btnCancel.Tag = "langKey=btnCancel"
         Me.lblNtxtTag = New System.Windows.Forms.Label()
+Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.txtTag = New System.Windows.Forms.TextBox()
         Me.lblTitel = New System.Windows.Forms.Label()
+Me.lblTitel.Tag = "langKey=lblTitel"
         Me.btnOK = New System.Windows.Forms.Button()
+Me.btnOK.Tag = "langKey=btnOK"
         Me.picLogo = New System.Windows.Forms.PictureBox()
+Me.picLogo.Tag = "langKey=picLogo"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

@@ -23,12 +23,18 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblTransitionname = New System.Windows.Forms.Label()
+Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNRichtungen = New System.Windows.Forms.Label()
+Me.lblNRichtungen.Tag = "langKey=lblNRichtungen"
         Me.lblKeineRichtung = New System.Windows.Forms.Label()
+Me.lblKeineRichtung.Tag = "langKey=lblKeineRichtung"
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtNW = New MyControlsLibrary.ToggleButton()
         Me.tbtN = New MyControlsLibrary.ToggleButton()
         Me.tbtNO = New MyControlsLibrary.ToggleButton()
@@ -38,12 +44,16 @@ Partial Class ucOptionsTransition
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.lblTransitionsname = New System.Windows.Forms.Label()
+Me.lblTransitionsname.Tag = "langKey=lblTransitionsname"
         Me.tbtZIn = New MyControlsLibrary.ToggleButton()
         Me.tbtZOut = New MyControlsLibrary.ToggleButton()
         Me.trkBreite = New System.Windows.Forms.TrackBar()
         Me.lblNBreite = New System.Windows.Forms.Label()
+Me.lblNBreite.Tag = "langKey=lblNBreite"
         Me.lblBreiteProzent = New System.Windows.Forms.Label()
+Me.lblBreiteProzent.Tag = "langKey=lblBreiteProzent"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkBreite, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()

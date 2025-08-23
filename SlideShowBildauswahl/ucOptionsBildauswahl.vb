@@ -353,6 +353,8 @@ Public Class ucOptionsBildauswahl
         If lstVerzeichnisse.Items.Count = 0 Then
             btnVerzeichnisseListeLöschen.Enabled = False
         End If
+        SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse")
+
 
         'White-List
         For Each item In aktuelleSettings.WhiteListTags
@@ -362,6 +364,7 @@ Public Class ucOptionsBildauswahl
         If lstWhiteList.Items.Count = 0 Then
             btnWhiteListListeLöschen.Enabled = False
         End If
+        SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
 
         'Black-List
         For Each item In aktuelleSettings.BlackListTags
@@ -371,10 +374,12 @@ Public Class ucOptionsBildauswahl
         If lstBlackList.Items.Count = 0 Then
             btnBlackListListeLöschen.Enabled = False
         End If
+        'WriteToRegistry erst nach setzen der Altersfreigabe
 
         'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
         sbcBewertung.Bewertung = aktuelleSettings.Bewertung
         sbcBewertung.EndInitialization()
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", aktuelleSettings.Bewertung.ToString)
 
         'Altersfreigabe - RadioButtons & Black-List Einträge
         Select Case aktuelleSettings.Altersfreigabe
@@ -384,6 +389,7 @@ Public Class ucOptionsBildauswahl
                 lstBlackList.Items.Remove("18+")
                 lstBlackList.Items.Remove("Akt")
                 lstBlackList.Items.Remove("Lingerie")
+                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "18+")
             Case "Akt"
                 rdoAkt.Checked = True
                 'Blacklist Tags setzen/löschen
@@ -392,6 +398,7 @@ Public Class ucOptionsBildauswahl
                 End If
                 lstBlackList.Items.Remove("Akt")
                 lstBlackList.Items.Remove("Lingerie")
+                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Akt")
             Case "Lingerie"
                 rdoLingerie.Checked = True
                 'Blacklist Tags setzen/löschen
@@ -402,6 +409,7 @@ Public Class ucOptionsBildauswahl
                     lstBlackList.Items.Add("Akt")
                 End If
                 lstBlackList.Items.Remove("Lingerie")
+                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Lingerie")
             Case "Jugendfrei"
                 rdoJugendfrei.Checked = True
                 'Blacklist Tags setzen/löschen
@@ -414,7 +422,9 @@ Public Class ucOptionsBildauswahl
                 If Not lstBlackList.Items.Contains("Lingerie") Then
                     lstBlackList.Items.Add("Lingerie")
                 End If
+                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Jugendfrei")
         End Select
+        SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
 
     End Sub
 

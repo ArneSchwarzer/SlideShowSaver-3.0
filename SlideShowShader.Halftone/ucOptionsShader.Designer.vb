@@ -23,36 +23,60 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblShaderName = New System.Windows.Forms.Label()
+Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
         Me.grbAllgemeineOptionen = New System.Windows.Forms.GroupBox()
+Me.grbAllgemeineOptionen.Tag = "langKey=grbAllgemeineOptionen"
         Me.chkRasterZufall = New System.Windows.Forms.CheckBox()
+Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
         Me.lblGamma = New System.Windows.Forms.Label()
+Me.lblGamma.Tag = "langKey=lblGamma"
         Me.lblRaster = New System.Windows.Forms.Label()
+Me.lblRaster.Tag = "langKey=lblRaster"
         Me.cmbPosterise = New System.Windows.Forms.ComboBox()
+Me.cmbPosterise.Tag = "langKey=cmbPosterise"
         Me.lblNPosterise = New System.Windows.Forms.Label()
+Me.lblNPosterise.Tag = "langKey=lblNPosterise"
         Me.lblNGamma = New System.Windows.Forms.Label()
+Me.lblNGamma.Tag = "langKey=lblNGamma"
         Me.trkGamma = New System.Windows.Forms.TrackBar()
         Me.trkRaster = New System.Windows.Forms.TrackBar()
         Me.rdoModusHTCMYK = New System.Windows.Forms.RadioButton()
+Me.rdoModusHTCMYK.Tag = "langKey=rdoModusHTCMYK"
         Me.rdoModusZufall = New System.Windows.Forms.RadioButton()
+Me.rdoModusZufall.Tag = "langKey=rdoModusZufall"
         Me.rdoModusHTSW = New System.Windows.Forms.RadioButton()
+Me.rdoModusHTSW.Tag = "langKey=rdoModusHTSW"
         Me.rdoModusPixelArt = New System.Windows.Forms.RadioButton()
+Me.rdoModusPixelArt.Tag = "langKey=rdoModusPixelArt"
         Me.lblNRaster = New System.Windows.Forms.Label()
+Me.lblNRaster.Tag = "langKey=lblNRaster"
         Me.lblNModus = New System.Windows.Forms.Label()
+Me.lblNModus.Tag = "langKey=lblNModus"
         Me.grbHalftoneOptionen = New System.Windows.Forms.GroupBox()
+Me.grbHalftoneOptionen.Tag = "langKey=grbHalftoneOptionen"
         Me.lblPapierintensität = New System.Windows.Forms.Label()
         Me.trkPapierIntensität = New System.Windows.Forms.TrackBar()
         Me.lblNPapierIntensität = New System.Windows.Forms.Label()
         Me.chkPapierTextur = New System.Windows.Forms.CheckBox()
+Me.chkPapierTextur.Tag = "langKey=chkPapierTextur"
         Me.cmbDotsWinkel = New System.Windows.Forms.ComboBox()
+Me.cmbDotsWinkel.Tag = "langKey=cmbDotsWinkel"
         Me.lblNDotsWinkel = New System.Windows.Forms.Label()
+Me.lblNDotsWinkel.Tag = "langKey=lblNDotsWinkel"
         Me.lblDotsMin = New System.Windows.Forms.Label()
+Me.lblDotsMin.Tag = "langKey=lblDotsMin"
         Me.trkDotsMin = New System.Windows.Forms.TrackBar()
         Me.lblNDotsMin = New System.Windows.Forms.Label()
+Me.lblNDotsMin.Tag = "langKey=lblNDotsMin"
         Me.lblDotsMax = New System.Windows.Forms.Label()
+Me.lblDotsMax.Tag = "langKey=lblDotsMax"
         Me.trkDotsMax = New System.Windows.Forms.TrackBar()
         Me.lblNDotsMax = New System.Windows.Forms.Label()
+Me.lblNDotsMax.Tag = "langKey=lblNDotsMax"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.grbAllgemeineOptionen.SuspendLayout()
         CType(Me.trkGamma, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkRaster, System.ComponentModel.ISupportInitialize).BeginInit()

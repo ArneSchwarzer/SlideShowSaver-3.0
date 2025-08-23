@@ -25,6 +25,7 @@ Partial Class ucUnderConstruction
         Me.lblModulname = New System.Windows.Forms.Label()
         Me.panPanel = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
+Me.picLogo.Tag = "langKey=picLogo"
         Me.lblHierEntsteht = New System.Windows.Forms.Label()
         Me.lblUnderConstruction = New System.Windows.Forms.Label()
         Me.panPanel.SuspendLayout()

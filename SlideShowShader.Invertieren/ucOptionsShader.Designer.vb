@@ -23,12 +23,19 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNShaderName = New System.Windows.Forms.Label()
+Me.lblNShaderName.Tag = "langKey=lblNShaderName"
         Me.lblNModus = New System.Windows.Forms.Label()
+Me.lblNModus.Tag = "langKey=lblNModus"
         Me.rdoFarbe = New System.Windows.Forms.RadioButton()
+Me.rdoFarbe.Tag = "langKey=rdoFarbe"
         Me.rdoWS = New System.Windows.Forms.RadioButton()
+Me.rdoWS.Tag = "langKey=rdoWS"
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
+Me.rdoZufall.Tag = "langKey=rdoZufall"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.SuspendLayout()
         '
         'lblShadername

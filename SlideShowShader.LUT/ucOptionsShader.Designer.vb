@@ -23,13 +23,20 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNShaderName = New System.Windows.Forms.Label()
+Me.lblNShaderName.Tag = "langKey=lblNShaderName"
         Me.clbLUTs = New System.Windows.Forms.CheckedListBox()
+Me.clbLUTs.Tag = "langKey=clbLUTs"
         Me.lblNLUTs = New System.Windows.Forms.Label()
+Me.lblNLUTs.Tag = "langKey=lblNLUTs"
         Me.lblNIntensitaet = New System.Windows.Forms.Label()
+Me.lblNIntensitaet.Tag = "langKey=lblNIntensitaet"
         Me.lblIntensitaet = New System.Windows.Forms.Label()
+Me.lblIntensitaet.Tag = "langKey=lblIntensitaet"
         Me.trkIntensitaet = New System.Windows.Forms.TrackBar()
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkIntensitaet, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

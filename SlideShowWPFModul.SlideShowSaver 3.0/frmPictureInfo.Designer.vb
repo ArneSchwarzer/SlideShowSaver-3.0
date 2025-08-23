@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmPictureInfo
     Inherits System.Windows.Forms.Form
 
@@ -23,14 +23,21 @@ Partial Class frmPictureInfo
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.grpDatei = New System.Windows.Forms.GroupBox()
+Me.grpDatei.Tag = "langKey=grpDatei"
         Me.slbBewertung = New MyControlsLibrary.SterneAnzeigeLabel()
         Me.lblBewertung = New System.Windows.Forms.Label()
+Me.lblBewertung.Tag = "langKey=lblBewertung"
         Me.LblNBewertung = New System.Windows.Forms.Label()
         Me.lblTags = New System.Windows.Forms.Label()
+Me.lblTags.Tag = "langKey=lblTags"
         Me.lblAutor = New System.Windows.Forms.Label()
+Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblErstellungsdatum = New System.Windows.Forms.Label()
+Me.lblErstellungsdatum.Tag = "langKey=lblErstellungsdatum"
         Me.lblDateipfad = New System.Windows.Forms.Label()
+Me.lblDateipfad.Tag = "langKey=lblDateipfad"
         Me.lblDateiname = New System.Windows.Forms.Label()
+Me.lblDateiname.Tag = "langKey=lblDateiname"
         Me.lblNTags = New System.Windows.Forms.Label()
         Me.lblNAutor = New System.Windows.Forms.Label()
         Me.lblNErstellungsdatum = New System.Windows.Forms.Label()
@@ -38,20 +45,30 @@ Partial Class frmPictureInfo
         Me.lblNDateiname = New System.Windows.Forms.Label()
         Me.lblNDatei = New System.Windows.Forms.Label()
         Me.grpKamera = New System.Windows.Forms.GroupBox()
+Me.grpKamera.Tag = "langKey=grpKamera"
         Me.lblBlende = New System.Windows.Forms.Label()
+Me.lblBlende.Tag = "langKey=lblBlende"
         Me.lblISO = New System.Windows.Forms.Label()
+Me.lblISO.Tag = "langKey=lblISO"
         Me.lblVerschlusszeit = New System.Windows.Forms.Label()
+Me.lblVerschlusszeit.Tag = "langKey=lblVerschlusszeit"
         Me.lblObjektiv = New System.Windows.Forms.Label()
+Me.lblObjektiv.Tag = "langKey=lblObjektiv"
         Me.lblBrennweite = New System.Windows.Forms.Label()
+Me.lblBrennweite.Tag = "langKey=lblBrennweite"
         Me.lblKamera = New System.Windows.Forms.Label()
+Me.lblKamera.Tag = "langKey=lblKamera"
         Me.lblNBlende = New System.Windows.Forms.Label()
         Me.lblNISO = New System.Windows.Forms.Label()
         Me.lblNVerschlusszeit = New System.Windows.Forms.Label()
         Me.lblNObjektiv = New System.Windows.Forms.Label()
+Me.lblNObjektiv.Tag = "langKey=lblNObjektiv"
         Me.lblNBrennweite = New System.Windows.Forms.Label()
+Me.lblNBrennweite.Tag = "langKey=lblNBrennweite"
         Me.lblNlblKamera = New System.Windows.Forms.Label()
         Me.lblNKamera = New System.Windows.Forms.Label()
         Me.lblNBildinformationen = New System.Windows.Forms.Label()
+Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
         Me.grpDatei.SuspendLayout()
         Me.grpKamera.SuspendLayout()
         Me.SuspendLayout()

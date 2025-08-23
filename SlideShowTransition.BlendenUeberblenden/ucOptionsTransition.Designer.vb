@@ -23,21 +23,33 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblTransitionname = New System.Windows.Forms.Label()
+Me.lblTransitionname.Tag = "langKey=lblTransitionname"
         Me.lblNTransitionName = New System.Windows.Forms.Label()
+Me.lblNTransitionName.Tag = "langKey=lblNTransitionName"
         Me.lblNpicFarbton = New System.Windows.Forms.Label()
+Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
         Me.picFarbton = New System.Windows.Forms.PictureBox()
+Me.picFarbton.Tag = "langKey=picFarbton"
         Me.cdFarbton = New System.Windows.Forms.ColorDialog()
         Me.lblNModus = New System.Windows.Forms.Label()
+Me.lblNModus.Tag = "langKey=lblNModus"
         Me.chkZufallsfarbe = New System.Windows.Forms.CheckBox()
+Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
         Me.pnlModus = New System.Windows.Forms.Panel()
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
+Me.rdoZufall.Tag = "langKey=rdoZufall"
         Me.rdoÜberblenden = New System.Windows.Forms.RadioButton()
         Me.rdoBlenden = New System.Windows.Forms.RadioButton()
+Me.rdoBlenden.Tag = "langKey=rdoBlenden"
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.chkMorphing = New System.Windows.Forms.CheckBox()
+Me.chkMorphing.Tag = "langKey=chkMorphing"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlModus.SuspendLayout()
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()

@@ -23,15 +23,20 @@ Partial Class ucOptionsModul
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblModulname = New System.Windows.Forms.Label()
+Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblNlblModulname = New System.Windows.Forms.Label()
         Me.btnHighlighttextListeLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextHinzufügen = New System.Windows.Forms.Button()
         Me.lstHiglightTexte = New System.Windows.Forms.ListBox()
+Me.lstHiglightTexte.Tag = "langKey=lstHiglightTexte"
         Me.lblSzenendauer = New System.Windows.Forms.Label()
+Me.lblSzenendauer.Tag = "langKey=lblSzenendauer"
         Me.trkSzenendauer = New System.Windows.Forms.TrackBar()
         Me.lblNtrbSzenendauer = New System.Windows.Forms.Label()
+Me.lblNtrbSzenendauer.Tag = "langKey=lblNtrbSzenendauer"
         Me.lblNclbHighlighttexte = New System.Windows.Forms.Label()
+Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         CType(Me.trkSzenendauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

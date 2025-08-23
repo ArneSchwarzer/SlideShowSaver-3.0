@@ -23,16 +23,26 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblTransitionname = New System.Windows.Forms.Label()
+Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNoOptions = New System.Windows.Forms.Label()
+Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblKeineRichtungInfo = New System.Windows.Forms.Label()
+Me.lblKeineRichtungInfo.Tag = "langKey=lblKeineRichtungInfo"
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblNModus = New System.Windows.Forms.Label()
+Me.lblNModus.Tag = "langKey=lblNModus"
         Me.rbZufall = New System.Windows.Forms.RadioButton()
+Me.rbZufall.Tag = "langKey=rbZufall"
         Me.rbWischen = New System.Windows.Forms.RadioButton()
+Me.rbWischen.Tag = "langKey=rbWischen"
         Me.rbSchieben = New System.Windows.Forms.RadioButton()
+Me.rbSchieben.Tag = "langKey=rbSchieben"
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtNW = New MyControlsLibrary.ToggleButton()
         Me.tbtN = New MyControlsLibrary.ToggleButton()
         Me.tbtNO = New MyControlsLibrary.ToggleButton()
@@ -42,6 +52,7 @@ Partial Class ucOptionsTransition
         Me.tbtS = New MyControlsLibrary.ToggleButton()
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

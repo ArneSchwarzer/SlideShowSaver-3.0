@@ -23,20 +23,28 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblShaderName = New System.Windows.Forms.Label()
+Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
         Me.lblNpicFarbton = New System.Windows.Forms.Label()
+Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
         Me.picFarbton = New System.Windows.Forms.PictureBox()
+Me.picFarbton.Tag = "langKey=picFarbton"
         Me.lblNtrbIntensität = New System.Windows.Forms.Label()
         Me.trkIntensität = New System.Windows.Forms.TrackBar()
         Me.lblIntensität = New System.Windows.Forms.Label()
         Me.cdFarbton = New System.Windows.Forms.ColorDialog()
         Me.lblNModus = New System.Windows.Forms.Label()
+Me.lblNModus.Tag = "langKey=lblNModus"
         Me.chkZufallsfarbe = New System.Windows.Forms.CheckBox()
+Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
         Me.pnlModus = New System.Windows.Forms.Panel()
         Me.rdoZufall = New System.Windows.Forms.RadioButton()
+Me.rdoZufall.Tag = "langKey=rdoZufall"
         Me.rdoFärben = New System.Windows.Forms.RadioButton()
         Me.rdoTönen = New System.Windows.Forms.RadioButton()
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.picFarbton, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkIntensität, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.pnlModus.SuspendLayout()

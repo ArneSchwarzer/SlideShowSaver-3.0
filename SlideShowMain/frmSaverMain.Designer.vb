@@ -25,8 +25,11 @@ Partial Class frmSaverMain
         Me.components = New System.ComponentModel.Container()
         Me.tmrMain = New System.Windows.Forms.Timer(Me.components)
         Me.lblMCP = New System.Windows.Forms.Label()
+Me.lblMCP.Tag = "langKey=lblMCP"
         Me.lblNameFramework = New System.Windows.Forms.Label()
+Me.lblNameFramework.Tag = "langKey=lblNameFramework"
         Me.lblInitialisiere = New System.Windows.Forms.Label()
+Me.lblInitialisiere.Tag = "langKey=lblInitialisiere"
         Me.SuspendLayout()
         '
         'tmrMain

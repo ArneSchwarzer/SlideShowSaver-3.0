@@ -164,5 +164,8 @@
   <ItemGroup>
     <None Include="Resources\Flying Kitchen-Aid Logo Transparent.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Language\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

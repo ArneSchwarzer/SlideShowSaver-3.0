@@ -24,9 +24,13 @@ Partial Class frmMessageBildauswahl
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmMessageBildauswahl))
         Me.picLogo = New System.Windows.Forms.PictureBox()
+Me.picLogo.Tag = "langKey=picLogo"
         Me.btnOK = New System.Windows.Forms.Button()
+Me.btnOK.Tag = "langKey=btnOK"
         Me.lblTitel = New System.Windows.Forms.Label()
+Me.lblTitel.Tag = "langKey=lblTitel"
         Me.rtxMessage = New System.Windows.Forms.RichTextBox()
+Me.rtxMessage.Tag = "langKey=rtxMessage"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

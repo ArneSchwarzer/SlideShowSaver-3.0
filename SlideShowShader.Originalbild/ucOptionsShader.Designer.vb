@@ -23,8 +23,11 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNShaderName = New System.Windows.Forms.Label()
+Me.lblNShaderName.Tag = "langKey=lblNShaderName"
         Me.lblNoOptions = New System.Windows.Forms.Label()
+Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.SuspendLayout()
         '
         'lblShadername

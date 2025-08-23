@@ -23,11 +23,17 @@ Partial Class frmSplashscreen
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+Me.GroupBox1.Tag = "langKey=GroupBox1"
         Me.lblJahr = New System.Windows.Forms.Label()
+Me.lblJahr.Tag = "langKey=lblJahr"
         Me.lblAutor = New System.Windows.Forms.Label()
+Me.lblAutor.Tag = "langKey=lblAutor"
         Me.lblMarketingslogan = New System.Windows.Forms.Label()
+Me.lblMarketingslogan.Tag = "langKey=lblMarketingslogan"
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+Me.PictureBox1.Tag = "langKey=PictureBox1"
         Me.lblTitel = New System.Windows.Forms.Label()
+Me.lblTitel.Tag = "langKey=lblTitel"
         Me.GroupBox1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()

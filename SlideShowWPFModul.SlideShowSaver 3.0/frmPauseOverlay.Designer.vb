@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class frmPauseModusOverlay
     Inherits System.Windows.Forms.Form
 
@@ -24,12 +24,19 @@ Partial Class frmPauseModusOverlay
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.lblPauseAnzahl = New System.Windows.Forms.Label()
+Me.lblPauseAnzahl.Tag = "langKey=lblPauseAnzahl"
         Me.btnPauseBack = New System.Windows.Forms.Button()
+Me.btnPauseBack.Tag = "langKey=btnPauseBack"
         Me.btnPausePause = New System.Windows.Forms.Button()
+Me.btnPausePause.Tag = "langKey=btnPausePause"
         Me.btnPauseForward = New System.Windows.Forms.Button()
+Me.btnPauseForward.Tag = "langKey=btnPauseForward"
         Me.chkPauseMarkPicture = New System.Windows.Forms.CheckBox()
+Me.chkPauseMarkPicture.Tag = "langKey=chkPauseMarkPicture"
         Me.chkBewerten = New System.Windows.Forms.CheckBox()
+Me.chkBewerten.Tag = "langKey=chkBewerten"
         Me.lblOptionsDialogDisabled = New System.Windows.Forms.Label()
+Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
         Me.tmrWarnLabelAnzeige = New System.Windows.Forms.Timer(Me.components)
         Me.sbcBewerten = New MyControlsLibrary.SterneBewertungControl()
         Me.SuspendLayout()

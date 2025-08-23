@@ -1,194 +1,305 @@
-[Update] ucOptionsModul.Designer.vb: langKey für lblModulname aktualisiert.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNModul aktualisiert.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNcmbGradient aktualisiert.
-[Update] ucOptionsModul.Designer.vb: langKey für chkGradientAnimieren aktualisiert.
-[Update] ucOptionsModul.Designer.vb: langKey für chkKoordinatenAnzeigen aktualisiert.
-[Neu] ucOptionsModul.Designer.vb: langKey für cmbGradient hinzugefügt.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblModulname aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblHierEntsteht aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblUnderConstruction aktualisiert.
-[Neu] ucUnderConstruction.Designer.vb: langKey für picLogo hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblModulname hinzugefügt.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNlblModulname aktualisiert.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblSzenendauer hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNtrbSzenendauer hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNclbHighlighttexte hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lstHiglightTexte hinzugefügt.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblModulname aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblHierEntsteht aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblUnderConstruction aktualisiert.
-[Neu] ucUnderConstruction.Designer.vb: langKey für picLogo hinzugefügt.
-[Neu] frmModulMain.Designer.vb: langKey für lblInitializing hinzugefügt.
-[Neu] frmModulMain.Designer.vb: langKey für picBildAnzeige hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für lblPauseAnzahl hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für lblOptionsDialogDisabled hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für btnPauseBack hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für btnPausePause hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für btnPauseForward hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für chkPauseMarkPicture hinzugefügt.
-[Neu] frmPauseModusOverlay.Designer.vb: langKey für chkBewerten hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblBewertung hinzugefügt.
-[Update] frmPictureInfo.Designer.vb: langKey für LblNBewertung aktualisiert.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblTags hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblAutor hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblErstellungsdatum hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblDateipfad hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblDateiname hinzugefügt.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNTags aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNAutor aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNErstellungsdatum aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNDateipfad aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNDateiname aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNDatei aktualisiert.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblBlende hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblISO hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblVerschlusszeit hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblObjektiv hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblBrennweite hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblKamera hinzugefügt.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNBlende aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNISO aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNVerschlusszeit aktualisiert.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblNObjektiv hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblNBrennweite hinzugefügt.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNlblKamera aktualisiert.
-[Update] frmPictureInfo.Designer.vb: langKey für lblNKamera aktualisiert.
-[Neu] frmPictureInfo.Designer.vb: langKey für lblNBildinformationen hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für grpDatei hinzugefügt.
-[Neu] frmPictureInfo.Designer.vb: langKey für grpKamera hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNcmbBildauswahl hinzugefügt.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNtrbAnzeigedauer aktualisiert.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblAnzeigedauer hinzugefügt.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNUebergangseffekteBilder aktualisiert.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNcmbEffektauswahl hinzugefügt.
-[Update] ucOptionsModul.Designer.vb: langKey für lblNShader aktualisiert.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNcmbShaderauswahl hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblModulname hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für lblNModulname hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für chkBildinformationen hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für cmbBildauswahl hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für cmbEffektauswahl hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für cmbShaderauswahl hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für clbTransitions hinzugefügt.
-[Neu] ucOptionsModul.Designer.vb: langKey für clbShader hinzugefügt.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblModulname aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblHierEntsteht aktualisiert.
-[Update] ucUnderConstruction.Designer.vb: langKey für lblUnderConstruction aktualisiert.
-[Neu] ucUnderConstruction.Designer.vb: langKey für PictureBox1 hinzugefügt.
-[Update] frmMain.Designer.vb: langKey für lblTitel aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTestbilder aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblOptionsdialoge aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTitelShader aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblShaderName aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblShaderKurzbeschreibung aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblShaderVersion aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTitelTransition aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTransitionVersion aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTransitionKurzbeschreibung aktualisiert.
-[Update] frmMain.Designer.vb: langKey für lblTransitionName aktualisiert.
-[Update] frmMain.Designer.vb: langKey für Label1 aktualisiert.
-[Update] frmMain.Designer.vb: langKey für rbTransitionModeManual aktualisiert.
-[Update] frmMain.Designer.vb: langKey für rbTransitionModeLoop aktualisiert.
-[Update] frmMain.Designer.vb: langKey für btnRunTransition aktualisiert.
-[Update] frmMain.Designer.vb: langKey für chbTransitionDuration aktualisiert.
-[Update] frmMain.Designer.vb: langKey für tpShader aktualisiert.
-[Update] frmMain.Designer.vb: langKey für tpTransition aktualisiert.
-[Update] frmMain.Designer.vb: langKey für tabOptionDialoge aktualisiert.
-[Update] frmMain.Designer.vb: langKey für cmbPBSizeMod1 aktualisiert.
-[Update] frmMain.Designer.vb: langKey für cmbPBSizeMode2 aktualisiert.
-[Update] frmMain.Designer.vb: langKey für cmbShaderAuswahl aktualisiert.
-[Update] frmMain.Designer.vb: langKey für cmbTransitionAuswahl aktualisiert.
-[Update] frmMain.Designer.vb: langKey für picShaderOriginal aktualisiert.
-[Update] frmMain.Designer.vb: langKey für picTest1 aktualisiert.
-[Update] frmMain.Designer.vb: langKey für picTest2 aktualisiert.
-[Update] frmMain.Designer.vb: langKey für picShaderAngewandt aktualisiert.
-[Update] frmMain.Designer.vb: langKey für picTransition aktualisiert.
-[Neu] frmInputBildauswahl.Designer.vb: langKey für lblTitel hinzugefügt.
-[Neu] frmInputBildauswahl.Designer.vb: langKey für lblNtxtTag hinzugefügt.
-[Neu] frmInputBildauswahl.Designer.vb: langKey für btnOK hinzugefügt.
-[Neu] frmInputBildauswahl.Designer.vb: langKey für btnCancel hinzugefügt.
-[Neu] frmInputBildauswahl.Designer.vb: langKey für picLogo hinzugefügt.
-[Neu] frmMessageBildauswahl.Designer.vb: langKey für lblTitel hinzugefügt.
-[Neu] frmMessageBildauswahl.Designer.vb: langKey für rtxMessage hinzugefügt.
-[Neu] frmMessageBildauswahl.Designer.vb: langKey für btnOK hinzugefügt.
-[Neu] frmMessageBildauswahl.Designer.vb: langKey für picLogo hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lblNlstVerzeichnisse hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lblNlstWhiteList hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lblNlstBlakcList hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lblNAltersfreigabe hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lblNBewertung hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für rdo18 hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für rdoAkt hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für rdoLingerie hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für rdoJugendfrei hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lstVerzeichnisse hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lstWhiteList hinzugefügt.
-[Neu] ucOptionsBildauswahl.Designer.vb: langKey für lstBlackList hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNTitel hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblKeineTransitionsModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNcmbAbspielmodusTransitionsModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNclbTransitionsModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblKeineModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblDauerModuswechsel hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNtrkDauerModulwechsel hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNcmbModulWechsel hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für lblNcblModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für btnOK hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für btnAbbrechen hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für chkMultiMonitor hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tpAllgemein hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tpModul hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tpBildauswahl hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tpTransitions hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tpShader hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für tabOptions hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für cmbTransitionsReihenfolge hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für cmbModulwechsel hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für clbTransitionsModule hinzugefügt.
-[Neu] frmOptionsMain.Designer.vb: langKey für clbModule hinzugefügt.
-[Neu] frmSaverMain.Designer.vb: langKey für lblMCP hinzugefügt.
-[Neu] frmSaverMain.Designer.vb: langKey für Label1 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für Label4 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für Label3 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für Label2 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für Label1 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für GroupBox1 hinzugefügt.
-[Neu] frmSplashscreen.Designer.vb: langKey für PictureBox1 hinzugefügt.
-[Update] ucOptionsShader.Designer.vb: langKey für lblShadername aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für Label6 aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblNoOptions aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblShadername aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für Label6 aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblNoOptions aktualisiert.
-[Neu] ucOptionsShader.Designer.vb: langKey für lblShadername hinzugefügt.
-[Neu] ucOptionsShader.Designer.vb: langKey für Label6 hinzugefügt.
-[Neu] ucOptionsShader.Designer.vb: langKey für lblNoOptions hinzugefügt.
-[Update] ucOptionsShader.Designer.vb: langKey für lblShadername aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblNlblShaderName aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblNpicFarbton aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für lblNModus aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für rbZufall aktualisiert.
-[Update] ucOptionsShader.Designer.vb: langKey für picFarbton aktualisiert.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangES hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangRU hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangPL hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangTLH hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangHI hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangFR hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangEN hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangDE hinzugefügt.
-[Neu] ucFlaggenstreifen.Designer.vb: langKey für btnLangZH hinzugefügt.
-[Update] ucLanguageSelector.Designer.vb: langKey für lblSprache aktualisiert.
-[Update] ucLanguageSelector.Designer.vb: langKey für TITLE aktualisiert.
-[Update] ucLanguageSelector.Designer.vb: langKey für BTN_OK aktualisiert.
-[Update] ucLanguageSelector.Designer.vb: langKey für BTN_CANCEL aktualisiert.
-[Update] ucLanguageSelector.Designer.vb: langKey für cboSprache aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblShadername aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblNlblTransitionname aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblNoOptions aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblKeineRichtungInfo aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblNtrbGeschwindigkeit aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für lblNModus aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für rbZufall aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für rbWischen aktualisiert.
-[Update] ucOptionsTransition.Designer.vb: langKey für rbSchieben aktualisiert.
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\frmInputBildauswahl.Designer.vb ===
+[Neu]    lblTitel => Me.lblTitel.Tag = "langKey=lblTitel"
+[Neu]    lblNtxtTag => Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
+[Neu]    btnOK => Me.btnOK.Tag = "langKey=btnOK"
+[Neu]    btnCancel => Me.btnCancel.Tag = "langKey=btnCancel"
+[Neu]    picLogo => Me.picLogo.Tag = "langKey=picLogo"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\frmMessageBildauswahl.Designer.vb ===
+[Neu]    lblTitel => Me.lblTitel.Tag = "langKey=lblTitel"
+[Neu]    rtxMessage => Me.rtxMessage.Tag = "langKey=rtxMessage"
+[Neu]    btnOK => Me.btnOK.Tag = "langKey=btnOK"
+[Neu]    picLogo => Me.picLogo.Tag = "langKey=picLogo"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\ucOptionsBildauswahl.Designer.vb ===
+[Neu]    lblNlstVerzeichnisse => Me.lblNlstVerzeichnisse.Tag = "langKey=lblNlstVerzeichnisse"
+[Neu]    lblNlstWhiteList => Me.lblNlstWhiteList.Tag = "langKey=lblNlstWhiteList"
+[Neu]    lblNlstBlakcList => Me.lblNlstBlakcList.Tag = "langKey=lblNlstBlakcList"
+[Neu]    lblNAltersfreigabe => Me.lblNAltersfreigabe.Tag = "langKey=lblNAltersfreigabe"
+[Neu]    lblNBewertung => Me.lblNBewertung.Tag = "langKey=lblNBewertung"
+[Neu]    rdo18 => Me.rdo18.Tag = "langKey=rdo18"
+[Neu]    rdoAkt => Me.rdoAkt.Tag = "langKey=rdoAkt"
+[Neu]    rdoLingerie => Me.rdoLingerie.Tag = "langKey=rdoLingerie"
+[Neu]    rdoJugendfrei => Me.rdoJugendfrei.Tag = "langKey=rdoJugendfrei"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    lstVerzeichnisse => Me.lstVerzeichnisse.Tag = "langKey=lstVerzeichnisse"
+[Neu]    lstWhiteList => Me.lstWhiteList.Tag = "langKey=lstWhiteList"
+[Neu]    lstBlackList => Me.lstBlackList.Tag = "langKey=lstBlackList"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\frmOptionsMain.Designer.vb ===
+[Neu]    lblNTitel => Me.lblNTitel.Tag = "langKey=lblNTitel"
+[Neu]    lblNHintergrundfarbe => Me.lblNHintergrundfarbe.Tag = "langKey=lblNHintergrundfarbe"
+[Neu]    lblKeineTransitionsModule => Me.lblKeineTransitionsModule.Tag = "langKey=lblKeineTransitionsModule"
+[Neu]    lblNcmbAbspielmodusTransitionsModule => Me.lblNcmbAbspielmodusTransitionsModule.Tag = "langKey=lblNcmbAbspielmodusTransitionsModule"
+[Neu]    lblNclbTransitionsModule => Me.lblNclbTransitionsModule.Tag = "langKey=lblNclbTransitionsModule"
+[Neu]    lblKeineModule => Me.lblKeineModule.Tag = "langKey=lblKeineModule"
+[Neu]    lblDauerModuswechsel => Me.lblDauerModuswechsel.Tag = "langKey=lblDauerModuswechsel"
+[Neu]    lblNtrkDauerModulwechsel => Me.lblNtrkDauerModulwechsel.Tag = "langKey=lblNtrkDauerModulwechsel"
+[Neu]    lblNcmbModulWechsel => Me.lblNcmbModulWechsel.Tag = "langKey=lblNcmbModulWechsel"
+[Neu]    lblNcblModule => Me.lblNcblModule.Tag = "langKey=lblNcblModule"
+[Neu]    btnOK => Me.btnOK.Tag = "langKey=btnOK"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkMultiMonitor => Me.chkMultiMonitor.Tag = "langKey=chkMultiMonitor"
+[Neu]    tpAllgemein => Me.tpAllgemein.Tag = "langKey=tpAllgemein"
+[Neu]    tpModul => Me.tpModul.Tag = "langKey=tpModul"
+[Neu]    tpBildauswahl => Me.tpBildauswahl.Tag = "langKey=tpBildauswahl"
+[Neu]    tpTransitions => Me.tpTransitions.Tag = "langKey=tpTransitions"
+[Neu]    tpShader => Me.tpShader.Tag = "langKey=tpShader"
+[Neu]    tabOptions => Me.tabOptions.Tag = "langKey=tabOptions"
+[Neu]    cmbTransitionsReihenfolge => Me.cmbTransitionsReihenfolge.Tag = "langKey=cmbTransitionsReihenfolge"
+[Neu]    cmbModulwechsel => Me.cmbModulwechsel.Tag = "langKey=cmbModulwechsel"
+[Neu]    clbTransitionsModule => Me.clbTransitionsModule.Tag = "langKey=clbTransitionsModule"
+[Neu]    clbModule => Me.clbModule.Tag = "langKey=clbModule"
+[Neu]    picHintergrundfarbe => Me.picHintergrundfarbe.Tag = "langKey=picHintergrundfarbe"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\frmSaverMain.Designer.vb ===
+[Neu]    lblMCP => Me.lblMCP.Tag = "langKey=lblMCP"
+[Neu]    lblNameFramework => Me.lblNameFramework.Tag = "langKey=lblNameFramework"
+[Neu]    lblInitialisiere => Me.lblInitialisiere.Tag = "langKey=lblInitialisiere"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\frmSplashscreen.Designer.vb ===
+[Neu]    lblJahr => Me.lblJahr.Tag = "langKey=lblJahr"
+[Neu]    lblAutor => Me.lblAutor.Tag = "langKey=lblAutor"
+[Neu]    lblMarketingslogan => Me.lblMarketingslogan.Tag = "langKey=lblMarketingslogan"
+[Neu]    lblTitel => Me.lblTitel.Tag = "langKey=lblTitel"
+[Neu]    GroupBox1 => Me.GroupBox1.Tag = "langKey=GroupBox1"
+[Neu]    PictureBox1 => Me.PictureBox1.Tag = "langKey=PictureBox1"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\ucOptionsModul.Designer.vb ===
+[OK]     lblModulname => Me.lblModulname.Tag = "langKey=lblModulname"
+[OK]     lblNModul => Me.lblNModul.Tag = "langKey=lblNModul"
+[OK]     lblNcmbGradient => Me.lblNcmbGradient.Tag = "langKey=lblNcmbGradient"
+[OK]     chkGradientAnimieren => Me.chkGradientAnimieren.Tag = "langKey=chkGradientAnimieren"
+[OK]     chkKoordinatenAnzeigen => Me.chkKoordinatenAnzeigen.Tag = "langKey=chkKoordinatenAnzeigen"
+[Neu]    cmbGradient => Me.cmbGradient.Tag = "langKey=cmbGradient"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\ucUnderConstruction.Designer.vb ===
+[OK]     lblModulname => Me.lblModulname.Tag = "langKey=lblModulname"
+[OK]     lblHierEntsteht => Me.lblHierEntsteht.Tag = "langKey=lblHierEntsteht"
+[OK]     lblUnderConstruction => Me.lblUnderConstruction.Tag = "langKey=lblUnderConstruction"
+[Neu]    picLogo => Me.picLogo.Tag = "langKey=picLogo"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\frmInputModul.Designer.vb ===
+[Neu]    lblNtxtTag => Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
+[Neu]    lblTitel => Me.lblTitel.Tag = "langKey=lblTitel"
+[Neu]    btnCancel => Me.btnCancel.Tag = "langKey=btnCancel"
+[Neu]    btnOK => Me.btnOK.Tag = "langKey=btnOK"
+[Neu]    picLogo => Me.picLogo.Tag = "langKey=picLogo"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\ucOptionsModul.Designer.vb ===
+[Neu]    lblModulname => Me.lblModulname.Tag = "langKey=lblModulname"
+[OK]     lblNlblModulname => Me.lblNlblModulname.Tag = "langKey=lblNlblModulname"
+[Neu]    lblSzenendauer => Me.lblSzenendauer.Tag = "langKey=lblSzenendauer"
+[Neu]    lblNtrbSzenendauer => Me.lblNtrbSzenendauer.Tag = "langKey=lblNtrbSzenendauer"
+[Neu]    lblNclbHighlighttexte => Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
+[Neu]    lstHiglightTexte => Me.lstHiglightTexte.Tag = "langKey=lstHiglightTexte"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\ucUnderConstruction.Designer.vb ===
+[OK]     lblModulname => Me.lblModulname.Tag = "langKey=lblModulname"
+[OK]     lblHierEntsteht => Me.lblHierEntsteht.Tag = "langKey=lblHierEntsteht"
+[OK]     lblUnderConstruction => Me.lblUnderConstruction.Tag = "langKey=lblUnderConstruction"
+[Neu]    picLogo => Me.picLogo.Tag = "langKey=picLogo"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Halftone\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblShaderName => Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
+[Neu]    lblGamma => Me.lblGamma.Tag = "langKey=lblGamma"
+[Neu]    lblRaster => Me.lblRaster.Tag = "langKey=lblRaster"
+[Neu]    lblNPosterise => Me.lblNPosterise.Tag = "langKey=lblNPosterise"
+[Neu]    lblNGamma => Me.lblNGamma.Tag = "langKey=lblNGamma"
+[Neu]    lblNRaster => Me.lblNRaster.Tag = "langKey=lblNRaster"
+[Neu]    lblNModus => Me.lblNModus.Tag = "langKey=lblNModus"
+[Neu]    lblNDotsWinkel => Me.lblNDotsWinkel.Tag = "langKey=lblNDotsWinkel"
+[Neu]    lblDotsMin => Me.lblDotsMin.Tag = "langKey=lblDotsMin"
+[Neu]    lblNDotsMin => Me.lblNDotsMin.Tag = "langKey=lblNDotsMin"
+[Neu]    lblDotsMax => Me.lblDotsMax.Tag = "langKey=lblDotsMax"
+[Neu]    lblNDotsMax => Me.lblNDotsMax.Tag = "langKey=lblNDotsMax"
+[Neu]    grbAllgemeineOptionen => Me.grbAllgemeineOptionen.Tag = "langKey=grbAllgemeineOptionen"
+[Neu]    grbHalftoneOptionen => Me.grbHalftoneOptionen.Tag = "langKey=grbHalftoneOptionen"
+[Neu]    rdoModusHTCMYK => Me.rdoModusHTCMYK.Tag = "langKey=rdoModusHTCMYK"
+[Neu]    rdoModusZufall => Me.rdoModusZufall.Tag = "langKey=rdoModusZufall"
+[Neu]    rdoModusHTSW => Me.rdoModusHTSW.Tag = "langKey=rdoModusHTSW"
+[Neu]    rdoModusPixelArt => Me.rdoModusPixelArt.Tag = "langKey=rdoModusPixelArt"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkRasterZufall => Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
+[Neu]    chkPapierTextur => Me.chkPapierTextur.Tag = "langKey=chkPapierTextur"
+[Neu]    cmbPosterise => Me.cmbPosterise.Tag = "langKey=cmbPosterise"
+[Neu]    cmbDotsWinkel => Me.cmbDotsWinkel.Tag = "langKey=cmbDotsWinkel"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Invertieren\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNShaderName => Me.lblNShaderName.Tag = "langKey=lblNShaderName"
+[Neu]    lblNModus => Me.lblNModus.Tag = "langKey=lblNModus"
+[Neu]    rdoFarbe => Me.rdoFarbe.Tag = "langKey=rdoFarbe"
+[Neu]    rdoWS => Me.rdoWS.Tag = "langKey=rdoWS"
+[Neu]    rdoZufall => Me.rdoZufall.Tag = "langKey=rdoZufall"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.LUT\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNShaderName => Me.lblNShaderName.Tag = "langKey=lblNShaderName"
+[Neu]    lblNLUTs => Me.lblNLUTs.Tag = "langKey=lblNLUTs"
+[Neu]    lblNIntensitaet => Me.lblNIntensitaet.Tag = "langKey=lblNIntensitaet"
+[Neu]    lblIntensitaet => Me.lblIntensitaet.Tag = "langKey=lblIntensitaet"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    clbLUTs => Me.clbLUTs.Tag = "langKey=clbLUTs"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Nachtsicht\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNShaderName => Me.lblNShaderName.Tag = "langKey=lblNShaderName"
+[Neu]    lblNoOptions => Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.Originalbild\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNShaderName => Me.lblNShaderName.Tag = "langKey=lblNShaderName"
+[Neu]    lblNoOptions => Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.PixelArt\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblShaderName => Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
+[Neu]    lblRaster => Me.lblRaster.Tag = "langKey=lblRaster"
+[Neu]    lblNFarbraum => Me.lblNFarbraum.Tag = "langKey=lblNFarbraum"
+[Neu]    lblNRaster => Me.lblNRaster.Tag = "langKey=lblNRaster"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkRasterZufall => Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
+[Neu]    chkFarbraumZufall => Me.chkFarbraumZufall.Tag = "langKey=chkFarbraumZufall"
+[Neu]    cmbFarbraum => Me.cmbFarbraum.Tag = "langKey=cmbFarbraum"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.SchwarzWeiss\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblShaderName => Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
+[Neu]    lblNoOptions => Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowShader.ToenenFaerben\ucOptionsShader.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblShaderName => Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
+[Neu]    lblNpicFarbton => Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
+[Neu]    lblNModus => Me.lblNModus.Tag = "langKey=lblNModus"
+[Neu]    rdoZufall => Me.rdoZufall.Tag = "langKey=rdoZufall"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkZufallsfarbe => Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
+[Neu]    picFarbton => Me.picFarbton.Tag = "langKey=picFarbton"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowSprachen\ucFlaggenstreifen.Designer.vb ===
+[Neu]    btnLangES => Me.btnLangES.Tag = "langKey=btnLangES"
+[Neu]    btnLangRU => Me.btnLangRU.Tag = "langKey=btnLangRU"
+[Neu]    btnLangPL => Me.btnLangPL.Tag = "langKey=btnLangPL"
+[Neu]    btnLangTLH => Me.btnLangTLH.Tag = "langKey=btnLangTLH"
+[Neu]    btnLangHI => Me.btnLangHI.Tag = "langKey=btnLangHI"
+[Neu]    btnLangFR => Me.btnLangFR.Tag = "langKey=btnLangFR"
+[Neu]    btnLangEN => Me.btnLangEN.Tag = "langKey=btnLangEN"
+[Neu]    btnLangDE => Me.btnLangDE.Tag = "langKey=btnLangDE"
+[Neu]    btnLangZH => Me.btnLangZH.Tag = "langKey=btnLangZH"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.BlendenUeberblenden\ucOptionsTransition.Designer.vb ===
+[Neu]    lblTransitionname => Me.lblTransitionname.Tag = "langKey=lblTransitionname"
+[Neu]    lblNTransitionName => Me.lblNTransitionName.Tag = "langKey=lblNTransitionName"
+[Neu]    lblNpicFarbton => Me.lblNpicFarbton.Tag = "langKey=lblNpicFarbton"
+[Neu]    lblNModus => Me.lblNModus.Tag = "langKey=lblNModus"
+[Neu]    lblGeschwindigkeit => Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
+[Neu]    lblNtrbGeschwindigkeit => Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
+[Neu]    rdoZufall => Me.rdoZufall.Tag = "langKey=rdoZufall"
+[Neu]    rdoBlenden => Me.rdoBlenden.Tag = "langKey=rdoBlenden"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkZufallsfarbe => Me.chkZufallsfarbe.Tag = "langKey=chkZufallsfarbe"
+[Neu]    chkMorphing => Me.chkMorphing.Tag = "langKey=chkMorphing"
+[Neu]    picFarbton => Me.picFarbton.Tag = "langKey=picFarbton"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.Cut\ucOptonsTransition.Designer.vb ===
+[Neu]    lblNoOptions => Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+[Neu]    lblTransitonName => Me.lblTransitonName.Tag = "langKey=lblTransitonName"
+[Neu]    lblNlblTransitionName => Me.lblNlblTransitionName.Tag = "langKey=lblNlblTransitionName"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowTransition.GradientWischen\ucOptionsTransition.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblTransitionname => Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
+[Neu]    lblNRichtungen => Me.lblNRichtungen.Tag = "langKey=lblNRichtungen"
+[Neu]    lblKeineRichtung => Me.lblKeineRichtung.Tag = "langKey=lblKeineRichtung"
+[Neu]    lblNtrbGeschwindigkeit => Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
+[Neu]    lblGeschwindigkeit => Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
+[Neu]    lblTransitionsname => Me.lblTransitionsname.Tag = "langKey=lblTransitionsname"
+[Neu]    lblNBreite => Me.lblNBreite.Tag = "langKey=lblNBreite"
+[Neu]    lblBreiteProzent => Me.lblBreiteProzent.Tag = "langKey=lblBreiteProzent"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\frmPauseOverlay.Designer.vb ===
+[Neu]    lblPauseAnzahl => Me.lblPauseAnzahl.Tag = "langKey=lblPauseAnzahl"
+[Neu]    lblOptionsDialogDisabled => Me.lblOptionsDialogDisabled.Tag = "langKey=lblOptionsDialogDisabled"
+[Neu]    btnPauseBack => Me.btnPauseBack.Tag = "langKey=btnPauseBack"
+[Neu]    btnPausePause => Me.btnPausePause.Tag = "langKey=btnPausePause"
+[Neu]    btnPauseForward => Me.btnPauseForward.Tag = "langKey=btnPauseForward"
+[Neu]    chkPauseMarkPicture => Me.chkPauseMarkPicture.Tag = "langKey=chkPauseMarkPicture"
+[Neu]    chkBewerten => Me.chkBewerten.Tag = "langKey=chkBewerten"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\frmPictureInfo.Designer.vb ===
+[Neu]    lblBewertung => Me.lblBewertung.Tag = "langKey=lblBewertung"
+[OK]     LblNBewertung => Me.LblNBewertung.Tag = "langKey=LblNBewertung"
+[Neu]    lblTags => Me.lblTags.Tag = "langKey=lblTags"
+[Neu]    lblAutor => Me.lblAutor.Tag = "langKey=lblAutor"
+[Neu]    lblErstellungsdatum => Me.lblErstellungsdatum.Tag = "langKey=lblErstellungsdatum"
+[Neu]    lblDateipfad => Me.lblDateipfad.Tag = "langKey=lblDateipfad"
+[Neu]    lblDateiname => Me.lblDateiname.Tag = "langKey=lblDateiname"
+[OK]     lblNTags => Me.lblNTags.Tag = "langKey=lblNTags"
+[OK]     lblNAutor => Me.lblNAutor.Tag = "langKey=lblNAutor"
+[OK]     lblNErstellungsdatum => Me.lblNErstellungsdatum.Tag = "langKey=lblNErstellungsdatum"
+[OK]     lblNDateipfad => Me.lblNDateipfad.Tag = "langKey=lblNDateipfad"
+[OK]     lblNDateiname => Me.lblNDateiname.Tag = "langKey=lblNDateiname"
+[OK]     lblNDatei => Me.lblNDatei.Tag = "langKey=lblNDatei"
+[Neu]    lblBlende => Me.lblBlende.Tag = "langKey=lblBlende"
+[Neu]    lblISO => Me.lblISO.Tag = "langKey=lblISO"
+[Neu]    lblVerschlusszeit => Me.lblVerschlusszeit.Tag = "langKey=lblVerschlusszeit"
+[Neu]    lblObjektiv => Me.lblObjektiv.Tag = "langKey=lblObjektiv"
+[Neu]    lblBrennweite => Me.lblBrennweite.Tag = "langKey=lblBrennweite"
+[Neu]    lblKamera => Me.lblKamera.Tag = "langKey=lblKamera"
+[OK]     lblNBlende => Me.lblNBlende.Tag = "langKey=lblNBlende"
+[OK]     lblNISO => Me.lblNISO.Tag = "langKey=lblNISO"
+[OK]     lblNVerschlusszeit => Me.lblNVerschlusszeit.Tag = "langKey=lblNVerschlusszeit"
+[Neu]    lblNObjektiv => Me.lblNObjektiv.Tag = "langKey=lblNObjektiv"
+[Neu]    lblNBrennweite => Me.lblNBrennweite.Tag = "langKey=lblNBrennweite"
+[OK]     lblNlblKamera => Me.lblNlblKamera.Tag = "langKey=lblNlblKamera"
+[OK]     lblNKamera => Me.lblNKamera.Tag = "langKey=lblNKamera"
+[Neu]    lblNBildinformationen => Me.lblNBildinformationen.Tag = "langKey=lblNBildinformationen"
+[Neu]    grpDatei => Me.grpDatei.Tag = "langKey=grpDatei"
+[Neu]    grpKamera => Me.grpKamera.Tag = "langKey=grpKamera"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\ucOptionsModul.Designer.vb ===
+[Neu]    lblNcmbBildauswahl => Me.lblNcmbBildauswahl.Tag = "langKey=lblNcmbBildauswahl"
+[OK]     lblNtrbAnzeigedauer => Me.lblNtrbAnzeigedauer.Tag = "langKey=lblNtrbAnzeigedauer"
+[Neu]    lblAnzeigedauer => Me.lblAnzeigedauer.Tag = "langKey=lblAnzeigedauer"
+[OK]     lblNUebergangseffekteBilder => Me.lblNUebergangseffekteBilder.Tag = "langKey=lblNUebergangseffekteBilder"
+[Neu]    lblNcmbEffektauswahl => Me.lblNcmbEffektauswahl.Tag = "langKey=lblNcmbEffektauswahl"
+[OK]     lblNShader => Me.lblNShader.Tag = "langKey=lblNShader"
+[Neu]    lblNcmbShaderauswahl => Me.lblNcmbShaderauswahl.Tag = "langKey=lblNcmbShaderauswahl"
+[Neu]    lblModulname => Me.lblModulname.Tag = "langKey=lblModulname"
+[Neu]    lblNModulname => Me.lblNModulname.Tag = "langKey=lblNModulname"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkBildinformationen => Me.chkBildinformationen.Tag = "langKey=chkBildinformationen"
+[Neu]    cmbBildauswahl => Me.cmbBildauswahl.Tag = "langKey=cmbBildauswahl"
+[Neu]    cmbEffektauswahl => Me.cmbEffektauswahl.Tag = "langKey=cmbEffektauswahl"
+[Neu]    cmbShaderauswahl => Me.cmbShaderauswahl.Tag = "langKey=cmbShaderauswahl"
+[Neu]    clbTransitions => Me.clbTransitions.Tag = "langKey=clbTransitions"
+[Neu]    clbShader => Me.clbShader.Tag = "langKey=clbShader"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.SchiebenWischen\ucOptionsTransition.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblTransitionname => Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
+[Neu]    lblNoOptions => Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+[Neu]    lblKeineRichtungInfo => Me.lblKeineRichtungInfo.Tag = "langKey=lblKeineRichtungInfo"
+[Neu]    lblNtrbGeschwindigkeit => Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
+[Neu]    lblNModus => Me.lblNModus.Tag = "langKey=lblNModus"
+[Neu]    lblGeschwindigkeit => Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
+[Neu]    rbZufall => Me.rbZufall.Tag = "langKey=rbZufall"
+[Neu]    rbWischen => Me.rbWischen.Tag = "langKey=rbWischen"
+[Neu]    rbSchieben => Me.rbSchieben.Tag = "langKey=rbSchieben"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+
+=== C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFTransition.Zoom\ucOptionsTransition.Designer.vb ===
+[Neu]    lblShadername => Me.lblShadername.Tag = "langKey=lblShadername"
+[Neu]    lblNlblTransitionname => Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
+[Neu]    lblNAnkerpunkt => Me.lblNAnkerpunkt.Tag = "langKey=lblNAnkerpunkt"
+[Neu]    lblKeinAnkerpunkt => Me.lblKeinAnkerpunkt.Tag = "langKey=lblKeinAnkerpunkt"
+[Neu]    lblNtrbGeschwindigkeit => Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
+[Neu]    lblGeschwindigkeit => Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
+[Neu]    btnDefaults => Me.btnDefaults.Tag = "langKey=btnDefaults"
+[Neu]    chkGleicherAnkerpunkt => Me.chkGleicherAnkerpunkt.Tag = "langKey=chkGleicherAnkerpunkt"
+

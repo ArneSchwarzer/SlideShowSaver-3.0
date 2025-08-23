@@ -25,6 +25,7 @@ Partial Class ucOptionsModul
         Me.lblModulname = New System.Windows.Forms.Label()
         Me.lblNModul = New System.Windows.Forms.Label()
         Me.cmbGradient = New System.Windows.Forms.ComboBox()
+Me.cmbGradient.Tag = "langKey=cmbGradient"
         Me.lblNcmbGradient = New System.Windows.Forms.Label()
         Me.chkGradientAnimieren = New System.Windows.Forms.CheckBox()
         Me.chkKoordinatenAnzeigen = New System.Windows.Forms.CheckBox()

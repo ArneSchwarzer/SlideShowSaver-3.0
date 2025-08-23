@@ -23,15 +23,24 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblShaderName = New System.Windows.Forms.Label()
+Me.lblNlblShaderName.Tag = "langKey=lblNlblShaderName"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         Me.chkRasterZufall = New System.Windows.Forms.CheckBox()
+Me.chkRasterZufall.Tag = "langKey=chkRasterZufall"
         Me.lblRaster = New System.Windows.Forms.Label()
+Me.lblRaster.Tag = "langKey=lblRaster"
         Me.cmbFarbraum = New System.Windows.Forms.ComboBox()
+Me.cmbFarbraum.Tag = "langKey=cmbFarbraum"
         Me.lblNFarbraum = New System.Windows.Forms.Label()
+Me.lblNFarbraum.Tag = "langKey=lblNFarbraum"
         Me.trkRaster = New System.Windows.Forms.TrackBar()
         Me.lblNRaster = New System.Windows.Forms.Label()
+Me.lblNRaster.Tag = "langKey=lblNRaster"
         Me.chkFarbraumZufall = New System.Windows.Forms.CheckBox()
+Me.chkFarbraumZufall.Tag = "langKey=chkFarbraumZufall"
         CType(Me.trkRaster, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

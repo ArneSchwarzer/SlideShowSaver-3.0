@@ -24,14 +24,23 @@ Partial Class ucFlaggenstreifen
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.btnLangES = New System.Windows.Forms.Button()
+Me.btnLangES.Tag = "langKey=btnLangES"
         Me.btnLangRU = New System.Windows.Forms.Button()
+Me.btnLangRU.Tag = "langKey=btnLangRU"
         Me.btnLangPL = New System.Windows.Forms.Button()
+Me.btnLangPL.Tag = "langKey=btnLangPL"
         Me.btnLangTLH = New System.Windows.Forms.Button()
+Me.btnLangTLH.Tag = "langKey=btnLangTLH"
         Me.btnLangHI = New System.Windows.Forms.Button()
+Me.btnLangHI.Tag = "langKey=btnLangHI"
         Me.btnLangFR = New System.Windows.Forms.Button()
+Me.btnLangFR.Tag = "langKey=btnLangFR"
         Me.btnLangEN = New System.Windows.Forms.Button()
+Me.btnLangEN.Tag = "langKey=btnLangEN"
         Me.btnLangDE = New System.Windows.Forms.Button()
+Me.btnLangDE.Tag = "langKey=btnLangDE"
         Me.btnLangZH = New System.Windows.Forms.Button()
+Me.btnLangZH.Tag = "langKey=btnLangZH"
         Me.ttSprachen = New System.Windows.Forms.ToolTip(Me.components)
         Me.SuspendLayout()
         '

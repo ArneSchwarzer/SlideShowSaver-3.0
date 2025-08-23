@@ -1,4 +1,4 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class ucOptionsModul
     Inherits System.Windows.Forms.UserControl
 
@@ -23,23 +23,36 @@ Partial Class ucOptionsModul
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblNcmbBildauswahl = New System.Windows.Forms.Label()
+Me.lblNcmbBildauswahl.Tag = "langKey=lblNcmbBildauswahl"
         Me.cmbBildauswahl = New System.Windows.Forms.ComboBox()
+Me.cmbBildauswahl.Tag = "langKey=cmbBildauswahl"
         Me.lblNtrbAnzeigedauer = New System.Windows.Forms.Label()
         Me.trkAnzeigedauer = New System.Windows.Forms.TrackBar()
         Me.lblAnzeigedauer = New System.Windows.Forms.Label()
+Me.lblAnzeigedauer.Tag = "langKey=lblAnzeigedauer"
         Me.lblNUebergangseffekteBilder = New System.Windows.Forms.Label()
         Me.clbTransitions = New System.Windows.Forms.CheckedListBox()
+Me.clbTransitions.Tag = "langKey=clbTransitions"
         Me.lblNcmbEffektauswahl = New System.Windows.Forms.Label()
+Me.lblNcmbEffektauswahl.Tag = "langKey=lblNcmbEffektauswahl"
         Me.cmbEffektauswahl = New System.Windows.Forms.ComboBox()
+Me.cmbEffektauswahl.Tag = "langKey=cmbEffektauswahl"
         Me.chkBildinformationen = New System.Windows.Forms.CheckBox()
+Me.chkBildinformationen.Tag = "langKey=chkBildinformationen"
         Me.clbShader = New System.Windows.Forms.CheckedListBox()
+Me.clbShader.Tag = "langKey=clbShader"
         Me.lblNShader = New System.Windows.Forms.Label()
         Me.cmbShaderauswahl = New System.Windows.Forms.ComboBox()
+Me.cmbShaderauswahl.Tag = "langKey=cmbShaderauswahl"
         Me.lblNcmbShaderauswahl = New System.Windows.Forms.Label()
+Me.lblNcmbShaderauswahl.Tag = "langKey=lblNcmbShaderauswahl"
         Me.lblModulname = New System.Windows.Forms.Label()
+Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblNModulname = New System.Windows.Forms.Label()
+Me.lblNModulname.Tag = "langKey=lblNModulname"
         Me.chkPräsentationsschirm = New System.Windows.Forms.CheckBox()
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkAnzeigedauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

@@ -23,12 +23,18 @@ Partial Class ucOptionsTransition
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
+Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNlblTransitionname = New System.Windows.Forms.Label()
+Me.lblNlblTransitionname.Tag = "langKey=lblNlblTransitionname"
         Me.lblNAnkerpunkt = New System.Windows.Forms.Label()
+Me.lblNAnkerpunkt.Tag = "langKey=lblNAnkerpunkt"
         Me.lblKeinAnkerpunkt = New System.Windows.Forms.Label()
+Me.lblKeinAnkerpunkt.Tag = "langKey=lblKeinAnkerpunkt"
         Me.lblNtrbGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblNtrbGeschwindigkeit.Tag = "langKey=lblNtrbGeschwindigkeit"
         Me.trkGeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.lblGeschwindigkeit = New System.Windows.Forms.Label()
+Me.lblGeschwindigkeit.Tag = "langKey=lblGeschwindigkeit"
         Me.tbtNW = New MyControlsLibrary.ToggleButton()
         Me.tbtN = New MyControlsLibrary.ToggleButton()
         Me.tbtNO = New MyControlsLibrary.ToggleButton()
@@ -39,7 +45,9 @@ Partial Class ucOptionsTransition
         Me.tbtSO = New MyControlsLibrary.ToggleButton()
         Me.tbtZ = New MyControlsLibrary.ToggleButton()
         Me.chkGleicherAnkerpunkt = New System.Windows.Forms.CheckBox()
+Me.chkGleicherAnkerpunkt.Tag = "langKey=chkGleicherAnkerpunkt"
         Me.btnDefaults = New System.Windows.Forms.Button()
+Me.btnDefaults.Tag = "langKey=btnDefaults"
         CType(Me.trkGeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '

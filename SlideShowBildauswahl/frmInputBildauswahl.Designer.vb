@@ -23,11 +23,16 @@ Partial Class frmInputBildauswahl
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblTitel = New System.Windows.Forms.Label()
+Me.lblTitel.Tag = "langKey=lblTitel"
         Me.btnOK = New System.Windows.Forms.Button()
+Me.btnOK.Tag = "langKey=btnOK"
         Me.picLogo = New System.Windows.Forms.PictureBox()
+Me.picLogo.Tag = "langKey=picLogo"
         Me.txtTag = New System.Windows.Forms.TextBox()
         Me.lblNtxtTag = New System.Windows.Forms.Label()
+Me.lblNtxtTag.Tag = "langKey=lblNtxtTag"
         Me.btnCancel = New System.Windows.Forms.Button()
+Me.btnCancel.Tag = "langKey=btnCancel"
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
