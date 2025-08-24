@@ -69,8 +69,10 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LanguageCSVManager.vb" />
     <Compile Include="LanguageHelper.vb" />
     <Compile Include="LanguageManager.vb" />
+    <Compile Include="LanguageSpecialHelper.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

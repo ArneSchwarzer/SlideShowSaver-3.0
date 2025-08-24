@@ -1,7 +1,7 @@
 ﻿Imports System.Windows.Forms
 Imports SlideShowSprachen.LanguageHelper
 Imports SlideShowTools.RegistryHandling
-Imports SlideShowSprachen.SprachSpezialHandling
+Imports SlideShowSprachen.LanguageSpecialHandling
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports MyControlsLibrary
 
@@ -47,85 +47,46 @@ Public Class ucFlaggenstreifen
         Next
     End Sub
 
-    Private Sub btnLangDE_Click(sender As Object, e As EventArgs) Handles btnLangDE.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "DE")
+    Private Sub FlaggeGeklickt(langIso As String)
+        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", langIso)
+        LanguageSpecialHandling.WendeSpracheAufAlleControls(Me.FindForm(), langIso)
         FlaggenSetzen()
+    End Sub
 
+    Private Sub btnLangDE_Click(sender As Object, e As EventArgs) Handles btnLangDE.Click
+        FlaggeGeklickt("DE")
     End Sub
 
     Private Sub btnLangEN_Click(sender As Object, e As EventArgs) Handles btnLangEN.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "EN")
-        FlaggenSetzen()
-
-    End Sub
-
-    Private Sub btnLangES_Click(sender As Object, e As EventArgs) Handles btnLangES.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "ES")
-        FlaggenSetzen()
-
+        FlaggeGeklickt("EN")
     End Sub
 
     Private Sub btnLangFR_Click(sender As Object, e As EventArgs) Handles btnLangFR.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "FR")
-        FlaggenSetzen()
-
+        FlaggeGeklickt("FR")
     End Sub
 
-    Private Sub btnLangHI_Click(sender As Object, e As EventArgs) Handles btnLangHI.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "HI")
-        FlaggenSetzen()
-
+    Private Sub btnLangES_Click(sender As Object, e As EventArgs) Handles btnLangES.Click
+        FlaggeGeklickt("ES")
     End Sub
 
     Private Sub btnLangPL_Click(sender As Object, e As EventArgs) Handles btnLangPL.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "PL")
-        FlaggenSetzen()
-
+        FlaggeGeklickt("PL")
     End Sub
 
     Private Sub btnLangRU_Click(sender As Object, e As EventArgs) Handles btnLangRU.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "RU")
-        FlaggenSetzen()
-
+        FlaggeGeklickt("RU")
     End Sub
 
-    Private Sub btnLangTLH_Click(sender As Object, e As EventArgs) Handles btnLangTLH.Click
-
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "TLH")
-        FlaggenSetzen()
-
+    Private Sub btnLangHI_Click(sender As Object, e As EventArgs) Handles btnLangHI.Click
+        FlaggeGeklickt("HI")
     End Sub
 
     Private Sub btnLangZH_Click(sender As Object, e As EventArgs) Handles btnLangZH.Click
+        FlaggeGeklickt("ZH")
+    End Sub
 
-        ' Hier den LanguageManager Aufrufen
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", "ZH")
-        FlaggenSetzen()
-
+    Private Sub btnLangTLH_Click(sender As Object, e As EventArgs) Handles btnLangTLH.Click
+        FlaggeGeklickt("TLH")
     End Sub
 
 End Class

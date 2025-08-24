@@ -5,7 +5,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\Met
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\MyControlsLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\StarControlLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowInterfaces.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\bin\Debug\SlideShowLogging.pdb

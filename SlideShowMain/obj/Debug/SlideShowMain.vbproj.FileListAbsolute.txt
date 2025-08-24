@@ -10,7 +10,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowL
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowLogging.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowSprachen.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowTools.dll
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\StarControlLibrary.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowBildauswahl.pdb
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\SlideShowBildauswahl.xml

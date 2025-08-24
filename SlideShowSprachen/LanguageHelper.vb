@@ -79,7 +79,7 @@ Public Module LanguageHelper
         New SprachInformation With {
             .Sprache = "Klingonisch",
             .ToolTipText = "tlhIngan Hol",
-            .btnTag = "LangKL",
+            .btnTag = "LangTLH",
             .ISOCode = "TLH",
             .Font = New Font("Segoe UI", 10, FontStyle.Regular), ' Optional alternative: "Code2000"
             .FlaggeAktiv = My.Resources.Flagge_Klingonen,

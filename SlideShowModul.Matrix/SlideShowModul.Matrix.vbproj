@@ -181,8 +181,14 @@
     <Folder Include="Lang\HI\" />
     <Folder Include="Lang\PL\" />
     <Folder Include="Lang\RU\" />
-    <Folder Include="Lang\THL\" />
+    <Folder Include="Lang\TLH\" />
     <Folder Include="Lang\ZH\" />
   </ItemGroup>
+  <ItemGroup>
+  <EmbeddedResource Include="Lang\**\*.csv">
+    <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
+    <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+  </EmbeddedResource>
+</ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
