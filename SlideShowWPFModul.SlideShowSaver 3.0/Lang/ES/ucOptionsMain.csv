@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;Selección de imagen
+lblNtrbAnzeigedauer;Duración de pantalla
+lblAnzeigedauer;20 s
+lblNUebergangseffekteBilder;Efectos de transición de imagen
+lblNcmbEffektauswahl;Orden de efectos
+chkBildinformationen;Mostrar info de imagen
+lblNShader;Sombreado
+lblNcmbShaderauswahl;Orden del shader
+lblNModulname;Módulo
+lblModulname;SlideShowSaver 3.0
+btnDefaults;Valores predeterminados
+cmbBildauswahl;"Imagen aleatoria
+Carpeta aleatoria"
+cmbEffektauswahl;"Aleatorio al inicio
+Aleatorio
+En orden al inicio
+En orden"
+cmbShaderauswahl;"Aleatorio al inicio
+Aleatorio
+En orden al inicio
+En orden"
+clbTransitions;-
+clbShader;-

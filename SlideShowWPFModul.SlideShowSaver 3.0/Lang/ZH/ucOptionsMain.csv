@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;图像选择
+lblNtrbAnzeigedauer;显示时长
+lblAnzeigedauer;20 秒
+lblNUebergangseffekteBilder;图像过渡效果
+lblNcmbEffektauswahl;效果顺序
+chkBildinformationen;显示图像信息
+lblNShader;着色器
+lblNcmbShaderauswahl;着色器顺序
+lblNModulname;模块
+lblModulname;幻灯片保护程序 3.0
+btnDefaults;默认值
+cmbBildauswahl;"随机图片
+随机目录"
+cmbEffektauswahl;"启动时随机
+随机
+启动时按顺序
+按顺序"
+cmbShaderauswahl;"启动时随机
+随机
+启动时按顺序
+按顺序"
+clbTransitions;-
+clbShader;-

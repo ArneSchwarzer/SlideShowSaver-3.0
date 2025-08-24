@@ -1,0 +1,15 @@
+﻿lblShadername;Pixel art
+lblNlblShaderName;Shader
+lblRaster;16 px
+lblNFarbraum;Espace colorimétrique
+lblNRaster;Taille de la grille
+btnDefaults;Par défaut
+chkRasterZufall;Taille de grille aléatoire
+chkFarbraumZufall;Espace colorimétrique aléatoire
+cmbFarbraum;"8 couleurs (2 par canal)
+27 couleurs (3 par canal)
+64 couleurs (4 par canal)
+125 couleurs (5 par canal)
+216 couleurs (6 par canal)
+343 couleurs (7 par canal)
+512 couleurs (8 par canal)"

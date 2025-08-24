@@ -1,0 +1,13 @@
+﻿lblTransitionname;Fondu et fondu enchaîné
+lblNTransitionname;Transition
+lblNpicFarbton;Fondu vers la teinte
+lblNModus;Mode
+lblGeschwindigkeit;20 s
+lblNtrbGeschwindigkeit;Vitesse
+rdoZufall;Aléatoire
+rodBlenden;Fondu
+rdoÜberblenden;Fondu enchaîné
+btnDefaults;Par défaut
+chkZufallsfarbe;Teinte aléatoire
+chkMorphing;Phase de morphing
+picFarbton;-

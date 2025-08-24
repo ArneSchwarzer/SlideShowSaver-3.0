@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;Bildauswahl
+lblNtrbAnzeigedauer;Anzeigedauer
+lblAnzeigedauer;20 s
+lblNUebergangseffekteBilder;Übergangseffekte für Bilder
+lblNcmbEffektauswahl;Effektreihenfolge
+chkBildinformationen;Bildinformationen anzeigen
+lblNShader;Shader
+lblNcmbShaderauswahl;Shaderreihenfolge
+lblNModulname;Modul
+lblModulname;SlideShowSaver 3.0
+btnDefaults;Standards
+cmbBildauswahl;"Zufallsbild
+Zufallsverzeichnis"
+cmbEffektauswahl;"Zufällig bei Start
+Zufällig
+In Reihenfolge bei Start
+In Reihenfolge"
+cmbShaderauswahl;"Zufällig bei Start
+Zufällig
+In Reihenfolge bei Start
+In Reihenfolge"
+clbTransitions;-
+clbShader;-

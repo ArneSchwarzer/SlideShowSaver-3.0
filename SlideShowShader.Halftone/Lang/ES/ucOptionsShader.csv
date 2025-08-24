@@ -1,0 +1,33 @@
+﻿lblShadername;Semitono (trama de semitonos)
+lblNlblShaderName;Shader
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Espacio de color
+lblNGamma;Gamma
+lblNRaster;Tamaño de la cuadrícula
+lblNModus;Modo
+ lblNDotsWinkel;Ángulo de los puntos
+ lblDotsMin;5%
+ lblNDotsMin;Tamaño mín. de puntos
+ lblDotsMax;40%
+ lblNDotsMax;Tamaño máx. de puntos
+ grbAllgemeineOptionen;Opciones generales
+ grbHalftoneOptione;Opciones de semitono y CMYK
+ rdoModusHTCMYK;Semitono (CMYK)
+ rdoModusZufall;Aleatorio
+ rdoModusHTSW;Semitono (B/N)
+ btnDefaults;Valores predeterminados
+ chkRasterZufall;Tamaño de cuadrícula aleatorio
+ chkPapierTextur;
+ cmbPosterise;"8 colores (2 por canal)
+27 colores (3 por canal)
+64 colores (4 por canal)
+125 colores (5 por canal)
+216 colores (6 por canal)
+343 colores (7 por canal)
+512 colores (8 por canal)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (clásico)
+C: 15° | M: 45° | Y: 0° | K: 75° (alternativo)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Intensidad de la textura del papel
+btnDefaults;Valores predeterminados

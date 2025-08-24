@@ -1,0 +1,13 @@
+﻿lblTransitionname;Затемнение и кроссфейд
+lblNTransitionname;Переход
+lblNpicFarbton;Плавно к цветовому тону
+lblNModus;Режим
+lblGeschwindigkeit;20 с
+lblNtrbGeschwindigkeit;Скорость
+rdoZufall;Случайный
+rodBlenden;Затемнение
+rdoÜberblenden;Кроссфейд
+btnDefaults;По умолчанию
+chkZufallsfarbe;Случайный оттенок
+chkMorphing;Фаза морфинга
+picFarbton;-

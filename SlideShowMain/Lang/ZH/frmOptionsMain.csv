@@ -1,0 +1,27 @@
+﻿lblNTitel;幻灯屏保 3.0
+tpAllgemein;常规
+tpModul;模块
+tpBildauswahl;图片选择
+tpTransitions;转场效果
+tpShader;着色器
+lblNcblModule;模块
+lblNcmbModulWechsel;模块播放模式
+lblNtrkDauerModulwechsel;模块切换时间
+lblDauerModuswechsel;15 分钟
+chkMultiMonitor;多显示器模式
+lblKeineModule;无模块，播放弹跳徽标
+lblNclbTransitionsModule;模块过渡效果
+lblKeineTransitionsModule;无过渡加载
+lblNcmbAbspielmodusTransitionsModule;转场播放模式
+btnOK;完成
+btnDefaults;默认值
+lblNHintergrundfarbe;背景颜色
+tabOptions;
+cmbTransitionsReihenfolge;"启动时随机
+启动时按顺序"
+cmbModulwechsel;"启动时随机
+随机
+启动时按顺序
+按顺序"
+clbTransitionsModule;
+clbModule;

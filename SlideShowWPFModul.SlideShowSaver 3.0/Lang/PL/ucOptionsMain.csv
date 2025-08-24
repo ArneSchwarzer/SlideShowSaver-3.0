@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;Wybór obrazu
+lblNtrbAnzeigedauer;Czas wyświetlania
+lblAnzeigedauer;20 s
+lblNUebergangseffekteBilder;Efekty przejścia obrazu
+lblNcmbEffektauswahl;Kolejność efektów
+chkBildinformationen;Pokaż informacje o obrazie
+lblNShader;Shader
+lblNcmbShaderauswahl;Kolejność shaderów
+lblNModulname;Moduł
+lblModulname;SlideShowSaver 3.0
+btnDefaults;Domyślne
+cmbBildauswahl;"Losowe zdjęcie
+Losowy katalog"
+cmbEffektauswahl;"Losowo przy starcie
+Losowo
+W kolejności przy starcie
+W kolejności"
+cmbShaderauswahl;"Losowo przy starcie
+Losowo
+W kolejności przy starcie
+W kolejności"
+clbTransitions;-
+clbShader;-

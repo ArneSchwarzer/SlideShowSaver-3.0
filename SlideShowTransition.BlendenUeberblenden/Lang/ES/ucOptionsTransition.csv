@@ -1,0 +1,13 @@
+﻿lblTransitionname;Fundido y fundido cruzado
+lblNTransitionname;Transición
+lblNpicFarbton;Fundido al tono
+lblNModus;Modo
+lblGeschwindigkeit;20 s
+lblNtrbGeschwindigkeit;Velocidad
+rdoZufall;Aleatorio
+rodBlenden;Fundido
+rdoÜberblenden;Fundido cruzado
+btnDefaults;Valores predeterminados
+chkZufallsfarbe;Tono aleatorio
+chkMorphing;Fase de morphing
+picFarbton;-

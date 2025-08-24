@@ -1,0 +1,27 @@
+﻿lblNTitel;Économiseur 3.0
+tpAllgemein;Général
+tpModul;Module
+tpBildauswahl;Sélection d’image
+tpTransitions;Effet de transition
+tpShader;Ombrageur
+lblNcblModule;Modules
+lblNcmbModulWechsel;Mode de lecture module
+lblNtrkDauerModulwechsel;Durée avant changement
+lblDauerModuswechsel;15 min
+chkMultiMonitor;Mode multi-écran
+lblKeineModule;Aucun module chargé, affichage du logo rebondissant
+lblNclbTransitionsModule;Effets de transition
+lblKeineTransitionsModule;Aucun effet chargé
+lblNcmbAbspielmodusTransitionsModule;Mode de lecture transitions
+btnOK;Terminé
+btnDefaults;Par défaut
+lblNHintergrundfarbe;Couleur d’arrière-plan
+tabOptions;
+cmbTransitionsReihenfolge;"Aléatoire au démarrage
+Dans l’ordre au démarrage"
+cmbModulwechsel;"Aléatoire au démarrage
+Aléatoire
+Dans l’ordre au démarrage
+Dans l’ordre"
+clbTransitionsModule;
+clbModule;

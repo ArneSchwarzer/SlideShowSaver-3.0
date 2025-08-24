@@ -1,0 +1,29 @@
+﻿lblTitel;Информация о фото
+lblNDatei;Файл
+lblDateipfad;-
+lblNDateipfad;Путь
+lblDateiname;-
+lblNDateiname;Имя
+lblErstellungsdatum;-
+lblNErstellungsdatum;Дата создания
+lblAutor;-
+lblNAutor;Автор
+lblTags;-
+lblNTags;Используемые теги
+lblBewertung;-
+lblNBewertung;Оценка
+lblNKamera;Камера
+lblKamera;-
+lblNlblKamera;Камера
+lblBrennweite;-
+lblNBrennweite;Фокусное расстояние
+lblObjektiv;-
+lblNObjektiv;Объектив
+lblVerschlusszeit;-
+lblNVerschlusszeit;Выдержка
+lblISO;-
+lblNISO;ISO
+lblBlende;-
+lblNBlende;Диафрагма
+grpDatei;-
+grpKamera;-

@@ -1,0 +1,15 @@
+﻿lblShadername;Grafika pikselowa
+lblNlblShaderName;Shader
+lblRaster;16 px
+lblNFarbraum;Przestrzeń barw
+lblNRaster;Rozmiar siatki
+btnDefaults;Domyślne
+chkRasterZufall;Losowy rozmiar siatki
+chkFarbraumZufall;Losowa przestrzeń barw
+cmbFarbraum;"8 kolorów (2 na kanał)
+27 kolorów (3 na kanał)
+64 kolory (4 na kanał)
+125 kolorów (5 na kanał)
+216 kolorów (6 na kanał)
+343 kolory (7 na kanał)
+512 kolorów (8 na kanał)"

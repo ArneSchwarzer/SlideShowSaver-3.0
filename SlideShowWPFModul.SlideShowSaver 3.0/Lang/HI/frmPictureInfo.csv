@@ -1,0 +1,29 @@
+﻿lblTitel;चित्र जानकारी
+lblNDatei;फ़ाइल
+lblDateipfad;-
+lblNDateipfad;पथ
+lblDateiname;-
+lblNDateiname;फ़ाइल नाम
+lblErstellungsdatum;-
+lblNErstellungsdatum;निर्माण तिथि
+lblAutor;-
+lblNAutor;लेखक
+lblTags;-
+lblNTags;उपयोग किए गए टैग
+lblBewertung;-
+lblNBewertung;रेटिंग
+lblNKamera;कैमरा
+lblKamera;-
+lblNlblKamera;कैमरा
+lblBrennweite;-
+lblNBrennweite;फोकल लंबाई
+lblObjektiv;-
+lblNObjektiv;लेंस
+lblVerschlusszeit;-
+lblNVerschlusszeit;शटर स्पीड
+lblISO;-
+lblNISO;ISO
+lblBlende;-
+lblNBlende;एपर्चर
+grpDatei;-
+grpKamera;-

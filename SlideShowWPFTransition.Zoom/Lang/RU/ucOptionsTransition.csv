@@ -1,0 +1,13 @@
+﻿lblTransitionname;Масштаб
+lblNlblTransitionname;Переход
+lblNAnkerpunkt;Точки поворота
+lblKeineRichtungInfo;Точка поворота не выбрана — будет использована случайная точка поворота
+lblNtrbGeschwindigkeit;Скорость
+lblGeschwindigkeit;20 с
+chkGleicherAnkerpunkt;Использовать одну точку поворота для затухания и появления
+btnDefaults;По умолчанию
+;
+;
+;
+;
+;

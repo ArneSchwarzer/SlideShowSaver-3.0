@@ -1,0 +1,13 @@
+﻿lblTransitionname;Blenden && Überblenden
+lblNTransitionname;Übergang
+lblNpicFarbton;Blende zu Farbton
+lblNModus;Modus
+lblGeschwindigkeit;20 s
+lblNtrbGeschwindigkeit;Geschwindigkeit
+rdoZufall;Zufällig
+rodBlenden;Blenden
+rdoÜberblenden;Überblenden
+btnDefaults;Standards
+chkZufallsfarbe;Zufallsfarbe
+chkMorphing;Morpphase
+picFarbton;-

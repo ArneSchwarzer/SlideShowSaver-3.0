@@ -1,0 +1,13 @@
+﻿lblTransitionname;Сдвиг и Протирка
+lblNlblTransitionname;Переход
+lblNRichtungen;Направление
+lblKeineRichtungInfo;Направление не выбрано, используется случайное
+lblNtrbGeschwindigkeit;Скорость
+lblGeschwindigkeit;20 с
+rbSchieben;Сдвиг
+rbWischen;Протирка
+rbZufall;Случайный
+lblNModus;Режим
+btnDefaults;По умолчанию
+;
+;

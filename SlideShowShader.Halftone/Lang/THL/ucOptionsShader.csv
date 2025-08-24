@@ -1,0 +1,33 @@
+﻿lblShadername;Halftone
+lblNlblShaderName;Shader
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Colourspace
+lblNGamma;Gamma
+lblNRaster;Grid size
+lblNModus;Mode
+ lblNDotsWinkel;Angle dots
+ lblDotsMin;5%
+ lblNDotsMin;MinSize dots
+ lblDotsMax;40%
+ lblNDotsMax;MaxSize dots
+ grbAllgemeineOptionen;General options
+ grbHalftoneOptione;Halftone & CMYK options
+ rdoModusHTCMYK;Halftone (CMYK)
+ rdoModusZufall;bong
+ rdoModusHTSW;Halftone (BW)
+ btnDefaults;Defaults
+ chkRasterZufall;Random grid size
+ chkPapierTextur;Paper texture
+ cmbPosterise;"8 colours (2 per chanel)
+27 colours (3 per chanel)
+64 colours (4 per chanel)
+125 colours (5 per chanel)
+216 colours (6 per chanel)
+343 colours (7 per chanel)
+512 colours (8 per chanel)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (classic)
+C: 15° | M: 45° | Y: 0° | K: 75° (alternative)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Intensity paper texture
+btnDefaults;Defaults

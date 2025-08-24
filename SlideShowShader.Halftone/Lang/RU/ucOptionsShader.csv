@@ -1,0 +1,33 @@
+﻿lblShadername;Полутоновый растр
+lblNlblShaderName;Шейдер
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Цветовое пространство
+lblNGamma;Гамма
+lblNRaster;Размер сетки
+lblNModus;Режим
+ lblNDotsWinkel;Угол точек
+ lblDotsMin;5%
+ lblNDotsMin;Мин. размер точек
+ lblDotsMax;40%
+ lblNDotsMax;Макс. размер точек
+ grbAllgemeineOptionen;Общие параметры
+ grbHalftoneOptione;Параметры полутонов и CMYK
+ rdoModusHTCMYK;Полутон (CMYK)
+ rdoModusZufall;Случайный
+ rdoModusHTSW;Полутон (Ч/Б)
+ btnDefaults;По умолчанию
+ chkRasterZufall;Случайный размер сетки
+ chkPapierTextur;
+ cmbPosterise;"8 цветов (2 на канал)
+27 цветов (3 на канал)
+64 цвета (4 на канал)
+125 цветов (5 на канал)
+216 цветов (6 на канал)
+343 цвета (7 на канал)
+512 цветов (8 на канал)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (классический)
+C: 15° | M: 45° | Y: 0° | K: 75° (альтернативный)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Интенсивность текстуры бумаги
+btnDefaults;По умолчанию

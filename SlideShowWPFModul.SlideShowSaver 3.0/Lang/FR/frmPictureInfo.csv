@@ -1,0 +1,29 @@
+﻿lblTitel;Infos image
+lblNDatei;Fichier
+lblDateipfad;-
+lblNDateipfad;Chemin
+lblDateiname;-
+lblNDateiname;Nom
+lblErstellungsdatum;-
+lblNErstellungsdatum;Date de création
+lblAutor;-
+lblNAutor;Auteur
+lblTags;-
+lblNTags;Étiquettes utilisées
+lblBewertung;-
+lblNBewertung;Note
+lblNKamera;Caméra
+lblKamera;-
+lblNlblKamera;Caméra
+lblBrennweite;-
+lblNBrennweite;Longueur focale
+lblObjektiv;-
+lblNObjektiv;Objectif
+lblVerschlusszeit;-
+lblNVerschlusszeit;Vitesse d'obturation
+lblISO;-
+lblNISO;ISO
+lblBlende;-
+lblNBlende;Ouverture
+grpDatei;-
+grpKamera;-

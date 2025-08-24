@@ -1,0 +1,29 @@
+﻿lblTitel;Informacje o zdjęciu
+lblNDatei;Plik
+lblDateipfad;-
+lblNDateipfad;Ścieżka
+lblDateiname;-
+lblNDateiname;Nazwa
+lblErstellungsdatum;-
+lblNErstellungsdatum;Data utworzenia
+lblAutor;-
+lblNAutor;Autor
+lblTags;-
+lblNTags;Użyte tagi
+lblBewertung;-
+lblNBewertung;Ocena
+lblNKamera;Aparat
+lblKamera;-
+lblNlblKamera;Aparat
+lblBrennweite;-
+lblNBrennweite;Ogniskowa
+lblObjektiv;-
+lblNObjektiv;Obiektyw
+lblVerschlusszeit;-
+lblNVerschlusszeit;Czas naświetlania
+lblISO;-
+lblNISO;ISO
+lblBlende;-
+lblNBlende;Przysłona
+grpDatei;-
+grpKamera;-

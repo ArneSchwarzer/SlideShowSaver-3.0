@@ -1,0 +1,15 @@
+﻿lblShadername;PixelArt
+lblNlblShaderName;Shader
+lblRaster;16 px
+lblNFarbraum;Colour space
+lblNRaster;Grid size
+btnDefaults;Defaults
+chkRasterZufall;Random grid size
+chkFarbraumZufall;Random colour space
+cmbFarbraum;"8 colours (2 per chanel)
+27 colours (3 per chanel)
+64 colours (4 per chanel)
+125 colours (5 per chanel)
+216 colours (6 per chanel)
+343 colours (7 per chanel)
+512 colours (8 per chanel)"

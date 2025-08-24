@@ -1,0 +1,15 @@
+﻿lblShadername;PixelArt
+lblNlblShaderName;Shader
+lblRaster;16 px
+lblNFarbraum;Farbraum
+lblNRaster;Rastergröße
+btnDefaults;Standards
+chkRasterZufall;Rastergröße zufällig
+chkFarbraumZufall;Farbraum zufällig
+cmbFarbraum;"8 Farben (2 pro Kanal)
+27 Farben (3 pro Kanal)
+64 Farben (4 pro Kanal)
+125 Farben (5 pro Kanal)
+216 Farben (6 pro Kanal)
+343 Farben (7 pro Kanal)
+512 Farben (8 pro Kanal)"

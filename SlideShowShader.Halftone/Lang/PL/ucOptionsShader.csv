@@ -1,0 +1,33 @@
+﻿lblShadername;Półton / rastr półtonowy
+lblNlblShaderName;Shader
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Przestrzeń barw
+lblNGamma;Gamma
+lblNRaster;Rozmiar siatki
+lblNModus;Tryb
+ lblNDotsWinkel;Kąt kropek
+ lblDotsMin;5%
+ lblNDotsMin;Min. rozmiar kropek
+ lblDotsMax;40%
+ lblNDotsMax;Maks. rozmiar kropek
+ grbAllgemeineOptionen;Opcje ogólne
+ grbHalftoneOptione;Opcje półtonu i CMYK
+ rdoModusHTCMYK;Półton (CMYK)
+ rdoModusZufall;Losowy
+ rdoModusHTSW;Półton (czarno‑biały)
+ btnDefaults;Domyślne
+ chkRasterZufall;Losowy rozmiar siatki
+ chkPapierTextur;
+ cmbPosterise;"8 kolorów (2 na kanał)
+27 kolorów (3 na kanał)
+64 kolory (4 na kanał)
+125 kolorów (5 na kanał)
+216 kolorów (6 na kanał)
+343 kolory (7 na kanał)
+512 kolorów (8 na kanał)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (klasyczny)
+C: 15° | M: 45° | Y: 0° | K: 75° (alternatywny)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Intensywność faktury papieru
+btnDefaults;Domyślne

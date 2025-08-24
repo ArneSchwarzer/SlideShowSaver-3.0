@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;Sélection d’image
+lblNtrbAnzeigedauer;Durée d’affichage
+lblAnzeigedauer;20 s
+lblNUebergangseffekteBilder;Effets de transition d’image
+lblNcmbEffektauswahl;Ordre des effets
+chkBildinformationen;Afficher les infos
+lblNShader;Shader
+lblNcmbShaderauswahl;Ordre du shader
+lblNModulname;Module
+lblModulname;SlideShowSaver 3.0
+btnDefaults;Par défaut
+cmbBildauswahl;"Image aléatoire
+Dossier aléatoire"
+cmbEffektauswahl;"Aléatoire au démarrage
+Aléatoire
+Dans l’ordre au démarrage
+Dans l’ordre"
+cmbShaderauswahl;"Aléatoire au démarrage
+Aléatoire
+Dans l’ordre au démarrage
+Dans l’ordre"
+clbTransitions;-
+clbShader;-

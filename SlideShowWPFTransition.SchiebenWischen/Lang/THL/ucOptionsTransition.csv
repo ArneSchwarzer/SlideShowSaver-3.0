@@ -1,0 +1,13 @@
+﻿lblTransitionname;Slide & Wipe
+lblNlblTransitionname;Transition
+lblNRichtungen;Direction
+lblKeineRichtungInfo;No direction selected, using random direction
+lblNtrbGeschwindigkeit;Do
+lblGeschwindigkeit;20 lup
+rbSchieben;Slide
+rbWischen;Wipe
+rbZufall;Random
+lblNModus;Mode
+btnDefaults;Defaults
+;
+;

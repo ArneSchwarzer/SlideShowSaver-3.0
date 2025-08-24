@@ -1,0 +1,27 @@
+﻿lblNTitel;SlideShow’wI’ 3.0
+tpAllgemein;motlh
+tpModul;pat
+tpBildauswahl;mIllogh wIv
+tpTransitions;ghoS buD
+tpShader;wanwI'
+lblNcblModule;patmey
+lblNcmbModulWechsel;pat ghoS mIw
+lblNtrkDauerModulwechsel;pat choH poH
+lblDauerModuswechsel;15 tup
+chkMultiMonitor;DuSaQ nIvnav mIw
+lblKeineModule;pat Hutlh – De' ngaSbogh joH
+lblNclbTransitionsModule;patmey ghoS buD
+lblKeineTransitionsModule;ghoS Hutlh
+lblNcmbAbspielmodusTransitionsModule;ghoS mIw
+btnOK;luq
+btnDefaults;Defaults
+lblNHintergrundfarbe;Background colour
+tabOptions;
+cmbTransitionsReihenfolge;"Random at start
+In order at start"
+cmbModulwechsel;"Random at start
+Random
+In order at start
+In order"
+clbTransitionsModule;
+clbModule;

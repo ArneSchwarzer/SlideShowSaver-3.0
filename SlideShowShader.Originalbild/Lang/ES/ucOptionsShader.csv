@@ -1,0 +1,3 @@
+﻿lblNShadername;Sombreado
+lblShadername;Imagen original
+lblNoOptions;Este shader no ofrece opciones ajustables. De hecho, ni siquiera es un shader, solo muestra la imagen original sin cambios.

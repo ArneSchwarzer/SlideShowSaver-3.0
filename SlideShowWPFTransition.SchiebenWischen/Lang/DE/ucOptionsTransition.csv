@@ -1,0 +1,13 @@
+﻿lblTransitionname;Schieben & Wischen
+lblNlblTransitionname;Übergang
+lblNRichtungen;Richtung
+lblKeineRichtungInfo;Keine Richtung ausgewählt, verwende zufällige Richtung
+lblNtrbGeschwindigkeit;Geschwindigkeit
+lblGeschwindigkeit;20 s
+rbSchieben;Schieben
+rbWischen;Wischen
+rbZufall;Zufällig
+lblNModus;Modus
+btnDefaults;Standards
+;
+;

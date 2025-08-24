@@ -1,0 +1,13 @@
+﻿lblTransitionname;Zoom
+lblNlblTransitionname;Transition
+lblNAnkerpunkt;Pivot points
+lblKeineRichtungInfo;No pivot point selected, using random pivot point
+lblNtrbGeschwindigkeit;Speed
+lblGeschwindigkeit;20 s
+chkGleicherAnkerpunkt;Use same pivot point for fade-out and fade-in
+btnDefaults;Defaults
+;
+;
+;
+;
+;

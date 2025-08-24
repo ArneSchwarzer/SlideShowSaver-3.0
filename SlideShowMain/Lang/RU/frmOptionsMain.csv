@@ -1,0 +1,27 @@
+﻿lblNTitel;СлайдШоуСейвер 3.0
+tpAllgemein;Общие
+tpModul;Модуль
+tpBildauswahl;Выбор изображений
+tpTransitions;Эффект перехода
+tpShader;Шейдер
+lblNcblModule;Модули
+lblNcmbModulWechsel;Режим воспроизведения
+lblNtrkDauerModulwechsel;Время до смены
+lblDauerModuswechsel;15 мин
+chkMultiMonitor;Мульти-мониторный режим
+lblKeineModule;Модули не загружены, показывается прыгающий логотип
+lblNclbTransitionsModule;Эффекты перехода
+lblKeineTransitionsModule;Переходы не загружены
+lblNcmbAbspielmodusTransitionsModule;Режим переходов
+btnOK;Готово
+btnDefaults;По умолчанию
+lblNHintergrundfarbe;Цвет фона
+tabOptions;-
+cmbTransitionsReihenfolge;"Случайно при старте
+По порядку при старте"
+cmbModulwechsel;"Случайно при старте
+Случайно
+По порядку при старте
+По порядку"
+clbTransitionsModule;-
+clbModule;-

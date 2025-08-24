@@ -1,0 +1,33 @@
+﻿lblShadername;हाफ़टोन (सेमिटोन)
+lblNlblShaderName;शेडर
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;रंग स्थान
+lblNGamma;गामा
+lblNRaster;ग्रिड आकार
+lblNModus;मोड
+ lblNDotsWinkel;बिंदुओं का कोण
+ lblDotsMin;5%
+ lblNDotsMin;न्यूनतम बिंदु आकार
+ lblDotsMax;40%
+ lblNDotsMax;अधिकतम बिंदु आकार
+ grbAllgemeineOptionen;सामान्य विकल्प
+ grbHalftoneOptione;हाफ़टोन व CMYK विकल्प
+ rdoModusHTCMYK;हाफ़टोन (CMYK)
+ rdoModusZufall;यादृच्छिक
+ rdoModusHTSW;हाफ़टोन (काला‑सफेद)
+ btnDefaults;डिफ़ॉल्ट
+ chkRasterZufall;यादृच्छिक ग्रिड आकार
+ chkPapierTextur;
+ cmbPosterise;"8 रंग (प्रति चैनल 2)
+27 रंग (प्रति चैनल 3)
+64 रंग (प्रति चैनल 4)
+125 रंग (प्रति चैनल 5)
+216 रंग (प्रति चैनल 6)
+343 रंग (प्रति चैनल 7)
+512 रंग (प्रति चैनल 8)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (पारंपरिक)
+C: 15° | M: 45° | Y: 0° | K: 75° (वैकल्पिक)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;कागज़ बनावट की तीव्रता
+btnDefaults;डिफ़ॉल्ट

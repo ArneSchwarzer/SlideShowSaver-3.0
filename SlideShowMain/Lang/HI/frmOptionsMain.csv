@@ -1,0 +1,27 @@
+﻿lblNTitel;स्लाइडशोसेवर 3.0
+tpAllgemein;सामान्य
+tpModul;मॉड्यूल
+tpBildauswahl;चित्र चयन
+tpTransitions;संक्रमण प्रभाव
+tpShader;शेडर
+lblNcblModule;मॉड्यूल
+lblNcmbModulWechsel;मॉड्यूल प्लेबैक मोड
+lblNtrkDauerModulwechsel;परिवर्तन तक का समय
+lblDauerModuswechsel;१५ मिनट
+chkMultiMonitor;मल्टी-मॉनिटर मोड
+lblKeineModule;कोई मॉड्यूल लोड नहीं, बाउंसिंग लोगो चल रहा है
+lblNclbTransitionsModule;मॉड्यूल ट्रांज़िशन प्रभाव
+lblKeineTransitionsModule;कोई ट्रांज़िशन लोड नहीं
+lblNcmbAbspielmodusTransitionsModule;ट्रांज़िशन प्लेबैक मोड
+btnOK;समाप्त
+btnDefaults;डिफ़ॉल्ट
+lblNHintergrundfarbe;पृष्ठभूमि रंग
+tabOptions;
+cmbTransitionsReihenfolge;"आरंभ में यादृच्छिक
+आरंभ में क्रम से"
+cmbModulwechsel;"आरंभ में यादृच्छिक
+यादृच्छिक
+आरंभ में क्रम से
+क्रम से"
+clbTransitionsModule;
+clbModule;

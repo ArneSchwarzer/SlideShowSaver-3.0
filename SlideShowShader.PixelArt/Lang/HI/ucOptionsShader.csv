@@ -1,0 +1,15 @@
+﻿lblShadername;पिक्सेल कला
+lblNlblShaderName;शेडर
+lblRaster;16 px
+lblNFarbraum;रंग स्थान
+lblNRaster;ग्रिड आकार
+btnDefaults;डिफ़ॉल्ट
+chkRasterZufall;यादृच्छिक ग्रिड आकार
+chkFarbraumZufall;यादृच्छिक रंग स्थान
+cmbFarbraum;"8 रंग (प्रति चैनल 2)
+27 रंग (प्रति चैनल 3)
+64 रंग (प्रति चैनल 4)
+125 रंग (प्रति चैनल 5)
+216 रंग (प्रति चैनल 6)
+343 रंग (प्रति चैनल 7)
+512 रंग (प्रति चैनल 8)"

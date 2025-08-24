@@ -1,0 +1,13 @@
+﻿lblTransitionname;Glisser et Essuyer
+lblNlblTransitionname;Transition
+lblNRichtungen;Direction
+lblKeineRichtungInfo;Aucune direction sélectionnée, direction aléatoire
+lblNtrbGeschwindigkeit;Vitesse
+lblGeschwindigkeit;20 s
+rbSchieben;Glisser
+rbWischen;Essuyer
+rbZufall;Aléatoire
+lblNModus;Mode
+btnDefaults;Par défaut
+;
+;

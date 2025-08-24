@@ -1,0 +1,15 @@
+﻿lblShadername;Arte de píxeles
+lblNlblShaderName;Shader
+lblRaster;16 px
+lblNFarbraum;Espacio de color
+lblNRaster;Tamaño de la cuadrícula
+btnDefaults;Valores predeterminados
+chkRasterZufall;Tamaño de cuadrícula aleatorio
+chkFarbraumZufall;Espacio de color aleatorio
+cmbFarbraum;"8 colores (2 por canal)
+27 colores (3 por canal)
+64 colores (4 por canal)
+125 colores (5 por canal)
+216 colores (6 por canal)
+343 colores (7 por canal)
+512 colores (8 por canal)"

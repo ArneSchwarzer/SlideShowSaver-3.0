@@ -1,0 +1,13 @@
+﻿lblTransitionname;Deslizar y Limpiar
+lblNlblTransitionname;Transición
+lblNRichtungen;Dirección
+lblKeineRichtungInfo;No se seleccionó dirección, usando dirección aleatoria
+lblNtrbGeschwindigkeit;Velocidad
+lblGeschwindigkeit;20 s
+rbSchieben;Deslizar
+rbWischen;Limpiar
+rbZufall;Aleatorio
+lblNModus;Modo
+btnDefaults;Valores predeterminados
+;
+;

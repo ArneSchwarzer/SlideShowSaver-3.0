@@ -1,0 +1,13 @@
+﻿lblTransitionname;Zoom
+lblNlblTransitionname;Transición
+lblNAnkerpunkt;Puntos de pivote
+lblKeineRichtungInfo;No se ha seleccionado ningún punto de pivote — se usará uno aleatorio
+lblNtrbGeschwindigkeit;Velocidad
+lblGeschwindigkeit;20 s
+chkGleicherAnkerpunkt;Usar el mismo punto de pivote para el fundido de salida y de entrada
+btnDefaults;Valores predeterminados
+;
+;
+;
+;
+;

@@ -1,0 +1,13 @@
+﻿lblTransitionname;淡入淡出与交叉淡入淡出.
+lblNTransitionname;转场
+lblNpicFarbton;渐变到色相
+lblNModus;模式
+lblGeschwindigkeit;20 秒
+lblNtrbGeschwindigkeit;速度
+rdoZufall;随机
+rodBlenden;淡化
+rdoÜberblenden;交叉淡化
+btnDefaults;默认值
+chkZufallsfarbe;随机色相
+chkMorphing;变形阶段
+picFarbton;-

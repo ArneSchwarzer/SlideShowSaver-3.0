@@ -1,0 +1,13 @@
+﻿lblTransitionname;Fade && Crossfade
+lblNTransitionname;Transition
+lblNpicFarbton;Blend to hue
+lblNModus;Mode
+lblGeschwindigkeit;20 lup
+lblNtrbGeschwindigkeit;Do
+rdoZufall;bong
+rodBlenden;Fade
+rdoÜberblenden;Crossfade
+btnDefaults;Defaults
+chkZufallsfarbe;Random hue
+chkMorphing;Morphing phase
+picFarbton;-

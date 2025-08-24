@@ -1,0 +1,13 @@
+﻿lblTransitionname;推动与擦拭
+lblNlblTransitionname;过渡
+lblNRichtungen;方向
+lblKeineRichtungInfo;未选择方向，使用随机方向
+lblNtrbGeschwindigkeit;速度
+lblGeschwindigkeit;20 秒
+rbSchieben;推动
+rbWischen;擦拭
+rbZufall;随机
+lblNModus;模式
+btnDefaults;默认值
+;
+;

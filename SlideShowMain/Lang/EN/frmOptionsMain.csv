@@ -1,0 +1,27 @@
+﻿lblNTitel;SlideShowSaver 3.0
+tpAllgemein;General
+tpModul;Module
+tpBildauswahl;Image Selection
+tpTransitions;Transition Effect
+tpShader;Shader
+lblNcblModule;Modules
+lblNcmbModulWechsel;Module Playback Mode
+lblNtrkDauerModulwechsel;Duration until switch
+lblDauerModuswechsel;15 min
+chkMultiMonitor;Multi-Monitor Mode
+lblKeineModule;No modules loaded, playing bouncing logo
+lblNclbTransitionsModule;Transition Effects
+lblKeineTransitionsModule;No transitions loaded
+lblNcmbAbspielmodusTransitionsModule;Transition Playback
+btnOK;Done
+btnDefaults;Defaults
+lblNHintergrundfarbe;Background colour
+tabOptions;
+cmbTransitionsReihenfolge;"Random at start
+In order at start"
+cmbModulwechsel;"Random at start
+Random
+In order at start
+In order"
+clbTransitionsModule;
+clbModule;

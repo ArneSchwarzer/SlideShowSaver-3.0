@@ -1,0 +1,27 @@
+﻿lblNTitel;PokazSlajdów 3.0
+tpAllgemein;Ogólne
+tpModul;Moduł
+tpBildauswahl;Wybór obrazów
+tpTransitions;Efekt przejścia
+tpShader;Shader
+lblNcblModule;Moduły
+lblNcmbModulWechsel;Tryb odtwarzania
+lblNtrkDauerModulwechsel;Czas zmiany
+lblDauerModuswechsel;15 min
+chkMultiMonitor;Tryb wielu monitorów
+lblKeineModule;Brak modułów, pokaz logo
+lblNclbTransitionsModule;Efekty przejścia
+lblKeineTransitionsModule;Brak przejść
+lblNcmbAbspielmodusTransitionsModule;Tryb przejścia
+btnOK;Gotowe
+btnDefaults;Domyślne
+lblNHintergrundfarbe;Kolor tła
+tabOptions;
+cmbTransitionsReihenfolge;"Losowo przy starcie
+W kolejności przy starcie"
+cmbModulwechsel;"Losowo przy starcie
+Losowo
+W kolejności przy starcie
+W kolejności"
+clbTransitionsModule;
+clbModule;

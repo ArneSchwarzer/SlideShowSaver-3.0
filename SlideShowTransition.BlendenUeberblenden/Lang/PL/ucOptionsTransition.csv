@@ -1,0 +1,13 @@
+﻿lblTransitionname;Zanikanie i przenikanie
+lblNTransitionname;Przejście
+lblNpicFarbton;Przenikaj do odcienia
+lblNModus;Tryb
+lblGeschwindigkeit;20 s
+lblNtrbGeschwindigkeit;Prędkość
+rdoZufall;Losowy
+rodBlenden;Zanikanie
+rdoÜberblenden;Przenikanie
+btnDefaults;Domyślne
+chkZufallsfarbe;Losowy odcień
+chkMorphing;Faza morphingu
+picFarbton;-

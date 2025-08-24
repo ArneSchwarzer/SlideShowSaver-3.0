@@ -1,0 +1,33 @@
+﻿lblShadername;Halftone
+lblNlblShaderName;Shader
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Farbraum
+lblNGamma;Gamma
+lblNRaster;Rastergröße
+lblNModus;Modus
+ lblNDotsWinkel;Dots Winkel
+ lblDotsMin;5 %
+ lblNDotsMin;Dots MinGröße
+ lblDotsMax;40%
+ lblNDotsMax;Dots MaxGröße
+ grbAllgemeineOptionen;Allgemeine Optionen
+ grbHalftoneOptione;Halftone & CMYK Optionen
+ rdoModusHTCMYK;Halftone (CMYK)
+ rdoModusZufall;Zufällig
+ rdoModusHTSW;Halftone (SW)
+ btnDefaults;Standards
+ chkRasterZufall;Rastergröße zufällig
+ chkPapierTextur;Papiertextur
+ cmbPosterise;"8 Farben (2 pro Kanal)
+27 Farben (3 pro Kanal)
+64 Farben (4 pro Kanal)
+125 Farben (5 pro Kanal)
+216 Farben (6 pro Kanal)
+343 Farben (7 pro Kanal)
+512 Farben (8 pro Kanal)"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45° (klassisch)
+C: 15° | M: 45° | Y: 0° | K: 75° (alternativ)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Papiertextur Intensität
+btnDefaults;Standards

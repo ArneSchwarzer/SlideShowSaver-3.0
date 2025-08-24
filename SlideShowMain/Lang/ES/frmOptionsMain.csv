@@ -1,0 +1,27 @@
+﻿lblNTitel;SlideShowSaver 3.0
+tpAllgemein;General
+tpModul;Módulo
+tpBildauswahl;Selección de imágenes
+tpTransitions;Efecto de transición
+tpShader;Sombreado
+lblNcblModule;Módulos
+lblNcmbModulWechsel;Modo de reproducción de módulos
+lblNtrkDauerModulwechsel;Duración hasta el cambio de módulo
+lblDauerModuswechsel;15 min
+chkMultiMonitor;Modo multimonitor
+lblKeineModule;No se cargaron módulos, se muestra el logo saltarín
+lblNclbTransitionsModule;Efectos de transición para módulos
+lblKeineTransitionsModule;No se cargaron transiciones
+lblNcmbAbspielmodusTransitionsModule;Modo de reproducción de transiciones
+btnOK;Listo
+btnDefaults;Valores predeterminados
+lblNHintergrundfarbe;Color de fondo
+tabOptions;-
+cmbTransitionsReihenfolge;"Aleatorio al inicio
+En orden al inicio"
+cmbModulwechsel;"Aleatorio al inicio
+Aleatorio
+En orden al inicio
+En orden"
+clbTransitionsModule;-
+clbModule;-

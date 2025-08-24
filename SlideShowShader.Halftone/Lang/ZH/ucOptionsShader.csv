@@ -1,0 +1,33 @@
+﻿lblShadername;半色调
+lblNlblShaderName;着色器
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;色彩空间
+lblNGamma;伽玛
+lblNRaster;网格大小
+lblNModus;模式
+ lblNDotsWinkel;网点角度
+ lblDotsMin;5%
+ lblNDotsMin;最小点大小
+ lblDotsMax;40%
+ lblNDotsMax;最大点大小
+ grbAllgemeineOptionen;常规选项
+ grbHalftoneOptione;半色调与 CMYK 选项
+ rdoModusHTCMYK;半色调（CMYK）
+ rdoModusZufall;随机
+ rdoModusHTSW;半色调（黑白）
+ btnDefaults;默认值
+ chkRasterZufall;随机网格大小
+ chkPapierTextur;
+ cmbPosterise;"8 种颜色（每通道 2）
+27 种颜色（每通道 3）
+64 种颜色（每通道 4）
+125 种颜色（每通道 5）
+216 种颜色（每通道 6）
+343 种颜色（每通道 7）
+512 种颜色（每通道 8）"
+ cmbDotsWinkel;"C: 15° | M: 75° | Y: 0° | K: 45°（经典）
+C: 15° | M: 45° | Y: 0° | K: 75°（替代）"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;纸张纹理强度
+btnDefaults;默认值

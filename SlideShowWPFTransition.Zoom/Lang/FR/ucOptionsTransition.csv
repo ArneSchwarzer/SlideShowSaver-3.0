@@ -1,0 +1,13 @@
+﻿lblTransitionname;Zoom
+lblNlblTransitionname;Transition
+lblNAnkerpunkt;Points de pivot
+lblKeineRichtungInfo;Aucun point de pivot sélectionné — un point de pivot aléatoire sera utilisé
+lblNtrbGeschwindigkeit;Vitesse
+lblGeschwindigkeit;20 s
+chkGleicherAnkerpunkt;Utiliser le même point de pivot pour le fondu sortant et entrant
+btnDefaults;Par défaut
+;
+;
+;
+;
+;

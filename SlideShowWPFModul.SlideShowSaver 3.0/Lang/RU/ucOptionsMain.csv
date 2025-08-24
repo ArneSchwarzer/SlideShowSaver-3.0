@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;Выбор изображения
+lblNtrbAnzeigedauer;Длительность показа
+lblAnzeigedauer;20 с
+lblNUebergangseffekteBilder;Эффекты перехода изображения
+lblNcmbEffektauswahl;Порядок эффектов
+chkBildinformationen;Показать информацию об изображении
+lblNShader;Шейдер
+lblNcmbShaderauswahl;Порядок шейдеров
+lblNModulname;Модуль
+lblModulname;SlideShowSaver 3.0
+btnDefaults;По умолчанию
+cmbBildauswahl;"Случайное изображение
+Случайный каталог"
+cmbEffektauswahl;"Случайно при старте
+Случайно
+По порядку при старте
+По порядку"
+cmbShaderauswahl;"Случайно при старте
+Случайно
+По порядку при старте
+По порядку"
+clbTransitions;-
+clbShader;-

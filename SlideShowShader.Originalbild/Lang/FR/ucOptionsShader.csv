@@ -1,0 +1,3 @@
+﻿lblNShadername;Shader
+lblShadername;Image d’origine
+lblNoOptions;Ce shader ne propose aucune option réglable. En fait, ce n’est même pas un shader, il affiche simplement l’image originale sans modification.

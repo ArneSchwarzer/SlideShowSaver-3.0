@@ -1,0 +1,3 @@
+﻿lblNShadername;着色器
+lblShadername;原始图像
+lblNoOptions;此着色器不提供可调选项。它其实并不是一个着色器，而是原样显示原始图像。

@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;mIllogh wIv
+lblNtrbAnzeigedauer;Display duration
+lblAnzeigedauer;20 lup
+lblNUebergangseffekteBilder;Image transition effects
+lblNcmbEffektauswahl;Effect order
+chkBildinformationen;Show image info
+lblNShader;Shader
+lblNcmbShaderauswahl;Shader order
+lblNModulname;Module
+lblModulname;SlideShow’wI’ 3.0
+btnDefaults;Defaults
+cmbBildauswahl;"Random picture
+Random directory"
+cmbEffektauswahl;"Random at start
+Random
+In order at start
+In order"
+cmbShaderauswahl;"Random at start
+Random
+In order at start
+In order"
+clbTransitions;-
+clbShader;-

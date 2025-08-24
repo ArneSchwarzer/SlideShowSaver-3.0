@@ -1,0 +1,15 @@
+﻿lblShadername;像素艺术
+lblNlblShaderName;着色器
+lblRaster;16 px
+lblNFarbraum;色彩空间
+lblNRaster;网格大小
+btnDefaults;默认值
+chkRasterZufall;随机网格大小
+chkFarbraumZufall;随机色彩空间
+cmbFarbraum;"8 种颜色（每通道 2）
+27 种颜色（每通道 3）
+64 种颜色（每通道 4）
+125 种颜色（每通道 5）
+216 种颜色（每通道 6）
+343 种颜色（每通道 7）
+512 种颜色（每通道 8）"

@@ -1,0 +1,23 @@
+﻿lblNcmbBildauswahl;छवि चयन
+lblNtrbAnzeigedauer;प्रदर्शन अवधि
+lblAnzeigedauer;२० सेकंड
+lblNUebergangseffekteBilder;चित्र संक्रमण प्रभाव
+lblNcmbEffektauswahl;प्रभाव क्रम
+chkBildinformationen;छवि जानकारी दिखाएं
+lblNShader;शेडर
+lblNcmbShaderauswahl;शेडर क्रम
+lblNModulname;मॉड्यूल
+lblModulname;स्लाइडशोसेवर 3.0
+btnDefaults;डिफ़ॉल्ट
+cmbBildauswahl;"यादृच्छिक चित्र
+यादृच्छिक निर्देशिका"
+cmbEffektauswahl;"आरंभ में यादृच्छिक
+यादृच्छिक
+आरंभ में क्रम से
+क्रम से"
+cmbShaderauswahl;"आरंभ में यादृच्छिक
+यादृच्छिक
+आरंभ में क्रम से
+क्रम से"
+clbTransitions;-
+clbShader;-

@@ -1,0 +1,13 @@
+﻿lblTransitionname;缩放
+lblNlblTransitionname;过渡
+lblNAnkerpunkt;枢轴点
+lblKeineRichtungInfo;未选择枢轴点，将使用随机枢轴点
+lblNtrbGeschwindigkeit;速度
+lblGeschwindigkeit;20 秒
+chkGleicherAnkerpunkt;淡出与淡入使用同一枢轴点
+btnDefaults;默认值
+;
+;
+;
+;
+;

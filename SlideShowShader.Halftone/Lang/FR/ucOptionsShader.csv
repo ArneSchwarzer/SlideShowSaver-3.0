@@ -1,0 +1,33 @@
+﻿lblShadername;Trame de demi-teintes
+lblNlblShaderName;Shader
+lblGamma;1.6
+ lblRaster;16 px
+lblNPosterise;Espace colorimétrique
+lblNGamma;Gamma
+lblNRaster;Taille de la grille
+lblNModus;Mode
+ lblNDotsWinkel;Angle des points
+ lblDotsMin;5%
+ lblNDotsMin;Taille min. des points
+ lblDotsMax;40%
+ lblNDotsMax;Taille max. des points
+ grbAllgemeineOptionen;Options générales
+ grbHalftoneOptione;Options de trame et CMYK
+ rdoModusHTCMYK;Trame (CMYK)
+ rdoModusZufall;Aléatoire
+ rdoModusHTSW;Trame (N&B)
+ btnDefaults;Par défaut
+ chkRasterZufall;Taille de grille aléatoire
+ chkPapierTextur;
+ cmbPosterise;"8 couleurs (2 par canal)
+27 couleurs (3 par canal)
+64 couleurs (4 par canal)
+125 couleurs (5 par canal)
+216 couleurs (6 par canal)
+343 couleurs (7 par canal)
+512 couleurs (8 par canal)"
+ cmbDotsWinkel;"C : 15° | M : 75° | J : 0° | N : 45° (classique)
+C : 15° | M : 45° | J : 0° | N : 75° (alternatif)"
+ lblPapierIntensitaet;30%
+lblPapierIntensitaet;Intensité de la texture papier
+btnDefaults;Par défaut
