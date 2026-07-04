@@ -1,11 +1,10 @@
 ﻿Imports System.Windows.Forms
-Imports SlideShowSprachen.LanguageHelper
-Imports SlideShowTools.RegistryHandling
 Imports SlideShowSprachen.LanguageSpecialHandling
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement
-Imports MyControlsLibrary
+Imports SlideShowTools.RegistryHandling
 
 Public Class ucFlaggenstreifen
+    Inherits UserControl
+
     Private Sub ucFlaggenstreifen_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         FlaggenSetzen()
@@ -32,7 +31,7 @@ Public Class ucFlaggenstreifen
                 If sprachInfo.ISOCode IsNot Nothing Then
 
                     'ToolTip Setzen
-                    SprachSpezialHandling.SetzeTooltipsSprache(Me, ttSprachen)
+                    SetzeTooltipsSprache(Me, ttSprachen)
 
                     If btn.Tag.ToString = regValSprache Then
                         btn.BackgroundImage = sprachInfo.FlaggeAktiv
@@ -45,11 +44,12 @@ Public Class ucFlaggenstreifen
 
             End If
         Next
+
     End Sub
 
     Private Sub FlaggeGeklickt(langIso As String)
         WriteToRegistry(SLIDESHOWMAIN_PATH & "Sprache", langIso)
-        LanguageSpecialHandling.WendeSpracheAufAlleControls(Me.FindForm(), langIso)
+        WendeSpracheAufAlleControls(Me.FindForm(), langIso)
         FlaggenSetzen()
     End Sub
 

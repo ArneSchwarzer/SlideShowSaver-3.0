@@ -28,9 +28,6 @@ Public Class XmlHandling
         Return liste
     End Function
 
-
-
-
     ''' <summary>
     ''' Speichert eine Liste von Strings als XML-Datei mit gegebenem Element- und Attributnamen.
     ''' </summary>
@@ -54,8 +51,6 @@ Public Class XmlHandling
             LogWarn("Fehler beim Speichern der Werteliste als XML: " & ex.Message)
         End Try
     End Sub
-
-
 
     ''' <summary>
     ''' Prüft, ob ein bestimmter Wert in der XML-Werteliste bereits existiert.
@@ -89,6 +84,43 @@ Public Class XmlHandling
             LogWarn("Fehler beim Hinzufügen/Entfernen von Wert in XML: " & ex.Message)
         End Try
     End Sub
+
+    ''' <summary>
+    ''' Zählt die Datensätze eines bestimmten Elementtyps in einer XML-Datei.
+    ''' </summary>
+    Public Shared Function XMLDatensaetzeCount(pfad As String, datensatzElementName As String) As Integer
+        Try
+            If Not File.Exists(pfad) Then Return 0
+
+            Dim doc As XDocument = XDocument.Load(pfad)
+            Return doc.Descendants(datensatzElementName).Count()
+
+        Catch ex As Exception
+            LogWarn("Fehler beim Zählen der XML-Datensätze: " & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Liefert den XML-Datensatz mit dem angegebenen Index.
+    ''' Index ist 0-basiert.
+    ''' </summary>
+    Public Shared Function XMLDatensatzPerIndex(pfad As String, datensatzElementName As String, index As Integer) As XElement
+        Try
+            If Not File.Exists(pfad) Then Return Nothing
+            If index < 0 Then Return Nothing
+
+            Dim doc As XDocument = XDocument.Load(pfad)
+
+            Return doc.Descendants(datensatzElementName).
+                       Skip(index).
+                       FirstOrDefault()
+
+        Catch ex As Exception
+            LogWarn("Fehler beim Laden eines XML-Datensatzes per Index: " & ex.Message)
+            Return Nothing
+        End Try
+    End Function
 
 End Class
 

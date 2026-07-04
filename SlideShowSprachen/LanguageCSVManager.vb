@@ -131,7 +131,7 @@ Public Module LanguageCSVManager
             End If
         Next
         Return n
-  End Function
+    End Function
 
     Private Function Unquote(s As String) As String
         s = s.Trim()
@@ -143,4 +143,15 @@ Public Module LanguageCSVManager
         Return s
     End Function
 
+    Private Function FindResourceName(sourceAsm As Reflection.Assembly, formName As String, lang As String) As String
+        Dim wantedSlash = $"Lang/{lang}/{formName}.csv".ToLowerInvariant()
+        Dim wantedDots = $"Lang.{lang}.{formName}.csv".ToLowerInvariant()
+        For Each n In sourceAsm.GetManifestResourceNames()
+            Dim low = n.ToLowerInvariant()
+            If low.EndsWith(wantedSlash) OrElse low.EndsWith(wantedDots) Then
+                Return n
+            End If
+        Next
+        Return Nothing
+    End Function
 End Module

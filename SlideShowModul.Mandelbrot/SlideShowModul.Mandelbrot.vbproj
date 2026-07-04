@@ -67,13 +67,13 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModulMain.vb" />
     <Compile Include="frmModulMain.Designer.vb">
       <DependentUpon>frmModulMain.vb</DependentUpon>
     </Compile>
     <Compile Include="frmModulMain.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ModulMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -152,21 +152,13 @@
     <None Include="Resources\mandelbrot_SpashScreen.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Lang\DE\" />
-    <Folder Include="Lang\EN\" />
-    <Folder Include="Lang\ES\" />
-    <Folder Include="Lang\FR\" />
-    <Folder Include="Lang\HI\" />
-    <Folder Include="Lang\PL\" />
-    <Folder Include="Lang\RU\" />
     <Folder Include="Lang\TLH\" />
-    <Folder Include="Lang\ZH\" />
   </ItemGroup>
   <ItemGroup>
-  <EmbeddedResource Include="Lang\**\*.csv">
-    <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
-    <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-  </EmbeddedResource>
-</ItemGroup>
+    <EmbeddedResource Include="Lang\**\*.csv">
+      <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
+      <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
