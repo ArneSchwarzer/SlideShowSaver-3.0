@@ -12,6 +12,12 @@
         MouseDown="Window_MouseDown">
     
     <Grid>
+        <!-- Hauptbild, immer Vollbild -->
+        <Rectangle x:Name="rctMandelbrot"            
+            Stretch="Fill"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"/>
+        
         <!-- Präsentations‑TextBlock in Bildschirmmitte -->
         <TextBlock x:Name="txbPräsentationsschirm"
              HorizontalAlignment="Center"

@@ -90,7 +90,10 @@ Public Class XmlHandling
     ''' </summary>
     Public Shared Function XMLDatensaetzeCount(pfad As String, datensatzElementName As String) As Integer
         Try
-            If Not File.Exists(pfad) Then Return 0
+            If Not File.Exists(pfad) Then
+                LogInfo("MandelbrotZiele.xml unter " & pfad & " nicht gefunden.")
+                Return 0
+            End If
 
             Dim doc As XDocument = XDocument.Load(pfad)
             Return doc.Descendants(datensatzElementName).Count()

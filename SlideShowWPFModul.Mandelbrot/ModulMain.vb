@@ -86,7 +86,7 @@ Public Class ModulMain
             LogError("Modul Mandelbrot - ModulMain.StartModul(): Das Modul konnte nicht geladen werden:" & ex.ToString)
         End Try
 
-        mandelbrotScreen.WindowState = FormWindowState.Minimized
+        mandelbrotScreen.WindowState = System.Windows.WindowState.Maximized
         mandelbrotScreen.Show()
 
         RaiseEvent ModulStateChanged("Running")

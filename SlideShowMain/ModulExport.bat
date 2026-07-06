@@ -4,8 +4,8 @@ setlocal
 
 :: === Module ===
 :: Quellpfade
-set "SOURCE1=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\SlideShowModul.Mandelbrot.dll"
-set "SOURCE2=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Mandelbrot\bin\Debug\SlideShowModul.Mandelbrot.pdb"
+set "SOURCE1=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\bin\Debug\SlideShowWPFModul.Mandelbrot.dll"
+set "SOURCE2=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\bin\Debug\SlideShowWPFModul.Mandelbrot.pdb"
 set "SOURCE3=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowModul.Matrix.dll"
 set "SOURCE4=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowModul.Matrix\bin\Debug\SlideShowModul.Matrix.pdb"
 set "SOURCE5=C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.SlideShowSaver 3.0\bin\Debug\SlideShowWPFModul.SlideShowSaver 3.0.dll"
