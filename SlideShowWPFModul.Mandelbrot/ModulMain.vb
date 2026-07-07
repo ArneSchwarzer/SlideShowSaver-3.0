@@ -2,6 +2,7 @@
 Imports System.Windows.Forms
 Imports System.Drawing
 Imports SlideShowTools.ConversionHandling
+Imports SlideShowTools.ListHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowLogging.LogHandling
@@ -24,7 +25,7 @@ Public Class ModulMain
 #Region "Structures & Enums"
     ' === Settings-Structure ===
     Public Structure ModulSettings_Mandelbrot
-        Dim Farbverlauf As String
+        Dim Gradienten As List(Of String)
         Dim GradientAnimieren As Boolean
         Dim KoordinatenAnzeigen As Boolean
     End Structure
@@ -141,7 +142,7 @@ Public Class ModulMain
 
         Dim defaults As New Dictionary(Of String, String)
 
-        defaults("Farbverlauf") = "Regenbogen"
+        defaults("Gradienten") = "Regenbogen"
         defaults("GradientAnimieren") = "True"
         defaults("KoordinatenAnzeigen") = "False"
 
@@ -153,11 +154,13 @@ Public Class ModulMain
         'Füllt die Struktur mit den Settings
 
         Dim defaults As New Dictionary(Of String, String)
+        Dim tmpRegVal As String
 
         defaults = GetModulDefaultSettings()
 
         'Farbverlauf
-        aktuelleSettings.Farbverlauf = ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Farbverlauf", defaults)
+        tmpRegVal = ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Gradienten", defaults)
+        aktuelleSettings.Gradienten = SplitSemicolonList(tmpRegVal)
 
         'Gradient Animieren
         aktuelleSettings.GradientAnimieren = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "GradientAnimieren", defaults))

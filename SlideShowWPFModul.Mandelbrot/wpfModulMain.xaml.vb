@@ -38,15 +38,16 @@ Public Class wpfModulMain
     'Gradient / Palette
     Private gradientOffset As Double = 0.0
     Private gradientGeschwindigkeit As Double = 0.15
+    Private gradientIndex As Integer
 
     'Sonstiges
     Private rnd As New Random()
 
     Public Structure MandelbrotZiel
         Public Property Name As String
-        Public Property CenterX As Single
-        Public Property CenterY As Single
-        Public Property TargetScale As Single
+        Public Property CenterX As Double
+        Public Property CenterY As Double
+        Public Property TargetScale As Double
         Public Property MaxIterations As Integer
     End Structure
 
@@ -91,6 +92,7 @@ Public Class wpfModulMain
         InitialisiereStartpunkt()
         InitialisiereShader()
         WaehleNeuesZiel()
+        WaehleNeuenGradienten()
 
         PräsentationsschirmAnzeigen()
 
@@ -117,7 +119,9 @@ Public Class wpfModulMain
     Private Sub PräsentationsschirmAnzeigen()
 
         Dim präsentationsText As String = "Mandelbrot"
-        Dim präsentationsZeit As Integer = 15
+        Dim präsentationsZeit As Integer = 5
+
+        rctMandelbrot.Visibility = Visibility.Collapsed
 
         txbPräsentationsschirm.Text = präsentationsText
         txbPräsentationsschirm.Visibility = Visibility.Visible
@@ -150,6 +154,7 @@ Public Class wpfModulMain
     Private Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
 
         WaehleNeuesZiel()
+        WaehleNeuenGradienten()
 
         zoomStartZeit = DateTime.Now
         tmrModul.Interval = zoomDauer
@@ -177,6 +182,30 @@ Public Class wpfModulMain
         End With
 
         LogHandling.LogInfo("Modul Mandelbrot: Aktuelles Ziel: " & aktuellesZiel.Name)
+
+    End Sub
+
+    Private Sub WaehleNeuenGradienten()
+
+        Dim gewaehlterGradient As String
+
+        gewaehlterGradient = aktuelleSettings.Gradienten(rnd.Next(aktuelleSettings.Gradienten.Count))
+
+        Select Case gewaehlterGradient
+            Case "Regenbogen"
+                gradientIndex = 0
+            Case "Zebra"
+                gradientIndex = 1
+            Case "Wakanda"
+                gradientIndex = 2
+            Case "Joker"
+                gradientIndex = 3
+            Case "Weihnachten"
+                gradientIndex = 4
+            Case Else
+                gradientIndex = 0
+        End Select
+
 
     End Sub
 
@@ -249,10 +278,7 @@ Public Class wpfModulMain
 
     End Sub
 
-    Private Function EaseOutCubic(t As Double) As Double
-        t = Math.Max(0.0, Math.Min(1.0, t))
-        Return 1.0 - Math.Pow(1.0 - t, 3.0)
-    End Function
+
 
     Private Sub AktualisiereGradient()
 
@@ -260,7 +286,13 @@ Public Class wpfModulMain
         ' Später kann hier die komplette Gradient-/Palette-Engine hängen.
 
         Dim elapsedSeconds As Double = (DateTime.Now - zoomStartZeit).TotalSeconds
-        gradientOffset = (elapsedSeconds * gradientGeschwindigkeit) Mod 1.0
+
+        If aktuelleSettings.GradientAnimieren Then
+            gradientOffset = (elapsedSeconds * gradientGeschwindigkeit) Mod 1.0
+        Else
+            gradientOffset = 0
+        End If
+
 
     End Sub
 
@@ -282,7 +314,7 @@ Public Class wpfModulMain
             .ViewportHeight = CSng(Math.Max(1, rctMandelbrot.ActualHeight))
 
             .GradientOffset = CSng(gradientOffset)
-            .GradientIndex = 0.0F
+            .GradientIndex = gradientIndex
         End With
 
     End Sub
@@ -298,7 +330,10 @@ Public Class wpfModulMain
     Private Function EaseInOut(t As Double) As Double
         Return t * t * (3.0 - 2.0 * t)
     End Function
-
+    Private Function EaseOutCubic(t As Double) As Double
+        t = Math.Max(0.0, Math.Min(1.0, t))
+        Return 1.0 - Math.Pow(1.0 - t, 3.0)
+    End Function
 #End Region
 
 #Region "Framework / Events"

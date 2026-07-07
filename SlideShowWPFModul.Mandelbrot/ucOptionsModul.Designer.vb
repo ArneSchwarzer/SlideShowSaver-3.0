@@ -24,10 +24,10 @@ Partial Class ucOptionsModul
     Private Sub InitializeComponent()
         Me.lblModul = New System.Windows.Forms.Label()
         Me.lblNModul = New System.Windows.Forms.Label()
-        Me.cmbGradient = New System.Windows.Forms.ComboBox()
         Me.lblNcmbGradient = New System.Windows.Forms.Label()
         Me.chkGradientAnimieren = New System.Windows.Forms.CheckBox()
         Me.chkKoordinatenAnzeigen = New System.Windows.Forms.CheckBox()
+        Me.clbGradienten = New System.Windows.Forms.CheckedListBox()
         Me.SuspendLayout()
         '
         'lblModul
@@ -51,30 +51,20 @@ Partial Class ucOptionsModul
         Me.lblNModul.Tag = "langKey=lblNModul"
         Me.lblNModul.Text = "Modul"
         '
-        'cmbGradient
-        '
-        Me.cmbGradient.FormattingEnabled = True
-        Me.cmbGradient.Items.AddRange(New Object() {"Regenbogen", "Pastellbogen", "Zebra", "Joker", "Wakanda", "Weihnachten"})
-        Me.cmbGradient.Location = New System.Drawing.Point(264, 110)
-        Me.cmbGradient.Name = "cmbGradient"
-        Me.cmbGradient.Size = New System.Drawing.Size(604, 49)
-        Me.cmbGradient.TabIndex = 19
-        Me.cmbGradient.Tag = "langKey=cmbGradient"
-        '
         'lblNcmbGradient
         '
         Me.lblNcmbGradient.AutoSize = True
         Me.lblNcmbGradient.Location = New System.Drawing.Point(29, 113)
         Me.lblNcmbGradient.Name = "lblNcmbGradient"
-        Me.lblNcmbGradient.Size = New System.Drawing.Size(132, 41)
+        Me.lblNcmbGradient.Size = New System.Drawing.Size(165, 41)
         Me.lblNcmbGradient.TabIndex = 18
         Me.lblNcmbGradient.Tag = "langKey=lblNcmbGradient"
-        Me.lblNcmbGradient.Text = "Gradient"
+        Me.lblNcmbGradient.Text = "Gradienten"
         '
         'chkGradientAnimieren
         '
         Me.chkGradientAnimieren.AutoSize = True
-        Me.chkGradientAnimieren.Location = New System.Drawing.Point(36, 165)
+        Me.chkGradientAnimieren.Location = New System.Drawing.Point(36, 378)
         Me.chkGradientAnimieren.Name = "chkGradientAnimieren"
         Me.chkGradientAnimieren.Size = New System.Drawing.Size(303, 45)
         Me.chkGradientAnimieren.TabIndex = 20
@@ -85,7 +75,7 @@ Partial Class ucOptionsModul
         'chkKoordinatenAnzeigen
         '
         Me.chkKoordinatenAnzeigen.AutoSize = True
-        Me.chkKoordinatenAnzeigen.Location = New System.Drawing.Point(36, 245)
+        Me.chkKoordinatenAnzeigen.Location = New System.Drawing.Point(36, 458)
         Me.chkKoordinatenAnzeigen.Name = "chkKoordinatenAnzeigen"
         Me.chkKoordinatenAnzeigen.Size = New System.Drawing.Size(340, 45)
         Me.chkKoordinatenAnzeigen.TabIndex = 21
@@ -93,13 +83,22 @@ Partial Class ucOptionsModul
         Me.chkKoordinatenAnzeigen.Text = "Koordinaten anzeigen"
         Me.chkKoordinatenAnzeigen.UseVisualStyleBackColor = True
         '
+        'clbGradienten
+        '
+        Me.clbGradienten.FormattingEnabled = True
+        Me.clbGradienten.Items.AddRange(New Object() {"Regenbogen", "Zebra", "Joker", "Wakanda", "Weihnachten"})
+        Me.clbGradienten.Location = New System.Drawing.Point(264, 113)
+        Me.clbGradienten.Name = "clbGradienten"
+        Me.clbGradienten.Size = New System.Drawing.Size(575, 224)
+        Me.clbGradienten.TabIndex = 22
+        '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.clbGradienten)
         Me.Controls.Add(Me.chkKoordinatenAnzeigen)
         Me.Controls.Add(Me.chkGradientAnimieren)
-        Me.Controls.Add(Me.cmbGradient)
         Me.Controls.Add(Me.lblNcmbGradient)
         Me.Controls.Add(Me.lblModul)
         Me.Controls.Add(Me.lblNModul)
@@ -114,8 +113,8 @@ Partial Class ucOptionsModul
 
     Friend WithEvents lblModul As Windows.Forms.Label
     Friend WithEvents lblNModul As Windows.Forms.Label
-    Friend WithEvents cmbGradient As Windows.Forms.ComboBox
     Friend WithEvents lblNcmbGradient As Windows.Forms.Label
     Friend WithEvents chkGradientAnimieren As Windows.Forms.CheckBox
     Friend WithEvents chkKoordinatenAnzeigen As Windows.Forms.CheckBox
+    Friend WithEvents clbGradienten As Forms.CheckedListBox
 End Class
