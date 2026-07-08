@@ -2,6 +2,7 @@
 Imports System.Windows.Interop
 Imports System.Windows.Media
 Imports System.Windows.Threading
+Imports System.IO
 Imports SlideShowLogging
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.SettingsHandling
@@ -18,18 +19,32 @@ Public Class wpfModulMain
     'Timer und Zeitmanagement
     Public WithEvents tmrModul As New DispatcherTimer()
     Public WithEvents tmrPresentation As New DispatcherTimer()
-
     Private zoomStartZeit As DateTime
     Private zoomDauer As TimeSpan
 
     'Initialisierung
     Private hintergrundWM As Windows.Media.Color
     Private renderSize As Windows.Size
+    Private zielePfad As String = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotZiele.xml"
+            )
+    Private gradientenPfad As String = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+    "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotGradienten.xml"
+)
 
-    'Start- und Zielpunkte
+    Private gradienten As List(Of MandelbrotGradient)
+    Private aktuellerGradient As MandelbrotGradient
+    Private aktuellerGradientBrush As ImageBrush
+
+
+    'Start- und Zielpunkte & Skalierung
     Private startpunkt As MandelbrotZiel
     Private aktuellesZiel As MandelbrotZiel
     Private aktuellePosition As MandelbrotZiel
+    Private maxIterationen As Integer
+    Private aktuelleSkala As Double
 
     'Shader
     Private mandelbrotEffect As MandelbrotEffect
@@ -89,6 +104,7 @@ Public Class wpfModulMain
 
         CheckYourMail()
 
+        gradienten = MandelbrotGradientRepository.LadeGradienten(gradientenPfad)
         InitialisiereStartpunkt()
         InitialisiereShader()
         WaehleNeuesZiel()
@@ -139,7 +155,7 @@ Public Class wpfModulMain
         txbPräsentationsschirm.Visibility = Visibility.Collapsed
         tmrPresentation.Stop()
 
-        zoomDauer = TimeSpan.FromSeconds(60)
+        zoomDauer = TimeSpan.FromMinutes(Math.Max(1, aktuelleSettings.Zoomdauer))
         zoomStartZeit = DateTime.Now
 
         rctMandelbrot.Visibility = Visibility.Visible
@@ -164,51 +180,51 @@ Public Class wpfModulMain
 
     Private Sub WaehleNeuesZiel()
 
-        Dim count As Integer = XMLDatensaetzeCount("MandelbrotZiele.XML", "Target")
+        Dim count As Integer = XMLDatensaetzeCount(zielePfad, "Target")
         If count <= 0 Then
             LogHandling.LogInfo("Count Mandelbrot-Ziele fehlgeschlagen.")
             Exit Sub
         End If
 
-        Dim node = XMLDatensatzPerIndex("MandelbrotZiele.XML", "Target", rnd.Next(count))
+        Dim node = XMLDatensatzPerIndex(zielePfad, "Target", rnd.Next(count))
         If node Is Nothing Then Exit Sub
 
         With node
             aktuellesZiel.Name = CStr(.Attribute("Name"))
             aktuellesZiel.CenterX = CDbl(.Element("CenterX"))
             aktuellesZiel.CenterY = CDbl(.Element("CenterY"))
-            aktuellesZiel.TargetScale = CDbl(.Element("TargetScale"))
-            aktuellesZiel.MaxIterations = CInt(.Element("MaxIterations"))
         End With
 
+        If rnd.Next(2) = 0 Then
+            aktuellesZiel.CenterY *= -1.0
+            aktuellesZiel.Name &= " gespiegelt"
+        End If
+
         LogHandling.LogInfo("Modul Mandelbrot: Aktuelles Ziel: " & aktuellesZiel.Name)
-        LogHandling.LogInfo("Anzahl Ziele: " & count.ToString)
 
     End Sub
 
     Private Sub WaehleNeuenGradienten()
 
-        Dim gewaehlterGradient As String
+        If gradienten Is Nothing OrElse gradienten.Count = 0 Then Exit Sub
+        If aktuelleSettings.Gradienten Is Nothing OrElse aktuelleSettings.Gradienten.Count = 0 Then Exit Sub
 
-        gewaehlterGradient = aktuelleSettings.Gradienten(rnd.Next(aktuelleSettings.Gradienten.Count))
+        Dim erlaubteGradienten = gradienten.
+        Where(Function(g) aktuelleSettings.Gradienten.Contains(g.Name)).
+        ToList()
 
-        Select Case gewaehlterGradient
-            Case "Regenbogen"
-                gradientIndex = 0
-            Case "Zebra"
-                gradientIndex = 1
-            Case "Joker"
-                gradientIndex = 2
-            Case "Wakanda"
-                gradientIndex = 3
-            Case "Weihnachten"
-                gradientIndex = 4
-            Case "Pastell"
-                gradientIndex = 5
-            Case Else
-                gradientIndex = 0
-        End Select
+        If erlaubteGradienten.Count = 0 Then
+            erlaubteGradienten = gradienten
+        End If
 
+        aktuellerGradient = erlaubteGradienten(rnd.Next(erlaubteGradienten.Count))
+        aktuellerGradientBrush = MandelbrotGradientRepository.ErzeugeGradientBrush(aktuellerGradient, 1024)
+
+        If mandelbrotEffect IsNot Nothing Then
+            mandelbrotEffect.GradientTexture = aktuellerGradientBrush
+        End If
+
+        LogHandling.LogInfo("Modul Mandelbrot: Aktueller Gradient: " & aktuellerGradient.Name)
 
     End Sub
 
@@ -260,24 +276,21 @@ Public Class wpfModulMain
 
         If zoomDauer.TotalMilliseconds <= 0 Then Exit Sub
 
-        Dim elapsed As Double = (DateTime.Now - zoomStartZeit).TotalMilliseconds
-        Dim progress As Double = Math.Min(1.0, elapsed / zoomDauer.TotalMilliseconds)
+        Dim elapsedSeconds As Double = (DateTime.Now - zoomStartZeit).TotalSeconds
+        Dim progress As Double = Math.Min(1.0, elapsedSeconds / zoomDauer.TotalSeconds)
 
-        ' Kamera-Zentrum erreicht das Ziel bereits nach 15 % der Zoomdauer.
+        ' Kamera-Zentrum erreicht das Ziel früh im Zoom.
         Dim centerProgress As Double = Math.Min(1.0, progress / 0.15)
         Dim centerT As Double = EaseOutCubic(centerProgress)
-
-        ' Skalierung läuft über die volle Dauer.
-        Dim scaleT As Double = EaseInOut(progress)
 
         aktuellePosition.CenterX = Lerp(startpunkt.CenterX, aktuellesZiel.CenterX, centerT)
         aktuellePosition.CenterY = Lerp(startpunkt.CenterY, aktuellesZiel.CenterY, centerT)
 
-        aktuellePosition.TargetScale =
-            startpunkt.TargetScale * Math.Pow(aktuellesZiel.TargetScale / startpunkt.TargetScale, scaleT)
+        aktuelleSkala = BerechneAktuelleSkala(elapsedSeconds)
+        maxIterationen = BerechneMaxIterationen(aktuelleSkala)
 
-        aktuellePosition.MaxIterations =
-            CInt(Math.Round(Lerp(startpunkt.MaxIterations, aktuellesZiel.MaxIterations, scaleT)))
+        aktuellePosition.TargetScale = aktuelleSkala
+        aktuellePosition.MaxIterations = maxIterationen
 
     End Sub
 
@@ -293,7 +306,6 @@ Public Class wpfModulMain
         Else
             gradientOffset = 0
         End If
-
 
     End Sub
 
@@ -315,7 +327,6 @@ Public Class wpfModulMain
             .ViewportHeight = CSng(Math.Max(1, rctMandelbrot.ActualHeight))
 
             .GradientOffset = CSng(gradientOffset)
-            .GradientIndex = gradientIndex
         End With
 
     End Sub
@@ -335,6 +346,48 @@ Public Class wpfModulMain
         t = Math.Max(0.0, Math.Min(1.0, t))
         Return 1.0 - Math.Pow(1.0 - t, 3.0)
     End Function
+
+    Private Function BerechneAktuelleSkala(elapsedSeconds As Double) As Double
+
+        Dim startScale As Double = startpunkt.TargetScale
+
+        ' Trackbar 1..100:
+        ' 1   = sehr langsamer Zoom
+        ' 50  = normal
+        ' 100 = sehr schneller Zoom
+        Dim slider As Double = Math.Max(1.0, Math.Min(100.0, CDbl(aktuelleSettings.Zoomgeschwindigkeit)))
+
+        ' Übersetzung in Zoomfaktor pro Sekunde.
+        ' Werte kleiner 1.0 verkleinern die Scale.
+        Dim minFaktor As Double = 0.985   ' langsam
+        Dim maxFaktor As Double = 0.7     ' schnell
+
+        Dim t As Double = (slider - 1.0) / 99.0
+        Dim zoomFaktorProSekunde As Double = Lerp(minFaktor, maxFaktor, t)
+
+        Return startScale * Math.Pow(zoomFaktorProSekunde, elapsedSeconds)
+
+    End Function
+
+    Private Function BerechneMaxIterationen(scale As Double) As Integer
+
+        Dim startScale As Double = startpunkt.TargetScale
+
+        If scale <= 0 Then Return 100
+
+        Dim zoomTiefe As Double = Math.Log(startScale / scale, 2.0)
+
+        ' V0.2-Formel:
+        ' Basis + Iterationen pro Verdopplung der Zoomtiefe.
+        Dim basis As Integer = 100
+        Dim faktor As Double = 35.0
+
+        Dim iterations As Integer = CInt(Math.Round(basis + zoomTiefe * faktor))
+
+        Return Math.Max(100, Math.Min(iterations, 2000))
+
+    End Function
+
 #End Region
 
 #Region "Framework / Events"

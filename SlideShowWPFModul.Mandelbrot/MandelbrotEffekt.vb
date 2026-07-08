@@ -23,7 +23,7 @@ Public Class MandelbrotEffect
         UpdateShaderValue(ViewportWidthProperty)
         UpdateShaderValue(ViewportHeightProperty)
         UpdateShaderValue(GradientOffsetProperty)
-        UpdateShaderValue(GradientIndexProperty)
+        UpdateShaderValue(GradientTextureProperty)
     End Sub
 
     Public Shared ReadOnly CenterXProperty As DependencyProperty =
@@ -145,13 +145,18 @@ Public Class MandelbrotEffect
             GetType(MandelbrotEffect),
             New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(7)))
 
-    Public Property GradientIndex As Single
+    Public Shared ReadOnly GradientTextureProperty As DependencyProperty =
+    ShaderEffect.RegisterPixelShaderSamplerProperty(
+        "GradientTexture",
+        GetType(MandelbrotEffect),
+        0)
+
+    Public Property GradientTexture As Brush
         Get
-            Return CSng(GetValue(GradientIndexProperty))
+            Return CType(GetValue(GradientTextureProperty), Brush)
         End Get
-        Set(value As Single)
-            SetValue(GradientIndexProperty, value)
+        Set(value As Brush)
+            SetValue(GradientTextureProperty, value)
         End Set
     End Property
-
 End Class

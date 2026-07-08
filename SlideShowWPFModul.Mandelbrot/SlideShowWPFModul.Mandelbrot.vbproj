@@ -72,6 +72,8 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="MandelbrotEffekt.vb" />
+    <Compile Include="MandelbrotGradient.vb" />
+    <Compile Include="MandelbrotGradientRepository.vb" />
     <Compile Include="ModulMain.vb" />
     <Compile Include="ucOptionsModul.Designer.vb">
       <DependentUpon>ucOptionsModul.vb</DependentUpon>
@@ -138,6 +140,7 @@
   <ItemGroup>
     <Resource Include="Shader\Mandelbrot.ps" />
     <Resource Include="MandelbrotZiele.xml" />
+    <Resource Include="MandelbrotGradienten.xml" />
     <Content Include="Shader\Mandelbrot.fx" />
   </ItemGroup>
   <ItemGroup>

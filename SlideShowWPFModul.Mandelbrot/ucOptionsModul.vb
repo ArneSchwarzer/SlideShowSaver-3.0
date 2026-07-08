@@ -19,23 +19,23 @@ Public Class ucOptionsModul
 
         CheckYourMail()
 
+        'clbGradienten initialisieren
         clbGradienten.Items.Clear()
 
-        Dim alleGradienten As String() = {
-        "Regenbogen",
-        "Zebra",
-        "Joker",
-        "Wakanda",
-        "Weihnachten",
-        "Pastell"
-    }
+        Dim gradientenPfad As String = IO.Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+    "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotGradienten.xml"
+)
+
+        Dim alleGradienten As List(Of MandelbrotGradient) =
+    MandelbrotGradientRepository.LadeGradienten(gradientenPfad)
 
         Dim aktiveGradienten As New HashSet(Of String)(
-        aktuelleSettings.Gradienten,
-        StringComparer.OrdinalIgnoreCase)
+    aktuelleSettings.Gradienten,
+    StringComparer.OrdinalIgnoreCase)
 
-        For Each gradientName As String In alleGradienten
-            clbGradienten.Items.Add(gradientName, aktiveGradienten.Contains(gradientName))
+        For Each gradient As MandelbrotGradient In alleGradienten
+            clbGradienten.Items.Add(gradient.Name, aktiveGradienten.Contains(gradient.Name))
         Next
 
         If clbGradienten.CheckedItems.Count = 0 AndAlso clbGradienten.Items.Count > 0 Then
@@ -44,8 +44,20 @@ Public Class ucOptionsModul
 
         clbGradienten.Sorted = True
 
+        'Checkboxen initialisieren
         chkGradientAnimieren.Checked = aktuelleSettings.GradientAnimieren
         chkKoordinatenAnzeigen.Checked = aktuelleSettings.KoordinatenAnzeigen
+        chkRotation.Checked = aktuelleSettings.Rotation
+
+        'Trackbars initialisieren
+        trkZoomdauer.Value = aktuelleSettings.Zoomdauer
+        If trkZoomdauer.Value = 60 Then
+            lblZoomdauer.Text = "1 h"
+        Else
+            lblZoomdauer.Text = trkZoomdauer.Value.ToString & " m"
+        End If
+
+        trkZoomgeschwindigkeit.Value = aktuelleSettings.Zoomgeschwindigkeit
 
     End Sub
 
@@ -75,6 +87,33 @@ Public Class ucOptionsModul
         Catch ex As Exception
             LogHandling.LogWarn("SSS 3.0: ucOptionsModul.clbGradienten_ItemCheck() - Problem: " & ex.ToString)
         End Try
+    End Sub
+
+    Private Sub trkZoomdauer_ValueChanged(sender As Object, e As EventArgs) Handles trkZoomdauer.ValueChanged
+        If trkZoomdauer.Value = 60 Then
+            lblZoomdauer.Text = "1 h"
+        Else
+            lblZoomdauer.Text = trkZoomdauer.Value.ToString & " m"
+        End If
+
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomdauer", trkZoomdauer.Value.ToString)
+
+    End Sub
+
+    Private Sub trkZoomgeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkZoomgeschwindigkeit.ValueChanged
+
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomgeschwindigkeit", trkZoomgeschwindigkeit.Value.ToString)
+
+    End Sub
+
+    Private Sub chkRotation_CheckedChanged(sender As Object, e As EventArgs) Handles chkRotation.CheckedChanged
+        'Behandelt chkKoordinatenAnzeigen
+
+        'DirectCommit
+        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Rotation", chkRotation.Checked.ToString)
+
     End Sub
 
     Private Sub CheckYourMail()

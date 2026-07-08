@@ -3,212 +3,152 @@
 
   <Target Name="Seahorse Valley">
     <CenterX>-0.743643887037151</CenterX>
-    <CenterY>0.131825904205330</CenterY>
-    <TargetScale>0.0000005</TargetScale>
-    <MaxIterations>800</MaxIterations>
+    <CenterY>0.131825904205330</CenterY>   
   </Target>
 
   <Target Name="Elephant Valley">
     <CenterX>0.275</CenterX>
-    <CenterY>0.0</CenterY>
-    <TargetScale>0.0005</TargetScale>
-    <MaxIterations>500</MaxIterations>
+    <CenterY>0.0</CenterY>    
   </Target>
 
   <Target Name="Triple Spiral">
     <CenterX>-0.088</CenterX>
-    <CenterY>0.654</CenterY>
-    <TargetScale>0.0002</TargetScale>
-    <MaxIterations>700</MaxIterations>
+    <CenterY>0.654</CenterY>    
   </Target>
 
   <Target Name="Mini Mandelbrot">
     <CenterX>-1.25066</CenterX>
-    <CenterY>0.02012</CenterY>
-    <TargetScale>0.00008</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>0.02012</CenterY>    
   </Target>
 
   <Target Name="Spiral Seahorse">
     <CenterX>-0.761574</CenterX>
-    <CenterY>-0.0847596</CenterY>
-    <TargetScale>0.00002</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>-0.0847596</CenterY>    
   </Target>
 
   <Target Name="Lightning Branches">
     <CenterX>-1.786440255</CenterX>
-    <CenterY>0.0</CenterY>
-    <TargetScale>0.00004</TargetScale>
-    <MaxIterations>1000</MaxIterations>
+    <CenterY>0.0</CenterY>   
   </Target>
 
   <Target Name="Needle Point">
     <CenterX>-0.10109636384562</CenterX>
-    <CenterY>0.95628651080914</CenterY>
-    <TargetScale>0.000005</TargetScale>
-    <MaxIterations>1200</MaxIterations>
+    <CenterY>0.95628651080914</CenterY>    
   </Target>
 
   <Target Name="Satellite Island">
     <CenterX>-1.768778833</CenterX>
-    <CenterY>0.00173856</CenterY>
-    <TargetScale>0.00001</TargetScale>
-    <MaxIterations>1000</MaxIterations>
+    <CenterY>0.00173856</CenterY>    
   </Target>
 
   <Target Name="Curl Valley">
     <CenterX>-0.16070135</CenterX>
-    <CenterY>1.0375665</CenterY>
-    <TargetScale>0.00003</TargetScale>
-    <MaxIterations>1000</MaxIterations>
+    <CenterY>1.0375665</CenterY>  
   </Target>
 
   <Target Name="Deep Spiral">
     <CenterX>-0.7435</CenterX>
-    <CenterY>0.1314</CenterY>
-    <TargetScale>0.000001</TargetScale>
-    <MaxIterations>1200</MaxIterations>
+    <CenterY>0.1314</CenterY>   
   </Target>
 
   <Target Name="Mini Seahorse">
     <CenterX>-0.74543</CenterX>
-    <CenterY>0.11301</CenterY>
-    <TargetScale>0.00008</TargetScale>
-    <MaxIterations>700</MaxIterations>
+    <CenterY>0.11301</CenterY> 
 </Target>
 
 <Target Name="Dragon Curve">
     <CenterX>-0.746312</CenterX>
-    <CenterY>0.110201</CenterY>
-    <TargetScale>0.00002</TargetScale>
-    <MaxIterations>850</MaxIterations>
+    <CenterY>0.110201</CenterY> 
 </Target>
 
 <Target Name="Coral Reef">
     <CenterX>-0.744954</CenterX>
-    <CenterY>0.132661</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>0.132661</CenterY>  
 </Target>
 
 <Target Name="Ice Crystal">
     <CenterX>-0.748233</CenterX>
-    <CenterY>0.101824</CenterY>
-    <TargetScale>0.00004</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>0.101824</CenterY>   
 </Target>
 
 <Target Name="Galaxy">
     <CenterX>-0.16234</CenterX>
-    <CenterY>1.03841</CenterY>
-    <TargetScale>0.00007</TargetScale>
-    <MaxIterations>850</MaxIterations>
+    <CenterY>1.03841</CenterY>   
 </Target>
 
 <Target Name="Twin Spirals">
     <CenterX>-0.74387</CenterX>
-    <CenterY>0.13141</CenterY>
-    <TargetScale>0.00003</TargetScale>
-    <MaxIterations>1000</MaxIterations>
+    <CenterY>0.13141</CenterY>   
 </Target>
 
 <Target Name="Alien Forest">
     <CenterX>0.28515</CenterX>
-    <CenterY>0.01218</CenterY>
-    <TargetScale>0.0002</TargetScale>
-    <MaxIterations>700</MaxIterations>
+    <CenterY>0.01218</CenterY>   
 </Target>
 
 <Target Name="Lightning Storm">
     <CenterX>-1.78562</CenterX>
-    <CenterY>0.00062</CenterY>
-    <TargetScale>0.00003</TargetScale>
-    <MaxIterations>1100</MaxIterations>
+    <CenterY>0.00062</CenterY>   
 </Target>
 
 <Target Name="Feather">
     <CenterX>-0.75219</CenterX>
-    <CenterY>0.03144</CenterY>
-    <TargetScale>0.00004</TargetScale>
-    <MaxIterations>850</MaxIterations>
+    <CenterY>0.03144</CenterY>    
 </Target>
 
 <Target Name="Lace">
     <CenterX>-0.10151</CenterX>
-    <CenterY>0.95642</CenterY>
-    <TargetScale>0.000015</TargetScale>
-    <MaxIterations>1200</MaxIterations>
+    <CenterY>0.95642</CenterY>   
 </Target>
 
 <Target Name="Roots">
     <CenterX>-0.15998</CenterX>
-    <CenterY>1.03782</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>1.03782</CenterY>   
 </Target>
 
 <Target Name="Frozen Lake">
     <CenterX>-0.74489</CenterX>
-    <CenterY>0.13812</CenterY>
-    <TargetScale>0.00004</TargetScale>
-    <MaxIterations>950</MaxIterations>
+    <CenterY>0.13812</CenterY>   
 </Target>
 
 <Target Name="Fire Wheel">
     <CenterX>-0.74192</CenterX>
-    <CenterY>0.12688</CenterY>
-    <TargetScale>0.00003</TargetScale>
-    <MaxIterations>1000</MaxIterations>
+    <CenterY>0.12688</CenterY>   
 </Target>
 
 <Target Name="Cloud Valley">
     <CenterX>-0.74752</CenterX>
-    <CenterY>0.10753</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>0.10753</CenterY>    
 </Target>
 
 <Target Name="Crystal Garden">
     <CenterX>-1.25021</CenterX>
-    <CenterY>0.01983</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>900</MaxIterations>
+    <CenterY>0.01983</CenterY>   
 </Target>
 
 <Target Name="Infinity Gate">
     <CenterX>-0.08864</CenterX>
-    <CenterY>0.65471</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>850</MaxIterations>
+    <CenterY>0.65471</CenterY>  
 </Target>
 
 <Target Name="Phoenix">
     <CenterX>-0.74781</CenterX>
-    <CenterY>0.08462</CenterY>
-    <TargetScale>0.00003</TargetScale>
-    <MaxIterations>950</MaxIterations>
+    <CenterY>0.08462</CenterY>  
 </Target>
 
 <Target Name="Spider Web">
     <CenterX>-1.76893</CenterX>
-    <CenterY>0.00182</CenterY>
-    <TargetScale>0.000015</TargetScale>
-    <MaxIterations>1200</MaxIterations>
+    <CenterY>0.00182</CenterY> 
 </Target>
 
 <Target Name="Dream Spiral">
     <CenterX>-0.74372</CenterX>
-    <CenterY>0.13168</CenterY>
-    <TargetScale>0.000008</TargetScale>
-    <MaxIterations>1200</MaxIterations>
+    <CenterY>0.13168</CenterY>   
 </Target>
 
 <Target Name="Blue Lagoon">
     <CenterX>-0.74681</CenterX>
-    <CenterY>0.11541</CenterY>
-    <TargetScale>0.00005</TargetScale>
-    <MaxIterations>850</MaxIterations>
+    <CenterY>0.11541</CenterY>   
 </Target>
 
 </MandelbrotTargets>

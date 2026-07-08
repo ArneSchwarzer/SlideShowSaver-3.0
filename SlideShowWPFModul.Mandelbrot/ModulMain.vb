@@ -28,6 +28,9 @@ Public Class ModulMain
         Dim Gradienten As List(Of String)
         Dim GradientAnimieren As Boolean
         Dim KoordinatenAnzeigen As Boolean
+        Dim Zoomdauer As Integer
+        Dim Zoomgeschwindigkeit As Integer
+        Dim Rotation As Boolean
     End Structure
 #End Region
 
@@ -145,6 +148,9 @@ Public Class ModulMain
         defaults("Gradienten") = "Regenbogen"
         defaults("GradientAnimieren") = "True"
         defaults("KoordinatenAnzeigen") = "False"
+        defaults("Zoomdauer") = "1"
+        defaults("Zoomgeschwindigkeit") = "1"
+        defaults("Rotation") = "True"
 
         Return defaults
 
@@ -168,5 +174,13 @@ Public Class ModulMain
         'Koordinaten Anzeigen
         aktuelleSettings.KoordinatenAnzeigen = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "KoordinatenAnzeigen", defaults))
 
+        'Zoomgeschwindigkeit
+        aktuelleSettings.Zoomgeschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomgeschwindigkeit", defaults))
+
+        'Zoomdauer
+        aktuelleSettings.Zoomdauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomdauer", defaults))
+
+        'Koordinaten Anzeigen
+        aktuelleSettings.Rotation = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Rotation", defaults))
     End Sub
 End Class

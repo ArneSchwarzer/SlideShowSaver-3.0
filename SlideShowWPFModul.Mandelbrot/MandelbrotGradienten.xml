@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<MandelbrotGradienten>
+
+  <Gradient Name="Regenbogen">
+    <Stop Position="0.00" Color="#FF0000"/>
+    <Stop Position="0.17" Color="#FFFF00"/>
+    <Stop Position="0.33" Color="#00FF00"/>
+    <Stop Position="0.50" Color="#00FFFF"/>
+    <Stop Position="0.67" Color="#0000FF"/>
+    <Stop Position="0.83" Color="#FF00FF"/>
+    <Stop Position="1.00" Color="#FF0000"/>
+  </Gradient>
+
+  <Gradient Name="Zebra">
+    <Stop Position="0.00" Color="#000000"/>
+    <Stop Position="0.12" Color="#FFFFFF"/>
+    <Stop Position="0.25" Color="#000000"/>
+    <Stop Position="0.37" Color="#FFFFFF"/>
+    <Stop Position="0.50" Color="#000000"/>
+    <Stop Position="0.62" Color="#FFFFFF"/>
+    <Stop Position="0.75" Color="#000000"/>
+    <Stop Position="0.87" Color="#FFFFFF"/>
+    <Stop Position="1.00" Color="#000000"/>
+  </Gradient>
+
+  <Gradient Name="Joker">
+    <Stop Position="0.00" Color="#19002E"/>
+    <Stop Position="0.25" Color="#7A00BF"/>
+    <Stop Position="0.50" Color="#00D936"/>
+    <Stop Position="0.75" Color="#8CFF1A"/>
+    <Stop Position="1.00" Color="#19002E"/>
+  </Gradient>
+
+  <Gradient Name="Wakanda">
+    <Stop Position="0.00" Color="#100020"/>
+    <Stop Position="0.30" Color="#590D8C"/>
+    <Stop Position="0.55" Color="#613314"/>
+    <Stop Position="0.75" Color="#F2E6D2"/>
+    <Stop Position="1.00" Color="#100020"/>
+  </Gradient>
+
+  <Gradient Name="Weihnachten">
+    <Stop Position="0.00" Color="#002E0D"/>
+    <Stop Position="0.25" Color="#008C1F"/>
+    <Stop Position="0.50" Color="#B30505"/>
+    <Stop Position="0.70" Color="#592E12"/>
+    <Stop Position="0.85" Color="#F2F2E6"/>
+    <Stop Position="1.00" Color="#002E0D"/>
+  </Gradient>
+
+  <Gradient Name="Pastell">
+    <Stop Position="0.00" Color="#F2B8C6"/>
+    <Stop Position="0.20" Color="#F2D6A2"/>
+    <Stop Position="0.40" Color="#D9F2B8"/>
+    <Stop Position="0.60" Color="#B8E6F2"/>
+    <Stop Position="0.80" Color="#D6C2F2"/>
+    <Stop Position="1.00" Color="#F2B8C6"/>
+  </Gradient>
+
+</MandelbrotGradienten>
