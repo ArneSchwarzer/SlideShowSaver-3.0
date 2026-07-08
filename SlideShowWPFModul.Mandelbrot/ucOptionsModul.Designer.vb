@@ -86,7 +86,7 @@ Partial Class ucOptionsModul
         'clbGradienten
         '
         Me.clbGradienten.FormattingEnabled = True
-        Me.clbGradienten.Items.AddRange(New Object() {"Regenbogen", "Zebra", "Joker", "Wakanda", "Weihnachten"})
+        Me.clbGradienten.Items.AddRange(New Object() {"Joker", "Regenbogen", "Wakanda", "Weihnachten", "Zebra"})
         Me.clbGradienten.Location = New System.Drawing.Point(264, 113)
         Me.clbGradienten.Name = "clbGradienten"
         Me.clbGradienten.Size = New System.Drawing.Size(575, 224)

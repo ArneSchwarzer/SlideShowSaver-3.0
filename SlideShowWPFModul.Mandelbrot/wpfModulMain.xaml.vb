@@ -37,7 +37,7 @@ Public Class wpfModulMain
 
     'Gradient / Palette
     Private gradientOffset As Double = 0.0
-    Private gradientGeschwindigkeit As Double = 0.15
+    Private gradientGeschwindigkeit As Double = 0.05
     Private gradientIndex As Integer
 
     'Sonstiges
@@ -182,6 +182,7 @@ Public Class wpfModulMain
         End With
 
         LogHandling.LogInfo("Modul Mandelbrot: Aktuelles Ziel: " & aktuellesZiel.Name)
+        LogHandling.LogInfo("Anzahl Ziele: " & count.ToString)
 
     End Sub
 
@@ -196,12 +197,14 @@ Public Class wpfModulMain
                 gradientIndex = 0
             Case "Zebra"
                 gradientIndex = 1
-            Case "Wakanda"
-                gradientIndex = 2
             Case "Joker"
+                gradientIndex = 2
+            Case "Wakanda"
                 gradientIndex = 3
             Case "Weihnachten"
                 gradientIndex = 4
+            Case "Pastell"
+                gradientIndex = 5
             Case Else
                 gradientIndex = 0
         End Select
@@ -277,8 +280,6 @@ Public Class wpfModulMain
             CInt(Math.Round(Lerp(startpunkt.MaxIterations, aktuellesZiel.MaxIterations, scaleT)))
 
     End Sub
-
-
 
     Private Sub AktualisiereGradient()
 

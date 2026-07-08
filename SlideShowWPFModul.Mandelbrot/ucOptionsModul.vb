@@ -26,7 +26,8 @@ Public Class ucOptionsModul
         "Zebra",
         "Joker",
         "Wakanda",
-        "Weihnachten"
+        "Weihnachten",
+        "Pastell"
     }
 
         Dim aktiveGradienten As New HashSet(Of String)(
@@ -40,6 +41,8 @@ Public Class ucOptionsModul
         If clbGradienten.CheckedItems.Count = 0 AndAlso clbGradienten.Items.Count > 0 Then
             clbGradienten.SetItemCheckState(0, CheckState.Checked)
         End If
+
+        clbGradienten.Sorted = True
 
         chkGradientAnimieren.Checked = aktuelleSettings.GradientAnimieren
         chkKoordinatenAnzeigen.Checked = aktuelleSettings.KoordinatenAnzeigen
