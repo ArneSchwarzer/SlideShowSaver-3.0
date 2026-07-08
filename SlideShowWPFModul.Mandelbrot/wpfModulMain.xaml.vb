@@ -317,11 +317,23 @@ Public Class wpfModulMain
 
         If mandelbrotEffect Is Nothing Then Exit Sub
 
+        Dim centerXHigh As Single, centerXLow As Single
+        Dim centerYHigh As Single, centerYLow As Single
+        Dim scaleHigh As Single, scaleLow As Single
+
+        SplitDouble(aktuellePosition.CenterX, centerXHigh, centerXLow)
+        SplitDouble(aktuellePosition.CenterY, centerYHigh, centerYLow)
+        SplitDouble(aktuellePosition.TargetScale, scaleHigh, scaleLow)
+
         With mandelbrotEffect
-            .CenterX = CSng(aktuellePosition.CenterX)
-            .CenterY = CSng(aktuellePosition.CenterY)
-            .Scale = CSng(aktuellePosition.TargetScale)
-            .MaxIterations = aktuellePosition.MaxIterations
+            .CenterXHigh = centerXHigh
+            .CenterXLow = centerXLow
+            .CenterYHigh = centerYHigh
+            .CenterYLow = centerYLow
+            .ScaleHigh = scaleHigh
+            .ScaleLow = scaleLow
+
+            .MaxIterations = CSng(aktuellePosition.MaxIterations)
 
             .ViewportWidth = CSng(Math.Max(1, rctMandelbrot.ActualWidth))
             .ViewportHeight = CSng(Math.Max(1, rctMandelbrot.ActualHeight))
@@ -387,6 +399,13 @@ Public Class wpfModulMain
         Return Math.Max(100, Math.Min(iterations, 2000))
 
     End Function
+
+    Private Sub SplitDouble(value As Double, ByRef high As Single, ByRef low As Single)
+
+        high = CSng(value)
+        low = CSng(value - CDbl(high))
+
+    End Sub
 
 #End Region
 

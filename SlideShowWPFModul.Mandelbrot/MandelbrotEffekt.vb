@@ -16,9 +16,12 @@ Public Class MandelbrotEffect
     Public Sub New()
         PixelShader = _pixelShader
 
-        UpdateShaderValue(CenterXProperty)
-        UpdateShaderValue(CenterYProperty)
-        UpdateShaderValue(ScaleProperty)
+        UpdateShaderValue(CenterXHighProperty)
+        UpdateShaderValue(CenterXLowProperty)
+        UpdateShaderValue(CenterYHighProperty)
+        UpdateShaderValue(CenterYLowProperty)
+        UpdateShaderValue(ScaleHighProperty)
+        UpdateShaderValue(ScaleLowProperty)
         UpdateShaderValue(MaxIterationsProperty)
         UpdateShaderValue(ViewportWidthProperty)
         UpdateShaderValue(ViewportHeightProperty)
@@ -26,51 +29,99 @@ Public Class MandelbrotEffect
         UpdateShaderValue(GradientTextureProperty)
     End Sub
 
-    Public Shared ReadOnly CenterXProperty As DependencyProperty =
-        DependencyProperty.Register(
-            "CenterX",
-            GetType(Single),
-            GetType(MandelbrotEffect),
-            New UIPropertyMetadata(-0.5F, PixelShaderConstantCallback(0)))
+    Public Shared ReadOnly CenterXHighProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "CenterXHigh",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(-0.5F, PixelShaderConstantCallback(0)))
 
-    Public Property CenterX As Single
+    Public Property CenterXHigh As Single
         Get
-            Return CSng(GetValue(CenterXProperty))
+            Return CSng(GetValue(CenterXHighProperty))
         End Get
         Set(value As Single)
-            SetValue(CenterXProperty, value)
+            SetValue(CenterXHighProperty, value)
         End Set
     End Property
 
-    Public Shared ReadOnly CenterYProperty As DependencyProperty =
-        DependencyProperty.Register(
-            "CenterY",
-            GetType(Single),
-            GetType(MandelbrotEffect),
-            New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(1)))
+    Public Shared ReadOnly CenterXLowProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "CenterXLow",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(1)))
 
-    Public Property CenterY As Single
+    Public Property CenterXLow As Single
         Get
-            Return CSng(GetValue(CenterYProperty))
+            Return CSng(GetValue(CenterXLowProperty))
         End Get
         Set(value As Single)
-            SetValue(CenterYProperty, value)
+            SetValue(CenterXLowProperty, value)
         End Set
     End Property
 
-    Public Shared ReadOnly ScaleProperty As DependencyProperty =
-        DependencyProperty.Register(
-            "Scale",
-            GetType(Single),
-            GetType(MandelbrotEffect),
-            New UIPropertyMetadata(3.0F, PixelShaderConstantCallback(2)))
+    Public Shared ReadOnly CenterYHighProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "CenterYHigh",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(2)))
 
-    Public Property Scale As Single
+    Public Property CenterYHigh As Single
         Get
-            Return CSng(GetValue(ScaleProperty))
+            Return CSng(GetValue(CenterYHighProperty))
         End Get
         Set(value As Single)
-            SetValue(ScaleProperty, value)
+            SetValue(CenterYHighProperty, value)
+        End Set
+    End Property
+
+    Public Shared ReadOnly CenterYLowProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "CenterYLow",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(3)))
+
+    Public Property CenterYLow As Single
+        Get
+            Return CSng(GetValue(CenterYLowProperty))
+        End Get
+        Set(value As Single)
+            SetValue(CenterYLowProperty, value)
+        End Set
+    End Property
+
+    Public Shared ReadOnly ScaleHighProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "ScaleHigh",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(3.0F, PixelShaderConstantCallback(4)))
+
+    Public Property ScaleHigh As Single
+        Get
+            Return CSng(GetValue(ScaleHighProperty))
+        End Get
+        Set(value As Single)
+            SetValue(ScaleHighProperty, value)
+        End Set
+    End Property
+
+    Public Shared ReadOnly ScaleLowProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "ScaleLow",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(5)))
+
+    Public Property ScaleLow As Single
+        Get
+            Return CSng(GetValue(ScaleLowProperty))
+        End Get
+        Set(value As Single)
+            SetValue(ScaleLowProperty, value)
         End Set
     End Property
 
@@ -79,7 +130,7 @@ Public Class MandelbrotEffect
             "MaxIterations",
             GetType(Single),
             GetType(MandelbrotEffect),
-            New UIPropertyMetadata(200.0F, PixelShaderConstantCallback(3)))
+            New UIPropertyMetadata(200.0F, PixelShaderConstantCallback(6)))
 
     Public Property MaxIterations As Single
         Get
@@ -95,7 +146,7 @@ Public Class MandelbrotEffect
             "ViewportWidth",
             GetType(Single),
             GetType(MandelbrotEffect),
-            New UIPropertyMetadata(1920.0F, PixelShaderConstantCallback(4)))
+            New UIPropertyMetadata(1920.0F, PixelShaderConstantCallback(7)))
 
     Public Property ViewportWidth As Single
         Get
@@ -111,7 +162,7 @@ Public Class MandelbrotEffect
             "ViewportHeight",
             GetType(Single),
             GetType(MandelbrotEffect),
-            New UIPropertyMetadata(1080.0F, PixelShaderConstantCallback(5)))
+            New UIPropertyMetadata(1080.0F, PixelShaderConstantCallback(8)))
 
     Public Property ViewportHeight As Single
         Get
@@ -127,7 +178,7 @@ Public Class MandelbrotEffect
             "GradientOffset",
             GetType(Single),
             GetType(MandelbrotEffect),
-            New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(6)))
+            New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(9)))
 
     Public Property GradientOffset As Single
         Get
@@ -137,13 +188,6 @@ Public Class MandelbrotEffect
             SetValue(GradientOffsetProperty, value)
         End Set
     End Property
-
-    Public Shared ReadOnly GradientIndexProperty As DependencyProperty =
-        DependencyProperty.Register(
-            "GradientIndex",
-            GetType(Single),
-            GetType(MandelbrotEffect),
-            New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(7)))
 
     Public Shared ReadOnly GradientTextureProperty As DependencyProperty =
     ShaderEffect.RegisterPixelShaderSamplerProperty(
