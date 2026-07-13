@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
-    ".NETFramework,Version=v4.8": {
+    "net48": {
       "SlideShowInterfaces/1.0.0": {
         "type": "project",
         "compile": {
@@ -35,7 +35,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.8": [
+    "net48": [
       "SlideShowInterfaces >= 1.0.0",
       "SlideShowLogging >= 1.0.0"
     ]
@@ -71,6 +71,7 @@
       },
       "frameworks": {
         "net48": {
+          "framework": "net48",
           "targetAlias": "net48",
           "projectReferences": {
             "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
@@ -91,12 +92,14 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net48": {
+        "framework": "net48",
         "targetAlias": "net48",
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\RuntimeIdentifierGraph.json"
       }
     }
   }

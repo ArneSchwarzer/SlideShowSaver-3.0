@@ -17,10 +17,7 @@ Public Class wpfModulMain
     Private Shared aktuelleSettings As ModulMain.ModulSettings_Mandelbrot
 
     'Timer und Zeitmanagement
-    Public WithEvents tmrModul As New DispatcherTimer()
-    Public WithEvents tmrPresentation As New DispatcherTimer()
-    Private zoomStartZeit As DateTime
-    Private zoomDauer As TimeSpan
+    Public WithEvents tmrPraesentation As New DispatcherTimer()
 
     'Initialisierung
     Private hintergrundWM As Windows.Media.Color
@@ -34,26 +31,67 @@ Public Class wpfModulMain
     "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotGradienten.xml"
 )
 
+    'Gradienten
     Private gradienten As List(Of MandelbrotGradient)
     Private aktuellerGradient As MandelbrotGradient
     Private aktuellerGradientBrush As ImageBrush
+    Private gradientOffset As Double = 0.0
+    Private gradientGeschwindigkeit As Double = 0.05
 
-
-    'Start- und Zielpunkte & Skalierung
+    'Start- und Zielpunkte
     Private startpunkt As MandelbrotZiel
     Private aktuellesZiel As MandelbrotZiel
     Private aktuellePosition As MandelbrotZiel
+
+    'Skalierung und Iteration
     Private maxIterationen As Integer
     Private aktuelleSkala As Double
 
+    'Referenzorbit
+    Private referenzOrbit As MandelbrotReferenzOrbit
+    Private Const PerturbationSwitchScale As Double = 0.1
+    Private referenzOrbitRealBrush As ImageBrush
+    Private referenzOrbitImaginaryBrush As ImageBrush
+
     'Shader
-    Private mandelbrotEffect As MandelbrotEffect
+    Private mandelbrotClassicEffect As MandelbrotEffect
+    Private mandelbrotPerturbationEffect As MandelbrotPerturbationEffect
     Private renderingAktiv As Boolean = False
 
-    'Gradient / Palette
-    Private gradientOffset As Double = 0.0
-    Private gradientGeschwindigkeit As Double = 0.05
-    Private gradientIndex As Integer
+    'Kamera
+    Private Enum ZoomPhaseTyp
+        FreezeIn
+        Translation
+        Cruise
+        EaseOut
+        FreezeOut
+    End Enum
+
+    Private Structure ZoomPhase
+        Public Property Typ As ZoomPhaseTyp
+        Public Property Dauer As TimeSpan
+    End Structure
+
+    Private aktuelleKamerafahrt As List(Of ZoomPhase)
+    Private aktuellePhaseIndex As Integer
+    Private phasenStartZeit As DateTime
+    Private kamerafahrtStartZeit As DateTime
+
+    Private easeOutStartSkala As Double
+
+    'Render-Wechsel-Logik
+    Private Enum MandelbrotRendererTyp
+        Klassisch
+        Perturbation
+    End Enum
+
+    Private aktuellerRenderer As MandelbrotRendererTyp
+
+    'Rotation – zunächst nur architektonisch vorbereitet
+    Private startRotation As Double
+    Private zielRotation As Double
+    Private aktuelleRotation As Double
+    Private easeOutStartRotation As Double
 
     'Sonstiges
     Private rnd As New Random()
@@ -95,22 +133,21 @@ Public Class wpfModulMain
         renderSize.Width = currentScreen.Bounds.Width
         renderSize.Height = currentScreen.Bounds.Height
 
-        txbPräsentationsschirm.MaxWidth = maxWidth
-        txbPräsentationsschirm.TextAlignment = TextAlignment.Center
-        txbPräsentationsschirm.TextWrapping = TextWrapping.Wrap
-        txbPräsentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+        txbPraesentationsschirm.MaxWidth = maxWidth
+        txbPraesentationsschirm.TextAlignment = TextAlignment.Center
+        txbPraesentationsschirm.TextWrapping = TextWrapping.Wrap
+        txbPraesentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
 
         rctMandelbrot.Fill = New SolidColorBrush(hintergrundWM)
 
         CheckYourMail()
 
         gradienten = MandelbrotGradientRepository.LadeGradienten(gradientenPfad)
+
         InitialisiereStartpunkt()
         InitialisiereShader()
-        WaehleNeuesZiel()
-        WaehleNeuenGradienten()
 
-        PräsentationsschirmAnzeigen()
+        PraesentationsschirmAnzeigen()
 
     End Sub
 
@@ -126,57 +163,147 @@ Public Class wpfModulMain
 
     Private Sub InitialisiereShader()
 
-        mandelbrotEffect = New MandelbrotEffect()
+        mandelbrotClassicEffect = New MandelbrotEffect()
+        mandelbrotPerturbationEffect = New MandelbrotPerturbationEffect()
 
-        rctMandelbrot.Effect = mandelbrotEffect
+        rctMandelbrot.Effect = mandelbrotClassicEffect
+        aktuellerRenderer = MandelbrotRendererTyp.Klassisch
 
     End Sub
 
-    Private Sub PräsentationsschirmAnzeigen()
+    Private Sub InitialisiereKamerafahrt()
 
-        Dim präsentationsText As String = "Mandelbrot"
-        Dim präsentationsZeit As Integer = 5
+        Dim freezeInDauer As TimeSpan
+        Dim translationDauer As TimeSpan
+        Dim cruiseDauer As TimeSpan
+        Dim easeOutDauer As TimeSpan
+        Dim freezeOutDauer As TimeSpan
+
+        freezeInDauer = TimeSpan.FromSeconds(2)
+        translationDauer = TimeSpan.FromSeconds(4)
+        cruiseDauer = TimeSpan.FromMinutes(Math.Max(1, aktuelleSettings.Zoomdauer))
+        easeOutDauer = TimeSpan.FromSeconds(5)
+        freezeOutDauer = TimeSpan.FromSeconds(10)
+
+        aktuelleKamerafahrt = New List(Of ZoomPhase) From {
+        New ZoomPhase With {
+            .Typ = ZoomPhaseTyp.FreezeIn,
+            .Dauer = freezeInDauer
+        },
+        New ZoomPhase With {
+            .Typ = ZoomPhaseTyp.Translation,
+            .Dauer = translationDauer
+        },
+        New ZoomPhase With {
+            .Typ = ZoomPhaseTyp.Cruise,
+            .Dauer = cruiseDauer
+        },
+        New ZoomPhase With {
+            .Typ = ZoomPhaseTyp.EaseOut,
+            .Dauer = easeOutDauer
+        },
+        New ZoomPhase With {
+            .Typ = ZoomPhaseTyp.FreezeOut,
+            .Dauer = freezeOutDauer
+        }
+    }
+
+    End Sub
+
+    Private Sub PraesentationsschirmAnzeigen()
+
+        Dim praesentationsText As String
+        Dim praesentationsZeit As Integer
+
+        praesentationsText = "Mandelbrot"
+        praesentationsZeit = 5
 
         rctMandelbrot.Visibility = Visibility.Collapsed
 
-        txbPräsentationsschirm.Text = präsentationsText
-        txbPräsentationsschirm.Visibility = Visibility.Visible
+        txbPraesentationsschirm.Text = praesentationsText
+        txbPraesentationsschirm.Visibility = Visibility.Visible
 
-        tmrPresentation.Interval = TimeSpan.FromSeconds(präsentationsZeit)
-        tmrPresentation.Start()
+        tmrPraesentation.Interval = TimeSpan.FromSeconds(praesentationsZeit)
+        tmrPraesentation.Start()
 
-        tmrModul.Stop()
         StopRendering()
 
     End Sub
 
-    Private Sub tmrPresentation_Tick() Handles tmrPresentation.Tick
+    Private Sub tmrPresentation_Tick() Handles tmrPraesentation.Tick
 
-        txbPräsentationsschirm.Visibility = Visibility.Collapsed
-        tmrPresentation.Stop()
-
-        zoomDauer = TimeSpan.FromMinutes(Math.Max(1, aktuelleSettings.Zoomdauer))
-        zoomStartZeit = DateTime.Now
+        txbPraesentationsschirm.Visibility = Visibility.Collapsed
+        tmrPraesentation.Stop()
 
         rctMandelbrot.Visibility = Visibility.Visible
 
-        tmrModul.Interval = zoomDauer
-        tmrModul.Start()
-
-        StartRendering()
+        If StarteNeueKamerafahrt() Then
+            StartRendering()
+        Else
+            LogHandling.LogWarn(
+            "Modul Mandelbrot: Rendering wurde nicht gestartet.")
+        End If
 
     End Sub
 
-    Private Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
+    Private Function StarteNeueKamerafahrt() As Boolean
 
-        WaehleNeuesZiel()
+        InitialisiereKamerafahrt()
+
+        If Not WaehleGueltigesDeepZoomZiel() Then
+
+            LogHandling.LogWarn(
+            "Modul Mandelbrot: Kamerafahrt konnte " &
+            "nicht gestartet werden.")
+
+            Return False
+
+        End If
+
         WaehleNeuenGradienten()
 
-        zoomStartZeit = DateTime.Now
-        tmrModul.Interval = zoomDauer
-        tmrModul.Start()
+        aktuellePosition = startpunkt
+        aktuelleSkala = startpunkt.TargetScale
+        maxIterationen = startpunkt.MaxIterations
 
-    End Sub
+        aktuellerRenderer = MandelbrotRendererTyp.Klassisch
+        rctMandelbrot.Effect = mandelbrotClassicEffect
+
+        gradientOffset = 0.0
+
+        startRotation = 0.0
+        aktuelleRotation = startRotation
+
+        If aktuelleSettings.Rotation Then
+            zielRotation = WaehleZielRotation()
+        Else
+            zielRotation = 0.0
+        End If
+
+        aktuellePhaseIndex = 0
+        phasenStartZeit = DateTime.Now
+        kamerafahrtStartZeit = phasenStartZeit
+
+        Return True
+
+    End Function
+
+    Private Function WaehleZielRotation() As Double
+
+        Dim richtung As Double
+        Dim winkelGrad As Double
+
+        If rnd.Next(2) = 0 Then
+            richtung = -1.0
+        Else
+            richtung = 1.0
+        End If
+
+        winkelGrad = rnd.NextDouble() * 20.0 + 5.0
+
+        Return richtung * winkelGrad * Math.PI / 180.0
+
+    End Function
 
     Private Sub WaehleNeuesZiel()
 
@@ -204,6 +331,42 @@ Public Class wpfModulMain
 
     End Sub
 
+    Private Function WaehleGueltigesDeepZoomZiel() As Boolean
+
+        Dim versuch As Integer
+        Dim maxVersuche As Integer
+
+        maxVersuche = 30
+
+        For versuch = 1 To maxVersuche
+
+            WaehleNeuesZiel()
+
+            If ErzeugeReferenzOrbitFuerAktuellesZiel() Then
+
+                LogHandling.LogInfo(
+                "Modul Mandelbrot: Deepzoom-Ziel nach " &
+                versuch.ToString() &
+                " Versuch(en) gefunden.")
+
+                Return True
+
+            End If
+
+        Next
+
+        referenzOrbit = Nothing
+
+        LogHandling.LogWarn(
+        "Modul Mandelbrot: Nach " &
+        maxVersuche.ToString() &
+        " Versuchen wurde kein geeignetes " &
+        "Deepzoom-Ziel gefunden.")
+
+        Return False
+
+    End Function
+
     Private Sub WaehleNeuenGradienten()
 
         If gradienten Is Nothing OrElse gradienten.Count = 0 Then Exit Sub
@@ -220,8 +383,12 @@ Public Class wpfModulMain
         aktuellerGradient = erlaubteGradienten(rnd.Next(erlaubteGradienten.Count))
         aktuellerGradientBrush = MandelbrotGradientRepository.ErzeugeGradientBrush(aktuellerGradient, 1024)
 
-        If mandelbrotEffect IsNot Nothing Then
-            mandelbrotEffect.GradientTexture = aktuellerGradientBrush
+        If mandelbrotClassicEffect IsNot Nothing Then
+            mandelbrotClassicEffect.GradientTexture = aktuellerGradientBrush
+        End If
+
+        If mandelbrotPerturbationEffect IsNot Nothing Then
+            mandelbrotPerturbationEffect.GradientTexture = aktuellerGradientBrush
         End If
 
         LogHandling.LogInfo("Modul Mandelbrot: Aktueller Gradient: " & aktuellerGradient.Name)
@@ -264,7 +431,49 @@ Public Class wpfModulMain
 
     Private Sub RenderFrame()
 
-        AktualisiereShaderParameter()
+        Select Case aktuellerRenderer
+
+            Case MandelbrotRendererTyp.Klassisch
+                AktualisiereKlassischeShaderParameter()
+
+            Case MandelbrotRendererTyp.Perturbation
+                AktualisierePerturbationShaderParameter()
+
+        End Select
+
+    End Sub
+
+    Private Sub AktivierePerturbationRenderer()
+
+        If mandelbrotPerturbationEffect Is Nothing Then
+            Exit Sub
+        End If
+
+        If referenzOrbit Is Nothing Then
+            Exit Sub
+        End If
+
+        If referenzOrbitRealBrush Is Nothing OrElse
+       referenzOrbitImaginaryBrush Is Nothing Then
+
+            Exit Sub
+
+        End If
+
+        With mandelbrotPerturbationEffect
+
+            .GradientTexture = aktuellerGradientBrush
+            .ReferenceOrbitRealTexture = referenzOrbitRealBrush
+            .ReferenceOrbitImaginaryTexture = referenzOrbitImaginaryBrush
+            .OrbitLength = CSng(referenzOrbit.Count)
+            .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+
+        End With
+
+        rctMandelbrot.Effect = mandelbrotPerturbationEffect
+        aktuellerRenderer = MandelbrotRendererTyp.Perturbation
+
+        LogHandling.LogInfo("Modul Mandelbrot: Umschaltung auf Perturbation bei Scale " & aktuelleSkala.ToString("E6", Globalization.CultureInfo.InvariantCulture))
 
     End Sub
 
@@ -274,37 +483,331 @@ Public Class wpfModulMain
 
     Private Sub AktualisiereKamera()
 
-        If zoomDauer.TotalMilliseconds <= 0 Then Exit Sub
+        Dim aktuellePhase As ZoomPhase
+        Dim elapsed As TimeSpan
+        Dim phasenProgress As Double
 
-        Dim elapsedSeconds As Double = (DateTime.Now - zoomStartZeit).TotalSeconds
-        Dim progress As Double = Math.Min(1.0, elapsedSeconds / zoomDauer.TotalSeconds)
+        If aktuelleKamerafahrt Is Nothing OrElse
+       aktuelleKamerafahrt.Count = 0 Then
+            Exit Sub
+        End If
 
-        ' Kamera-Zentrum erreicht das Ziel früh im Zoom.
-        Dim centerProgress As Double = Math.Min(1.0, progress / 0.15)
-        Dim centerT As Double = EaseOutCubic(centerProgress)
+        If aktuellePhaseIndex < 0 OrElse
+       aktuellePhaseIndex >= aktuelleKamerafahrt.Count Then
+            Exit Sub
+        End If
 
-        aktuellePosition.CenterX = Lerp(startpunkt.CenterX, aktuellesZiel.CenterX, centerT)
-        aktuellePosition.CenterY = Lerp(startpunkt.CenterY, aktuellesZiel.CenterY, centerT)
+        aktuellePhase = aktuelleKamerafahrt(aktuellePhaseIndex)
+        elapsed = DateTime.Now - phasenStartZeit
 
-        aktuelleSkala = BerechneAktuelleSkala(elapsedSeconds)
-        maxIterationen = BerechneMaxIterationen(aktuelleSkala)
+        If aktuellePhase.Dauer.TotalMilliseconds <= 0 Then
+            WechsleZurNaechstenPhase()
+            Exit Sub
+        End If
+
+        phasenProgress = Math.Min(
+        1.0,
+        elapsed.TotalMilliseconds /
+        aktuellePhase.Dauer.TotalMilliseconds)
+
+        Select Case aktuellePhase.Typ
+
+            Case ZoomPhaseTyp.FreezeIn
+                AktualisiereFreezeIn()
+
+            Case ZoomPhaseTyp.Translation
+                AktualisiereTranslation(phasenProgress)
+
+            Case ZoomPhaseTyp.Cruise
+                AktualisiereCruise(
+                elapsed.TotalSeconds,
+                phasenProgress)
+
+            Case ZoomPhaseTyp.EaseOut
+                AktualisiereEaseOut(
+                elapsed.TotalSeconds,
+                aktuellePhase.Dauer.TotalSeconds,
+                phasenProgress)
+
+            Case ZoomPhaseTyp.FreezeOut
+                AktualisiereFreezeOut()
+
+        End Select
+
+        If phasenProgress >= 1.0 Then
+            WechsleZurNaechstenPhase()
+        End If
+
+    End Sub
+
+    Private Sub AktualisiereFreezeIn()
+
+        aktuellePosition.CenterX = startpunkt.CenterX
+        aktuellePosition.CenterY = startpunkt.CenterY
+        aktuellePosition.TargetScale = startpunkt.TargetScale
+        aktuellePosition.MaxIterations = startpunkt.MaxIterations
+
+        aktuelleSkala = startpunkt.TargetScale
+        maxIterationen = startpunkt.MaxIterations
+        aktuelleRotation = startRotation
+
+    End Sub
+
+    Private Sub AktualisiereTranslation(phasenProgress As Double)
+
+        Dim translationT As Double
+
+        translationT = EaseInOut(phasenProgress)
+
+        aktuellePosition.CenterX =
+        Lerp(
+            startpunkt.CenterX,
+            aktuellesZiel.CenterX,
+            translationT)
+
+        aktuellePosition.CenterY =
+        Lerp(
+            startpunkt.CenterY,
+            aktuellesZiel.CenterY,
+            translationT)
+
+        aktuelleSkala = startpunkt.TargetScale
+        maxIterationen = startpunkt.MaxIterations
+
+        aktuellePosition.TargetScale = aktuelleSkala
+        aktuellePosition.MaxIterations = maxIterationen
+
+        'Während der Translation noch keine Rotation.
+        aktuelleRotation = startRotation
+
+    End Sub
+
+    Private Sub AktualisiereCruise(elapsedSeconds As Double,
+                               phasenProgress As Double)
+
+        Dim rotationT As Double
+
+        aktuellePosition.CenterX = aktuellesZiel.CenterX
+        aktuellePosition.CenterY = aktuellesZiel.CenterY
+
+        aktuelleSkala =
+        BerechneAktuelleSkala(
+            startpunkt.TargetScale,
+            elapsedSeconds)
+
+        maxIterationen =
+        BerechneMaxIterationen(aktuelleSkala)
+
+        aktuellePosition.TargetScale = aktuelleSkala
+        aktuellePosition.MaxIterations = maxIterationen
+
+        'Rotation bereits berechnen, aber noch nicht an den Shader übergeben.
+        rotationT = EaseInOut(phasenProgress)
+
+        aktuelleRotation =
+        Lerp(
+            startRotation,
+            zielRotation,
+            rotationT)
+
+        AktualisiereRendererAuswahl()
+
+    End Sub
+
+    Private Sub AktualisiereEaseOut(elapsedSeconds As Double,
+                                dauerSeconds As Double,
+                                phasenProgress As Double)
+
+        Dim effektiveZoomSekunden As Double
+        Dim rotationRest As Double
+        Dim rotationT As Double
+
+        aktuellePosition.CenterX = aktuellesZiel.CenterX
+        aktuellePosition.CenterY = aktuellesZiel.CenterY
+
+        'Lineares Abbremsen der Zoomgeschwindigkeit.
+        effektiveZoomSekunden =
+        elapsedSeconds -
+        ((elapsedSeconds * elapsedSeconds) /
+         (2.0 * dauerSeconds))
+
+        aktuelleSkala =
+        BerechneAktuelleSkala(
+            easeOutStartSkala,
+            effektiveZoomSekunden)
+
+        maxIterationen =
+        BerechneMaxIterationen(aktuelleSkala)
+
+        aktuellePosition.TargetScale = aktuelleSkala
+        aktuellePosition.MaxIterations = maxIterationen
+
+        'Kleine Fortsetzung der Rotation während des Abbremsens.
+        rotationRest =
+        (zielRotation - startRotation) * 0.05
+
+        rotationT = EaseOutCubic(phasenProgress)
+
+        aktuelleRotation = Lerp(
+            easeOutStartRotation,
+            easeOutStartRotation + rotationRest,
+            rotationT)
+
+        AktualisiereRendererAuswahl()
+
+    End Sub
+
+    Private Sub AktualisiereFreezeOut()
+
+        aktuellePosition.CenterX = aktuellesZiel.CenterX
+        aktuellePosition.CenterY = aktuellesZiel.CenterY
 
         aktuellePosition.TargetScale = aktuelleSkala
         aktuellePosition.MaxIterations = maxIterationen
 
     End Sub
 
+    Private Sub AktualisiereRendererAuswahl()
+
+        If aktuellerRenderer = MandelbrotRendererTyp.Perturbation Then
+
+            Exit Sub
+
+        End If
+
+        If referenzOrbit Is Nothing Then Exit Sub
+
+        If referenzOrbitRealBrush Is Nothing OrElse referenzOrbitImaginaryBrush Is Nothing Then
+
+            Exit Sub
+
+        End If
+
+        If aktuelleSkala <= PerturbationSwitchScale Then
+            AktivierePerturbationRenderer()
+        End If
+
+    End Sub
+
+    Private Sub WechsleZurNaechstenPhase()
+
+        Dim neuePhase As ZoomPhaseTyp
+
+        aktuellePhaseIndex += 1
+
+        If aktuelleKamerafahrt Is Nothing OrElse
+       aktuellePhaseIndex >= aktuelleKamerafahrt.Count Then
+
+            If Not StarteNeueKamerafahrt() Then
+                StopRendering()
+            End If
+
+            Exit Sub
+
+        End If
+
+        neuePhase = aktuelleKamerafahrt(aktuellePhaseIndex).Typ
+
+        Select Case neuePhase
+
+            Case ZoomPhaseTyp.Cruise
+
+                If referenzOrbit Is Nothing Then
+
+                    LogHandling.LogWarn("Modul Mandelbrot: Beim Eintritt in Cruise ist kein gültiger Referenzorbit vorhanden.")
+
+                    If Not StarteNeueKamerafahrt() Then
+                        StopRendering()
+                    End If
+
+                    Return
+
+                End If
+
+            Case ZoomPhaseTyp.EaseOut
+
+                easeOutStartSkala = aktuelleSkala
+                easeOutStartRotation = aktuelleRotation
+
+        End Select
+
+        phasenStartZeit = DateTime.Now
+
+    End Sub
+
+    Private Function ErzeugeReferenzOrbitFuerAktuellesZiel() As Boolean
+
+        Dim benoetigteIterationen As Integer
+
+        referenzOrbit = Nothing
+        referenzOrbitRealBrush = Nothing
+        referenzOrbitImaginaryBrush = Nothing
+
+        benoetigteIterationen = BerechneBenoetigteReferenzIterationen()
+
+        referenzOrbit = New MandelbrotReferenzOrbit(
+            aktuellesZiel.CenterX,
+            aktuellesZiel.CenterY,
+            benoetigteIterationen)
+
+        If referenzOrbit.Count < benoetigteIterationen Then
+
+            LogHandling.LogWarn(
+            "Modul Mandelbrot: Ziel """ &
+            aktuellesZiel.Name &
+            """ ist als Referenzpunkt ungeeignet. " &
+            "Orbit endete nach " &
+            referenzOrbit.Count.ToString() &
+            " von benötigten " &
+            benoetigteIterationen.ToString() &
+            " Iterationen.")
+
+            referenzOrbit = Nothing
+            referenzOrbitRealBrush = Nothing
+            referenzOrbitImaginaryBrush = Nothing
+
+            If mandelbrotPerturbationEffect IsNot Nothing Then
+                mandelbrotPerturbationEffect.ReferenceOrbitRealTexture = Nothing
+                mandelbrotPerturbationEffect.ReferenceOrbitImaginaryTexture = Nothing
+            End If
+
+            Return False
+
+        End If
+
+        LogHandling.LogInfo(
+        "Modul Mandelbrot: Referenzorbit für """ &
+        aktuellesZiel.Name &
+        """ mit " &
+        referenzOrbit.Count.ToString() &
+        " Werten erfolgreich berechnet.")
+
+        referenzOrbitRealBrush = referenzOrbit.ErzeugeRealOrbitBrush()
+        referenzOrbitImaginaryBrush = referenzOrbit.ErzeugeImaginaryOrbitBrush()
+
+        With mandelbrotPerturbationEffect
+            .ReferenceOrbitRealTexture = referenzOrbitRealBrush
+            .ReferenceOrbitImaginaryTexture = referenzOrbitImaginaryBrush
+            .OrbitLength = CSng(referenzOrbit.Count)
+            .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+        End With
+
+        Return True
+
+    End Function
+
     Private Sub AktualisiereGradient()
 
-        ' V0.1: einfacher animierter Offset.
-        ' Später kann hier die komplette Gradient-/Palette-Engine hängen.
+        Dim elapsedSeconds As Double
 
-        Dim elapsedSeconds As Double = (DateTime.Now - zoomStartZeit).TotalSeconds
+        elapsedSeconds =
+        (DateTime.Now - kamerafahrtStartZeit).TotalSeconds
 
         If aktuelleSettings.GradientAnimieren Then
-            gradientOffset = (elapsedSeconds * gradientGeschwindigkeit) Mod 1.0
+            gradientOffset =
+            (elapsedSeconds * gradientGeschwindigkeit) Mod 1.0
         Else
-            gradientOffset = 0
+            gradientOffset = 0.0
         End If
 
     End Sub
@@ -313,9 +816,9 @@ Public Class wpfModulMain
 
 #Region "Render"
 
-    Private Sub AktualisiereShaderParameter()
+    Private Sub AktualisiereKlassischeShaderParameter()
 
-        If mandelbrotEffect Is Nothing Then Exit Sub
+        If mandelbrotClassicEffect Is Nothing Then Exit Sub
 
         Dim centerXHigh As Single, centerXLow As Single
         Dim centerYHigh As Single, centerYLow As Single
@@ -325,7 +828,7 @@ Public Class wpfModulMain
         SplitDouble(aktuellePosition.CenterY, centerYHigh, centerYLow)
         SplitDouble(aktuellePosition.TargetScale, scaleHigh, scaleLow)
 
-        With mandelbrotEffect
+        With mandelbrotClassicEffect
             .CenterXHigh = centerXHigh
             .CenterXLow = centerXLow
             .CenterYHigh = centerYHigh
@@ -343,6 +846,31 @@ Public Class wpfModulMain
 
     End Sub
 
+    Private Sub AktualisierePerturbationShaderParameter()
+
+        Dim scaleHigh As Single
+        Dim scaleLow As Single
+
+        If mandelbrotPerturbationEffect Is Nothing Then Exit Sub
+        If referenzOrbit Is Nothing Then Exit Sub
+
+        SplitDouble(aktuellePosition.TargetScale, scaleHigh, scaleLow)
+
+        With mandelbrotPerturbationEffect
+
+            .ScaleHigh = scaleHigh
+            .ScaleLow = scaleLow
+            .MaxIterations = CSng(Math.Min(aktuellePosition.MaxIterations, referenzOrbit.Count))
+            .OrbitLength = CSng(referenzOrbit.Count)
+            .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+            .ViewportWidth = CSng(Math.Max(1.0, rctMandelbrot.ActualWidth))
+            .ViewportHeight = CSng(Math.Max(1.0, rctMandelbrot.ActualHeight))
+            .GradientOffset = CSng(gradientOffset)
+            .Rotation = 0.0F
+
+        End With
+
+    End Sub
 #End Region
 
 #Region "Hilfsfunktionen"
@@ -359,25 +887,29 @@ Public Class wpfModulMain
         Return 1.0 - Math.Pow(1.0 - t, 3.0)
     End Function
 
-    Private Function BerechneAktuelleSkala(elapsedSeconds As Double) As Double
+    Private Function BerechneAktuelleSkala(startScale As Double,
+                                       elapsedSeconds As Double) As Double
 
-        Dim startScale As Double = startpunkt.TargetScale
+        Dim slider As Double
+        Dim minFaktor As Double
+        Dim maxFaktor As Double
+        Dim t As Double
+        Dim zoomFaktorProSekunde As Double
 
-        ' Trackbar 1..100:
-        ' 1   = sehr langsamer Zoom
-        ' 50  = normal
-        ' 100 = sehr schneller Zoom
-        Dim slider As Double = Math.Max(1.0, Math.Min(100.0, CDbl(aktuelleSettings.Zoomgeschwindigkeit)))
+        slider = Math.Max(
+        1.0,
+        Math.Min(100.0, CDbl(aktuelleSettings.Zoomgeschwindigkeit)))
 
-        ' Übersetzung in Zoomfaktor pro Sekunde.
-        ' Werte kleiner 1.0 verkleinern die Scale.
-        Dim minFaktor As Double = 0.985   ' langsam
-        Dim maxFaktor As Double = 0.7     ' schnell
+        minFaktor = 0.985
+        maxFaktor = 0.7
 
-        Dim t As Double = (slider - 1.0) / 99.0
-        Dim zoomFaktorProSekunde As Double = Lerp(minFaktor, maxFaktor, t)
+        t = (slider - 1.0) / 99.0
 
-        Return startScale * Math.Pow(zoomFaktorProSekunde, elapsedSeconds)
+        zoomFaktorProSekunde =
+        Lerp(minFaktor, maxFaktor, t)
+
+        Return startScale *
+           Math.Pow(zoomFaktorProSekunde, elapsedSeconds)
 
     End Function
 
@@ -397,6 +929,51 @@ Public Class wpfModulMain
         Dim iterations As Integer = CInt(Math.Round(basis + zoomTiefe * faktor))
 
         Return Math.Max(100, Math.Min(iterations, 2000))
+
+    End Function
+
+    Private Function BerechneBenoetigteReferenzIterationen() As Integer
+
+        Dim cruiseSekunden As Double
+        Dim easeOutSekunden As Double
+        Dim effektiveGesamtZoomSekunden As Double
+        Dim voraussichtlicheEndSkala As Double
+        Dim benoetigteIterationen As Integer
+
+        If aktuelleKamerafahrt Is Nothing OrElse
+       aktuelleKamerafahrt.Count = 0 Then
+
+            Return startpunkt.MaxIterations
+
+        End If
+
+        cruiseSekunden =
+        aktuelleKamerafahrt.
+        First(Function(p) p.Typ = ZoomPhaseTyp.Cruise).
+        Dauer.TotalSeconds
+
+        easeOutSekunden =
+        aktuelleKamerafahrt.
+        First(Function(p) p.Typ = ZoomPhaseTyp.EaseOut).
+        Dauer.TotalSeconds
+
+        'Während EaseOut sinkt die Geschwindigkeit linear auf 0.
+        'Daher entspricht die Phase ungefähr der halben Laufzeit
+        'bei voller Zoomgeschwindigkeit.
+        effektiveGesamtZoomSekunden =
+        cruiseSekunden +
+        easeOutSekunden * 0.5
+
+        voraussichtlicheEndSkala =
+        BerechneAktuelleSkala(
+            startpunkt.TargetScale,
+            effektiveGesamtZoomSekunden)
+
+        benoetigteIterationen =
+        BerechneMaxIterationen(
+            voraussichtlicheEndSkala)
+
+        Return benoetigteIterationen
 
     End Function
 
@@ -433,27 +1010,40 @@ Public Class wpfModulMain
 
     End Sub
 
-    Private Sub wpfModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+    Private Sub wpfModulMain_Closed(sender As Object,
+                                e As EventArgs) Handles Me.Closed
 
-        RemoveHandler ModulMain.YouHaveMail_Mandelbrot, AddressOf CheckYourMail
+        RemoveHandler ModulMain.YouHaveMail_Mandelbrot,
+        AddressOf CheckYourMail
 
         StopRendering()
 
-        If tmrModul IsNot Nothing Then
-            tmrModul.Stop()
-            tmrModul = Nothing
-        End If
-
-        If tmrPresentation IsNot Nothing Then
-            tmrPresentation.Stop()
-            tmrPresentation = Nothing
+        If tmrPraesentation IsNot Nothing Then
+            tmrPraesentation.Stop()
+            tmrPraesentation = Nothing
         End If
 
         If rctMandelbrot IsNot Nothing Then
             rctMandelbrot.Effect = Nothing
         End If
 
-        mandelbrotEffect = Nothing
+        If mandelbrotPerturbationEffect IsNot Nothing Then
+            mandelbrotPerturbationEffect.GradientTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitRealTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitImaginaryTexture = Nothing
+        End If
+
+        If mandelbrotClassicEffect IsNot Nothing Then
+            mandelbrotClassicEffect.GradientTexture = Nothing
+        End If
+
+        mandelbrotClassicEffect = Nothing
+        mandelbrotPerturbationEffect = Nothing
+
+        referenzOrbit = Nothing
+        referenzOrbitRealBrush = Nothing
+        referenzOrbitImaginaryBrush = Nothing
+        aktuellerGradientBrush = Nothing
 
         Me.Content = Nothing
 

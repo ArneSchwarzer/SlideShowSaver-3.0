@@ -74,6 +74,8 @@
     <Compile Include="MandelbrotEffekt.vb" />
     <Compile Include="MandelbrotGradient.vb" />
     <Compile Include="MandelbrotGradientRepository.vb" />
+    <Compile Include="MandelbrotPerturbationEffekt.vb" />
+    <Compile Include="MandelbrotReferenzorbit.vb" />
     <Compile Include="ModulMain.vb" />
     <Compile Include="ucOptionsModul.Designer.vb">
       <DependentUpon>ucOptionsModul.vb</DependentUpon>
@@ -138,10 +140,12 @@
     <None Include="Shader\CompileShader.cmd" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Shader\MandelbrotPerturbation.ps" />
     <Resource Include="Shader\Mandelbrot.ps" />
     <Resource Include="MandelbrotZiele.xml" />
     <Resource Include="MandelbrotGradienten.xml" />
     <Content Include="Shader\Mandelbrot.fx" />
+    <Content Include="Shader\MandelbrotPerturbation.fx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

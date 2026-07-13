@@ -9,14 +9,18 @@
         "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
         "projectName": "SlideShowInterfaces",
         "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj",
+        "UsingMicrosoftNETSdk": false,
         "frameworks": {
           "net48": {
+            "framework": "net48",
             "projectReferences": {}
           }
         }
       },
       "frameworks": {
-        "net48": {}
+        "net48": {
+          "framework": "net48"
+        }
       }
     },
     "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLoader\\SlideShowLoader.vbproj": {
@@ -46,6 +50,7 @@
         },
         "frameworks": {
           "net48": {
+            "framework": "net48",
             "targetAlias": "net48",
             "projectReferences": {
               "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowInterfaces\\SlideShowInterfaces.vbproj": {
@@ -66,12 +71,14 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net48": {
+          "framework": "net48",
           "targetAlias": "net48",
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\RuntimeIdentifierGraph.json"
         }
       }
     },
@@ -80,14 +87,18 @@
         "projectUniqueName": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
         "projectName": "SlideShowLogging",
         "projectPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowLogging\\SlideShowLogging.vbproj",
+        "UsingMicrosoftNETSdk": false,
         "frameworks": {
           "net48": {
+            "framework": "net48",
             "projectReferences": {}
           }
         }
       },
       "frameworks": {
-        "net48": {}
+        "net48": {
+          "framework": "net48"
+        }
       }
     }
   }

@@ -19,7 +19,7 @@
             VerticalAlignment="Stretch"/>
         
         <!-- Präsentations‑TextBlock in Bildschirmmitte -->
-        <TextBlock x:Name="txbPräsentationsschirm"
+        <TextBlock x:Name="txbPraesentationsschirm"
              HorizontalAlignment="Center"
              VerticalAlignment="Center"
              TextAlignment="Center"
