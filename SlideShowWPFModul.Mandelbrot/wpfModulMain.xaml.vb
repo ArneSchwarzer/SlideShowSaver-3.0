@@ -1,6 +1,7 @@
 ﻿Imports System.Windows.Forms
 Imports System.Windows.Interop
 Imports System.Windows.Media
+Imports System.Windows.Media.Imaging
 Imports System.Windows.Threading
 Imports System.IO
 Imports SlideShowLogging
@@ -21,15 +22,15 @@ Public Class wpfModulMain
 
     'Initialisierung
     Private hintergrundWM As Windows.Media.Color
-    Private renderSize As Windows.Size
+    Private Shadows renderSize As Windows.Size
     Private zielePfad As String = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotZiele.xml"
             )
     Private gradientenPfad As String = Path.Combine(
-    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-    "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotGradienten.xml"
-)
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "SlideShowSaver 3.0\Module\Mandelbrot\MandelbrotGradienten.xml"
+            )
 
     'Gradienten
     Private gradienten As List(Of MandelbrotGradient)
@@ -50,8 +51,19 @@ Public Class wpfModulMain
     'Referenzorbit
     Private referenzOrbit As MandelbrotReferenzOrbit
     Private Const PerturbationSwitchScale As Double = 0.1
-    Private referenzOrbitRealBrush As ImageBrush
-    Private referenzOrbitImaginaryBrush As ImageBrush
+    Private referenzOrbitRealHighBrush As ImageBrush
+    Private referenzOrbitImaginaryHighBrush As ImageBrush
+    Private referenzOrbitRealLowBrush As ImageBrush
+    Private referenzOrbitImaginaryLowBrush As ImageBrush
+
+    'Diagnose
+    Private Const BrushStreifenTestAktiv As Boolean = False
+
+    'Multipass-Proof-of-Concept
+    Private Const MultipassProofOfConceptAktiv As Boolean = True
+    Private multipassPass1Bitmap As RenderTargetBitmap
+    Private multipassPass2Bitmap As RenderTargetBitmap
+    Private multipassPass1Brush As ImageBrush
 
     'Shader
     Private mandelbrotClassicEffect As MandelbrotEffect
@@ -145,6 +157,26 @@ Public Class wpfModulMain
         gradienten = MandelbrotGradientRepository.LadeGradienten(gradientenPfad)
 
         InitialisiereStartpunkt()
+
+        If MultipassProofOfConceptAktiv Then
+
+            txbPraesentationsschirm.Visibility =
+        Visibility.Collapsed
+
+            rctMandelbrot.Visibility =
+        Visibility.Visible
+
+            StopRendering()
+
+            Dispatcher.BeginInvoke(
+        DispatcherPriority.Render,
+        New Action(
+            AddressOf StarteMultipassProofOfConcept))
+
+            Return
+
+        End If
+
         InitialisiereShader()
 
         PraesentationsschirmAnzeigen()
@@ -163,11 +195,17 @@ Public Class wpfModulMain
 
     Private Sub InitialisiereShader()
 
-        mandelbrotClassicEffect = New MandelbrotEffect()
-        mandelbrotPerturbationEffect = New MandelbrotPerturbationEffect()
+        mandelbrotClassicEffect =
+        New MandelbrotEffect()
 
-        rctMandelbrot.Effect = mandelbrotClassicEffect
-        aktuellerRenderer = MandelbrotRendererTyp.Klassisch
+        mandelbrotPerturbationEffect =
+        New MandelbrotPerturbationEffect()
+
+        rctMandelbrot.Effect =
+        mandelbrotClassicEffect
+
+        aktuellerRenderer =
+        MandelbrotRendererTyp.Klassisch
 
     End Sub
 
@@ -453,8 +491,10 @@ Public Class wpfModulMain
             Exit Sub
         End If
 
-        If referenzOrbitRealBrush Is Nothing OrElse
-       referenzOrbitImaginaryBrush Is Nothing Then
+        If referenzOrbitRealHighBrush Is Nothing OrElse
+            referenzOrbitImaginaryHighBrush Is Nothing OrElse
+            referenzOrbitRealLowBrush Is Nothing OrElse
+            referenzOrbitImaginaryLowBrush Is Nothing Then
 
             Exit Sub
 
@@ -463,10 +503,15 @@ Public Class wpfModulMain
         With mandelbrotPerturbationEffect
 
             .GradientTexture = aktuellerGradientBrush
-            .ReferenceOrbitRealTexture = referenzOrbitRealBrush
-            .ReferenceOrbitImaginaryTexture = referenzOrbitImaginaryBrush
+
+            .ReferenceOrbitRealHighTexture = referenzOrbitRealHighBrush
+            .ReferenceOrbitImaginaryHighTexture = referenzOrbitImaginaryHighBrush
+            .ReferenceOrbitRealLowTexture = referenzOrbitRealLowBrush
+            .ReferenceOrbitImaginaryLowTexture = referenzOrbitImaginaryLowBrush
+
             .OrbitLength = CSng(referenzOrbit.Count)
             .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+            .OrbitTextureHeight = CSng(referenzOrbit.TexturHoehe)
 
         End With
 
@@ -677,7 +722,10 @@ Public Class wpfModulMain
 
         If referenzOrbit Is Nothing Then Exit Sub
 
-        If referenzOrbitRealBrush Is Nothing OrElse referenzOrbitImaginaryBrush Is Nothing Then
+        If referenzOrbitRealHighBrush Is Nothing OrElse
+            referenzOrbitImaginaryHighBrush Is Nothing OrElse
+            referenzOrbitRealLowBrush Is Nothing OrElse
+            referenzOrbitImaginaryLowBrush Is Nothing Then
 
             Exit Sub
 
@@ -740,8 +788,10 @@ Public Class wpfModulMain
         Dim benoetigteIterationen As Integer
 
         referenzOrbit = Nothing
-        referenzOrbitRealBrush = Nothing
-        referenzOrbitImaginaryBrush = Nothing
+        referenzOrbitRealHighBrush = Nothing
+        referenzOrbitImaginaryHighBrush = Nothing
+        referenzOrbitRealLowBrush = Nothing
+        referenzOrbitImaginaryLowBrush = Nothing
 
         benoetigteIterationen = BerechneBenoetigteReferenzIterationen()
 
@@ -752,45 +802,53 @@ Public Class wpfModulMain
 
         If referenzOrbit.Count < benoetigteIterationen Then
 
-            LogHandling.LogWarn(
-            "Modul Mandelbrot: Ziel """ &
-            aktuellesZiel.Name &
-            """ ist als Referenzpunkt ungeeignet. " &
-            "Orbit endete nach " &
-            referenzOrbit.Count.ToString() &
-            " von benötigten " &
-            benoetigteIterationen.ToString() &
-            " Iterationen.")
+            LogHandling.LogWarn("Modul Mandelbrot: Ziel """ & aktuellesZiel.Name & """ ist als Referenzpunkt ungeeignet. " &
+            "Orbit endete nach " & referenzOrbit.Count.ToString() & " von benötigten " & benoetigteIterationen.ToString() & " Iterationen.")
 
             referenzOrbit = Nothing
-            referenzOrbitRealBrush = Nothing
-            referenzOrbitImaginaryBrush = Nothing
+            referenzOrbitRealHighBrush = Nothing
+            referenzOrbitImaginaryHighBrush = Nothing
+            referenzOrbitRealLowBrush = Nothing
+            referenzOrbitImaginaryLowBrush = Nothing
 
             If mandelbrotPerturbationEffect IsNot Nothing Then
-                mandelbrotPerturbationEffect.ReferenceOrbitRealTexture = Nothing
-                mandelbrotPerturbationEffect.ReferenceOrbitImaginaryTexture = Nothing
+
+                mandelbrotPerturbationEffect.ReferenceOrbitRealHighTexture = Nothing
+                mandelbrotPerturbationEffect.ReferenceOrbitImaginaryHighTexture = Nothing
+                mandelbrotPerturbationEffect.ReferenceOrbitRealLowTexture = Nothing
+                mandelbrotPerturbationEffect.ReferenceOrbitImaginaryLowTexture = Nothing
+
             End If
 
             Return False
 
         End If
 
-        LogHandling.LogInfo(
-        "Modul Mandelbrot: Referenzorbit für """ &
-        aktuellesZiel.Name &
-        """ mit " &
-        referenzOrbit.Count.ToString() &
-        " Werten erfolgreich berechnet.")
+        LogHandling.LogInfo("Modul Mandelbrot: Referenzorbit für """ & aktuellesZiel.Name & """ mit " &
+                            referenzOrbit.Count.ToString() & " Werten erfolgreich berechnet.")
 
-        referenzOrbitRealBrush = referenzOrbit.ErzeugeRealOrbitBrush()
-        referenzOrbitImaginaryBrush = referenzOrbit.ErzeugeImaginaryOrbitBrush()
+        referenzOrbit.InitialisiereTexturlayout(Math.Max(1, CInt(Math.Floor(rctMandelbrot.ActualWidth))))
+
+        referenzOrbitRealHighBrush = referenzOrbit.ErzeugeRealHighOrbitBrush()
+        referenzOrbitImaginaryHighBrush = referenzOrbit.ErzeugeImaginaryHighOrbitBrush()
+        referenzOrbitRealLowBrush = referenzOrbit.ErzeugeRealLowOrbitBrush()
+        referenzOrbitImaginaryLowBrush = referenzOrbit.ErzeugeImaginaryLowOrbitBrush()
 
         With mandelbrotPerturbationEffect
-            .ReferenceOrbitRealTexture = referenzOrbitRealBrush
-            .ReferenceOrbitImaginaryTexture = referenzOrbitImaginaryBrush
+
+            .ReferenceOrbitRealHighTexture = referenzOrbitRealHighBrush
+            .ReferenceOrbitImaginaryHighTexture = referenzOrbitImaginaryHighBrush
+            .ReferenceOrbitRealLowTexture = referenzOrbitRealLowBrush
+            .ReferenceOrbitImaginaryLowTexture = referenzOrbitImaginaryLowBrush
+
             .OrbitLength = CSng(referenzOrbit.Count)
             .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+            .OrbitTextureHeight = CSng(referenzOrbit.TexturHoehe)
+
         End With
+
+        LogHandling.LogInfo("Modul Mandelbrot: Orbittextur " & referenzOrbit.TexturBreite.ToString() &
+                            " × " & referenzOrbit.TexturHoehe.ToString() & " DIPs.")
 
         Return True
 
@@ -850,23 +908,32 @@ Public Class wpfModulMain
 
         Dim scaleHigh As Single
         Dim scaleLow As Single
+        Dim verwendeteIterationen As Integer
 
-        If mandelbrotPerturbationEffect Is Nothing Then Exit Sub
-        If referenzOrbit Is Nothing Then Exit Sub
+        If mandelbrotPerturbationEffect Is Nothing Then
+            Exit Sub
+        End If
+
+        If referenzOrbit Is Nothing Then
+            Exit Sub
+        End If
 
         SplitDouble(aktuellePosition.TargetScale, scaleHigh, scaleLow)
+
+        verwendeteIterationen = Math.Min(aktuellePosition.MaxIterations, referenzOrbit.Count)
 
         With mandelbrotPerturbationEffect
 
             .ScaleHigh = scaleHigh
             .ScaleLow = scaleLow
-            .MaxIterations = CSng(Math.Min(aktuellePosition.MaxIterations, referenzOrbit.Count))
+            .MaxIterations = CSng(verwendeteIterationen)
             .OrbitLength = CSng(referenzOrbit.Count)
             .OrbitTextureWidth = CSng(referenzOrbit.TexturBreite)
+            .OrbitTextureHeight = CSng(referenzOrbit.TexturHoehe)
             .ViewportWidth = CSng(Math.Max(1.0, rctMandelbrot.ActualWidth))
             .ViewportHeight = CSng(Math.Max(1.0, rctMandelbrot.ActualHeight))
             .GradientOffset = CSng(gradientOffset)
-            .Rotation = 0.0F
+            .Rotation = CSng(aktuelleRotation)
 
         End With
 
@@ -1029,8 +1096,11 @@ Public Class wpfModulMain
 
         If mandelbrotPerturbationEffect IsNot Nothing Then
             mandelbrotPerturbationEffect.GradientTexture = Nothing
-            mandelbrotPerturbationEffect.ReferenceOrbitRealTexture = Nothing
-            mandelbrotPerturbationEffect.ReferenceOrbitImaginaryTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitRealHighTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitImaginaryHighTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitRealLowTexture = Nothing
+            mandelbrotPerturbationEffect.ReferenceOrbitImaginaryLowTexture =
+    Nothing
         End If
 
         If mandelbrotClassicEffect IsNot Nothing Then
@@ -1041,11 +1111,657 @@ Public Class wpfModulMain
         mandelbrotPerturbationEffect = Nothing
 
         referenzOrbit = Nothing
-        referenzOrbitRealBrush = Nothing
-        referenzOrbitImaginaryBrush = Nothing
+        referenzOrbitRealHighBrush = Nothing
+        referenzOrbitImaginaryHighBrush = Nothing
+        referenzOrbitRealLowBrush = Nothing
+        referenzOrbitImaginaryLowBrush = Nothing
         aktuellerGradientBrush = Nothing
 
+        rctMandelbrot.Effect = Nothing
+        rctMandelbrot.Fill = Nothing
+
+        multipassPass1Brush = Nothing
+        multipassPass1Bitmap = Nothing
+        multipassPass2Bitmap = Nothing
+
         Me.Content = Nothing
+
+    End Sub
+
+#End Region
+
+#Region "Brush-Diagnose"
+
+    Private Sub StarteBrushStreifenTest()
+
+        Dim dpiInfo As DpiScale
+        Dim effektBreitePixel As Integer
+        Dim effektHoehePixel As Integer
+        Dim orbitWert As MandelbrotComplex
+        Dim realHigh As Single
+        Dim realLow As Single
+        Dim imaginaryHigh As Single
+        Dim imaginaryLow As Single
+        Dim i As Integer
+
+        rctMandelbrot.UpdateLayout()
+
+        dpiInfo =
+        VisualTreeHelper.GetDpi(
+            rctMandelbrot)
+
+        effektBreitePixel =
+        Math.Max(
+            1,
+            CInt(
+                Math.Round(
+                    rctMandelbrot.ActualWidth *
+                    dpiInfo.DpiScaleX)))
+
+        effektHoehePixel =
+        Math.Max(
+            1,
+            CInt(
+                Math.Round(
+                    rctMandelbrot.ActualHeight *
+                    dpiInfo.DpiScaleY)))
+
+        mandelbrotClassicEffect =
+        New MandelbrotEffect()
+
+        mandelbrotPerturbationEffect =
+        New MandelbrotPerturbationEffect()
+
+        'Acht echte Referenzorbitwerte für den Diagnosetest.
+        referenzOrbit =
+        New MandelbrotReferenzOrbit(
+            startpunkt.CenterX,
+            startpunkt.CenterY,
+            8)
+
+        If referenzOrbit.Count < 8 Then
+
+            LogHandling.LogWarn(
+            "Brush-Orbit-Komponententest: " &
+            "Der Referenzorbit enthält nur " &
+            referenzOrbit.Count.ToString() &
+            " statt 8 Werten.")
+
+            Return
+
+        End If
+
+        referenzOrbitRealHighBrush =
+        referenzOrbit.
+        ErzeugeRealHighOrbitBrush()
+
+        referenzOrbitImaginaryHighBrush =
+        referenzOrbit.
+        ErzeugeImaginaryHighOrbitBrush()
+
+        referenzOrbitRealLowBrush =
+        referenzOrbit.
+        ErzeugeRealLowOrbitBrush()
+
+        referenzOrbitImaginaryLowBrush =
+        referenzOrbit.
+        ErzeugeImaginaryLowOrbitBrush()
+
+        With mandelbrotPerturbationEffect
+
+            .ReferenceOrbitRealHighTexture =
+            referenzOrbitRealHighBrush
+
+            .ReferenceOrbitImaginaryHighTexture =
+            referenzOrbitImaginaryHighBrush
+
+            .ReferenceOrbitRealLowTexture =
+            referenzOrbitRealLowBrush
+
+            .ReferenceOrbitImaginaryLowTexture =
+            referenzOrbitImaginaryLowBrush
+
+            .OrbitLength =
+            CSng(
+                referenzOrbit.Count)
+
+            .OrbitTextureWidth =
+            CSng(
+                referenzOrbit.TexturBreite)
+
+            .ViewportWidth =
+            CSng(
+                rctMandelbrot.ActualWidth)
+
+            .ViewportHeight =
+            CSng(
+                rctMandelbrot.ActualHeight)
+
+        End With
+
+        For i = 0 To Math.Min(
+        7,
+        referenzOrbit.Count - 1)
+
+            orbitWert =
+            referenzOrbit.Item(i)
+
+            SplitDouble(
+            orbitWert.Real,
+            realHigh,
+            realLow)
+
+            SplitDouble(
+            orbitWert.Imaginary,
+            imaginaryHigh,
+            imaginaryLow)
+
+            LogHandling.LogInfo(
+            "Brush-Orbit-4K-Test: Index=" &
+            i.ToString() &
+            ", RealDouble=" &
+            orbitWert.Real.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture) &
+            ", RealHigh=" &
+            realHigh.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture) &
+            ", RealLow=" &
+            realLow.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture) &
+            ", ImaginaryDouble=" &
+            orbitWert.Imaginary.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture) &
+            ", ImaginaryHigh=" &
+            imaginaryHigh.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture) &
+            ", ImaginaryLow=" &
+            imaginaryLow.ToString(
+                "R",
+                Globalization.CultureInfo.InvariantCulture))
+
+        Next
+
+        aktuellerRenderer =
+        MandelbrotRendererTyp.Perturbation
+
+        rctMandelbrot.Effect =
+        mandelbrotPerturbationEffect
+
+        LogHandling.LogInfo(
+        "Modul Mandelbrot: Vier-Komponenten-Orbittest aktiviert. " &
+        "OrbitCount=" &
+        referenzOrbit.Count.ToString() &
+        ", Texturbreite=" &
+        referenzOrbit.TexturBreite.ToString() &
+        ", ActualWidth=" &
+        rctMandelbrot.ActualWidth.ToString(
+            "F2",
+            Globalization.CultureInfo.InvariantCulture) &
+        ", ActualHeight=" &
+        rctMandelbrot.ActualHeight.ToString(
+            "F2",
+            Globalization.CultureInfo.InvariantCulture) &
+        ", Pixelbreite=" &
+        effektBreitePixel.ToString() &
+        ", Pixelhöhe=" &
+        effektHoehePixel.ToString())
+
+    End Sub
+
+#End Region
+
+#Region "Multipass-Proof-of-Concept"
+
+    Private Sub StarteMultipassProofOfConcept()
+
+        Dim testEffect As MultipassTestPass1Effect
+
+        testEffect =
+        New MultipassTestPass1Effect()
+
+        rctMandelbrot.Fill =
+        Brushes.White
+
+        rctMandelbrot.Effect =
+        testEffect
+
+        LogHandling.LogInfo(
+        "Multipass-Test: Pass-1-Shader direkt auf rctMandelbrot gelegt.")
+
+    End Sub
+
+
+    Private Function RendereMultipassPass1(
+    breite As Integer,
+    hoehe As Integer) As RenderTargetBitmap
+
+        Dim passFlaeche As Rectangle
+        Dim passEffect As MultipassTestPass1Effect
+        Dim renderTarget As RenderTargetBitmap
+
+        passEffect = New MultipassTestPass1Effect()
+
+        passEffect.Input = Effect.ImplicitInput
+
+        passFlaeche =
+        New Rectangle()
+
+        With passFlaeche
+
+            .Width =
+            CDbl(
+                breite)
+
+            .Height =
+            CDbl(
+                hoehe)
+
+            .Fill =
+            Brushes.White
+
+            .Effect =
+            passEffect
+
+            .SnapsToDevicePixels =
+            True
+
+        End With
+
+        passFlaeche.Measure(
+        New Windows.Size(
+            CDbl(breite),
+            CDbl(hoehe)))
+
+        passFlaeche.Arrange(
+        New Rect(
+            0.0,
+            0.0,
+            CDbl(breite),
+            CDbl(hoehe)))
+
+        passFlaeche.UpdateLayout()
+
+        renderTarget =
+        New RenderTargetBitmap(
+            breite,
+            hoehe,
+            96.0,
+            96.0,
+            PixelFormats.Pbgra32)
+
+        renderTarget.Render(
+        passFlaeche)
+
+        renderTarget.Freeze()
+
+        passEffect.Input = Nothing
+
+        passFlaeche.Effect = Nothing
+
+        Return renderTarget
+
+    End Function
+
+
+    Private Function RendereMultipassPass2(
+    breite As Integer,
+    hoehe As Integer,
+    stateBrush As ImageBrush) As RenderTargetBitmap
+
+        Dim passFlaeche As Rectangle
+        Dim passEffect As MultipassTestPass2Effect
+        Dim renderTarget As RenderTargetBitmap
+
+        passEffect =
+        New MultipassTestPass2Effect()
+
+        passEffect.StateTexture =
+        stateBrush
+
+        passFlaeche =
+        New Rectangle()
+
+        With passFlaeche
+
+            .Width =
+            CDbl(
+                breite)
+
+            .Height =
+            CDbl(
+                hoehe)
+
+            .Fill =
+            Brushes.White
+
+            .Effect =
+            passEffect
+
+            .SnapsToDevicePixels =
+            True
+
+        End With
+
+        passFlaeche.Measure(
+        New Windows.Size(
+            CDbl(breite),
+            CDbl(hoehe)))
+
+        passFlaeche.Arrange(
+        New Rect(
+            0.0,
+            0.0,
+            CDbl(breite),
+            CDbl(hoehe)))
+
+        passFlaeche.UpdateLayout()
+
+        renderTarget =
+        New RenderTargetBitmap(
+            breite,
+            hoehe,
+            96.0,
+            96.0,
+            PixelFormats.Pbgra32)
+
+        renderTarget.Render(
+        passFlaeche)
+
+        renderTarget.Freeze()
+
+        passEffect.StateTexture =
+        Nothing
+
+        passFlaeche.Effect =
+        Nothing
+
+        Return renderTarget
+
+    End Function
+
+    Private Function ErzeugeMultipassBrush(
+    bitmap As BitmapSource) As ImageBrush
+
+        Dim brush As ImageBrush
+
+        If bitmap Is Nothing Then
+
+            Throw New ArgumentNullException(
+            NameOf(bitmap))
+
+        End If
+
+        brush =
+        New ImageBrush(
+            bitmap)
+
+        With brush
+
+            .Stretch =
+            Stretch.Fill
+
+            .TileMode =
+            TileMode.None
+
+            .AlignmentX =
+            AlignmentX.Left
+
+            .AlignmentY =
+            AlignmentY.Top
+
+        End With
+
+        RenderOptions.SetBitmapScalingMode(
+        brush,
+        BitmapScalingMode.NearestNeighbor)
+
+        brush.Freeze()
+
+        Return brush
+
+    End Function
+
+    Private Sub ZeigeMultipassErgebnis(
+    bitmap As BitmapSource)
+
+        Dim ergebnisBrush As ImageBrush
+
+        ergebnisBrush =
+        New ImageBrush(
+            bitmap)
+
+        With ergebnisBrush
+
+            .Stretch =
+            Stretch.Fill
+
+            .TileMode =
+            TileMode.None
+
+            .AlignmentX =
+            AlignmentX.Left
+
+            .AlignmentY =
+            AlignmentY.Top
+
+        End With
+
+        RenderOptions.SetBitmapScalingMode(
+        ergebnisBrush,
+        BitmapScalingMode.NearestNeighbor)
+
+        rctMandelbrot.Effect =
+        Nothing
+
+        rctMandelbrot.Fill =
+        ergebnisBrush
+
+    End Sub
+
+    Private Sub PruefeMultipassErgebnis(
+    bitmap As BitmapSource)
+
+        Dim breite As Integer
+        Dim hoehe As Integer
+
+        If bitmap Is Nothing Then
+
+            LogHandling.LogWarn(
+            "Multipass-Test: Ergebnisbitmap ist Nothing.")
+
+            Exit Sub
+
+        End If
+
+        breite =
+        bitmap.PixelWidth
+
+        hoehe =
+        bitmap.PixelHeight
+
+        LoggeMultipassTestpixel(
+        bitmap,
+        breite \ 4,
+        hoehe \ 4,
+        "oben links",
+        0.225)
+
+        LoggeMultipassTestpixel(
+        bitmap,
+        breite * 3 \ 4,
+        hoehe \ 4,
+        "oben rechts",
+        0.425)
+
+        LoggeMultipassTestpixel(
+        bitmap,
+        breite \ 4,
+        hoehe * 3 \ 4,
+        "unten links",
+        0.675)
+
+        LoggeMultipassTestpixel(
+        bitmap,
+        breite * 3 \ 4,
+        hoehe * 3 \ 4,
+        "unten rechts",
+        0.875)
+
+    End Sub
+
+    Private Sub LoggeMultipassTestpixel(
+    bitmap As BitmapSource,
+    x As Integer,
+    y As Integer,
+    bezeichnung As String,
+    erwarteterWert As Double)
+
+        Dim pixelDaten(3) As Byte
+        Dim bereich As Int32Rect
+        Dim gemessenerWert As Double
+        Dim abweichung As Double
+
+        bereich =
+        New Int32Rect(
+            x,
+            y,
+            1,
+            1)
+
+        bitmap.CopyPixels(
+        bereich,
+        pixelDaten,
+        4,
+        0)
+
+        'Pbgra32/Bgra32:
+        'Byte 0 = Blau
+        'Byte 1 = Grün
+        'Byte 2 = Rot
+        'Byte 3 = Alpha
+        '
+        'Pass 2 gibt Grau aus, daher sind RGB identisch.
+        gemessenerWert =
+        CDbl(
+            pixelDaten(2)) /
+        255.0
+
+        abweichung =
+        Math.Abs(
+            gemessenerWert -
+            erwarteterWert)
+
+        LogHandling.LogInfo(
+        "Multipass-Test: " &
+        bezeichnung &
+        ", erwartet=" &
+        erwarteterWert.ToString(
+            "F6",
+            Globalization.CultureInfo.InvariantCulture) &
+        ", gemessen=" &
+        gemessenerWert.ToString(
+            "F6",
+            Globalization.CultureInfo.InvariantCulture) &
+        ", Abweichung=" &
+        abweichung.ToString(
+            "E6",
+            Globalization.CultureInfo.InvariantCulture) &
+        ", BGRA=" &
+        pixelDaten(0).ToString() &
+        "/" &
+        pixelDaten(1).ToString() &
+        "/" &
+        pixelDaten(2).ToString() &
+        "/" &
+        pixelDaten(3).ToString())
+
+    End Sub
+
+    Private Sub PruefeMultipassPass1Ergebnis(
+    bitmap As BitmapSource)
+
+        Dim breite As Integer
+        Dim hoehe As Integer
+
+        If bitmap Is Nothing Then
+
+            LogHandling.LogWarn(
+                "Multipass-Test Pass 1: Bitmap ist Nothing.")
+
+            Exit Sub
+
+        End If
+
+        breite =
+            bitmap.PixelWidth
+
+        hoehe =
+            bitmap.PixelHeight
+
+        LoggeMultipassPass1Pixel(
+            bitmap,
+            breite \ 4,
+            hoehe \ 4,
+            "oben links")
+
+        LoggeMultipassPass1Pixel(
+            bitmap,
+            breite * 3 \ 4,
+            hoehe \ 4,
+            "oben rechts")
+
+        LoggeMultipassPass1Pixel(
+            bitmap,
+            breite \ 4,
+            hoehe * 3 \ 4,
+            "unten links")
+
+        LoggeMultipassPass1Pixel(
+            bitmap,
+            breite * 3 \ 4,
+            hoehe * 3 \ 4,
+            "unten rechts")
+
+    End Sub
+
+    Private Sub LoggeMultipassPass1Pixel(
+    bitmap As BitmapSource,
+    x As Integer,
+    y As Integer,
+    bezeichnung As String)
+
+        Dim pixelDaten(3) As Byte
+        Dim bereich As Int32Rect
+
+        bereich =
+            New Int32Rect(
+                x,
+                y,
+                1,
+                1)
+
+        bitmap.CopyPixels(
+            bereich,
+            pixelDaten,
+            4,
+            0)
+
+        LogHandling.LogInfo(
+            "Multipass-Test Pass 1: " &
+            bezeichnung &
+            ", BGRA=" &
+            pixelDaten(0).ToString() &
+            "/" &
+            pixelDaten(1).ToString() &
+            "/" &
+            pixelDaten(2).ToString() &
+            "/" &
+            pixelDaten(3).ToString())
 
     End Sub
 

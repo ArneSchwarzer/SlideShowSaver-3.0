@@ -19,7 +19,6 @@ Public Structure MandelbrotComplex
 
 End Structure
 
-
 ''' <summary>
 ''' Berechnet und verwaltet den Referenzorbit eines Punktes
 ''' innerhalb der komplexen Mandelbrot-Ebene.
@@ -29,11 +28,29 @@ Public Class MandelbrotReferenzOrbit
 #Region "Variablendeklaration"
 
     Private ReadOnly orbitIntern As List(Of MandelbrotComplex)
+    Private texturBreiteIntern As Integer
+    Private texturHoeheIntern As Integer
+
     Public ReadOnly Property TexturBreite As Integer
         Get
-            Return BerechneNaechsteZweierpotenz(orbitIntern.Count)
+            Return texturBreiteIntern
         End Get
     End Property
+
+    Public ReadOnly Property TexturHoehe As Integer
+        Get
+            Return texturHoeheIntern
+        End Get
+    End Property
+
+    Private Const OrbitHighMinimum As Double = -2.0
+    Private Const OrbitHighMaximum As Double = 2.0
+
+    'Die Low-Komponente eines in [-2, +2] liegenden Double-Wertes
+    'ist erheblich kleiner. Der gewählte Bereich enthält ausreichend
+    'Sicherheitsreserve und bleibt dennoch sehr fein quantisierbar.
+    Private Const OrbitLowMinimum As Double = -0.00000025
+    Private Const OrbitLowMaximum As Double = 0.00000025
 
 #End Region
 
@@ -76,14 +93,10 @@ Public Class MandelbrotReferenzOrbit
 
 #Region "Konstruktor"
 
-    Public Sub New(centerX As Double,
-                   centerY As Double,
-                   maxIterationen As Integer)
+    Public Sub New(centerX As Double, centerY As Double, maxIterationen As Integer)
 
         If maxIterationen <= 0 Then
-            Throw New ArgumentOutOfRangeException(
-                NameOf(maxIterationen),
-                "Die maximale Iterationszahl muss größer als 0 sein.")
+            Throw New ArgumentOutOfRangeException(NameOf(maxIterationen), "Die maximale Iterationszahl muss größer als 0 sein.")
         End If
 
         Me.CenterX = centerX
@@ -104,24 +117,34 @@ Public Class MandelbrotReferenzOrbit
     Public Function Item(index As Integer) As MandelbrotComplex
 
         If index < 0 OrElse index >= orbitIntern.Count Then
-            Throw New ArgumentOutOfRangeException(
-                NameOf(index),
-                "Der angegebene Orbitindex liegt außerhalb des gültigen Bereichs.")
+            Throw New ArgumentOutOfRangeException(NameOf(index), "Der angegebene Orbitindex liegt außerhalb des gültigen Bereichs.")
         End If
 
         Return orbitIntern(index)
 
     End Function
 
-    Public Function ErzeugeRealOrbitBrush() As ImageBrush
+    Public Function ErzeugeRealHighOrbitBrush() As ImageBrush
 
-        Return ErzeugeOrbitBrush(True)
+        Return ErzeugeOrbitKomponentenBrush(True, True)
 
     End Function
 
-    Public Function ErzeugeImaginaryOrbitBrush() As ImageBrush
+    Public Function ErzeugeImaginaryHighOrbitBrush() As ImageBrush
 
-        Return ErzeugeOrbitBrush(False)
+        Return ErzeugeOrbitKomponentenBrush(False, True)
+
+    End Function
+
+    Public Function ErzeugeRealLowOrbitBrush() As ImageBrush
+
+        Return ErzeugeOrbitKomponentenBrush(True, False)
+
+    End Function
+
+    Public Function ErzeugeImaginaryLowOrbitBrush() As ImageBrush
+
+        Return ErzeugeOrbitKomponentenBrush(False, False)
 
     End Function
 
@@ -153,31 +176,19 @@ Public Class MandelbrotReferenzOrbit
         For i = 0 To MaxIterationen - 1
 
             ' Z(n) speichern, bevor Z(n+1) berechnet wird.
-            ergebnis.Add(
-                New MandelbrotComplex(
-                    zReal,
-                    zImaginary))
+            ergebnis.Add(New MandelbrotComplex(zReal, zImaginary))
 
             zRealQuadrat = zReal * zReal
             zImaginaryQuadrat = zImaginary * zImaginary
 
-            neuerRealteil =
-                zRealQuadrat -
-                zImaginaryQuadrat +
-                CenterX
+            neuerRealteil = zRealQuadrat - zImaginaryQuadrat + CenterX
 
-            neuerImaginaerteil =
-                2.0 *
-                zReal *
-                zImaginary +
-                CenterY
+            neuerImaginaerteil = 2.0 * zReal * zImaginary + CenterY
 
             zReal = neuerRealteil
             zImaginary = neuerImaginaerteil
 
-            betragQuadrat =
-                zReal * zReal +
-                zImaginary * zImaginary
+            betragQuadrat = zReal * zReal + zImaginary * zImaginary
 
             If betragQuadrat > 4.0 Then
                 Exit For
@@ -191,78 +202,106 @@ Public Class MandelbrotReferenzOrbit
 
 #End Region
 
-    Private Function ErzeugeOrbitBrush(realteil As Boolean) As ImageBrush
+    Public Sub InitialisiereTexturlayout(maximaleTexturBreite As Integer)
 
-        Dim texturBreite As Integer
+        Dim orbitAnzahl As Integer
+
+        orbitAnzahl = orbitIntern.Count
+
+        maximaleTexturBreite = Math.Max(1, maximaleTexturBreite)
+        texturBreiteIntern = Math.Min(orbitAnzahl, maximaleTexturBreite)
+        texturHoeheIntern = CInt(Math.Ceiling(CDbl(orbitAnzahl) / CDbl(texturBreiteIntern)))
+
+    End Sub
+
+    Private Function ErzeugeOrbitKomponentenBrush(
+    realteil As Boolean,
+    highKomponente As Boolean) As ImageBrush
+
         Dim pixelDaten() As Byte
         Dim orbitWert As MandelbrotComplex
-        Dim wert As Double
+        Dim originalWert As Double
+        Dim high As Single
+        Dim low As Single
+        Dim komponentenWert As Double
+        Dim minimum As Double
+        Dim maximum As Double
         Dim normalisiert As Double
-        Dim codiert As Integer
+        Dim codierterWert As Integer
         Dim rot As Byte
         Dim gruen As Byte
         Dim blau As Byte
         Dim pixelOffset As Integer
-        Dim letzterIndex As Integer
+        Dim stride As Integer
         Dim bitmap As BitmapSource
         Dim brush As ImageBrush
         Dim i As Integer
 
         If orbitIntern Is Nothing OrElse orbitIntern.Count = 0 Then
-            Throw New InvalidOperationException(
-            "Der Referenzorbit enthält keine Werte.")
+
+            Throw New InvalidOperationException("Der Referenzorbit enthält keine Werte.")
+
         End If
 
-        texturBreite =
-        BerechneNaechsteZweierpotenz(
-            orbitIntern.Count)
+        If texturBreiteIntern <= 0 OrElse texturHoeheIntern <= 0 Then
 
-        'BGRA32 = vier Bytes pro Pixel.
-        ReDim pixelDaten(texturBreite * 4 - 1)
+            Throw New InvalidOperationException("Das Orbit-Texturlayout wurde noch nicht initialisiert.")
 
-        letzterIndex = orbitIntern.Count - 1
+        End If
 
-        For i = 0 To texturBreite - 1
+        If highKomponente Then
 
-            orbitWert =
-            orbitIntern(Math.Min(i, letzterIndex))
+            minimum = OrbitHighMinimum
+            maximum = OrbitHighMaximum
+
+        Else
+
+            minimum = OrbitLowMinimum
+            maximum = OrbitLowMaximum
+
+        End If
+
+        stride = texturBreiteIntern * 4
+
+        ReDim pixelDaten(stride * texturHoeheIntern - 1)
+
+        For i = 0 To orbitIntern.Count - 1
+
+            orbitWert = orbitIntern(i)
 
             If realteil Then
-                wert = orbitWert.Real
+                originalWert = orbitWert.Real
             Else
-                wert = orbitWert.Imaginary
+                originalWert = orbitWert.Imaginary
             End If
 
-            'Sicherheitsbegrenzung auf den darstellbaren Bereich.
-            wert = Math.Max(-2.0, Math.Min(2.0, wert))
+            SplitDouble(originalWert, high, low)
 
-            '[-2, +2] nach [0, 1] transformieren.
-            normalisiert =
-            (wert + 2.0) / 4.0
+            If highKomponente Then
+                komponentenWert = CDbl(high)
+            Else
+                komponentenWert = CDbl(low)
+            End If
 
-            'In 24 Bit quantisieren.
-            codiert =
-            CInt(Math.Round(
-                normalisiert * 16777215.0))
+            If komponentenWert < minimum OrElse komponentenWert > maximum Then
 
-            codiert =
-            Math.Max(
-                0,
-                Math.Min(16777215, codiert))
+                Throw New InvalidOperationException(
+                "Orbitkomponente außerhalb des odierbaren Bereichs. Index=" & i.ToString() &
+                ", Wert=" & komponentenWert.ToString("R", Globalization.CultureInfo.InvariantCulture))
 
-            rot =
-            CByte((codiert >> 16) And &HFF)
+            End If
 
-            gruen =
-            CByte((codiert >> 8) And &HFF)
+            normalisiert = (komponentenWert - minimum) / (maximum - minimum)
 
-            blau =
-            CByte(codiert And &HFF)
+            codierterWert = CInt(Math.Round(normalisiert * 16777215.0))
+            codierterWert = Math.Max(0, Math.Min(16777215, codierterWert))
+
+            rot = CByte((codierterWert >> 16) And &HFF)
+            gruen = CByte((codierterWert >> 8) And &HFF)
+            blau = CByte(codierterWert And &HFF)
 
             pixelOffset = i * 4
 
-            'PixelFormats.Bgra32 erwartet physisch:
-            'B, G, R, A
             pixelDaten(pixelOffset + 0) = blau
             pixelDaten(pixelOffset + 1) = gruen
             pixelDaten(pixelOffset + 2) = rot
@@ -270,30 +309,23 @@ Public Class MandelbrotReferenzOrbit
 
         Next
 
-        bitmap = BitmapSource.Create(
-        texturBreite,
-        1,
-        96.0,
-        96.0,
-        PixelFormats.Bgra32,
-        Nothing,
-        pixelDaten,
-        texturBreite * 4)
+        bitmap = BitmapSource.Create(texturBreiteIntern, texturHoeheIntern, 96.0, 96.0, PixelFormats.Bgra32, Nothing,
+            pixelDaten, stride)
 
         bitmap.Freeze()
 
         brush = New ImageBrush(bitmap)
 
         With brush
-            .Stretch = Stretch.Fill
+
+            .Stretch = Stretch.None
             .TileMode = TileMode.None
             .AlignmentX = AlignmentX.Left
             .AlignmentY = AlignmentY.Top
+
         End With
 
-        RenderOptions.SetBitmapScalingMode(
-        brush,
-        BitmapScalingMode.NearestNeighbor)
+        RenderOptions.SetBitmapScalingMode(brush, BitmapScalingMode.NearestNeighbor)
 
         brush.Freeze()
 
@@ -314,5 +346,12 @@ Public Class MandelbrotReferenzOrbit
         Return Math.Max(2, result)
 
     End Function
+
+    Private Sub SplitDouble(value As Double, ByRef high As Single, ByRef low As Single)
+
+        high = CSng(value)
+        low = CSng(value - CDbl(high))
+
+    End Sub
 
 End Class

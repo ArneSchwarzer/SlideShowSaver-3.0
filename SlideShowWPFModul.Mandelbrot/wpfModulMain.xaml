@@ -28,5 +28,56 @@
              Text="Mandelbrot"
              TextWrapping="Wrap"/>
         <!-- Standard: unsichtbar -->
+        <Grid x:Name="grdMultipassTest"
+      Background="Black"
+      Visibility="Collapsed">
+
+            <!-- Pass 1: bleibt Bestandteil des Visual Trees,
+         wird aber visuell vom Endpass überdeckt. -->
+            <Grid x:Name="grdMultipassPass1"
+          IsHitTestVisible="False">
+
+                <Grid.CacheMode>
+                    <BitmapCache RenderAtScale="1"
+                         EnableClearType="False"
+                         SnapsToDevicePixels="False" />
+                </Grid.CacheMode>
+
+                <Rectangle x:Name="rctMultipassPass1"
+                   Fill="White"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch" />
+
+            </Grid>
+
+            <!-- Pass 2 -->
+            <Grid x:Name="grdMultipassPass2"
+          IsHitTestVisible="False">
+
+                <Grid.CacheMode>
+                    <BitmapCache RenderAtScale="1"
+                         EnableClearType="False"
+                         SnapsToDevicePixels="False" />
+                </Grid.CacheMode>
+
+                <Rectangle x:Name="rctMultipassPass2"
+                   Fill="White"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch" />
+
+            </Grid>
+
+            <!-- Pass 3 / sichtbares Endergebnis -->
+            <Grid x:Name="grdMultipassPass3"
+          IsHitTestVisible="False">
+
+                <Rectangle x:Name="rctMultipassPass3"
+                   Fill="White"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch" />
+
+            </Grid>
+
+        </Grid>
     </Grid>
 </Window>

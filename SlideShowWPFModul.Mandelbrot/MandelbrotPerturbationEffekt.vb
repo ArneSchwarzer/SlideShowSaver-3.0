@@ -41,45 +41,106 @@ Public Class MandelbrotPerturbationEffect
         End Set
     End Property
 
-    's1: Referenzorbit – Realteil High/Low
-    Public Shared ReadOnly ReferenceOrbitRealTextureProperty As DependencyProperty =
-        RegisterPixelShaderSamplerProperty(
-            "ReferenceOrbitRealTexture",
-            GetType(MandelbrotPerturbationEffect),
-            1,
-            SamplingMode.NearestNeighbor)
+    '--------------------------------------------------------------
+    's1: Referenzorbit – Real High
+    '--------------------------------------------------------------
 
-    Public Property ReferenceOrbitRealTexture As Brush
+    Public Shared ReadOnly ReferenceOrbitRealHighTextureProperty As DependencyProperty =
+    RegisterPixelShaderSamplerProperty(
+        "ReferenceOrbitRealHighTexture",
+        GetType(MandelbrotPerturbationEffect),
+        1,
+        SamplingMode.NearestNeighbor)
+
+    Public Property ReferenceOrbitRealHighTexture As Brush
         Get
             Return CType(
-                GetValue(ReferenceOrbitRealTextureProperty),
-                Brush)
+            GetValue(
+                ReferenceOrbitRealHighTextureProperty),
+            Brush)
         End Get
         Set(value As Brush)
             SetValue(
-                ReferenceOrbitRealTextureProperty,
-                value)
+            ReferenceOrbitRealHighTextureProperty,
+            value)
         End Set
     End Property
 
-    's2: Referenzorbit – Imaginärteil High/Low
-    Public Shared ReadOnly ReferenceOrbitImaginaryTextureProperty As DependencyProperty =
-        RegisterPixelShaderSamplerProperty(
-            "ReferenceOrbitImaginaryTexture",
-            GetType(MandelbrotPerturbationEffect),
-            2,
-            SamplingMode.NearestNeighbor)
 
-    Public Property ReferenceOrbitImaginaryTexture As Brush
+    '--------------------------------------------------------------
+    's2: Referenzorbit – Imaginär High
+    '--------------------------------------------------------------
+
+    Public Shared ReadOnly ReferenceOrbitImaginaryHighTextureProperty As DependencyProperty =
+    RegisterPixelShaderSamplerProperty(
+        "ReferenceOrbitImaginaryHighTexture",
+        GetType(MandelbrotPerturbationEffect),
+        2,
+        SamplingMode.NearestNeighbor)
+
+    Public Property ReferenceOrbitImaginaryHighTexture As Brush
         Get
             Return CType(
-                GetValue(ReferenceOrbitImaginaryTextureProperty),
-                Brush)
+            GetValue(
+                ReferenceOrbitImaginaryHighTextureProperty),
+            Brush)
         End Get
         Set(value As Brush)
             SetValue(
-                ReferenceOrbitImaginaryTextureProperty,
-                value)
+            ReferenceOrbitImaginaryHighTextureProperty,
+            value)
+        End Set
+    End Property
+
+
+    '--------------------------------------------------------------
+    's3: Referenzorbit – Real Low
+    '--------------------------------------------------------------
+
+    Public Shared ReadOnly ReferenceOrbitRealLowTextureProperty As DependencyProperty =
+    RegisterPixelShaderSamplerProperty(
+        "ReferenceOrbitRealLowTexture",
+        GetType(MandelbrotPerturbationEffect),
+        3,
+        SamplingMode.NearestNeighbor)
+
+    Public Property ReferenceOrbitRealLowTexture As Brush
+        Get
+            Return CType(
+            GetValue(
+                ReferenceOrbitRealLowTextureProperty),
+            Brush)
+        End Get
+        Set(value As Brush)
+            SetValue(
+            ReferenceOrbitRealLowTextureProperty,
+            value)
+        End Set
+    End Property
+
+
+    '--------------------------------------------------------------
+    's4: Referenzorbit – Imaginär Low
+    '--------------------------------------------------------------
+
+    Public Shared ReadOnly ReferenceOrbitImaginaryLowTextureProperty As DependencyProperty =
+    RegisterPixelShaderSamplerProperty(
+        "ReferenceOrbitImaginaryLowTexture",
+        GetType(MandelbrotPerturbationEffect),
+        4,
+        SamplingMode.NearestNeighbor)
+
+    Public Property ReferenceOrbitImaginaryLowTexture As Brush
+        Get
+            Return CType(
+            GetValue(
+                ReferenceOrbitImaginaryLowTextureProperty),
+            Brush)
+        End Get
+        Set(value As Brush)
+            SetValue(
+            ReferenceOrbitImaginaryLowTextureProperty,
+            value)
         End Set
     End Property
 
@@ -182,6 +243,29 @@ Public Class MandelbrotPerturbationEffect
         End Set
     End Property
 
+    'c9
+    Public Shared ReadOnly OrbitTextureHeightProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "OrbitTextureHeight",
+        GetType(Single),
+        GetType(MandelbrotPerturbationEffect),
+        New UIPropertyMetadata(
+            1.0F,
+            PixelShaderConstantCallback(9)))
+
+    Public Property OrbitTextureHeight As Single
+        Get
+            Return CSng(
+            GetValue(
+                OrbitTextureHeightProperty))
+        End Get
+        Set(value As Single)
+            SetValue(
+            OrbitTextureHeightProperty,
+            value)
+        End Set
+    End Property
+
     'c5
     Public Shared ReadOnly ViewportWidthProperty As DependencyProperty =
         DependencyProperty.Register(
@@ -269,14 +353,17 @@ Public Class MandelbrotPerturbationEffect
         PixelShader = pixelShaderIntern
 
         UpdateShaderValue(GradientTextureProperty)
-        UpdateShaderValue(ReferenceOrbitRealTextureProperty)
-        UpdateShaderValue(ReferenceOrbitImaginaryTextureProperty)
+        UpdateShaderValue(ReferenceOrbitRealHighTextureProperty)
+        UpdateShaderValue(ReferenceOrbitImaginaryHighTextureProperty)
+        UpdateShaderValue(ReferenceOrbitRealLowTextureProperty)
+        UpdateShaderValue(ReferenceOrbitImaginaryLowTextureProperty)
 
         UpdateShaderValue(ScaleHighProperty)
         UpdateShaderValue(ScaleLowProperty)
         UpdateShaderValue(MaxIterationsProperty)
         UpdateShaderValue(OrbitLengthProperty)
         UpdateShaderValue(OrbitTextureWidthProperty)
+        UpdateShaderValue(OrbitTextureHeightProperty)
         UpdateShaderValue(ViewportWidthProperty)
         UpdateShaderValue(ViewportHeightProperty)
         UpdateShaderValue(GradientOffsetProperty)

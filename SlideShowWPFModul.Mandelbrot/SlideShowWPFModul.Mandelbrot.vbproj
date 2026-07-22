@@ -75,8 +75,10 @@
     <Compile Include="MandelbrotGradient.vb" />
     <Compile Include="MandelbrotGradientRepository.vb" />
     <Compile Include="MandelbrotPerturbationEffekt.vb" />
+    <Compile Include="MultipassTestPass1Effect.vb" />
     <Compile Include="MandelbrotReferenzorbit.vb" />
     <Compile Include="ModulMain.vb" />
+    <Compile Include="MultipassTestPass2Effect.vb" />
     <Compile Include="ucOptionsModul.Designer.vb">
       <DependentUpon>ucOptionsModul.vb</DependentUpon>
     </Compile>
@@ -146,6 +148,10 @@
     <Resource Include="MandelbrotGradienten.xml" />
     <Content Include="Shader\Mandelbrot.fx" />
     <Content Include="Shader\MandelbrotPerturbation.fx" />
+    <Resource Include="Shader\MultipassTestPass1.ps" />
+    <Resource Include="Shader\MultipassTestPass2.ps" />
+    <None Include="Shader\MultipassTestPass1.fx" />
+    <None Include="Shader\MultipassTestPass2.fx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -167,9 +173,6 @@
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Shader\Mandelbrot.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
