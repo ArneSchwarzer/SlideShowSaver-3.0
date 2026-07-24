@@ -1,20 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\slideshowwpfmodul.mandelbrot\\shader\\multipasstestpass1.fx||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\shader\\multipasstestpass1.fx||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\slideshowwpfmodul.mandelbrot\\multipasstestpass1effect.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\multipasstestpass1effect.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -22,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -31,45 +18,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MultipassTestPass1.fx",
-              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\Shader\\MultipassTestPass1.fx",
-              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\Shader\\MultipassTestPass1.fx",
-              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\Shader\\MultipassTestPass1.fx",
-              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\Shader\\MultipassTestPass1.fx",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAwwBwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-07-21T22:40:46.582Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MultipassTestPass1Effect.vb",
-              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MultipassTestPass1Effect.vb",
-              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\MultipassTestPass1Effect.vb",
-              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MultipassTestPass1Effect.vb",
-              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\MultipassTestPass1Effect.vb",
-              "ViewState": "AgIAACUAAAAAAAAAAAAUwC4AAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
-              "WhenOpened": "2026-07-21T22:40:46.584Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "wpfModulMain.xaml.vb",
-              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
-              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
-              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
-              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
-              "ViewState": "AgIAACcFAAAAAAAAAIA0wDEFAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
-              "WhenOpened": "2026-07-13T14:03:52.4Z",
-              "EditorCaption": ""
             }
           ]
         }

@@ -10,74 +10,148 @@
         Topmost="False"
         KeyDown="Window_KeyDown"
         MouseDown="Window_MouseDown">
-    
-    <Grid>
-        <!-- Hauptbild, immer Vollbild -->
-        <Rectangle x:Name="rctMandelbrot"            
-            Stretch="Fill"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"/>
-        
-        <!-- Präsentations‑TextBlock in Bildschirmmitte -->
+
+    <Grid x:Name="grdHauptbereich"
+          Background="Black"
+          ClipToBounds="True">
+
+        <!-- ==================================================
+             Normale Mandelbrot-Ausgabe
+             ================================================== -->
+
+        <Rectangle x:Name="rctMandelbrot"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   Stretch="Fill" />
+
+
+        <!-- ==================================================
+             Präsentationstext
+             ================================================== -->
+
         <TextBlock x:Name="txbPraesentationsschirm"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center"
-             TextAlignment="Center"
-             FontSize="48"
-             FontWeight="Bold"                   
-             Text="Mandelbrot"
-             TextWrapping="Wrap"/>
-        <!-- Standard: unsichtbar -->
-        <Grid x:Name="grdMultipassTest"
-      Background="Black"
-      Visibility="Collapsed">
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   MaxWidth="1200"
+                   Margin="40"
+                   Text="Mandelbrot"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap"
+                   FontSize="48"
+                   FontWeight="Bold"
+                   Foreground="White"
+                   IsHitTestVisible="False" />
 
-            <!-- Pass 1: bleibt Bestandteil des Visual Trees,
-         wird aber visuell vom Endpass überdeckt. -->
-            <Grid x:Name="grdMultipassPass1"
-          IsHitTestVisible="False">
 
-                <Grid.CacheMode>
-                    <BitmapCache RenderAtScale="1"
-                         EnableClearType="False"
-                         SnapsToDevicePixels="False" />
-                </Grid.CacheMode>
+        <!-- ==================================================
+             MPPValidation
 
-                <Rectangle x:Name="rctMultipassPass1"
-                   Fill="White"
-                   HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch" />
+             Alle Pass-Flächen liegen exakt übereinander und
+             erhalten durch Stretch-Ausrichtung automatisch
+             dieselbe Größe wie der Hauptbereich.
+
+             Seed:
+                 Erzeugt den Ausgangszustand.
+
+             Node A/B:
+                 Liest Seed über BitmapCacheBrush und setzt
+                 die Berechnung fort.
+
+             Output:
+                 Liest Node A und zeigt das Endergebnis an.
+             ================================================== -->
+
+        <Grid x:Name="grdMPPValidation"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Background="Black"
+              ClipToBounds="True"
+              Visibility="Collapsed"
+              Panel.ZIndex="10">
+
+            <!-- ==============================================
+                 Seed
+                 ============================================== -->
+
+            <Grid x:Name="grdMPPValidationSeed"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="Transparent"
+                  ClipToBounds="True"
+                  IsHitTestVisible="False"
+                  Panel.ZIndex="0">
+
+                <Rectangle x:Name="rctMPPValidationSeed"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch"
+                           Fill="White"
+                           Stretch="Fill" />
 
             </Grid>
 
-            <!-- Pass 2 -->
-            <Grid x:Name="grdMultipassPass2"
-          IsHitTestVisible="False">
 
-                <Grid.CacheMode>
-                    <BitmapCache RenderAtScale="1"
-                         EnableClearType="False"
-                         SnapsToDevicePixels="False" />
-                </Grid.CacheMode>
+            <!-- ==============================================
+                 Node A
+                 ============================================== -->
 
-                <Rectangle x:Name="rctMultipassPass2"
-                   Fill="White"
-                   HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch" />
+            <Grid x:Name="grdMPPValidationNodeA"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="Transparent"
+                  ClipToBounds="True"
+                  IsHitTestVisible="False"
+                  Panel.ZIndex="1">
+
+                <Rectangle x:Name="rctMPPValidationNodeA"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch"
+                           Fill="White"
+                           Stretch="Fill" />
 
             </Grid>
 
-            <!-- Pass 3 / sichtbares Endergebnis -->
-            <Grid x:Name="grdMultipassPass3"
-          IsHitTestVisible="False">
+            <!-- ==============================================
+     Node B
+     ============================================== -->
 
-                <Rectangle x:Name="rctMultipassPass3"
-                   Fill="White"
-                   HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch" />
+            <Grid x:Name="grdMPPValidationNodeB"
+      HorizontalAlignment="Stretch"
+      VerticalAlignment="Stretch"
+      Background="Transparent"
+      ClipToBounds="True"
+      IsHitTestVisible="False"
+      Panel.ZIndex="2">
+
+                <Rectangle x:Name="rctMPPValidationNodeB"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               Fill="White"
+               Stretch="Fill" />
+
+            </Grid>
+
+            <!-- ==============================================
+                 Output / sichtbares Endergebnis
+                 ============================================== -->
+
+            <Grid x:Name="grdMPPValidationOutput"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="Transparent"
+                  ClipToBounds="True"
+                  IsHitTestVisible="False"
+                  Panel.ZIndex="3">
+
+                <Rectangle x:Name="rctMPPValidationOutput"
+                           HorizontalAlignment="Stretch"
+                           VerticalAlignment="Stretch"
+                           Fill="White"
+                           Stretch="Fill" />
 
             </Grid>
 
         </Grid>
+
     </Grid>
+
 </Window>

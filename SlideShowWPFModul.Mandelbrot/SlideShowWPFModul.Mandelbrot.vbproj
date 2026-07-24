@@ -67,29 +67,45 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="wpfModulMain.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="MandelbrotEffekt.vb" />
-    <Compile Include="MandelbrotGradient.vb" />
-    <Compile Include="MandelbrotGradientRepository.vb" />
-    <Compile Include="MandelbrotPerturbationEffekt.vb" />
-    <Compile Include="MultipassTestPass1Effect.vb" />
-    <Compile Include="MandelbrotReferenzorbit.vb" />
-    <Compile Include="ModulMain.vb" />
-    <Compile Include="MultipassTestPass2Effect.vb" />
-    <Compile Include="ucOptionsModul.Designer.vb">
-      <DependentUpon>ucOptionsModul.vb</DependentUpon>
-    </Compile>
-    <Compile Include="ucOptionsModul.vb">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="wpfModulMain.xaml.vb">
-      <DependentUpon>wpfModulMain.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+  <Page Include="wpfModulMain.xaml">
+    <Generator>MSBuild:Compile</Generator>
+    <SubType>Designer</SubType>
+  </Page>
+
+  <Compile Include="MandelbrotEffekt.vb" />
+  <Compile Include="MandelbrotGradient.vb" />
+  <Compile Include="MandelbrotGradientRepository.vb" />
+  <Compile Include="MandelbrotPerturbationEffekt.vb" />
+  <Compile Include="MandelbrotReferenzorbit.vb" />
+
+<Compile Include="Multipass\MultipassShaderEffectBase.vb" />
+<Compile Include="Multipass\MultipassStateShaderEffectBase.vb" />
+
+<Compile Include="Multipass\MultipassRenderNodeBase.vb" />
+<Compile Include="Multipass\Validation\MPPValidationSeedNode.vb" />
+<Compile Include="Multipass\Validation\MPPValidationContinueNode.vb" />
+<Compile Include="Multipass\Validation\MPPValidationOutputNode.vb" />
+
+<Compile Include="Multipass\Validation\MPPValidationSeedEffect.vb" />
+<Compile Include="Multipass\Validation\MPPValidationContinueEffect.vb" />
+<Compile Include="Multipass\Validation\MPPValidationOutputEffect.vb" />
+<Compile Include="Multipass\Validation\MPPValidation.vb" />
+
+  <Compile Include="ModulMain.vb" />
+
+  <Compile Include="ucOptionsModul.Designer.vb">
+    <DependentUpon>ucOptionsModul.vb</DependentUpon>
+  </Compile>
+
+  <Compile Include="ucOptionsModul.vb">
+    <SubType>UserControl</SubType>
+  </Compile>
+
+  <Compile Include="wpfModulMain.xaml.vb">
+    <DependentUpon>wpfModulMain.xaml</DependentUpon>
+    <SubType>Code</SubType>
+  </Compile>
+</ItemGroup>
   <ItemGroup>
     <Import Include="System.Threading.Tasks" />
     <Import Include="System.Linq" />
@@ -142,16 +158,18 @@
     <None Include="Shader\CompileShader.cmd" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\MPPValidationContinue.fx" />
+    <None Include="Shader\MPPValidationOutput.fx" />
+    <Resource Include="Shader\MPPValidationContinue.ps" />
+    <Resource Include="Shader\MPPValidationOutput.ps" />
     <Resource Include="Shader\MandelbrotPerturbation.ps" />
     <Resource Include="Shader\Mandelbrot.ps" />
     <Resource Include="MandelbrotZiele.xml" />
     <Resource Include="MandelbrotGradienten.xml" />
     <Content Include="Shader\Mandelbrot.fx" />
     <Content Include="Shader\MandelbrotPerturbation.fx" />
-    <Resource Include="Shader\MultipassTestPass1.ps" />
-    <Resource Include="Shader\MultipassTestPass2.ps" />
-    <None Include="Shader\MultipassTestPass1.fx" />
-    <None Include="Shader\MultipassTestPass2.fx" />
+    <Resource Include="Shader\MPPValidationSeed.ps" />   
+    <None Include="Shader\MPPValidationSeed.fx" />    
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

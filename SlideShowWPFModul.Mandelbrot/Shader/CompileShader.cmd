@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 
 set FXC="C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe"
 
@@ -15,14 +15,20 @@ echo Kompiliere MandelbrotPerturbation.fx...
 if errorlevel 1 goto :fehler
 
 echo.
-echo Kompiliere MultipassTestPass1.fx...
-%FXC% /T ps_3_0 /E main /Fo MultipassTestPass1.ps MultipassTestPass1.fx
+echo Kompiliere MPPValidationSeed.fx...
+%FXC% /T ps_3_0 /E main /Fo MPPValidationSeed.ps MPPValidationSeed.fx
 
 if errorlevel 1 goto :fehler
 
 echo.
-echo Kompiliere MultipassTestPass2.fx...
-%FXC% /T ps_3_0 /E main /Fo MultipassTestPass2.ps MultipassTestPass2.fx
+echo Kompiliere MPPValidationContinue.fx...
+%FXC% /T ps_3_0 /E main /Fo MPPValidationContinue.ps MPPValidationContinue.fx
+
+if errorlevel 1 goto :fehler
+
+echo.
+echo Kompiliere MPPValidationOutput.fx...
+%FXC% /T ps_3_0 /E main /Fo MPPValidationOutput.ps MPPValidationOutput.fx
 
 if errorlevel 1 goto :fehler
 
