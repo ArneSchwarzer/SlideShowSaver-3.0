@@ -52,37 +52,28 @@ Public MustInherit Class MultipassRenderNodeBase
 
         Dim bitmapCacheIntern As BitmapCache
 
-        If String.IsNullOrWhiteSpace(
-            nodeName) Then
+        If String.IsNullOrWhiteSpace(nodeName) Then
 
-            Throw New ArgumentException(
-                "Der Name des RenderNodes darf nicht leer sein.",
-                NameOf(nodeName))
+            Throw New ArgumentException("Der Name des RenderNodes darf nicht leer sein.", NameOf(nodeName))
 
         End If
 
         If container Is Nothing Then
 
-            Throw New ArgumentNullException(
-                NameOf(container))
+            Throw New ArgumentNullException(NameOf(container))
 
         End If
 
         If renderRectangle Is Nothing Then
 
-            Throw New ArgumentNullException(
-                NameOf(renderRectangle))
+            Throw New ArgumentNullException(NameOf(renderRectangle))
 
         End If
 
         nodeNameIntern = nodeName
-
         containerIntern = container
-
         renderRectangleIntern = renderRectangle
-
         bitmapCacheIntern = New BitmapCache With {.RenderAtScale = 1.0, .EnableClearType = False, .SnapsToDevicePixels = False}
-
         containerIntern.CacheMode = bitmapCacheIntern
 
         outputBrushIntern = New BitmapCacheBrush(containerIntern)
@@ -95,11 +86,8 @@ Public MustInherit Class MultipassRenderNodeBase
 
     Public Sub Aktiviere()
 
-        containerIntern.Visibility =
-            Visibility.Visible
-
-        containerIntern.IsHitTestVisible =
-            False
+        containerIntern.Visibility = Visibility.Visible
+        containerIntern.IsHitTestVisible = False
 
         containerIntern.InvalidateVisual()
         renderRectangleIntern.InvalidateVisual()
@@ -108,28 +96,21 @@ Public MustInherit Class MultipassRenderNodeBase
 
     Public Sub Deaktiviere()
 
-        containerIntern.Visibility =
-            Visibility.Hidden
+        containerIntern.Visibility = Visibility.Hidden
 
     End Sub
 
     Public Sub LoeseEffekt()
 
-        renderRectangleIntern.Effect =
-            Nothing
+        renderRectangleIntern.Effect = Nothing
 
     End Sub
 
     Public Overridable Sub Aufraeumen()
 
-        renderRectangleIntern.Effect =
-            Nothing
-
-        renderRectangleIntern.Fill =
-            Nothing
-
-        outputBrushIntern.Target =
-            Nothing
+        renderRectangleIntern.Effect = Nothing
+        renderRectangleIntern.Fill = Nothing
+        outputBrushIntern.Target = Nothing
 
     End Sub
 

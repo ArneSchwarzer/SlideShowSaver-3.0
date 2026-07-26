@@ -28,7 +28,6 @@ Public Class ModulMain
         Dim Gradienten As List(Of String)
         Dim GradientAnimieren As Boolean
         Dim KoordinatenAnzeigen As Boolean
-        Dim Zoomdauer As Integer
         Dim Zoomgeschwindigkeit As Integer
         Dim Rotation As Boolean
     End Structure
@@ -87,7 +86,13 @@ Public Class ModulMain
         Try
             mandelbrotScreen = New wpfModulMain()
         Catch ex As Exception
-            LogError("Modul Mandelbrot - ModulMain.StartModul(): Das Modul konnte nicht geladen werden:" & ex.ToString)
+            LogError(
+        "Modul Mandelbrot - ModulMain.StartModul(): " &
+        "Das Modul konnte nicht geladen werden: " &
+        ex.ToString())
+
+            RaiseEvent ModulStateChanged("Error")
+            Exit Sub
         End Try
 
         mandelbrotScreen.WindowState = System.Windows.WindowState.Maximized
@@ -148,7 +153,6 @@ Public Class ModulMain
         defaults("Gradienten") = "Regenbogen"
         defaults("GradientAnimieren") = "True"
         defaults("KoordinatenAnzeigen") = "False"
-        defaults("Zoomdauer") = "1"
         defaults("Zoomgeschwindigkeit") = "1"
         defaults("Rotation") = "True"
 
@@ -176,9 +180,6 @@ Public Class ModulMain
 
         'Zoomgeschwindigkeit
         aktuelleSettings.Zoomgeschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomgeschwindigkeit", defaults))
-
-        'Zoomdauer
-        aktuelleSettings.Zoomdauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomdauer", defaults))
 
         'Koordinaten Anzeigen
         aktuelleSettings.Rotation = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Rotation", defaults))

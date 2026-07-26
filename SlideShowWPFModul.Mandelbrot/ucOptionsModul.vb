@@ -49,14 +49,7 @@ Public Class ucOptionsModul
         chkKoordinatenAnzeigen.Checked = aktuelleSettings.KoordinatenAnzeigen
         chkRotation.Checked = aktuelleSettings.Rotation
 
-        'Trackbars initialisieren
-        trkZoomdauer.Value = aktuelleSettings.Zoomdauer
-        If trkZoomdauer.Value = 60 Then
-            lblZoomdauer.Text = "1 h"
-        Else
-            lblZoomdauer.Text = trkZoomdauer.Value.ToString & " m"
-        End If
-
+        'Trackbar initialisieren
         trkZoomgeschwindigkeit.Value = aktuelleSettings.Zoomgeschwindigkeit
 
     End Sub
@@ -87,18 +80,6 @@ Public Class ucOptionsModul
         Catch ex As Exception
             LogHandling.LogWarn("SSS 3.0: ucOptionsModul.clbGradienten_ItemCheck() - Problem: " & ex.ToString)
         End Try
-    End Sub
-
-    Private Sub trkZoomdauer_ValueChanged(sender As Object, e As EventArgs) Handles trkZoomdauer.ValueChanged
-        If trkZoomdauer.Value = 60 Then
-            lblZoomdauer.Text = "1 h"
-        Else
-            lblZoomdauer.Text = trkZoomdauer.Value.ToString & " m"
-        End If
-
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Zoomdauer", trkZoomdauer.Value.ToString)
-
     End Sub
 
     Private Sub trkZoomgeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkZoomgeschwindigkeit.ValueChanged

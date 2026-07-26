@@ -34,12 +34,9 @@ Public MustInherit Class MultipassStateShaderEffectBase
 
 #Region "Konstruktor"
 
-    Protected Sub New(
-        shaderDateiname As String)
+    Protected Sub New(shaderDateiname As String)
 
-        MyBase.New(
-            shaderDateiname,
-            StateTextureProperty)
+        MyBase.New(shaderDateiname, StateTextureProperty)
 
     End Sub
 

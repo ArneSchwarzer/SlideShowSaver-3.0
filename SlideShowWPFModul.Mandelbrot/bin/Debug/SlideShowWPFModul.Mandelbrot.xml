@@ -54,53 +54,6 @@ SlideShowWPFModul.Mandelbrot
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
-<member name="T:SlideShowWPFModul.Mandelbrot.MandelbrotComplex">
- <summary>
- Repräsentiert eine komplexe Zahl mit Double-Genauigkeit.
- </summary>
-</member>
-<member name="T:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit">
- <summary>
- Berechnet und verwaltet den Referenzorbit eines Punktes
- innerhalb der komplexen Mandelbrot-Ebene.
- </summary>
-</member>
-<member name="P:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.CenterX">
- <summary>
- Realteil des Referenzpunktes.
- </summary>
-</member>
-<member name="P:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.CenterY">
- <summary>
- Imaginärteil des Referenzpunktes.
- </summary>
-</member>
-<member name="P:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.MaxIterationen">
- <summary>
- Maximale Anzahl der zu berechnenden Iterationen.
- </summary>
-</member>
-<member name="P:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.Orbit">
- <summary>
- Nur lesbarer Zugriff auf die berechneten Orbitwerte.
- </summary>
-</member>
-<member name="P:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.Count">
- <summary>
- Anzahl der tatsächlich berechneten Orbitwerte.
- </summary>
-</member>
-<member name="M:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.Item(System.Int32)">
- <summary>
- Liefert den Orbitwert an der angegebenen Position.
- </summary>
-</member>
-<member name="M:SlideShowWPFModul.Mandelbrot.MandelbrotReferenzOrbit.BerechneOrbit">
- <summary>
- Berechnet die Referenzbahn Z(n+1) = Z(n)^2 + C.
- Z0 wird als erster Eintrag gespeichert.
- </summary>
-</member>
 <member name="T:SlideShowWPFModul.Mandelbrot.wpfModulMain">
 <summary>
 wpfModulMain

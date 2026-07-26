@@ -28,13 +28,9 @@ Partial Class ucOptionsModul
         Me.chkGradientAnimieren = New System.Windows.Forms.CheckBox()
         Me.chkKoordinatenAnzeigen = New System.Windows.Forms.CheckBox()
         Me.clbGradienten = New System.Windows.Forms.CheckedListBox()
-        Me.trkZoomdauer = New System.Windows.Forms.TrackBar()
         Me.trkZoomgeschwindigkeit = New System.Windows.Forms.TrackBar()
-        Me.lbltkbZoomdauer = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.chkRotation = New System.Windows.Forms.CheckBox()
-        Me.lblZoomdauer = New System.Windows.Forms.Label()
-        CType(Me.trkZoomdauer, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkZoomgeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -83,7 +79,7 @@ Partial Class ucOptionsModul
         'chkKoordinatenAnzeigen
         '
         Me.chkKoordinatenAnzeigen.AutoSize = True
-        Me.chkKoordinatenAnzeigen.Location = New System.Drawing.Point(36, 735)
+        Me.chkKoordinatenAnzeigen.Location = New System.Drawing.Point(36, 642)
         Me.chkKoordinatenAnzeigen.Name = "chkKoordinatenAnzeigen"
         Me.chkKoordinatenAnzeigen.Size = New System.Drawing.Size(340, 45)
         Me.chkKoordinatenAnzeigen.TabIndex = 21
@@ -100,19 +96,9 @@ Partial Class ucOptionsModul
         Me.clbGradienten.Size = New System.Drawing.Size(575, 224)
         Me.clbGradienten.TabIndex = 22
         '
-        'trkZoomdauer
-        '
-        Me.trkZoomdauer.Location = New System.Drawing.Point(257, 439)
-        Me.trkZoomdauer.Maximum = 60
-        Me.trkZoomdauer.Minimum = 1
-        Me.trkZoomdauer.Name = "trkZoomdauer"
-        Me.trkZoomdauer.Size = New System.Drawing.Size(484, 101)
-        Me.trkZoomdauer.TabIndex = 23
-        Me.trkZoomdauer.Value = 1
-        '
         'trkZoomgeschwindigkeit
         '
-        Me.trkZoomgeschwindigkeit.Location = New System.Drawing.Point(257, 504)
+        Me.trkZoomgeschwindigkeit.Location = New System.Drawing.Point(257, 446)
         Me.trkZoomgeschwindigkeit.Maximum = 100
         Me.trkZoomgeschwindigkeit.Minimum = 1
         Me.trkZoomgeschwindigkeit.Name = "trkZoomgeschwindigkeit"
@@ -120,19 +106,10 @@ Partial Class ucOptionsModul
         Me.trkZoomgeschwindigkeit.TabIndex = 24
         Me.trkZoomgeschwindigkeit.Value = 1
         '
-        'lbltkbZoomdauer
-        '
-        Me.lbltkbZoomdauer.AutoSize = True
-        Me.lbltkbZoomdauer.Location = New System.Drawing.Point(29, 439)
-        Me.lbltkbZoomdauer.Name = "lbltkbZoomdauer"
-        Me.lbltkbZoomdauer.Size = New System.Drawing.Size(173, 41)
-        Me.lbltkbZoomdauer.TabIndex = 25
-        Me.lbltkbZoomdauer.Text = "Zoomdauer"
-        '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(29, 504)
+        Me.Label2.Location = New System.Drawing.Point(29, 446)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(236, 41)
         Me.Label2.TabIndex = 26
@@ -148,25 +125,13 @@ Partial Class ucOptionsModul
         Me.chkRotation.Text = "Rotation"
         Me.chkRotation.UseVisualStyleBackColor = True
         '
-        'lblZoomdauer
-        '
-        Me.lblZoomdauer.Location = New System.Drawing.Point(703, 439)
-        Me.lblZoomdauer.Name = "lblZoomdauer"
-        Me.lblZoomdauer.Size = New System.Drawing.Size(118, 62)
-        Me.lblZoomdauer.TabIndex = 28
-        Me.lblZoomdauer.Text = "1 m"
-        Me.lblZoomdauer.TextAlign = System.Drawing.ContentAlignment.TopRight
-        '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.lblZoomdauer)
         Me.Controls.Add(Me.chkRotation)
         Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.lbltkbZoomdauer)
         Me.Controls.Add(Me.trkZoomgeschwindigkeit)
-        Me.Controls.Add(Me.trkZoomdauer)
         Me.Controls.Add(Me.clbGradienten)
         Me.Controls.Add(Me.chkKoordinatenAnzeigen)
         Me.Controls.Add(Me.chkGradientAnimieren)
@@ -177,7 +142,6 @@ Partial Class ucOptionsModul
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "ucOptionsModul"
         Me.Size = New System.Drawing.Size(890, 1020)
-        CType(Me.trkZoomdauer, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.trkZoomgeschwindigkeit, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -190,10 +154,7 @@ Partial Class ucOptionsModul
     Friend WithEvents chkGradientAnimieren As Windows.Forms.CheckBox
     Friend WithEvents chkKoordinatenAnzeigen As Windows.Forms.CheckBox
     Friend WithEvents clbGradienten As Forms.CheckedListBox
-    Friend WithEvents trkZoomdauer As Forms.TrackBar
     Friend WithEvents trkZoomgeschwindigkeit As Forms.TrackBar
-    Friend WithEvents lbltkbZoomdauer As Forms.Label
     Friend WithEvents Label2 As Forms.Label
     Friend WithEvents chkRotation As Forms.CheckBox
-    Friend WithEvents lblZoomdauer As Forms.Label
 End Class

@@ -39,57 +39,38 @@ Public Class MPPValidationContinueNode
 
 #Region "Öffentliche Methoden"
 
-    Public Sub SetzeEingang(
-    inputBrush As Brush)
+    Public Sub SetzeEingang(inputBrush As Brush)
 
         If inputBrush Is Nothing Then
-
-            Throw New ArgumentNullException(
-            NameOf(inputBrush))
-
+            Throw New ArgumentNullException(NameOf(inputBrush))
         End If
 
-        continueEffectIntern.StateTexture =
-        Nothing
-
-        continueEffectIntern.StateTexture =
-        inputBrush
+        continueEffectIntern.StateTexture = Nothing
+        continueEffectIntern.StateTexture = inputBrush
 
         RenderRectangle.InvalidateVisual()
         Container.InvalidateVisual()
 
     End Sub
 
-    Public Sub LoeseEingang()
+    Public Sub TrenneEingang()
 
-        continueEffectIntern.StateTexture =
-            Nothing
+        continueEffectIntern.StateTexture = Nothing
 
     End Sub
 
-    Public Sub SetzePassInformation(
-    passIndex As Integer,
-    maxPasses As Integer)
+    Public Sub SetzePassInformation(passIndex As Integer, maxPasses As Integer)
 
         If passIndex < 0 Then
-
-            Throw New ArgumentOutOfRangeException(
-                NameOf(passIndex))
-
+            Throw New ArgumentOutOfRangeException(NameOf(passIndex))
         End If
 
         If maxPasses <= 0 Then
-
-            Throw New ArgumentOutOfRangeException(
-                NameOf(maxPasses))
-
+            Throw New ArgumentOutOfRangeException(NameOf(maxPasses))
         End If
 
-        continueEffectIntern.PassIndex =
-            CDbl(passIndex)
-
-        continueEffectIntern.MaxPasses =
-            CDbl(maxPasses)
+        continueEffectIntern.PassIndex = CDbl(passIndex)
+        continueEffectIntern.MaxPasses = CDbl(maxPasses)
 
         RenderRectangle.InvalidateVisual()
         Container.InvalidateVisual()

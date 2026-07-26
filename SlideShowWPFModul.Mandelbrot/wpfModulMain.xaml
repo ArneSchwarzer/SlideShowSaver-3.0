@@ -11,29 +11,21 @@
         KeyDown="Window_KeyDown"
         MouseDown="Window_MouseDown">
 
-    <Grid x:Name="grdHauptbereich"
-          Background="Black"
+    <Grid x:Name="grdHauptbereich"          
           ClipToBounds="True">
 
-        <!-- ==================================================
-             Normale Mandelbrot-Ausgabe
-             ================================================== -->
-
+        <!-- Aktuelle Mandelbrot-Ausgabe -->
         <Rectangle x:Name="rctMandelbrot"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    Stretch="Fill" />
 
-
-        <!-- ==================================================
-             Präsentationstext
-             ================================================== -->
-
+        <!-- Präsentationsschirm beim Modulstart -->
         <TextBlock x:Name="txbPraesentationsschirm"
+                   Margin="40"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    MaxWidth="1200"
-                   Margin="40"
                    Text="Mandelbrot"
                    TextAlignment="Center"
                    TextWrapping="Wrap"
@@ -41,116 +33,6 @@
                    FontWeight="Bold"
                    Foreground="White"
                    IsHitTestVisible="False" />
-
-
-        <!-- ==================================================
-             MPPValidation
-
-             Alle Pass-Flächen liegen exakt übereinander und
-             erhalten durch Stretch-Ausrichtung automatisch
-             dieselbe Größe wie der Hauptbereich.
-
-             Seed:
-                 Erzeugt den Ausgangszustand.
-
-             Node A/B:
-                 Liest Seed über BitmapCacheBrush und setzt
-                 die Berechnung fort.
-
-             Output:
-                 Liest Node A und zeigt das Endergebnis an.
-             ================================================== -->
-
-        <Grid x:Name="grdMPPValidation"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Stretch"
-              Background="Black"
-              ClipToBounds="True"
-              Visibility="Collapsed"
-              Panel.ZIndex="10">
-
-            <!-- ==============================================
-                 Seed
-                 ============================================== -->
-
-            <Grid x:Name="grdMPPValidationSeed"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Background="Transparent"
-                  ClipToBounds="True"
-                  IsHitTestVisible="False"
-                  Panel.ZIndex="0">
-
-                <Rectangle x:Name="rctMPPValidationSeed"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch"
-                           Fill="White"
-                           Stretch="Fill" />
-
-            </Grid>
-
-
-            <!-- ==============================================
-                 Node A
-                 ============================================== -->
-
-            <Grid x:Name="grdMPPValidationNodeA"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Background="Transparent"
-                  ClipToBounds="True"
-                  IsHitTestVisible="False"
-                  Panel.ZIndex="1">
-
-                <Rectangle x:Name="rctMPPValidationNodeA"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch"
-                           Fill="White"
-                           Stretch="Fill" />
-
-            </Grid>
-
-            <!-- ==============================================
-     Node B
-     ============================================== -->
-
-            <Grid x:Name="grdMPPValidationNodeB"
-      HorizontalAlignment="Stretch"
-      VerticalAlignment="Stretch"
-      Background="Transparent"
-      ClipToBounds="True"
-      IsHitTestVisible="False"
-      Panel.ZIndex="2">
-
-                <Rectangle x:Name="rctMPPValidationNodeB"
-               HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch"
-               Fill="White"
-               Stretch="Fill" />
-
-            </Grid>
-
-            <!-- ==============================================
-                 Output / sichtbares Endergebnis
-                 ============================================== -->
-
-            <Grid x:Name="grdMPPValidationOutput"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Background="Transparent"
-                  ClipToBounds="True"
-                  IsHitTestVisible="False"
-                  Panel.ZIndex="3">
-
-                <Rectangle x:Name="rctMPPValidationOutput"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Stretch"
-                           Fill="White"
-                           Stretch="Fill" />
-
-            </Grid>
-
-        </Grid>
 
     </Grid>
 

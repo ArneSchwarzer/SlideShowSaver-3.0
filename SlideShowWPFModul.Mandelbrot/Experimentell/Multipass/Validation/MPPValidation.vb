@@ -10,7 +10,7 @@ Public NotInheritable Class MPPValidation
 
 #Region "Konstanten"
 
-    Private Const StandardMaxPasses As Integer = 8
+    Private Const StandardMaxPasses As Integer = 3
     Private Const StandardWarteFrames As Integer = 30
 
 #End Region
@@ -129,9 +129,12 @@ Public NotInheritable Class MPPValidation
 
         renderingHandlerAktivIntern = True
 
-        LogHandling.LogInfo(
-            "Modul Mandelbrot: MPPValidation gestartet. " &
-            "Pass 1 wurde auf Node A eingerichtet.")
+        LogHandling.LogInfo("Modul Mandelbrot: Encode-Decode-Encode-Test gestartet. " &
+                            "Pass 1 wurde auf Node A eingerichtet. " &
+                            "Maximale Passzahl=" &
+                            maxPassesIntern.ToString() &
+                            ".")
+
 
     End Sub
 
@@ -208,6 +211,7 @@ Public NotInheritable Class MPPValidation
     Private Sub FuehreNaechstenPassAus()
 
         Dim quellNode As MultipassRenderNodeBase
+        Dim quellContinueNode As MPPValidationContinueNode
         Dim zielNode As MPPValidationContinueNode
         Dim neuerZielNode As MPPValidationContinueNode
         Dim naechsterPass As Integer
@@ -218,9 +222,7 @@ Public NotInheritable Class MPPValidation
 
         If quellNode Is Nothing Then
 
-            LogHandling.LogWarn(
-                "MPPValidation: QuellNode ist Nothing.")
-
+            LogHandling.LogWarn("MPPValidation: QuellNode ist Nothing.")
             [Stop]()
 
             Return
@@ -229,8 +231,20 @@ Public NotInheritable Class MPPValidation
 
         If zielNode Is Nothing Then
 
+            LogHandling.LogWarn("MPPValidation: ZielNode ist Nothing.")
+            [Stop]()
+
+            Return
+
+        End If
+
+        quellContinueNode = TryCast(quellNode, MPPValidationContinueNode)
+
+        If quellContinueNode Is Nothing Then
+
             LogHandling.LogWarn(
-                "MPPValidation: ZielNode ist Nothing.")
+            "MPPValidation: Der QuellNode '" & quellNode.NodeName &
+            "' ist kein MPPValidationContinueNode.")
 
             [Stop]()
 
@@ -238,31 +252,22 @@ Public NotInheritable Class MPPValidation
 
         End If
 
-        zielNode.SetzePassInformation(
-            naechsterPass,
-            maxPassesIntern)
+        LogHandling.LogInfo(
+        "MPPValidation: Eingang von " & quellContinueNode.NodeName &
+        " wird vor Pass " & naechsterPass.ToString() & " getrennt.")
 
-        zielNode.SetzeEingang(
-            quellNode.OutputBrush)
+        quellContinueNode.TrenneEingang()
 
-        outputNodeIntern.SetzeEingang(
-            zielNode.OutputBrush)
+        zielNode.SetzePassInformation(naechsterPass, maxPassesIntern)
+        zielNode.SetzeEingang(quellNode.OutputBrush)
+        outputNodeIntern.SetzeEingang(zielNode.OutputBrush)
 
         aktuellerPassIntern = naechsterPass
 
         LogHandling.LogInfo(
-            "MPPValidation: Pass " &
-            aktuellerPassIntern.ToString() &
-            ", Quelle=" &
-            quellNode.NodeName &
-            ", Ziel=" &
-            zielNode.NodeName &
-            ", Rotwert=" &
-            (CDbl(aktuellerPassIntern) /
-             CDbl(maxPassesIntern)).ToString(
-                "F3",
-                CultureInfo.InvariantCulture) &
-            ".")
+        "MPPValidation: Pass " & aktuellerPassIntern.ToString() &
+        ", Quelle=" & quellNode.NodeName &
+        ", Ziel=" & zielNode.NodeName & ".")
 
         aktuellerQuellNodeIntern = zielNode
 
