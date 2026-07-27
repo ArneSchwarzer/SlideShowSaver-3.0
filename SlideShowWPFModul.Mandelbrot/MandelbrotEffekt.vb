@@ -26,6 +26,7 @@ Public Class MandelbrotEffect
         UpdateShaderValue(ViewportWidthProperty)
         UpdateShaderValue(ViewportHeightProperty)
         UpdateShaderValue(GradientOffsetProperty)
+        UpdateShaderValue(RotationProperty)
         UpdateShaderValue(GradientTextureProperty)
     End Sub
 
@@ -186,6 +187,22 @@ Public Class MandelbrotEffect
         End Get
         Set(value As Single)
             SetValue(GradientOffsetProperty, value)
+        End Set
+    End Property
+
+    Public Shared ReadOnly RotationProperty As DependencyProperty =
+    DependencyProperty.Register(
+        "Rotation",
+        GetType(Single),
+        GetType(MandelbrotEffect),
+        New UIPropertyMetadata(0.0F, PixelShaderConstantCallback(10)))
+
+    Public Property Rotation As Single
+        Get
+            Return CSng(GetValue(RotationProperty))
+        End Get
+        Set(value As Single)
+            SetValue(RotationProperty, value)
         End Set
     End Property
 

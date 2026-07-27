@@ -42,7 +42,7 @@ Public Class ModulMain
 
     Public ReadOnly Property ModulBeschreibung As String Implements ISlideShowModul.ModulBeschreibung
         Get
-            Return "Zeigt animierte Mandelbrot-Fraktale mit Farbverlauf."
+            Return "Kurze Mandelbrotfraktal-Zooms (bis 3.5e-5)"
         End Get
     End Property
 

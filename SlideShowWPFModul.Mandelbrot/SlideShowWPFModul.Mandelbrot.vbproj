@@ -67,14 +67,21 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ucMandelbrotZielOverlay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="wpfModulMain.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="MandelbrotEffekt.vb" />
     <Compile Include="MandelbrotGradient.vb" />
-    <Compile Include="MandelbrotGradientRepository.vb" />    
+    <Compile Include="MandelbrotGradientRepository.vb" />
     <Compile Include="ModulMain.vb" />
+    <Compile Include="ucMandelbrotZielOverlay.xaml.vb">
+      <DependentUpon>ucMandelbrotZielOverlay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ucOptionsModul.Designer.vb">
       <DependentUpon>ucOptionsModul.vb</DependentUpon>
     </Compile>
@@ -137,9 +144,9 @@
     </None>
     <None Include="Shader\CompileShader.cmd" />
   </ItemGroup>
-  <ItemGroup>   
-    <Resource Include="Shader\Mandelbrot.ps" />    
-    <Content Include="Shader\Mandelbrot.fx" />    
+  <ItemGroup>
+    <Resource Include="Shader\Mandelbrot.ps" />
+    <Content Include="Shader\Mandelbrot.fx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -161,6 +168,6 @@
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>
     </ProjectReference>
-  </ItemGroup> 
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

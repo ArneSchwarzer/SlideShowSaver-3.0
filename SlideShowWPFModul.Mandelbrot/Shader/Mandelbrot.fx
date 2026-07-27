@@ -10,6 +10,7 @@ float MaxIterations : register(c6);
 float ViewportWidth : register(c7);
 float ViewportHeight : register(c8);
 float GradientOffset : register(c9);
+float Rotation : register(c10);
 
 float2 ds_normalize(float2 a)
 {
@@ -78,15 +79,26 @@ float4 main(float2 uv : TEXCOORD) : COLOR
     float aspect = ViewportWidth / max(ViewportHeight, 1.0);
 
     float px = (uv.x - 0.5) * aspect;
-    float py = (uv.y - 0.5);
+    float py = uv.y - 0.5;
+
+    float sinAngle = sin(Rotation);
+    float cosAngle = cos(Rotation);
+
+    float rotatedX = px * cosAngle - py * sinAngle;
+    float rotatedY = px * sinAngle + py * cosAngle;
+
+    px = rotatedX;
+    py = rotatedY;
 
     float2 scale = float2(ScaleHigh, ScaleLow);
 
-    float2 cx = ds_add(float2(CenterXHigh, CenterXLow),
-                       ds_mul_float(scale, px));
+    float2 cx = ds_add(
+        float2(CenterXHigh, CenterXLow),
+        ds_mul_float(scale, px));
 
-    float2 cy = ds_add(float2(CenterYHigh, CenterYLow),
-                       ds_mul_float(scale, py));
+    float2 cy = ds_add(
+        float2(CenterYHigh, CenterYLow),
+        ds_mul_float(scale, py));
 
     float2 zx = ds_set(0.0);
     float2 zy = ds_set(0.0);

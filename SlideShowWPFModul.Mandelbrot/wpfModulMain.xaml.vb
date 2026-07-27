@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Windows.Forms
+Imports System.Windows.Input
 Imports System.Windows.Interop
 Imports System.Windows.Threading
 Imports SlideShowLogging
@@ -7,6 +8,7 @@ Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.SharedDataHandling
 Imports SlideShowTools.XmlHandling
+Imports SlideShowTools.KeyAndMouseHandling
 Imports SlideShowWPFModul.Mandelbrot.ModulMain
 
 Public Class wpfModulMain
@@ -72,13 +74,18 @@ Public Class wpfModulMain
     Private easeOutStartSkala As Double
 
     'Rotation 
+    Private Const minRotationsWinkel As Double = 33.0
+    Private Const maxRotationsWinkel As Double = 180.0
+
     Private startRotation As Double
     Private zielRotation As Double
     Private aktuelleRotation As Double
-    Private easeOutStartRotation As Double
 
     'Sonstiges
     Private rnd As New Random()
+
+    'Finetuning/Diagnose
+    Private Const aktuellesTarget As Integer = 55
 
     Public Structure MandelbrotZiel
         Public Property Name As String
@@ -91,9 +98,22 @@ Public Class wpfModulMain
 
     Public Sub New()
 
-        AddHandler ModulMain.YouHaveMail_Mandelbrot, AddressOf CheckYourMail
+        AddHandler ModulMain.YouHaveMail_Mandelbrot,
+               AddressOf CheckYourMail
 
         InitializeComponent()
+
+        Me.AddHandler(
+        System.Windows.UIElement.PreviewMouseDownEvent,
+        New System.Windows.Input.MouseButtonEventHandler(
+            AddressOf Window_PreviewMouseDown),
+        True)
+
+        Me.AddHandler(
+        System.Windows.UIElement.PreviewKeyDownEvent,
+        New System.Windows.Input.KeyEventHandler(
+            AddressOf Window_PreviewKeyDown),
+        True)
 
         Me.WindowState = WindowState.Maximized
 
@@ -145,6 +165,30 @@ Public Class wpfModulMain
 
         mandelbrotClassicEffect = New MandelbrotEffect()
         rctMandelbrot.Effect = mandelbrotClassicEffect
+
+    End Sub
+
+    Private Sub InitialisiereZielOverlay()
+
+        Dim zielMaxIterationen As Integer
+        Dim textfarbe As Windows.Media.Color
+
+        If Not aktuelleSettings.KoordinatenAnzeigen Then
+            ucZielOverlay.Verberge()
+            Exit Sub
+        End If
+
+        zielMaxIterationen =
+        BerechneMaxIterationen(aktuellesZiel.TargetScale)
+
+        textfarbe =
+        InvertWMColor(hintergrundWM)
+
+        ucZielOverlay.InitialisiereZiel(aktuellesZiel.Name, aktuellesZiel.CenterX, aktuellesZiel.CenterY,
+                                        aktuellesZiel.TargetScale, zielMaxIterationen, aktuelleSettings.Rotation,
+                                        zielRotation, hintergrundWM, textfarbe)
+
+        ucZielOverlay.ZeigeFreezeIn()
 
     End Sub
 
@@ -265,6 +309,8 @@ Public Class wpfModulMain
         phasenStartZeit = DateTime.Now
         kamerafahrtStartZeit = phasenStartZeit
 
+        InitialisiereZielOverlay()
+
         Return True
 
     End Function
@@ -280,7 +326,7 @@ Public Class wpfModulMain
             richtung = 1.0
         End If
 
-        winkelGrad = rnd.NextDouble() * 20.0 + 5.0
+        winkelGrad = rnd.NextDouble() * (maxRotationsWinkel - minRotationsWinkel) + minRotationsWinkel
 
         Return richtung * winkelGrad * Math.PI / 180.0
 
@@ -299,6 +345,9 @@ Public Class wpfModulMain
         End If
 
         node = XMLDatensatzPerIndex(zielePfad, "Target", rnd.Next(count))
+
+        'Für Finetuning der Mandelbrotziele
+        'node = XMLDatensatzPerIndex(zielePfad, "Target", aktuellesTarget)
 
         If node Is Nothing Then
             LogHandling.LogWarn("Modul Mandelbrot: Das ausgewählte Mandelbrot-Ziel konnte nicht geladen werden.")
@@ -324,7 +373,12 @@ Public Class wpfModulMain
 
         If rnd.Next(2) = 0 Then
             aktuellesZiel.CenterY *= -1.0
-            aktuellesZiel.Name &= " gespiegelt"
+        End If
+
+        If aktuellesZiel.CenterY < 0 Then
+            aktuellesZiel.Name &= " (Nord)"
+        ElseIf aktuellesZiel.CenterY > 0 Then
+            aktuellesZiel.Name &= " (Süd)"
         End If
 
         LogHandling.LogInfo("Modul Mandelbrot: Aktuelles Ziel: " & aktuellesZiel.Name)
@@ -450,10 +504,10 @@ Public Class wpfModulMain
                 AktualisiereCruise(elapsed.TotalSeconds, phasenProgress)
 
             Case ZoomPhaseTyp.EaseOut
-                AktualisiereEaseOut(elapsed.TotalSeconds, aktuellePhase.Dauer.TotalSeconds, phasenProgress)
+                AktualisiereEaseOut(elapsed.TotalSeconds, aktuellePhase.Dauer.TotalSeconds)
 
             Case ZoomPhaseTyp.FreezeOut
-                AktualisiereFreezeOut()
+                AktualisiereFreezeOut(phasenProgress)
 
         End Select
 
@@ -473,6 +527,10 @@ Public Class wpfModulMain
         maxIterationen = startIterationen
         aktuelleRotation = startRotation
 
+        If ZielOverlayIstAktiv() Then
+            ucZielOverlay.ZeigeFreezeIn()
+        End If
+
     End Sub
 
     Private Sub AktualisiereTranslation(phasenProgress As Double)
@@ -481,8 +539,17 @@ Public Class wpfModulMain
 
         translationT = EaseInOut(phasenProgress)
 
-        aktuellePosition.CenterX = Lerp(startpunkt.CenterX, aktuellesZiel.CenterX, translationT)
-        aktuellePosition.CenterY = Lerp(startpunkt.CenterY, aktuellesZiel.CenterY, translationT)
+        aktuellePosition.CenterX =
+        Lerp(
+            startpunkt.CenterX,
+            aktuellesZiel.CenterX,
+            translationT)
+
+        aktuellePosition.CenterY =
+        Lerp(
+            startpunkt.CenterY,
+            aktuellesZiel.CenterY,
+            translationT)
 
         aktuelleSkala = startpunkt.TargetScale
         maxIterationen = startIterationen
@@ -491,6 +558,10 @@ Public Class wpfModulMain
 
         'Während der Translation noch keine Rotation.
         aktuelleRotation = startRotation
+
+        If ZielOverlayIstAktiv() Then
+            ucZielOverlay.AktualisiereTranslation(phasenProgress)
+        End If
 
     End Sub
 
@@ -502,41 +573,76 @@ Public Class wpfModulMain
         aktuellePosition.CenterY = aktuellesZiel.CenterY
 
         aktuelleSkala = Math.Max(aktuellesZiel.TargetScale, BerechneAktuelleSkala(startpunkt.TargetScale, elapsedSeconds))
+
         maxIterationen = BerechneMaxIterationen(aktuelleSkala)
 
         aktuellePosition.TargetScale = aktuelleSkala
 
-        'Rotation berechnen
         rotationT = EaseInOut(phasenProgress)
+
         aktuelleRotation = Lerp(startRotation, zielRotation, rotationT)
 
+        If ZielOverlayIstAktiv() Then
+
+            ucZielOverlay.ZeigeInformationszeile()
+
+            ucZielOverlay.AktualisiereWerte(aktuellePosition.CenterX, aktuellePosition.CenterY, aktuelleSkala, maxIterationen)
+
+        End If
+
     End Sub
 
-    Private Sub AktualisiereEaseOut(elapsedSeconds As Double, dauerSeconds As Double, phasenProgress As Double)
+    Private Sub AktualisiereEaseOut(
+    elapsedSeconds As Double,
+    dauerSeconds As Double)
 
         Dim effektiveZoomSekunden As Double
-        Dim rotationRest As Double
-        Dim rotationT As Double
 
-        aktuellePosition.CenterX = aktuellesZiel.CenterX
-        aktuellePosition.CenterY = aktuellesZiel.CenterY
+        aktuellePosition.CenterX =
+        aktuellesZiel.CenterX
+
+        aktuellePosition.CenterY =
+        aktuellesZiel.CenterY
 
         'Lineares Abbremsen der Zoomgeschwindigkeit.
-        effektiveZoomSekunden = elapsedSeconds - ((elapsedSeconds * elapsedSeconds) / (2.0 * dauerSeconds))
+        effektiveZoomSekunden =
+        elapsedSeconds -
+        ((elapsedSeconds * elapsedSeconds) /
+         (2.0 * dauerSeconds))
 
-        aktuelleSkala = Math.Max(aktuellesZiel.TargetScale, BerechneAktuelleSkala(easeOutStartSkala, effektiveZoomSekunden))
-        maxIterationen = BerechneMaxIterationen(aktuelleSkala)
+        aktuelleSkala =
+        Math.Max(
+            aktuellesZiel.TargetScale,
+            BerechneAktuelleSkala(
+                easeOutStartSkala,
+                effektiveZoomSekunden))
 
-        aktuellePosition.TargetScale = aktuelleSkala
+        maxIterationen =
+        BerechneMaxIterationen(aktuelleSkala)
 
-        'Kleine Fortsetzung der Rotation während des Abbremsens.
-        rotationRest = (zielRotation - startRotation) * 0.05
-        rotationT = EaseOutCubic(phasenProgress)
-        aktuelleRotation = Lerp(easeOutStartRotation, easeOutStartRotation + rotationRest, rotationT)
+        aktuellePosition.TargetScale =
+        aktuelleSkala
+
+        'Der Zielwinkel wurde am Ende von Cruise vollständig erreicht.
+        'Während EaseOut wird ausschließlich der Zoom abgebremst.
+        aktuelleRotation =
+        zielRotation
+
+        If ZielOverlayIstAktiv() Then
+
+            ucZielOverlay.ZeigeInformationszeile()
+
+            ucZielOverlay.AktualisiereWerte(
+            aktuellePosition.CenterX,
+            aktuellePosition.CenterY,
+            aktuelleSkala,
+            maxIterationen)
+
+        End If
 
     End Sub
 
-    Private Sub AktualisiereFreezeOut()
+    Private Sub AktualisiereFreezeOut(phasenProgress As Double)
 
         aktuellePosition.CenterX = aktuellesZiel.CenterX
         aktuellePosition.CenterY = aktuellesZiel.CenterY
@@ -545,6 +651,19 @@ Public Class wpfModulMain
         maxIterationen = BerechneMaxIterationen(aktuelleSkala)
 
         aktuellePosition.TargetScale = aktuelleSkala
+
+        If ZielOverlayIstAktiv() Then
+
+            ucZielOverlay.AktualisiereWerte(
+            aktuellePosition.CenterX,
+            aktuellePosition.CenterY,
+            aktuelleSkala,
+            maxIterationen)
+
+            ucZielOverlay.AktualisiereFreezeOut(
+            phasenProgress)
+
+        End If
 
     End Sub
 
@@ -572,7 +691,7 @@ Public Class wpfModulMain
             Case ZoomPhaseTyp.EaseOut
 
                 easeOutStartSkala = aktuelleSkala
-                easeOutStartRotation = aktuelleRotation
+                aktuelleRotation = zielRotation
 
         End Select
 
@@ -623,7 +742,10 @@ Public Class wpfModulMain
             .ViewportWidth = CSng(Math.Max(1, rctMandelbrot.ActualWidth))
             .ViewportHeight = CSng(Math.Max(1, rctMandelbrot.ActualHeight))
 
+            .Rotation = CSng(aktuelleRotation)
+
             .GradientOffset = CSng(gradientOffset)
+
         End With
 
     End Sub
@@ -722,29 +844,67 @@ Public Class wpfModulMain
 
     End Sub
 
+    Private Function ZielOverlayIstAktiv() As Boolean
+
+        If ucZielOverlay Is Nothing Then
+            Return False
+        End If
+
+        Return aktuelleSettings.KoordinatenAnzeigen
+
+    End Function
+
 #End Region
 
 #Region "Framework / Events"
 
-    Private Sub Window_KeyDown(sender As Object, e As System.Windows.Input.KeyEventArgs)
+    Private Sub Window_PreviewKeyDown(
+    sender As Object,
+    e As System.Windows.Input.KeyEventArgs)
 
-        If e.Key = Key.Escape Then
+        If e.Key = System.Windows.Input.Key.Escape Then
             e.Handled = True
         End If
 
-        SlideShowTools.KeyAndMouseHandling.ForwardKeyDownWPF(sender, e)
+        SlideShowTools.KeyAndMouseHandling.ForwardKeyDownWPF(
+        sender,
+        e)
 
     End Sub
 
-    Private Sub Window_MouseDown(sender As Object, e As System.Windows.Input.MouseButtonEventArgs)
+    Private Sub Window_PreviewMouseDown(
+    sender As Object,
+    e As System.Windows.Input.MouseButtonEventArgs)
 
-        SlideShowTools.KeyAndMouseHandling.ForwardMouseDownWPF(Me, e)
+        SlideShowTools.KeyAndMouseHandling.ForwardMouseDownWPF(
+        Me,
+        e)
 
     End Sub
 
     Private Sub CheckYourMail()
 
-        aktuelleSettings = GetSettings(Of ModulSettings_Mandelbrot)(nameModul)
+        aktuelleSettings =
+        GetSettings(Of ModulSettings_Mandelbrot)(nameModul)
+
+        If ucZielOverlay Is Nothing Then
+            Exit Sub
+        End If
+
+        If aktuelleSettings.KoordinatenAnzeigen Then
+
+            If aktuellesZiel.Name IsNot Nothing AndAlso
+           aktuellesZiel.Name <> String.Empty Then
+
+                InitialisiereZielOverlay()
+
+            End If
+
+        Else
+
+            ucZielOverlay.Verberge()
+
+        End If
 
     End Sub
 
