@@ -1,12 +1,4 @@
-﻿Imports SW = System.Windows
-Imports SWC = System.Windows.Controls
-Imports SWM = System.Windows.Media
-Imports SWMI = System.Windows.Media.Imaging
-Imports SWD = System.Windows.Threading
-Imports SWI = System.Windows.Input
-Imports System.Runtime.InteropServices
-Imports System.Windows.Media.Imaging
-Imports System.Windows.Forms
+﻿Imports System.Runtime.InteropServices
 Imports SlideShowBildauswahl
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports SlideShowInterfaces.InfoHandling
@@ -15,19 +7,24 @@ Imports SlideShowLoader
 Imports SlideShowLogging
 Imports SlideShowTools
 Imports SlideShowTools.ColorHandling
-Imports SlideShowTools.CursorHandling
 Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.KeyAndMouseHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
 Imports SlideShowTools.SharedDataHandling
+Imports SW = System.Windows
+Imports SWC = System.Windows.Controls
+Imports SWD = System.Windows.Threading
+Imports SWI = System.Windows.Input
+Imports SWM = System.Windows.Media
+Imports SWMI = System.Windows.Media.Imaging
 
 Module SaverMain
 
 #Region "Variablendeklaration"
 
-    ' Framework-Settings
+#Region "Strukturen und Enumerationen"
     Friend Structure SettingsMain
         Public ModulDauer As Integer
         Public ModulReihenfolge As String
@@ -38,7 +35,7 @@ Module SaverMain
         Public Hintergrundfarbe As Color
     End Structure
 
-    Friend Enum ModulLadeErgebnis
+    Private Enum ModulLadeErgebnis
         ModulGeladen
         KeinWechselNotwendig
         FallbackAktiviert
@@ -63,48 +60,55 @@ Module SaverMain
         Optionsdialog
         Pause
     End Enum
+#End Region
 
-    Friend aktuelleSettings As SettingsMain
+#Region "Framework-Settings"
+    Private aktuelleSettings As SettingsMain
+#End Region
 
-    ' Fallback-Saver
-    Friend fallbackInstanz As frmFallbackSaver = Nothing
-    Friend fallbackIsActive As Boolean = False
-    Friend fallbackPaused As Boolean = False
+#Region "Fallback-Saver"
+    Private fallbackInstanz As frmFallbackSaver = Nothing
+    Private fallbackIsActive As Boolean = False
+    Private fallbackPaused As Boolean = False
+#End Region
 
-    ' Schoner-Module
-    Friend listOfAvailableModules As List(Of SlideShowModulInfo)
-    Friend listOfEnabledModules As List(Of String)
+#Region "Module"
+    Private listOfAvailableModules As List(Of SlideShowModulInfo)
+    Private listOfEnabledModules As List(Of String)
     Friend activeModule As ISlideShowModul = Nothing
-    Friend nextModule As ISlideShowModul = Nothing
+    Private nextModule As ISlideShowModul = Nothing
+#End Region
 
-    ' Transitionen verwalten
-    Friend listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
-    Friend listOfEnabledTransitions As List(Of String)
-    Friend activeTransition As ISlideShowTransition = Nothing
+#Region "Transitionen"
+    Private listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
+    Private listOfEnabledTransitions As List(Of String)
+    Private activeTransition As ISlideShowTransition = Nothing
 
-    Friend modulwechselTransitionName As String = Nothing
-    Friend letzteTransition As String = Nothing
+    Private modulwechselTransitionName As String = Nothing
+    Private letzteTransition As String = Nothing
+#End Region
 
-    ' Optionsdialog und Eingabesteuerung
-    Friend optionsDialog As frmOptionsMain = Nothing
+#Region "Optionsdialog und Eingabesteuerung"
+    Private optionsDialog As frmOptionsMain = Nothing
     Friend optionsDialogIsActive As Boolean = False
     Friend isInputLocked As Boolean = False
-
-    ' Status der globalen Eingabehandler
     Private eingabesteuerungIstRegistriert As Boolean = False
-    Private shutdownWurdeGestartet As Boolean = False
+#End Region
 
-    ' MCP
+#Region "MCP-Status und Timer"
+
     Private WithEvents tmrMCP As New Timer()
     Private mcpWurdeGestartet As Boolean = False
     Private mcpStartIstRegistriert As Boolean = False
     Private modulwechselIstAktiv As Boolean = False
     Private initialerModulwechsel As Boolean = False
+    Private shutdownWurdeGestartet As Boolean = False
 
-    Friend startBild As SWMI.BitmapImage = Nothing
-    Friend zielBild As SWMI.BitmapImage = Nothing
+    Private startBild As SWMI.BitmapImage = Nothing
+    Private zielBild As SWMI.BitmapImage = Nothing
+#End Region
 
-    ' TransitionHost und Transitionssteuerung
+#Region "TransitionHost"
     Private transitionHost As SW.Window = Nothing
     Private transitionHostGrid As SWC.Grid = Nothing
     Private transitionHostImage As SWC.Image = Nothing
@@ -125,11 +129,9 @@ Module SaverMain
 
     Private Const TITELCARD_ANZEIGEDAUER_MS As Integer = 3000
     Private Const TITELCARD_SCHRIFTGROESSE_PT As Double = 72.0
+#End Region
 
-    ' Sonstiges
-    Friend rnd As New Random()
-
-    'Desktop Windows Manager und Z-Order verwalten
+#Region "DWM und native Fenstersteuerung"
     Private ReadOnly HWND_TOPMOST As New IntPtr(-1)
 
     Private Const SWP_NOSIZE As UInteger = &H1UI
@@ -146,15 +148,17 @@ Module SaverMain
     Private Function DwmFlush() As Integer
     End Function
 
-    '----------------------------------------------------------------------
-    ' Vorläufig beibehalten
-    '----------------------------------------------------------------------
-    Friend screenDim As Rectangle = Screen.PrimaryScreen.Bounds
+#End Region
+
+    ' Sonstiges
+    Private rnd As New Random()
 
 #End Region
 
     'Funktionen und Prozeduren
 #Region "Start und Initialisierung"
+
+#Region "Programmeinstieg und Startmodus"
 
     Public Sub Main()
         Dim args As String()
@@ -220,6 +224,38 @@ Module SaverMain
         End Try
 
     End Sub
+
+    Private Function ErmittleStartmodus(args As String()) As FrameworkStartmodus
+        'Ermittelt anhand der übergebenen Kommandozeilenparameter den gewünschten Startmodus.
+
+        If args Is Nothing OrElse args.Length <= 1 Then
+            Return FrameworkStartmodus.Bildschirmschoner
+        End If
+
+        Select Case args(1).ToLowerInvariant()
+
+            Case "/c"
+                Return FrameworkStartmodus.Konfiguration
+
+            Case "/p"
+                Return FrameworkStartmodus.Vorschau
+
+            Case "/s"
+                Return FrameworkStartmodus.Bildschirmschoner
+
+            Case Else
+
+                LogHandling.LogWarn("Unbekannter Startparameter """ & args(1) & """ - Starte Bildschirmschoner.")
+
+                Return FrameworkStartmodus.Bildschirmschoner
+
+        End Select
+
+    End Function
+
+#End Region
+
+#Region "MCP-Start"
 
     Private Sub RegistriereMCPStart()
         'Registriert den einmaligen MCP-Start nach Beginn der Nachrichtenschleife.
@@ -310,6 +346,28 @@ Module SaverMain
 
     End Sub
 
+#End Region
+
+#Region "Framework-Initialisierung"
+
+    Private Sub IniAndReinitialize()
+        '(Re-)Initialisieren der zentralen Framework-Daten gemäß Settings
+
+        'Basisdaten auslesen
+        ReadMainSettingsFromRegistryOrDefaults()
+
+        'Aktuelle Settings für andere Framework-Komponenten bereitstellen
+        StoreSettings("Main", aktuelleSettings)
+
+        'Den Modulen die Hintergrundfarbe bereitstellen
+        HintergrundFarbeSaver = aktuelleSettings.Hintergrundfarbe
+
+    End Sub
+
+#End Region
+
+#Region "Transitionsinitialisierung"
+
     Private Sub InitialisiereMCPTransitionen()
         'Lädt die verfügbaren Transitionen und bestimmt die nächste Modultransition.
 
@@ -361,16 +419,11 @@ Module SaverMain
 
             Case "Zufällig bei Start"
 
-                modulwechselTransitionName =
-        gueltigeTransitionen(
-        rnd.Next(gueltigeTransitionen.Count))
+                modulwechselTransitionName = gueltigeTransitionen(rnd.Next(gueltigeTransitionen.Count))
 
             Case "In Reihenfolge bei Start"
 
-                modulwechselTransitionName =
-        GetNextAlphabeticItemName(
-        gueltigeTransitionen,
-        letzteTransition)
+                modulwechselTransitionName = GetNextAlphabeticItemName(gueltigeTransitionen, letzteTransition)
 
             Case "Zufällig", "In Reihenfolge"
 
@@ -390,53 +443,15 @@ Module SaverMain
 
     End Sub
 
-    Private Function ErmittleStartmodus(args As String()) As FrameworkStartmodus
-        'Ermittelt anhand der übergebenen Kommandozeilenparameter den gewünschten Startmodus.
-
-        If args Is Nothing OrElse args.Length <= 1 Then
-            Return FrameworkStartmodus.Bildschirmschoner
-        End If
-
-        Select Case args(1).ToLowerInvariant()
-
-            Case "/c"
-                Return FrameworkStartmodus.Konfiguration
-
-            Case "/p"
-                Return FrameworkStartmodus.Vorschau
-
-            Case "/s"
-                Return FrameworkStartmodus.Bildschirmschoner
-
-            Case Else
-
-                LogHandling.LogWarn("Unbekannter Startparameter """ & args(1) & """ - Starte Bildschirmschoner.")
-
-                Return FrameworkStartmodus.Bildschirmschoner
-
-        End Select
-
-    End Function
-
-    Friend Sub IniAndReinitialize()
-        '(Re-)Initialisieren der zentralen Framework-Daten gemäß Settings
-
-        'Basisdaten auslesen
-        ReadMainSettingsFromRegistryOrDefaults()
-
-        'Aktuelle Settings für andere Framework-Komponenten bereitstellen
-        StoreSettings("Main", aktuelleSettings)
-
-        'Den Modulen die Hintergrundfarbe bereitstellen
-        HintergrundFarbeSaver = aktuelleSettings.Hintergrundfarbe
-
-    End Sub
+#End Region
 
 #End Region
 
 #Region "MCP"
 
-    Friend Sub LegitimeListeErstellen()
+#Region "Modulauswahl und Laden"
+
+    Private Sub LegitimeListeErstellen()
         'Aktualisiert die Liste der Module, die das Framework aktuell anzeigen darf
 
         Dim enabledModulesRegVal As String
@@ -477,7 +492,7 @@ Module SaverMain
 
     End Sub
 
-    Friend Function IstAktuellesModulWeiterhinAktiviert() As Boolean
+    Private Function IstAktuellesModulWeiterhinAktiviert() As Boolean
         'Prüft, ob das aktuell laufende Modul weiterhin in der Liste der aktivierten Module enthalten ist.
 
         If activeModule Is Nothing Then
@@ -497,7 +512,7 @@ Module SaverMain
 
     End Function
 
-    Friend Function ErmittleModulKandidaten(vorherigesModul As String, aktuellesModulAusschliessen As Boolean) As List(Of String)
+    Private Function ErmittleModulKandidaten(vorherigesModul As String, aktuellesModulAusschliessen As Boolean) As List(Of String)
         'Erstellt eine vollständige Liste möglicher Module in der Reihenfolge, in der Ladeversuche erfolgen sollen.
 
         Dim kandidaten As New List(Of String)
@@ -645,20 +660,7 @@ Module SaverMain
 
     End Function
 
-    Private Sub AktiviereFallbackSaver()
-        'Aktiviert den FallbackSaver, wenn kein reguläres Modul verwendet werden kann.
-
-        activeModule = Nothing
-        nextModule = Nothing
-
-        fallbackIsActive = True
-        fallbackPaused = False
-
-        LogHandling.LogWarn("Keines der aktivierten Module konnte geladen werden. Der FallbackSaver wird verwendet.")
-
-    End Sub
-
-    Friend Function LadeInitialesModul() As ModulLadeErgebnis
+    Private Function LadeInitialesModul() As ModulLadeErgebnis
         'Versucht, das erste funktionsfähige Modul zu laden. Der FallbackSaver wird erst verwendet,
         'wenn sämtliche legitimen Module gescheitert sind.
 
@@ -700,7 +702,7 @@ Module SaverMain
 
     End Function
 
-    Friend Function BereiteNaechstesModulVor() As ModulLadeErgebnis
+    Private Function BereiteNaechstesModulVor() As ModulLadeErgebnis
         'Versucht, ein nächstes funktionsfähiges Modul zu laden, ohne das aktuell laufende Modul bereits zu beenden.
 
         Dim kandidaten As List(Of String)
@@ -759,7 +761,7 @@ Module SaverMain
 
     End Function
 
-    Friend Function UebernehmeVorbereitetesModul() As Boolean
+    Private Function UebernehmeVorbereitetesModul() As Boolean
         'Übernimmt das erfolgreich vorbereitete Modul als neues aktives Modul.
 
         If nextModule Is Nothing Then
@@ -776,7 +778,51 @@ Module SaverMain
 
     End Function
 
-    Friend Sub AktualisiereStartBild()
+#End Region
+
+#Region "Fallback-Verwaltung"
+
+    Private Sub AktiviereFallbackSaver()
+        'Aktiviert den FallbackSaver, wenn kein reguläres Modul verwendet werden kann.
+
+        activeModule = Nothing
+        nextModule = Nothing
+
+        fallbackIsActive = True
+        fallbackPaused = False
+
+        LogHandling.LogWarn("Keines der aktivierten Module konnte geladen werden. Der FallbackSaver wird verwendet.")
+
+    End Sub
+
+    Private Sub WechselZumFallbackSaver()
+        'Wechselt kontrolliert zum FallbackSaver.
+
+        AktualisiereStartBild()
+
+        If activeModule IsNot Nothing Then
+
+            activeModule.StopModul()
+            activeModule = Nothing
+
+        End If
+
+        If fallbackInstanz IsNot Nothing Then
+            fallbackInstanz.Show()
+        End If
+
+        LogHandling.LogInfo(
+        "Neues Modul gestartet: FallbackSaver")
+
+        ModulwechselAbschliessen()
+
+    End Sub
+
+#End Region
+
+#Region "Start- und Zielbilder"
+
+    Private Sub AktualisiereStartBild()
         'Erstellt das Ausgangsbild für die nächste Transition.
 
         Dim screenshot As Image
@@ -829,7 +875,7 @@ Module SaverMain
 
     End Sub
 
-    Friend Sub ZielBildErstellen()
+    Private Sub ZielBildErstellen()
         'Erstellt die Titelcard des vorbereiteten Moduls vollständig in WPF.
 
         Dim bildschirmGrenzen As Rectangle
@@ -949,6 +995,10 @@ Module SaverMain
         End Try
 
     End Sub
+
+#End Region
+
+#Region "Transitionsauswahl und Ausführung"
 
     Private Function TransitionseffektAuswaehlen() As Boolean
         'Wählt für den aktuellen Modulwechsel eine verfügbare Transition aus und lädt sie.
@@ -1161,6 +1211,73 @@ Module SaverMain
 
     End Sub
 
+    Private Sub TransitionVorzeitigBeenden()
+        'Beendet eine laufende Transition kontrolliert.
+        'Die Wechselpipeline wird anschließend regulär fortgesetzt.
+
+        If aktuelleWechselPhase <> MCPWechselPhase.Transition Then
+            Exit Sub
+        End If
+
+        If activeTransition Is Nothing OrElse
+       Not transitionIstAktiv Then
+
+            Exit Sub
+
+        End If
+
+        Try
+
+            activeTransition.StopTransition()
+
+        Catch ex As Exception
+
+            LogHandling.LogError(
+            "Fehler beim vorzeitigen Beenden der Transition: " &
+            ex.ToString())
+
+            transitionIstAktiv = False
+            TransitionAbgeschlossenVormerken()
+
+        End Try
+
+    End Sub
+
+    Private Sub TransitionBereinigen()
+        'Entfernt Eventhandler und gibt die Transitioninstanz frei.
+
+        If activeTransition Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
+            RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
+
+            If TypeOf activeTransition Is IDisposable Then
+
+                DirectCast(activeTransition, IDisposable).Dispose()
+
+            End If
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Freigeben der Modultransition: " & ex.ToString())
+
+        Finally
+
+            activeTransition = Nothing
+            transitionIstAktiv = False
+
+        End Try
+
+    End Sub
+
+#End Region
+
+#Region "TransitionHost-Erzeugung und Darstellung"
+
     Private Sub TransitionHostVorbereiten()
         'Erstellt einen rahmenlosen WPF-Vollbildhost für Transitionen
         'und Titelcards.
@@ -1227,52 +1344,6 @@ Module SaverMain
 
     End Sub
 
-    Private Function TransitionHostDWMAnzeigeAbwarten() As Boolean
-        'Wartet, bis der Desktop Window Manager die aktuelle Darstellung
-        'des TransitionHosts tatsächlich verarbeitet hat.
-
-        Dim ergebnis As Integer
-
-        If transitionHost Is Nothing OrElse
-       Not transitionHost.IsVisible Then
-
-            Return False
-
-        End If
-
-        Try
-
-            TransitionHostNachVorneSetzen()
-            TransitionHostDarstellungErzwingen()
-
-            ergebnis = DwmFlush()
-
-            If ergebnis <> 0 Then
-
-                LogHandling.LogWarn(
-            "DwmFlush konnte die Darstellung des TransitionHosts " &
-            "nicht bestätigen. HRESULT: " &
-            ergebnis.ToString())
-
-                Return False
-
-            End If
-
-            Return True
-
-        Catch ex As Exception
-
-            LogHandling.LogError(
-        "Fehler beim Abwarten der DWM-Darstellung des " &
-        "TransitionHosts: " &
-        ex.ToString())
-
-            Return False
-
-        End Try
-
-    End Function
-
     Private Sub TransitionHostAnzeigen()
         'Zeigt den bereits vollständig vorbereiteten Host,
         'ohne einen Aktivierungs- oder Maximierungswechsel auszulösen.
@@ -1327,12 +1398,48 @@ Module SaverMain
 
     End Sub
 
-    Private Sub TransitionHostClosed(sender As Object, e As EventArgs)
-        'Entfernt Referenzen auf einen geschlossenen WPF-Host.
+    Private Sub ZeigeBildImTransitionHost(bild As SWM.ImageSource)
+        'Setzt das Bild gleichzeitig als Image.Source und als Hintergrund.
+        'Dadurch zeigt bereits der erste native Fensterframe das Bild.
 
-        transitionHost = Nothing
-        transitionHostGrid = Nothing
-        transitionHostImage = Nothing
+        Dim bildBrush As SWM.ImageBrush
+
+        If bild Is Nothing Then
+            Exit Sub
+        End If
+
+        bildBrush = Nothing
+
+        TransitionHostVorbereiten()
+
+        Try
+            bildBrush = New SWM.ImageBrush(bild)
+            bildBrush.Stretch = SWM.Stretch.Fill
+            bildBrush.AlignmentX = SWM.AlignmentX.Center
+            bildBrush.AlignmentY = SWM.AlignmentY.Center
+
+            If bildBrush.CanFreeze Then
+                bildBrush.Freeze()
+            End If
+
+            transitionHost.Background = bildBrush
+            transitionHostGrid.Background = bildBrush
+
+            transitionHostImage.Source = Nothing
+            transitionHostWriteableBitmap = Nothing
+
+            transitionHostImage.Source = bild
+            transitionHostImage.InvalidateVisual()
+
+            TransitionHostAnzeigen()
+
+        Catch ex As Exception
+
+            LogHandling.LogError(
+            "Fehler beim Anzeigen eines statischen Transitionbildes: " &
+            ex.ToString())
+
+        End Try
 
     End Sub
 
@@ -1451,6 +1558,129 @@ Module SaverMain
 
     End Sub
 
+    Private Sub TransitionHostClosed(sender As Object, e As EventArgs)
+        'Entfernt Referenzen auf einen geschlossenen WPF-Host.
+
+        transitionHost = Nothing
+        transitionHostGrid = Nothing
+        transitionHostImage = Nothing
+
+    End Sub
+
+    Private Sub TransitionHostSchliessen()
+        'Entfernt sämtliche Referenzen und schließt den WPF-TransitionHost.
+
+        Try
+
+            If activeTransition IsNot Nothing Then
+
+                RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
+                RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
+
+            End If
+
+            transitionIstAktiv = False
+
+            If transitionHostImage IsNot Nothing Then
+
+                transitionHostImage.Source = Nothing
+                transitionHostImage.DataContext = Nothing
+
+            End If
+
+            If transitionHostGrid IsNot Nothing Then
+
+                transitionHostGrid.Children.Clear()
+                transitionHostGrid.DataContext = Nothing
+
+            End If
+
+            If transitionHost IsNot Nothing Then
+
+                RemoveHandler transitionHost.ContentRendered, AddressOf TransitionHostContentRendered
+                RemoveHandler transitionHost.Closed, AddressOf TransitionHostClosed
+
+                RemoveHandler transitionHost.PreviewKeyDown, AddressOf TransitionHostPreviewKeyDown
+                RemoveHandler transitionHost.PreviewMouseDown, AddressOf TransitionHostPreviewMouseDown
+
+                transitionHost.Content = Nothing
+
+                If transitionHost.IsVisible Then
+                    transitionHost.Close()
+                End If
+
+            End If
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Schließen des WPF-TransitionHosts: " & ex.ToString())
+
+        Finally
+
+            transitionHostImage = Nothing
+            transitionHostGrid = Nothing
+            transitionHost = Nothing
+            transitionHostWriteableBitmap = Nothing
+            transitionFramePuffer = Nothing
+            transitionFrameStride = 0
+
+            startBild = Nothing
+            zielBild = Nothing
+
+        End Try
+
+    End Sub
+
+#End Region
+
+#Region "DWM und Z-Order"
+
+    Private Function TransitionHostDWMAnzeigeAbwarten() As Boolean
+        'Wartet, bis der Desktop Window Manager die aktuelle Darstellung
+        'des TransitionHosts tatsächlich verarbeitet hat.
+
+        Dim ergebnis As Integer
+
+        If transitionHost Is Nothing OrElse
+       Not transitionHost.IsVisible Then
+
+            Return False
+
+        End If
+
+        Try
+
+            TransitionHostNachVorneSetzen()
+            TransitionHostDarstellungErzwingen()
+
+            ergebnis = DwmFlush()
+
+            If ergebnis <> 0 Then
+
+                LogHandling.LogWarn(
+            "DwmFlush konnte die Darstellung des TransitionHosts " &
+            "nicht bestätigen. HRESULT: " &
+            ergebnis.ToString())
+
+                Return False
+
+            End If
+
+            Return True
+
+        Catch ex As Exception
+
+            LogHandling.LogError(
+        "Fehler beim Abwarten der DWM-Darstellung des " &
+        "TransitionHosts: " &
+        ex.ToString())
+
+            Return False
+
+        End Try
+
+    End Function
+
     Private Function TransitionHostNachVorneSetzen() As Boolean
         'Setzt den TransitionHost nativ an die Spitze der TopMost-Gruppe,
         'ohne den Fokus zu übernehmen.
@@ -1501,50 +1731,61 @@ Module SaverMain
 
     End Function
 
-    Private Sub ZeigeBildImTransitionHost(bild As SWM.ImageSource)
-        'Setzt das Bild gleichzeitig als Image.Source und als Hintergrund.
-        'Dadurch zeigt bereits der erste native Fensterframe das Bild.
+    Private Sub TransitionHostContentRendered(sender As Object, e As EventArgs)
+        'Setzt die Modulwechselpipeline erst fort, nachdem der Host
+        'von WPF gerendert und vom DWM verarbeitet wurde.
 
-        Dim bildBrush As SWM.ImageBrush
-
-        If bild Is Nothing Then
+        If Not transitionHostWartetAufErstdarstellung Then
             Exit Sub
         End If
 
-        bildBrush = Nothing
+        transitionHostWartetAufErstdarstellung = False
 
-        TransitionHostVorbereiten()
+        If transitionHost Is Nothing Then
 
-        Try
-            bildBrush = New SWM.ImageBrush(bild)
-            bildBrush.Stretch = SWM.Stretch.Fill
-            bildBrush.AlignmentX = SWM.AlignmentX.Center
-            bildBrush.AlignmentY = SWM.AlignmentY.Center
+            ModulwechselFehlgeschlagen()
+            Exit Sub
 
-            If bildBrush.CanFreeze Then
-                bildBrush.Freeze()
-            End If
+        End If
 
-            transitionHost.Background = bildBrush
-            transitionHostGrid.Background = bildBrush
-
-            transitionHostImage.Source = Nothing
-            transitionHostWriteableBitmap = Nothing
-
-            transitionHostImage.Source = bild
-            transitionHostImage.InvalidateVisual()
-
-            TransitionHostAnzeigen()
-
-        Catch ex As Exception
-
-            LogHandling.LogError(
-            "Fehler beim Anzeigen eines statischen Transitionbildes: " &
-            ex.ToString())
-
-        End Try
+        transitionHost.Dispatcher.BeginInvoke(
+    SWD.DispatcherPriority.ContextIdle,
+    New Action(
+        AddressOf TransitionHostNachErstdarstellungFortsetzen))
 
     End Sub
+
+    Private Sub TransitionHostNachErstdarstellungFortsetzen()
+        'Erzeugt eine echte Präsentationsbarriere zwischen dem sichtbaren
+        'TransitionHost und dem Beenden des bisherigen Moduls.
+
+        If shutdownWurdeGestartet Then
+            Exit Sub
+        End If
+
+        If aktuelleWechselPhase <>
+       MCPWechselPhase.HostVorbereitung Then
+
+            Exit Sub
+
+        End If
+
+        If Not TransitionHostDWMAnzeigeAbwarten() Then
+
+            LogHandling.LogWarn(
+        "Die DWM-Darstellung des TransitionHosts konnte nicht " &
+        "eindeutig bestätigt werden. Der Modulwechsel wird dennoch " &
+        "fortgesetzt.")
+
+        End If
+
+        ModulwechselNachHostDarstellungFortsetzen()
+
+    End Sub
+
+#End Region
+
+#Region "Titelcard und Modulübergabe"
 
     Private Sub TitelcardPhaseStarten()
         'Zeigt die Titelcard und startet den nicht blockierenden Timer.
@@ -1657,229 +1898,11 @@ Module SaverMain
 
     End Sub
 
-    Private Sub TransitionHostContentRendered(
-sender As Object,
-e As EventArgs)
-        'Setzt die Modulwechselpipeline erst fort, nachdem der Host
-        'von WPF gerendert und vom DWM verarbeitet wurde.
+#End Region
 
-        If Not transitionHostWartetAufErstdarstellung Then
-            Exit Sub
-        End If
+#Region "MCP-Modulwechsel"
 
-        transitionHostWartetAufErstdarstellung = False
-
-        If transitionHost Is Nothing Then
-
-            ModulwechselFehlgeschlagen()
-            Exit Sub
-
-        End If
-
-        transitionHost.Dispatcher.BeginInvoke(
-    SWD.DispatcherPriority.ContextIdle,
-    New Action(
-        AddressOf TransitionHostNachErstdarstellungFortsetzen))
-
-    End Sub
-
-    Private Sub TransitionHostNachErstdarstellungFortsetzen()
-        'Erzeugt eine echte Präsentationsbarriere zwischen dem sichtbaren
-        'TransitionHost und dem Beenden des bisherigen Moduls.
-
-        If shutdownWurdeGestartet Then
-            Exit Sub
-        End If
-
-        If aktuelleWechselPhase <>
-       MCPWechselPhase.HostVorbereitung Then
-
-            Exit Sub
-
-        End If
-
-        If Not TransitionHostDWMAnzeigeAbwarten() Then
-
-            LogHandling.LogWarn(
-        "Die DWM-Darstellung des TransitionHosts konnte nicht " &
-        "eindeutig bestätigt werden. Der Modulwechsel wird dennoch " &
-        "fortgesetzt.")
-
-        End If
-
-        ModulwechselNachHostDarstellungFortsetzen()
-
-    End Sub
-
-    Private Sub TransitionHostSchliessen()
-        'Entfernt sämtliche Referenzen und schließt den WPF-TransitionHost.
-
-        Try
-
-            If activeTransition IsNot Nothing Then
-
-                RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
-                RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
-
-            End If
-
-            transitionIstAktiv = False
-
-            If transitionHostImage IsNot Nothing Then
-
-                transitionHostImage.Source = Nothing
-                transitionHostImage.DataContext = Nothing
-
-            End If
-
-            If transitionHostGrid IsNot Nothing Then
-
-                transitionHostGrid.Children.Clear()
-                transitionHostGrid.DataContext = Nothing
-
-            End If
-
-            If transitionHost IsNot Nothing Then
-
-                RemoveHandler transitionHost.ContentRendered, AddressOf TransitionHostContentRendered
-                RemoveHandler transitionHost.Closed, AddressOf TransitionHostClosed
-
-                RemoveHandler transitionHost.PreviewKeyDown, AddressOf TransitionHostPreviewKeyDown
-                RemoveHandler transitionHost.PreviewMouseDown, AddressOf TransitionHostPreviewMouseDown
-
-                transitionHost.Content = Nothing
-
-                If transitionHost.IsVisible Then
-                    transitionHost.Close()
-                End If
-
-            End If
-
-        Catch ex As Exception
-
-            LogHandling.LogError("Fehler beim Schließen des WPF-TransitionHosts: " & ex.ToString())
-
-        Finally
-
-            transitionHostImage = Nothing
-            transitionHostGrid = Nothing
-            transitionHost = Nothing
-            transitionHostWriteableBitmap = Nothing
-            transitionFramePuffer = Nothing
-            transitionFrameStride = 0
-
-            startBild = Nothing
-            zielBild = Nothing
-
-        End Try
-
-    End Sub
-
-    Private Sub TransitionHostPreviewKeyDown(sender As Object, e As SWI.KeyEventArgs)
-        'Verarbeitet Eingaben, solange der WPF-TransitionHost aktiv ist.
-
-        If shutdownWurdeGestartet Then
-            Exit Sub
-        End If
-
-        Select Case e.Key
-
-            Case SWI.Key.Space
-
-                e.Handled = True
-                CloseSlideShowSaver()
-
-            Case SWI.Key.Escape
-
-                e.Handled = True
-                ausstehendeAktion =
-                AktionNachModulwechsel.Optionsdialog
-
-                TransitionVorzeitigBeenden()
-
-            Case SWI.Key.P
-
-                e.Handled = True
-                ausstehendeAktion =
-                AktionNachModulwechsel.Pause
-
-                TransitionVorzeitigBeenden()
-
-        End Select
-
-    End Sub
-
-    Private Sub TransitionHostPreviewMouseDown(
-    sender As Object,
-    e As SWI.MouseButtonEventArgs)
-        'Verarbeitet Mauseingaben während des Modulwechsels.
-
-        If shutdownWurdeGestartet Then
-            Exit Sub
-        End If
-
-        Select Case e.ChangedButton
-
-            Case SWI.MouseButton.Left
-
-                e.Handled = True
-                CloseSlideShowSaver()
-
-            Case SWI.MouseButton.Right
-
-                e.Handled = True
-                ausstehendeAktion =
-                AktionNachModulwechsel.Optionsdialog
-
-                TransitionVorzeitigBeenden()
-
-            Case SWI.MouseButton.Middle
-
-                e.Handled = True
-                ausstehendeAktion =
-                AktionNachModulwechsel.Pause
-
-                TransitionVorzeitigBeenden()
-
-        End Select
-
-    End Sub
-
-    Private Sub TransitionVorzeitigBeenden()
-        'Beendet eine laufende Transition kontrolliert.
-        'Die Wechselpipeline wird anschließend regulär fortgesetzt.
-
-        If aktuelleWechselPhase <> MCPWechselPhase.Transition Then
-            Exit Sub
-        End If
-
-        If activeTransition Is Nothing OrElse
-       Not transitionIstAktiv Then
-
-            Exit Sub
-
-        End If
-
-        Try
-
-            activeTransition.StopTransition()
-
-        Catch ex As Exception
-
-            LogHandling.LogError(
-            "Fehler beim vorzeitigen Beenden der Transition: " &
-            ex.ToString())
-
-            transitionIstAktiv = False
-            TransitionAbgeschlossenVormerken()
-
-        End Try
-
-    End Sub
-
-    Private Sub tmrMCP_Tick(
-    sender As Object,
-    e As EventArgs) Handles tmrMCP.Tick
+    Private Sub tmrMCP_Tick(sender As Object, e As EventArgs) Handles tmrMCP.Tick
         'Fordert einen automatischen Modulwechsel an.
 
         MCPModulwechsel()
@@ -2112,62 +2135,6 @@ e As EventArgs)
 
     End Sub
 
-    Private Sub TransitionBereinigen()
-        'Entfernt Eventhandler und gibt die Transitioninstanz frei.
-
-        If activeTransition Is Nothing Then
-            Exit Sub
-        End If
-
-        Try
-
-            RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
-            RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
-
-            If TypeOf activeTransition Is IDisposable Then
-
-                DirectCast(activeTransition, IDisposable).Dispose()
-
-            End If
-
-        Catch ex As Exception
-
-            LogHandling.LogError("Fehler beim Freigeben der Modultransition: " & ex.ToString())
-
-        Finally
-
-            activeTransition = Nothing
-            transitionIstAktiv = False
-
-        End Try
-
-    End Sub
-
-    Private Sub AusstehendeAktionAusfuehren()
-        'Führt eine während des Modulwechsels angeforderte Aktion aus.
-
-        Dim auszufuehrendeAktion As AktionNachModulwechsel
-
-        auszufuehrendeAktion =
-        ausstehendeAktion
-
-        ausstehendeAktion =
-        AktionNachModulwechsel.Keine
-
-        Select Case auszufuehrendeAktion
-
-            Case AktionNachModulwechsel.Optionsdialog
-
-                OpenOptionsDialog()
-
-            Case AktionNachModulwechsel.Pause
-
-                PauseModus()
-
-        End Select
-
-    End Sub
-
     Private Sub ModulwechselFehlgeschlagen()
         'Versucht nach einem fehlgeschlagenen Wechsel,
         'einen kontrollierten sichtbaren Zustand herzustellen.
@@ -2219,34 +2186,112 @@ e As EventArgs)
 
     End Sub
 
-    Private Sub WechselZumFallbackSaver()
-        'Wechselt kontrolliert zum FallbackSaver.
+#End Region
 
-        AktualisiereStartBild()
+#Region "Eingaben während des Modulwechsels"
 
-        If activeModule IsNot Nothing Then
+    Private Sub TransitionHostPreviewKeyDown(sender As Object, e As SWI.KeyEventArgs)
+        'Verarbeitet Eingaben, solange der WPF-TransitionHost aktiv ist.
 
-            activeModule.StopModul()
-            activeModule = Nothing
-
+        If shutdownWurdeGestartet Then
+            Exit Sub
         End If
 
-        If fallbackInstanz IsNot Nothing Then
-            fallbackInstanz.Show()
+        Select Case e.Key
+
+            Case SWI.Key.Space
+
+                e.Handled = True
+                CloseSlideShowSaver()
+
+            Case SWI.Key.Escape
+
+                e.Handled = True
+                ausstehendeAktion =
+                AktionNachModulwechsel.Optionsdialog
+
+                TransitionVorzeitigBeenden()
+
+            Case SWI.Key.P
+
+                e.Handled = True
+                ausstehendeAktion =
+                AktionNachModulwechsel.Pause
+
+                TransitionVorzeitigBeenden()
+
+        End Select
+
+    End Sub
+
+    Private Sub TransitionHostPreviewMouseDown(
+    sender As Object,
+    e As SWI.MouseButtonEventArgs)
+        'Verarbeitet Mauseingaben während des Modulwechsels.
+
+        If shutdownWurdeGestartet Then
+            Exit Sub
         End If
 
-        LogHandling.LogInfo(
-        "Neues Modul gestartet: FallbackSaver")
+        Select Case e.ChangedButton
 
-        ModulwechselAbschliessen()
+            Case SWI.MouseButton.Left
+
+                e.Handled = True
+                CloseSlideShowSaver()
+
+            Case SWI.MouseButton.Right
+
+                e.Handled = True
+                ausstehendeAktion =
+                AktionNachModulwechsel.Optionsdialog
+
+                TransitionVorzeitigBeenden()
+
+            Case SWI.MouseButton.Middle
+
+                e.Handled = True
+                ausstehendeAktion =
+                AktionNachModulwechsel.Pause
+
+                TransitionVorzeitigBeenden()
+
+        End Select
+
+    End Sub
+
+    Private Sub AusstehendeAktionAusfuehren()
+        'Führt eine während des Modulwechsels angeforderte Aktion aus.
+
+        Dim auszufuehrendeAktion As AktionNachModulwechsel
+
+        auszufuehrendeAktion =
+        ausstehendeAktion
+
+        ausstehendeAktion =
+        AktionNachModulwechsel.Keine
+
+        Select Case auszufuehrendeAktion
+
+            Case AktionNachModulwechsel.Optionsdialog
+
+                OpenOptionsDialog()
+
+            Case AktionNachModulwechsel.Pause
+
+                PauseModus()
+
+        End Select
 
     End Sub
 
 #End Region
 
+#End Region
+
 #Region "Optionsdialog"
 
-    Friend Sub OpenOptionsDialog()
+    Private Sub OpenOptionsDialog()
         'Öffnet den zentralen Optionsdialog und verarbeitet
         'anschließend die geänderten Frameworkeinstellungen.
 
@@ -2342,7 +2387,7 @@ e As EventArgs)
 
 #Region "Pause-Modus"
 
-    Friend Sub PauseModus()
+    Private Sub PauseModus()
         'Schaltet den Pausezustand des aktiven Schoners um.
 
         If shutdownWurdeGestartet Then
@@ -2381,7 +2426,7 @@ e As EventArgs)
 
 #Region "Eingabesteuerung"
 
-    Friend Sub RegistriereEingabesteuerung()
+    Private Sub RegistriereEingabesteuerung()
         'Registriert die zentralen globalen Tastatur-
         'und Mausereignisse genau einmal.
 
@@ -2399,7 +2444,7 @@ e As EventArgs)
 
     End Sub
 
-    Friend Sub EntferneEingabesteuerung()
+    Private Sub EntferneEingabesteuerung()
         'Entfernt die zentralen globalen Tastatur-
         'und Mausereignisse.
 
@@ -2467,7 +2512,7 @@ e As EventArgs)
 #End Region
 
 #Region "Settings"
-    Friend Sub ReadMainSettingsFromRegistryOrDefaults()
+    Private Sub ReadMainSettingsFromRegistryOrDefaults()
         'Liest die aktuellen Settings aus der Registry oder verwendet die definierten Standardwerte
 
         Dim tmpRegistryValues As String
@@ -2523,7 +2568,7 @@ e As EventArgs)
 
 #Region "Framework-Shutdown"
 
-    Friend Sub CloseSlideShowSaver()
+    Private Sub CloseSlideShowSaver()
         'Beendet den Bildschirmschoner kontrolliert und gibt alle zentralen Instanzen frei.
 
         If shutdownWurdeGestartet Then
