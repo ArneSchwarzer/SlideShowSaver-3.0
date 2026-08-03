@@ -101,7 +101,6 @@ Module SaverMain
     Private mcpWurdeGestartet As Boolean = False
     Private mcpStartIstRegistriert As Boolean = False
     Private modulwechselIstAktiv As Boolean = False
-    Private initialerModulwechsel As Boolean = False
     Private shutdownWurdeGestartet As Boolean = False
 
     Private startBild As SWMI.BitmapImage = Nothing
@@ -151,7 +150,7 @@ Module SaverMain
 #End Region
 
     ' Sonstiges
-    Private rnd As New Random()
+    Private ReadOnly rnd As New Random()
 
 #End Region
 
@@ -1305,10 +1304,7 @@ Module SaverMain
 
             transitionHost.WindowState = SW.WindowState.Normal
 
-            transitionHost.Left = Screen.PrimaryScreen.Bounds.Left
-            transitionHost.Top = Screen.PrimaryScreen.Bounds.Top
-            transitionHost.Width = Screen.PrimaryScreen.Bounds.Width
-            transitionHost.Height = Screen.PrimaryScreen.Bounds.Height
+            TransitionHostAufPrimaerbildschirmPositionieren()
 
             transitionHost.Background = New SWM.SolidColorBrush(hintergrundFarbe)
 
@@ -1339,7 +1335,7 @@ Module SaverMain
 
         'Das Fenster wird hier nur vorbereitet.
         'Angezeigt wird es erst, nachdem eine gültige Bildquelle gesetzt wurde.
-        ' transitionHost.Opacity = 0.0
+
         transitionHost.Topmost = True
 
     End Sub
@@ -1359,29 +1355,11 @@ Module SaverMain
             If Not transitionHost.IsVisible Then
 
                 'Die endgültige Geometrie wird unmittelbar vor Show() noch einmal gesetzt.
-                transitionHost.WindowState = SW.WindowState.Normal
-
-                transitionHost.Left = Screen.PrimaryScreen.Bounds.Left
-                transitionHost.Top = Screen.PrimaryScreen.Bounds.Top
-                transitionHost.Width = Screen.PrimaryScreen.Bounds.Width
-                transitionHost.Height = Screen.PrimaryScreen.Bounds.Height
+                TransitionHostAufPrimaerbildschirmPositionieren()
 
                 transitionHost.Topmost = True
                 transitionHost.Show()
 
-                If Not transitionHost.IsVisible Then
-
-                    transitionHost.WindowState = SW.WindowState.Normal
-                    transitionHost.Left = Screen.PrimaryScreen.Bounds.Left
-                    transitionHost.Top = Screen.PrimaryScreen.Bounds.Top
-                    transitionHost.Width = Screen.PrimaryScreen.Bounds.Width
-                    transitionHost.Height = Screen.PrimaryScreen.Bounds.Height
-
-                    transitionHost.Show()
-
-                End If
-
-                transitionHost.Topmost = True
                 TransitionHostNachVorneSetzen()
                 TransitionHostDarstellungErzwingen()
 
@@ -1395,6 +1373,21 @@ Module SaverMain
             LogHandling.LogError("Fehler beim Anzeigen des TransitionHosts: " & ex.ToString())
 
         End Try
+
+    End Sub
+
+    Private Sub TransitionHostAufPrimaerbildschirmPositionieren()
+        'Positioniert den Host exakt auf dem primären Bildschirm.
+
+        Dim bounds As Rectangle
+
+        bounds = Screen.PrimaryScreen.Bounds
+
+        transitionHost.WindowState = SW.WindowState.Normal
+        transitionHost.Left = bounds.Left
+        transitionHost.Top = bounds.Top
+        transitionHost.Width = bounds.Width
+        transitionHost.Height = bounds.Height
 
     End Sub
 
@@ -1950,7 +1943,6 @@ Module SaverMain
         End If
 
         modulwechselIstAktiv = True
-        initialerModulwechsel = istInitialerWechsel
 
         aktuelleWechselPhase = MCPWechselPhase.Keine
         vorbereiteterModulName = Nothing
@@ -2123,7 +2115,6 @@ Module SaverMain
 
         aktuelleWechselPhase = MCPWechselPhase.Keine
 
-        initialerModulwechsel = False
         vorbereiteterModulName = Nothing
         modulwechselIstAktiv = False
 
