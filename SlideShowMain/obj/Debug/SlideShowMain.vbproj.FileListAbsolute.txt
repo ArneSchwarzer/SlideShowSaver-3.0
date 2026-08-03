@@ -27,7 +27,6 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\bin\Debug\XmpCore.xm
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.vbproj.AssemblyReference.cache
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmFallbackSaver.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmOptionsMain.resources
-C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmSaverMain.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.Resources.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.frmSplashscreen.resources
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowMain\obj\Debug\SlideShowMain.vbproj.GenerateResource.cache

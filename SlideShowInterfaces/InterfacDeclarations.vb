@@ -39,6 +39,8 @@ Public Class InterfaceDeclarations
         'Events
         Event ModulStateChanged(newState As String)
 
+        Event ModulIstDarstellungsbereit()
+
         'Modulsteuerung
         Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing)
         Sub StopModul()

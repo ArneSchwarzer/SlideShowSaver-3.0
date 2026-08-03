@@ -66,6 +66,11 @@ Partial Public Class wpfModulMain
     Private sbBilder As Storyboard
     Private sbVerz As Storyboard
 
+    'Events
+    Public Event DarstellungIstBereit()
+
+    Private darstellungsbereitschaftWurdeGemeldet As Boolean = False
+
     'Sonstiges
     Private rnd As New Random()
 
@@ -147,6 +152,23 @@ Partial Public Class wpfModulMain
         StartHourglassAnimation(hourglassVerz, rtVerz)
 
         CheckYourMail()
+
+        Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, New Action(AddressOf MeldeDarstellungsbereitschaft))
+
+    End Sub
+
+    Private Sub MeldeDarstellungsbereitschaft()
+        'Meldet den vollständig aufgebauten Initialisierungsbildschirm einmalig an ModulMain.
+
+        If darstellungsbereitschaftWurdeGemeldet Then
+            Exit Sub
+        End If
+
+        darstellungsbereitschaftWurdeGemeldet = True
+
+        Me.UpdateLayout()
+
+        RaiseEvent DarstellungIstBereit()
 
     End Sub
 

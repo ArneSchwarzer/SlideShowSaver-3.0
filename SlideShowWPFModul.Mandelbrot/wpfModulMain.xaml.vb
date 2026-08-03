@@ -17,9 +17,6 @@ Public Class wpfModulMain
 
     Private Shared aktuelleSettings As ModulMain.ModulSettings_Mandelbrot
 
-    'Timer und Zeitmanagement
-    Public WithEvents tmrPraesentation As New DispatcherTimer()
-
     'Initialisierung
     Private hintergrundWM As Windows.Media.Color
     Private zielePfad As String = Path.Combine(
@@ -83,6 +80,7 @@ Public Class wpfModulMain
 
     'Sonstiges
     Private rnd As New Random()
+    Private darstellungsbereitschaftWurdeGemeldet As Boolean = False
 
     'Finetuning/Diagnose
     Private Const aktuellesTarget As Integer = 55
@@ -95,6 +93,9 @@ Public Class wpfModulMain
     End Structure
 
 #End Region
+
+    'Events
+    Public Event DarstellungIstBereit()
 
     Public Sub New()
 
@@ -134,11 +135,6 @@ Public Class wpfModulMain
         Me.Background = New SolidColorBrush(hintergrundWM)
         grdHauptbereich.Background = New SolidColorBrush(hintergrundWM)
 
-        txbPraesentationsschirm.MaxWidth = maxWidth
-        txbPraesentationsschirm.TextAlignment = TextAlignment.Center
-        txbPraesentationsschirm.TextWrapping = TextWrapping.Wrap
-        txbPraesentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
-
         rctMandelbrot.Fill = New SolidColorBrush(hintergrundWM)
 
         CheckYourMail()
@@ -148,7 +144,19 @@ Public Class wpfModulMain
         InitialisiereStartpunkt()
         InitialisiereShader()
 
-        PraesentationsschirmAnzeigen()
+
+        If StarteNeueKamerafahrt() Then
+
+            StartRendering()
+            MeldeDarstellungsbereitschaft()
+
+        Else
+
+            LogHandling.LogWarn("Modul Mandelbrot: Rendering wurde nicht gestartet.")
+
+        End If
+
+        Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, New Action(AddressOf MeldeDarstellungsbereitschaft))
 
     End Sub
 
@@ -242,41 +250,6 @@ Public Class wpfModulMain
             .Dauer = freezeOutDauer
         }
     }
-
-    End Sub
-
-    Private Sub PraesentationsschirmAnzeigen()
-
-        Dim praesentationsText As String
-        Dim praesentationsZeit As Integer
-
-        praesentationsText = "Mandelbrot"
-        praesentationsZeit = 5
-
-        rctMandelbrot.Visibility = Visibility.Collapsed
-
-        txbPraesentationsschirm.Text = praesentationsText
-        txbPraesentationsschirm.Visibility = Visibility.Visible
-
-        tmrPraesentation.Interval = TimeSpan.FromSeconds(praesentationsZeit)
-        tmrPraesentation.Start()
-
-        StopRendering()
-
-    End Sub
-
-    Private Sub tmrPresentation_Tick() Handles tmrPraesentation.Tick
-
-        txbPraesentationsschirm.Visibility = Visibility.Collapsed
-        tmrPraesentation.Stop()
-
-        rctMandelbrot.Visibility = Visibility.Visible
-
-        If StarteNeueKamerafahrt() Then
-            StartRendering()
-        Else
-            LogHandling.LogWarn("Modul Mandelbrot: Rendering wurde nicht gestartet.")
-        End If
 
     End Sub
 
@@ -858,6 +831,34 @@ Public Class wpfModulMain
 
 #Region "Framework / Events"
 
+    Private Sub MeldeDarstellungsbereitschaft()
+        'Meldet dem Framework einmalig, dass der erste Mandelbrot-Darstellungszustand vollständig aufgebaut wurde.
+
+        If darstellungsbereitschaftWurdeGemeldet Then
+            Exit Sub
+        End If
+
+        darstellungsbereitschaftWurdeGemeldet = True
+
+        Dispatcher.BeginInvoke(
+                DispatcherPriority.Render,
+                New Action(
+                    Sub()
+
+                        Me.UpdateLayout()
+
+                        Dispatcher.BeginInvoke(
+                        DispatcherPriority.ContextIdle,
+                        New Action(
+                            Sub()
+                                RaiseEvent DarstellungIstBereit()
+                            End Sub))
+
+                    End Sub))
+
+    End Sub
+
+
     Private Sub Window_PreviewKeyDown(
     sender As Object,
     e As System.Windows.Input.KeyEventArgs)
@@ -915,11 +916,6 @@ Public Class wpfModulMain
         AddressOf CheckYourMail
 
         StopRendering()
-
-        If tmrPraesentation IsNot Nothing Then
-            tmrPraesentation.Stop()
-            tmrPraesentation = Nothing
-        End If
 
         If rctMandelbrot IsNot Nothing Then
             rctMandelbrot.Effect = Nothing

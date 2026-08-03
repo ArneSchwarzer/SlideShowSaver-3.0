@@ -31,3 +31,7 @@ C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\D
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\SlideShowWPFModul.Mandelbrot.dll
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\SlideShowWPFModul.Mandelbrot.xml
 C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\SlideShowWPFModul.Mandelbrot.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\ucMandelbrotZielOverlay.baml
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\ucMandelbrotZielOverlay.g.vb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\GeneratedInternalTypeHelper.g.vb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowWPFModul.Mandelbrot\obj\Debug\SlideShowWPFModul.Mandelbrot_MarkupCompile.lref

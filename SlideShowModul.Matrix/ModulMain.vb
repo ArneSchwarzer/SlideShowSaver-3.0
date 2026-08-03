@@ -70,6 +70,7 @@ Public Class ModulMain
 
 #Region "Events"
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
+    Public Event ModulIstDarstellungsbereit() Implements ISlideShowModul.ModulIstDarstellungsbereit
     Public Shared Event YouHaveMail_Matrix()
 
 #End Region
@@ -83,12 +84,21 @@ Public Class ModulMain
         CheckYourSettings()
 
         Try
+
             matrixScreen = New frmModulMain()
+
+            AddHandler matrixScreen.DarstellungIstBereit, AddressOf MatrixScreen_DarstellungIstBereit
+
         Catch ex As Exception
-            LogHandling.LogError("Modul Matrix - ModulMain.StartModul(): Fehler beim Laden des Moduls: " & ex.ToString)
+
+            LogHandling.LogError("Modul Matrix - ModulMain.StartModul(): Fehler beim Laden des Moduls: " & ex.ToString())
+
+            Throw
+
         End Try
 
-        matrixScreen.WindowState = FormWindowState.Minimized
+        matrixScreen.WindowState = FormWindowState.Normal
+
         matrixScreen.Show()
 
         RaiseEvent ModulStateChanged("Running")
@@ -99,6 +109,7 @@ Public Class ModulMain
         'Räumt auf und beendet das Modul
 
         If matrixScreen IsNot Nothing Then
+            RemoveHandler matrixScreen.DarstellungIstBereit, AddressOf MatrixScreen_DarstellungIstBereit
             matrixScreen.Close()
             matrixScreen.Dispose()
             matrixScreen = Nothing
@@ -112,8 +123,15 @@ Public Class ModulMain
         ' Wird für dieses Modul nicht benötigt
     End Sub
 
-    'Optionen & OptionsDialog
+    'Eventweiterleitung
+    Private Sub MatrixScreen_DarstellungIstBereit()
+        'Leitet die Darstellungsbereitschaft an das Framework weiter.
 
+        RaiseEvent ModulIstDarstellungsbereit()
+
+    End Sub
+
+    'Optionen & OptionsDialog
     Public Function GetModulOptionsDialog() As UserControl Implements ISlideShowModul.GetModulOptionsDialog
         'Liest die aktuellen Settings ein, speichert sie in SettingsInbox und liefert dann das ucOptionsModul
 

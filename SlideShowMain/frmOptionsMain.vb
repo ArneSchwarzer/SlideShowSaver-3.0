@@ -465,8 +465,8 @@ Public Class frmOptionsMain
     Private Sub cmbTransitionsReihenfolge_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbTransitionsReihenfolge.SelectedIndexChanged
 
         'DirectCommit
-        If cmbModulwechsel.SelectedIndex >= 0 Then
-            WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", cmbModulwechsel.SelectedItem.ToString)
+        If cmbTransitionsReihenfolge.SelectedIndex >= 0 Then
+            WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", cmbTransitionsReihenfolge.SelectedItem.ToString)
         End If
 
     End Sub
@@ -599,10 +599,6 @@ Public Class frmOptionsMain
             clbTransitionsModule.Sorted = True
         End If
 
-        'Solange die Funktion noch nicht implementiert ist
-        lblNclbTransitionsModule.Enabled = False
-        clbTransitionsModule.Enabled = False
-
 #End Region
 
 #Region "cmbTransitionsReihenfolge für Module Initialisieren"
@@ -616,10 +612,6 @@ Public Class frmOptionsMain
             cmbTransitionsReihenfolge.Enabled = True
             lblNcmbAbspielmodusTransitionsModule.Enabled = True
         End If
-
-        'Solange die Funktion noch nicht implementiert ist
-        cmbTransitionsReihenfolge.Enabled = False
-        lblNcmbAbspielmodusTransitionsModule.Enabled = False
 
 #End Region
 
@@ -644,23 +636,65 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Default-Werte einlesen und Steuerelemente setzen
+        'Default-Werte übernehmen, speichern und Steuerelemente aktualisieren
 
         Dim defaults As Dictionary(Of String, String)
 
         'Defaults einlesen
-        defaults = GetMainDefaultSettings()
+        defaults = SaverMain.GetMainDefaultSettings()
 
-        'AktuelleSettings aktualisieren
-        aktuelleSettings.ModulDauer = CInt(defaults("ModulDauer"))
-        aktuelleSettings.ModulReihenfolge = defaults("ModulReihenfolge")
-        aktuelleSettings.ModulAktivListe = SplitSemicolonList(defaults("ModulAktivListe"))
-        aktuelleSettings.MultiMonitor = CBool(defaults("MultiMonitor"))
-        aktuelleSettings.ModulTransitionListe = SplitSemicolonList(defaults("ModulTransitionListe"))
-        aktuelleSettings.ModulTransitionReihenfolge = defaults("ModulTransitionReihenfolge")
-        aktuelleSettings.Hintergrundfarbe = StringToColor(defaults("Hintergrundfarbe"))
+        'Aktuelle Settings aktualisieren
+        aktuelleSettings.ModulDauer =
+        CInt(defaults("ModulDauer"))
 
-        'Steuerelemente setzen
+        aktuelleSettings.ModulReihenfolge =
+        defaults("ModulReihenfolge")
+
+        aktuelleSettings.ModulAktivListe =
+        SplitSemicolonList(defaults("ModulAktivListe"))
+
+        aktuelleSettings.MultiMonitor =
+        CBool(defaults("MultiMonitor"))
+
+        aktuelleSettings.ModulTransitionListe =
+        SplitSemicolonList(defaults("ModulTransitionListe"))
+
+        aktuelleSettings.ModulTransitionReihenfolge =
+        defaults("ModulTransitionReihenfolge")
+
+        aktuelleSettings.Hintergrundfarbe =
+        StringToColor(defaults("Hintergrundfarbe"))
+
+        'Defaults gemäß Direct-Commit-Architektur speichern
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "ModulDauer",
+        defaults("ModulDauer"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "ModulReihenfolge",
+        defaults("ModulReihenfolge"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "ModulAktivListe",
+        defaults("ModulAktivListe"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "MultiMonitor",
+        defaults("MultiMonitor"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "ModulTransitionListe",
+        defaults("ModulTransitionListe"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge",
+        defaults("ModulTransitionReihenfolge"))
+
+        WriteToRegistry(
+        SLIDESHOWMAIN_PATH & "Hintergrundfarbe",
+        defaults("Hintergrundfarbe"))
+
+        'Steuerelemente neu setzen
         IniOrReinitialise()
 
     End Sub

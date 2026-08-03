@@ -1,7 +1,20 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B0A75205-E2D6-478C-B5A1-625100924D74}|SlideShowMain\\SlideShowMain.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowmain\\savermain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{B0A75205-E2D6-478C-B5A1-625100924D74}|SlideShowMain\\SlideShowMain.vbproj|solutionrelative:slideshowmain\\savermain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -18,6 +31,44 @@
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "wpfModulMain.xaml",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml",
+              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml",
+              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-08-03T14:10:20.687Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "wpfModulMain.xaml.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAUwJYAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-08-03T14:06:12.963Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SaverMain.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowMain\\SaverMain.vb",
+              "RelativeDocumentMoniker": "SlideShowMain\\SaverMain.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowMain\\SaverMain.vb",
+              "RelativeToolTip": "SlideShowMain\\SaverMain.vb",
+              "ViewState": "AgIAAOoJAAAAAAAAAAArwPYJAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-07-30T08:31:23.464Z",
+              "EditorCaption": ""
             }
           ]
         }

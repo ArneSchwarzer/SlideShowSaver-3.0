@@ -199,19 +199,9 @@ SlideShowTools
  Globale Daten, die modulübergreifend von SaverMain aus bereitgestellt werden.
  </summary>
 </member>
-<member name="P:SlideShowTools.SharedDataHandling.StartBild">
- <summary>
- Enthält den Screenshot vom Desktop zum Zeitpunkt des Starts von SaverMain.
- </summary>
-</member>
-<member name="P:SlideShowTools.SharedDataHandling.StartBildWurdeVerwendet">
- <summary>
- Gibt an, ob ein Modul das Startbild bereits verwendet hat.
- </summary>
-</member>
 <member name="P:SlideShowTools.SharedDataHandling.HintergrundFarbeSaver">
  <summary>
- Gibt an, ob ein Modul das Startbild bereits verwendet hat.
+ Liefert die im frmOptionsMain eingestellte Hintergrundfarbe.
  </summary>
 </member>
 <member name="M:SlideShowTools.ToolTipHandling.EnableToolTipsForCLB(System.Windows.Forms.CheckedListBox)">

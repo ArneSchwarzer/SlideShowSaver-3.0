@@ -54,6 +54,16 @@ SlideShowWPFModul.Mandelbrot
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
+<member name="T:SlideShowWPFModul.Mandelbrot.ucMandelbrotZielOverlay">
+<summary>
+ucMandelbrotZielOverlay
+</summary>
+</member>
+<member name="M:SlideShowWPFModul.Mandelbrot.ucMandelbrotZielOverlay.InitializeComponent">
+<summary>
+InitializeComponent
+</summary>
+</member>
 <member name="T:SlideShowWPFModul.Mandelbrot.wpfModulMain">
 <summary>
 wpfModulMain

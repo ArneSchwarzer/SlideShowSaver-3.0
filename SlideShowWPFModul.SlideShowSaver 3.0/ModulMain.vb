@@ -1,10 +1,11 @@
-﻿Imports SlideShowInterfaces.InterfaceDeclarations
+﻿Imports System.Drawing
 Imports System.Windows.Forms
-Imports System.Drawing
-Imports SlideShowTools.RegistryHandling
-Imports SlideShowTools.ListHandling
-Imports SlideShowTools.SettingsHandling
 Imports SlideShowBildauswahl.BildauswahlMain
+Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowLogging
+Imports SlideShowTools.ListHandling
+Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
 
 Public Class ModulMain
     Implements ISlideShowModul
@@ -78,59 +79,156 @@ Public Class ModulMain
     'Events
 #Region "Events"
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
+    Public Event ModulIstDarstellungsbereit() Implements ISlideShowModul.ModulIstDarstellungsbereit
     Public Shared Event YouHaveMail_SSS()
 #End Region
 
     'Start/Stop/Pause
-    Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
+    Public Sub StartModul(
+    targetScreen As Screen,
+    Optional isPreview As Boolean = False,
+    Optional targetHandle As IntPtr = Nothing) _
+    Implements ISlideShowModul.StartModul
         'Initialisiert und startet das eigentliche Modul
 
-        RaiseEvent ModulStateChanged("Running")
-
-        ' Instanzen generieren
+        'Instanz des aktuell laufenden Moduls bereitstellen
         activeModuleInstanz = Me
 
-        If sssScreen Is Nothing Then
-            sssScreen = New wpfModulMain()
+        'Eine möglicherweise noch vorhandene Fensterreferenz
+        'darf nicht wiederverwendet werden.
+        If sssScreen IsNot Nothing Then
+
+            Try
+
+                RemoveHandler sssScreen.DarstellungIstBereit, AddressOf SssScreen_DarstellungIstBereit
+                RemoveHandler sssScreen.Closed, AddressOf SssScreen_Closed
+
+                sssScreen.Close()
+
+            Catch ex As Exception
+
+                'Eine bereits geschlossene WPF-Window-Instanz
+                'ist ohnehin nicht mehr verwendbar.
+
+            Finally
+
+                sssScreen = Nothing
+
+            End Try
+
         End If
 
+        Try
 
-        'Settings einlesen und erste Inititalisierungen durchführen
-        CheckYourSettings()
+            'Bei jedem Start eine neue WPF-Window-Instanz erzeugen
+            sssScreen = New wpfModulMain()
 
-        'Modul anzeigen
-        sssScreen.WindowState = FormWindowState.Maximized
-        sssScreen.Topmost = True
-        sssScreen.Show()
-        sssScreen.Focus()
+            AddHandler sssScreen.DarstellungIstBereit, AddressOf SssScreen_DarstellungIstBereit
+            AddHandler sssScreen.Closed, AddressOf SssScreen_Closed
+
+            'Settings einlesen und Initialisierungen durchführen
+            CheckYourSettings()
+
+            'Modul anzeigen
+            sssScreen.WindowState = System.Windows.WindowState.Maximized
+
+            sssScreen.Topmost = True
+
+            sssScreen.Show()
+            sssScreen.Focus()
+
+            RaiseEvent ModulStateChanged("Running")
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Modul """ & ModulName & """ konnte nicht gestartet werden: " & ex.ToString())
+
+            If sssScreen IsNot Nothing Then
+
+                Try
+
+                    RemoveHandler sssScreen.Closed,
+                    AddressOf SssScreen_Closed
+
+                    sssScreen.Close()
+
+                Catch
+                    'Keine weitere Behandlung notwendig
+                Finally
+                    sssScreen = Nothing
+                End Try
+
+            End If
+
+            activeModuleInstanz = Nothing
+
+            RaiseEvent ModulStateChanged("Error")
+
+            Throw
+
+        End Try
 
     End Sub
 
     Public Sub StopModul() Implements ISlideShowModul.StopModul
-        'Räumt auf und meldet, das der Schoner ordungsgemäß beendet wurde
+        'Räumt auf und meldet dass der Schoner ordnungsgemäß beendet wurde
 
         If sssInfo IsNot Nothing Then
-            sssInfo.Close()
-            sssInfo.Dispose()
-            sssInfo = Nothing
+
+            Try
+                sssInfo.Close()
+                sssInfo.Dispose()
+            Finally
+                sssInfo = Nothing
+            End Try
+
         End If
 
         If sssPause IsNot Nothing Then
-            sssPause.Close()
-            sssPause.Dispose()
-            sssPause = Nothing
+
+            Try
+                sssPause.Close()
+                sssPause.Dispose()
+            Finally
+                sssPause = Nothing
+            End Try
+
         End If
 
         If sssScreen IsNot Nothing Then
-            sssScreen.Close()
+
+            Try
+
+                RemoveHandler sssScreen.DarstellungIstBereit, AddressOf SssScreen_DarstellungIstBereit
+                RemoveHandler sssScreen.Closed, AddressOf SssScreen_Closed
+
+                sssScreen.Close()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Fehler beim Schließen des Modulfensters """ & ModulName & """: " & ex.ToString())
+
+            Finally
+
+                sssScreen = Nothing
+
+            End Try
+
         End If
+
+        activeModuleInstanz = Nothing
+        pauseIsActive = False
 
         RaiseEvent ModulStateChanged("Stopped")
 
     End Sub
 
     Public Sub PauseModusModul() Implements ISlideShowModul.PauseModusModul
-        ' Startet den Pause-Modus des Moduls
+        'Startet den Pause-Modus des Moduls
+
+        If sssScreen Is Nothing Then
+            Exit Sub
+        End If
 
         RaiseEvent ModulStateChanged("Pause")
 
@@ -147,10 +245,16 @@ Public Class ModulMain
         pauseIsActive = True
 
         If sssPause.ShowDialog() = DialogResult.OK Then
+
             sssPause.Dispose()
             sssPause = Nothing
+
+            pauseIsActive = False
+
             CheckYourSettings()
+
             RaiseEvent ModulStateChanged("Running")
+
         End If
 
     End Sub
@@ -197,6 +301,13 @@ Public Class ModulMain
     End Sub
 
     'Private Methoden
+    Private Sub SssScreen_DarstellungIstBereit()
+        'Leitet die WPF-Darstellungsbereitschaft an das Framework weiter.
+
+        RaiseEvent ModulIstDarstellungsbereit()
+
+    End Sub
+
     Public Shared Function GetModulDefaultSettings() As Dictionary(Of String, String)
         Dim defaultModulSettings As New Dictionary(Of String, String)
         'Liefert die Default-Werte des Moduls
@@ -246,6 +357,34 @@ Public Class ModulMain
 
         'Modus BildInfo Anzeigen
         aktuelleSettings.BildInfoAnzeigen = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_SSS_FULLPATH & "BildInfoAnzeigen", defaults))
+
+    End Sub
+
+    Private Sub SssScreen_Closed(
+    sender As Object,
+    e As EventArgs)
+        'Entfernt die Referenz auch dann,
+        'wenn sich das WPF-Fenster selbst geschlossen hat.
+
+        Dim geschlossenesFenster As wpfModulMain
+
+        geschlossenesFenster =
+            TryCast(sender, wpfModulMain)
+
+        If geschlossenesFenster IsNot Nothing Then
+
+            RemoveHandler geschlossenesFenster.Closed,
+                AddressOf SssScreen_Closed
+
+        End If
+
+        If ReferenceEquals(
+            sssScreen,
+            geschlossenesFenster) Then
+
+            sssScreen = Nothing
+
+        End If
 
     End Sub
 

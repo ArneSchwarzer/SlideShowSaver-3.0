@@ -73,41 +73,106 @@ Public Class ModulMain
 #Region "Eventdeklaration"
     ' === Events ===
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
+    Public Event ModulIstDarstellungsbereit() Implements ISlideShowModul.ModulIstDarstellungsbereit
     Public Shared Event YouHaveMail_Mandelbrot()
 #End Region
 
 
     'Start, Stopp & Pause
     Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
-        'Modul anzeigen
+        'Initialisiert und zeigt das Mandelbrot-Modul
+
+        'Eine eventuell noch vorhandene Fensterinstanz
+        'darf nicht wiederverwendet werden.
+        If mandelbrotScreen IsNot Nothing Then
+
+            Try
+
+                RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
+
+                mandelbrotScreen.Close()
+
+            Catch
+                'Eine alte oder bereits geschlossene Fensterinstanz
+                'ist nicht mehr verwendbar.
+            Finally
+                mandelbrotScreen = Nothing
+            End Try
+
+        End If
 
         CheckYourSettings()
 
         Try
+
             mandelbrotScreen = New wpfModulMain()
+
+            AddHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
+            AddHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
+
+            mandelbrotScreen.WindowState = System.Windows.WindowState.Maximized
+            mandelbrotScreen.Show()
+
+            RaiseEvent ModulStateChanged("Running")
+
         Catch ex As Exception
+
             LogError(
-        "Modul Mandelbrot - ModulMain.StartModul(): " &
-        "Das Modul konnte nicht geladen werden: " &
-        ex.ToString())
+            "Modul Mandelbrot - ModulMain.StartModul(): " &
+            "Das Modul konnte nicht gestartet werden: " &
+            ex.ToString())
+
+            If mandelbrotScreen IsNot Nothing Then
+
+                Try
+
+                    RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
+                    RemoveHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
+
+                    mandelbrotScreen.Close()
+
+                Catch
+                    'Keine weitere Behandlung notwendig
+                Finally
+                    mandelbrotScreen = Nothing
+                End Try
+
+            End If
 
             RaiseEvent ModulStateChanged("Error")
-            Exit Sub
+
+            Throw
+
         End Try
-
-        mandelbrotScreen.WindowState = System.Windows.WindowState.Maximized
-        mandelbrotScreen.Show()
-
-        RaiseEvent ModulStateChanged("Running")
 
     End Sub
 
-    Public Sub StopModul() Implements ISlideShowModul.StopModul
-        'Aufräumen und Modul beenden
+    Public Sub StopModul() _
+    Implements ISlideShowModul.StopModul
+        'Räumt auf und beendet das Mandelbrot-Modul
 
         If mandelbrotScreen IsNot Nothing Then
-            mandelbrotScreen.Close()
-            mandelbrotScreen = Nothing
+
+            Try
+
+                RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
+                RemoveHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
+
+                mandelbrotScreen.Close()
+
+            Catch ex As Exception
+
+                LogError(
+                "Modul Mandelbrot - ModulMain.StopModul(): " &
+                "Fehler beim Schließen des Modulfensters: " &
+                ex.ToString())
+
+            Finally
+
+                mandelbrotScreen = Nothing
+
+            End Try
+
         End If
 
         RaiseEvent ModulStateChanged("Stopped")
@@ -145,6 +210,14 @@ Public Class ModulMain
     End Sub
 
     'Private Funktionen
+
+    Private Sub MandelbrotScreen_DarstellungIstBereit()
+        'Leitet die WPF-Darstellungsbereitschaft an das Framework weiter.
+
+        RaiseEvent ModulIstDarstellungsbereit()
+
+    End Sub
+
     Private Function GetModulDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Werte des Moduls
 
@@ -184,4 +257,32 @@ Public Class ModulMain
         'Koordinaten Anzeigen
         aktuelleSettings.Rotation = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Rotation", defaults))
     End Sub
+
+    Private Sub MandelbrotScreen_Closed(
+    sender As Object,
+    e As EventArgs)
+        'Entfernt die Fensterreferenz auch bei internem Schließen.
+
+        Dim geschlossenesFenster As wpfModulMain
+
+        geschlossenesFenster =
+            TryCast(sender, wpfModulMain)
+
+        If geschlossenesFenster IsNot Nothing Then
+
+            RemoveHandler geschlossenesFenster.Closed,
+                AddressOf MandelbrotScreen_Closed
+
+        End If
+
+        If ReferenceEquals(
+            mandelbrotScreen,
+            geschlossenesFenster) Then
+
+            mandelbrotScreen = Nothing
+
+        End If
+
+    End Sub
+
 End Class

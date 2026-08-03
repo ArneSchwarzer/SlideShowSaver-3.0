@@ -9,12 +9,17 @@ Imports Modul_Matrix.ModulMain
 Imports SlideShowLogging
 
 
+
+
 Public Class frmModulMain
 
 #Region "Variablendeklaration"
     'Variablendeklaration
     Private Shared aktuelleSettings As ModulSettings_Matrix
 #End Region
+
+    'Events
+    Public Event DarstellungIstBereit()
 
     Private Sub frmModuleMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Initialisiert die Form und ihre Steuerelemente
@@ -46,13 +51,25 @@ Public Class frmModulMain
     End Sub
 
     Private Sub frmModulMain_Shown(sender As Object, e As EventArgs) Handles Me.Shown
-        'Initiale Anzeige der Form
+        'Maximiert das Modul und meldet die Darstellungsbereitschaft
+        'nach dem ersten vollständigen WinForms-Zeichenzyklus.
 
-        'Jetzt die Form sichtbar machen
         Me.WindowState = FormWindowState.Maximized
 
+        BeginInvoke(New MethodInvoker(AddressOf MeldeDarstellungsbereitschaft))
 
     End Sub
+
+    Private Sub MeldeDarstellungsbereitschaft()
+        'Meldet nach abgeschlossenem Layout- und Zeichenzyklus,
+        'dass das Modul vollständig dargestellt werden kann.
+
+        Me.Refresh()
+
+        RaiseEvent DarstellungIstBereit()
+
+    End Sub
+
 
     Private Sub frmModulMain_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
         LogDebug("SlideShowModul Matrix hat den Key: " & e.KeyValue.ToString & " empfangen. Leite Weiter an Eventhandler")

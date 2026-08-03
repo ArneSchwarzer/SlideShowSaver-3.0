@@ -20,16 +20,7 @@
             IsHitTestVisible="False"
             Panel.ZIndex="10"
             Visibility="Collapsed" />
-
-        <TextBlock x:Name="txbPraesentationsschirm"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   TextAlignment="Center"
-                   FontSize="48"
-                   FontWeight="Bold"          
-                   Visibility="Collapsed"
-                   Panel.ZIndex="20" />
-        
+              
 
     </Grid>
 
