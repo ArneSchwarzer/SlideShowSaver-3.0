@@ -119,17 +119,42 @@ Public Class frmOptionsMain
 
         'Handler vom vorherigen Modul entfernen
         Try
-            Dim ucTransition = TryCast(tpModul.Controls(0), ISlideShowTransitionCommunication)
-            If ucTransition IsNot Nothing Then
-                RemoveHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+
+            Dim altesOptionsControl As Control
+            Dim ucTransition As ISlideShowTransitionCommunication
+            Dim ucShader As ISlideShowShaderCommunication
+
+            altesOptionsControl = Nothing
+            ucTransition = Nothing
+            ucShader = Nothing
+
+            If tpModul.Controls.Count > 0 Then
+
+                altesOptionsControl = tpModul.Controls(0)
+
+                ucTransition = TryCast(altesOptionsControl, ISlideShowTransitionCommunication)
+
+                If ucTransition IsNot Nothing Then
+
+                    RemoveHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+
+                End If
+
+                ucShader = TryCast(altesOptionsControl, ISlideShowShaderCommunication)
+
+                If ucShader IsNot Nothing Then
+
+                    RemoveHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+
+                End If
+
             End If
 
-            Dim ucShader = TryCast(tpModul.Controls(0), ISlideShowShaderCommunication)
-            If ucShader IsNot Nothing Then
-                RemoveHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
-            End If
         Catch ex As Exception
-            LogHandling.LogError("SaverMain - frmOptionsMain.clbModule.SelectedIndexChanged: Fehler beim Entfernen alter Handler: " & ex.ToString)
+
+            LogHandling.LogError("frmOptionsMain.clbModule_SelectedIndexChanged: Fehler beim Entfernen alter Handler: " &
+                                 ex.ToString())
+
         End Try
 
         Try

@@ -18,21 +18,38 @@ Public Class ImageConversionHandling
     End Function
 
     Private Shared Function CreateBitmapSourceFromGdiBitmap(bmp As Bitmap) As BitmapSource
-        'Erzeugt pixelgenaue BitmapSource aus GDI-Bitmap (ohne DPI-Skalierung) ===
-        If bmp Is Nothing Then Return Nothing
-        Dim hBmp As IntPtr = bmp.GetHbitmap()
+        'Erzeugt eine BitmapSource aus einem GDI-Bitmap und gibt das HBITMAP
+        'in jedem Fall wieder frei.
+
+        Dim hBmp As IntPtr
+        Dim source As BitmapSource
+
+        hBmp = IntPtr.Zero
+        source = Nothing
+
+        If bmp Is Nothing Then
+            Return Nothing
+        End If
+
         Try
-            Dim src = Imaging.CreateBitmapSourceFromHBitmap(
-                hBmp,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromWidthAndHeight(bmp.Width, bmp.Height) ' 1:1 Pixel
-            )
-            src.Freeze()
-            Return src
+
+            hBmp = bmp.GetHbitmap()
+
+            source = Imaging.CreateBitmapSourceFromHBitmap(hBmp, IntPtr.Zero, Int32Rect.Empty,
+                                                           BitmapSizeOptions.FromWidthAndHeight(bmp.Width, bmp.Height))
+
+            source.Freeze()
+
+            Return source
+
         Finally
-            DeleteObject(hBmp)
+
+            If hBmp <> IntPtr.Zero Then
+                DeleteObject(hBmp)
+            End If
+
         End Try
+
     End Function
 
     'Konverter
@@ -155,22 +172,48 @@ Public Class ImageConversionHandling
 
     'BitmapImage to...
     Public Shared Function ConvertBitmapImageToImage(bmpImage As BitmapImage) As System.Drawing.Image
-        If bmpImage Is Nothing Then Return Nothing
 
-        ' Sicherstellen, dass das Bild vollständig geladen ist
-        If bmpImage.IsDownloading Then
-            Dim done As New ManualResetEvent(False)
-            AddHandler bmpImage.DownloadCompleted, Sub() done.Set()
-            done.WaitOne()
+        Dim encoder As PngBitmapEncoder
+        Dim temporaeresBild As System.Drawing.Image
+        Dim unabhaengigesBild As System.Drawing.Bitmap
+
+        encoder = Nothing
+        temporaeresBild = Nothing
+        unabhaengigesBild = Nothing
+
+        If bmpImage Is Nothing Then
+            Return Nothing
         End If
 
         Using ms As New MemoryStream()
-            Dim encoder As New PngBitmapEncoder()
+
+            encoder = New PngBitmapEncoder()
             encoder.Frames.Add(BitmapFrame.Create(bmpImage))
             encoder.Save(ms)
-            ms.Seek(0, SeekOrigin.Begin)
-            Return Image.FromStream(ms)
+
+            ms.Position = 0
+
+            Try
+
+                temporaeresBild = System.Drawing.Image.FromStream(ms, True, True)
+
+                unabhaengigesBild = New System.Drawing.Bitmap(temporaeresBild)
+
+            Finally
+
+                If temporaeresBild IsNot Nothing Then
+
+                    temporaeresBild.Dispose()
+                    temporaeresBild = Nothing
+
+                End If
+
+            End Try
+
         End Using
+
+        Return unabhaengigesBild
+
     End Function
 
     Public Shared Function ConvertBitmapImageToRenderTargetBitmap(bmpImage As BitmapImage, size As Windows.Size) As RenderTargetBitmap
