@@ -836,7 +836,7 @@ Module SaverMain
 
         Try
 
-            screenshot = GetCurrentScreen()
+            screenshot = ScreenHandling.ErstelleScreenshot()
 
             If screenshot Is Nothing Then
 

@@ -5,6 +5,8 @@ Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowBildauswahl.BildauswahlMain
 Imports System.IO
 Imports SlideShowTools
+Imports SlideShowTools.BildHandling
+Imports SlideShowTools.FileHandling
 Imports SlideShowLogging
 Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Xmp
@@ -107,7 +109,7 @@ Public Class frmPauseModusOverlay
         If meineInstanz IsNot Nothing Then
             meineInstanz.sssScreen.tmrModul.Stop()
 
-            tempImage = GetPictureByName(bildPfad)
+            tempImage = LadeBild(bildPfad)
             bild = ConvertImageToBitmapImage(tempImage)
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild
@@ -228,7 +230,7 @@ Public Class frmPauseModusOverlay
                 End If
 
                 ' Bild wieder neu einladen (nach dem Speichern)
-                tempImage = GetPictureByName(bildPfad)
+                tempImage = LadeBild(bildPfad)
                 bild = ConvertImageToBitmapImage(tempImage)
 
                 meineInstanz.sssScreen.imgAnzeige.Source = bild
@@ -302,7 +304,7 @@ Public Class frmPauseModusOverlay
         'Bild anzeigen
         If meineInstanz IsNot Nothing Then
 
-            tempImage = GetPictureByName(bildPfad)
+            tempImage = LadeBild(bildPfad)
             bild = ConvertImageToBitmapImage(tempImage)
             meineInstanz.sssScreen.imgAnzeige.Source = bild
         End If
@@ -361,7 +363,7 @@ Public Class frmPauseModusOverlay
 
         'Bild anzeigen
         If meineInstanz IsNot Nothing Then
-            tempImage = GetPictureByName(bildPfad)
+            tempImage = LadeBild(bildPfad)
             bild = ConvertImageToBitmapImage(tempImage)
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild

@@ -7,11 +7,13 @@ Imports SlideShowTools.CheckedListBoxHandling
 Imports SlideShowTools
 
 Public Class ucOptionsBildauswahl
-    'Variablendeklaration
-
+#Region "Variablendeklaration"
     'Settings
     Private aktuelleSettings As SettingsBildauswahl
 
+    'Initialisierung
+    Private initialisierungLaeuft As Boolean
+#End Region
 
     Private Sub ucOptionsBildauswahl_Load(sender As Object, e As EventArgs) Handles Me.Load
         'Settings einlesen und setzten
@@ -23,70 +25,46 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub rdo18_CheckedChanged(sender As Object, e As EventArgs) Handles rdo18.CheckedChanged
-        'Behandelt den RadioButton rdo18
+        'Behandelt die Auswahl der Altersfreigabe 18+.
 
-        'Blacklist Tags setzen/löschen
-        lstBlackList.Items.Remove("18+")
-        lstBlackList.Items.Remove("Akt")
-        lstBlackList.Items.Remove("Lingerie")
+        If initialisierungLaeuft OrElse Not rdo18.Checked Then
+            Exit Sub
+        End If
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "18+")
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        SpeichereAltersfreigabe("18+")
 
     End Sub
 
     Private Sub rdoAkt_CheckedChanged(sender As Object, e As EventArgs) Handles rdoAkt.CheckedChanged
-        'Behandelt den RadioButton rdo Akt
+        'Behandelt die Auswahl der Altersfreigabe Akt.
 
-        'Blacklist Tags setzen/löschen
-        If Not lstBlackList.Items.Contains("18+") Then
-            lstBlackList.Items.Add("18+")
+        If initialisierungLaeuft OrElse Not rdoAkt.Checked Then
+            Exit Sub
         End If
-        lstBlackList.Items.Remove("Akt")
-        lstBlackList.Items.Remove("Lingerie")
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Akt")
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        SpeichereAltersfreigabe("Akt")
 
     End Sub
 
     Private Sub rdoLingerie_CheckedChanged(sender As Object, e As EventArgs) Handles rdoLingerie.CheckedChanged
-        'Behandelt den RadioButton rdoLingerie
+        'Behandelt die Auswahl der Altersfreigabe Lingerie.
 
-        'Blacklist Tags setzen/löschen
-        If Not lstBlackList.Items.Contains("18+") Then
-            lstBlackList.Items.Add("18+")
+        If initialisierungLaeuft OrElse Not rdoLingerie.Checked Then
+            Exit Sub
         End If
-        If Not lstBlackList.Items.Contains("Akt") Then
-            lstBlackList.Items.Add("Akt")
-        End If
-        lstBlackList.Items.Remove("Lingerie")
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Lingerie")
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        SpeichereAltersfreigabe("Lingerie")
 
     End Sub
 
     Private Sub rdoJugendfrei_CheckedChanged(sender As Object, e As EventArgs) Handles rdoJugendfrei.CheckedChanged
-        'Behandelt den RadioButton rdoJugendfrei
+        'Behandelt die Auswahl der Altersfreigabe Jugendfrei.
 
-        'Blacklist Tags setzen/löschen
-        If Not lstBlackList.Items.Contains("18+") Then
-            lstBlackList.Items.Add("18+")
-        End If
-        If Not lstBlackList.Items.Contains("Akt") Then
-            lstBlackList.Items.Add("Akt")
-        End If
-        If Not lstBlackList.Items.Contains("Lingerie") Then
-            lstBlackList.Items.Add("Lingerie")
+        If initialisierungLaeuft OrElse Not rdoJugendfrei.Checked Then
+            Exit Sub
         End If
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Jugendfrei")
-        CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+        SpeichereAltersfreigabe("Jugendfrei")
 
     End Sub
 
@@ -142,84 +120,178 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub btnWhiteListHinzufügen_Click(sender As Object, e As EventArgs) Handles btnWhiteListHinzufügen.Click
-        'Schreibt ein neues Tag in die Whitelist. Bei einem Tag-Konflikt mit Einträgen
-        'aus der BlackList wird eine Warnung ausgegeben
+        'Schreibt ein neues Tag in die Whitelist.
+        'Bekannte Altersfreigabe-Tags werden gegen die aktuelle Freigabe geprüft.
 
-        Dim myTag As String = ""
+        Dim myTag As String
+        Dim erforderlicheAltersfreigabe As String
         Dim myMessageBox As frmMessageBildauswahl
-        Dim myInputBox As New frmInputBildauswahl
+        Dim myInputBox As frmInputBildauswahl
+        Dim warnDialog As frmAltersfreigabeWarnung
+        Dim warnErgebnis As frmAltersfreigabeWarnung.AltersfreigabeWarnungErgebnis
 
-        'InputBox aufrufen
-        If myInputBox.ShowDialog() = DialogResult.OK Then
+        myTag = String.Empty
+        erforderlicheAltersfreigabe = Nothing
+        myMessageBox = Nothing
+        myInputBox = New frmInputBildauswahl()
+        warnDialog = Nothing
 
-            myTag = myInputBox.rueckgabeTag
+        Using myInputBox
 
-            'Gegen Blacklist-Einträge gegenprüfen
-            If lstBlackList.Items.Contains(myTag) Then
-                myMessageBox = New frmMessageBildauswahl(myTag, False)
-                myMessageBox.Show()
+            If myInputBox.ShowDialog() <> DialogResult.OK Then
                 Exit Sub
             End If
 
-            'In die Liste eintragen
-            If Not lstWhiteList.Items.Contains(myTag) Then
-                lstWhiteList.Items.Add(myTag)
-            End If
+            myTag =
+            If(
+                myInputBox.rueckgabeTag,
+                String.Empty).
+            Trim()
 
-            'Button-Status setzen
-            If lstWhiteList.Items.Count > 0 Then
-                btnWhiteListListeLöschen.Enabled = True
-                btnWhiteListLöschen.Enabled = (lstWhiteList.SelectedIndex >= 0)
-            Else
-                btnWhiteListLöschen.Enabled = False
-                btnWhiteListListeLöschen.Enabled = False
-            End If
+        End Using
+
+        If String.IsNullOrWhiteSpace(myTag) Then
+            Exit Sub
+        End If
+
+        'Gegen die sichtbare Benutzer-Blacklist prüfen.
+        If ListBoxEnthaeltTag(lstBlackList, myTag) Then
+
+            myMessageBox =
+            New frmMessageBildauswahl(
+                myTag,
+                False)
+
+            Using myMessageBox
+                myMessageBox.ShowDialog()
+            End Using
+
+            Exit Sub
 
         End If
 
-        'DirectCommit
+        'Bekannte Altersfreigabe-Tags gegen die aktuelle Freigabe prüfen.
+        If Not IstWhitelistTagMitAltersfreigabeKompatibel(myTag, aktuelleSettings.Altersfreigabe,
+                                                          erforderlicheAltersfreigabe) Then
+
+            warnDialog =
+            New frmAltersfreigabeWarnung(
+                myTag,
+                aktuelleSettings.Altersfreigabe,
+                erforderlicheAltersfreigabe)
+
+            Using warnDialog
+
+                warnDialog.ShowDialog()
+
+                warnErgebnis = warnDialog.Ergebnis
+
+            End Using
+
+            Select Case warnErgebnis
+
+                Case frmAltersfreigabeWarnung.
+                AltersfreigabeWarnungErgebnis.Abbrechen
+
+                    Exit Sub
+
+                Case frmAltersfreigabeWarnung.
+                AltersfreigabeWarnungErgebnis.AltersfreigabeAnpassen
+
+                    SetzeAltersfreigabeUndRadioButton(erforderlicheAltersfreigabe)
+
+                Case frmAltersfreigabeWarnung.
+                AltersfreigabeWarnungErgebnis.TagTrotzdemHinzufuegen
+
+                    'Das Tag wird gespeichert.
+                    'Die bestehende Altersfreigabe bleibt unverändert.
+
+            End Select
+
+        End If
+
+        If Not ListBoxEnthaeltTag(lstWhiteList, myTag) Then
+
+            lstWhiteList.Items.Add(myTag)
+
+        End If
+
+        AktualisiereButtonStatus()
+
         CheckedListBoxHandling.SaveListBoxToRegistry(lstWhiteList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
 
     End Sub
 
     Private Sub btnBlackListHinzufügen_Click(sender As Object, e As EventArgs) Handles btnBlackListHinzufügen.Click
-        'Schreibt ein neues Tag in die Blacklist. Bei einem Tag-Konflikt mit Einträgen
-        'aus der WhiteList wird eine Warnung ausgegeben
+        'Schreibt ein neues Tag in die Benutzer-Blacklist.
+        'Altersfreigabe-Tags werden ausschließlich durch die RadioButtons verwaltet.
 
-        Dim myTag As String = ""
+        Dim myTag As String
         Dim myMessageBox As frmMessageBildauswahl
-        Dim myInputBox As New frmInputBildauswahl
+        Dim myInputBox As frmInputBildauswahl
 
-        'InputBox aufrufen
-        If myInputBox.ShowDialog() = DialogResult.OK Then
+        myTag = String.Empty
+        myMessageBox = Nothing
+        myInputBox = New frmInputBildauswahl()
 
-            myTag = myInputBox.rueckgabeTag
+        Using myInputBox
 
-
-            'Gegen WhiteListlist-Einträge gegenprüfen
-            If lstWhiteList.Items.Contains(myTag) Then
-                myMessageBox = New frmMessageBildauswahl(myTag, True)
-                myMessageBox.Show()
+            If myInputBox.ShowDialog() <> DialogResult.OK Then
                 Exit Sub
             End If
 
-            'In die Liste eintragen
-            If Not lstBlackList.Items.Contains(myTag) Then
-                lstBlackList.Items.Add(myTag)
-            End If
+            myTag =
+            If(
+                myInputBox.rueckgabeTag,
+                String.Empty).
+            Trim()
 
-            'Button-Status setzen
-            If lstBlackList.Items.Count > 0 Then
-                btnBlackListListeLöschen.Enabled = True
-                btnBlackListLöschen.Enabled = (lstBlackList.SelectedIndex >= 0)
-            Else
-                btnBlackListLöschen.Enabled = False
-                btnBlackListListeLöschen.Enabled = False
-            End If
+        End Using
+
+        If String.IsNullOrWhiteSpace(myTag) Then
+            Exit Sub
+        End If
+
+        If IstAltersfreigabeTag(myTag) Then
+
+            MessageBox.Show(
+            "Das Tag """ &
+            myTag &
+            """ wird intern durch die Altersfreigabe verwaltet." &
+            Environment.NewLine &
+            Environment.NewLine &
+            "Bitte ändere die gewünschte Altersfreigabe über die dafür vorgesehenen Optionsfelder.",
+            "Altersfreigabe",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information)
+
+            Exit Sub
 
         End If
 
-        'DirectCommit
+        If ListBoxEnthaeltTag(lstWhiteList, myTag) Then
+
+            myMessageBox =
+            New frmMessageBildauswahl(
+                myTag,
+                True)
+
+            Using myMessageBox
+                myMessageBox.ShowDialog()
+            End Using
+
+            Exit Sub
+
+        End If
+
+        If Not ListBoxEnthaeltTag(lstBlackList, myTag) Then
+
+            lstBlackList.Items.Add(myTag)
+
+        End If
+
+        AktualisiereButtonStatus()
+
         CheckedListBoxHandling.SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
 
     End Sub
@@ -345,112 +417,225 @@ Public Class ucOptionsBildauswahl
     End Sub
 
     Private Sub IniOrReinitialise()
-        'lstVerzeichnisse
-        For Each item In aktuelleSettings.Verzeichnisse
-            lstVerzeichnisse.Items.Add(item)
-        Next
-        btnVerzeichnisseLöschen.Enabled = False
-        If lstVerzeichnisse.Items.Count = 0 Then
-            btnVerzeichnisseListeLöschen.Enabled = False
-        End If
-        SaveListBoxToRegistry(lstVerzeichnisse, SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse")
+        'Initialisiert alle Steuerelemente anhand der aktuellen Settings.
 
+        Dim item As String
 
-        'White-List
-        For Each item In aktuelleSettings.WhiteListTags
-            lstWhiteList.Items.Add(item)
-        Next
-        btnWhiteListLöschen.Enabled = False
-        If lstWhiteList.Items.Count = 0 Then
-            btnWhiteListListeLöschen.Enabled = False
-        End If
-        SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags")
+        initialisierungLaeuft = True
 
-        'Black-List
-        For Each item In aktuelleSettings.BlackListTags
-            lstBlackList.Items.Add(item)
-        Next
-        btnBlackListLöschen.Enabled = False
-        If lstBlackList.Items.Count = 0 Then
-            btnBlackListListeLöschen.Enabled = False
-        End If
-        'WriteToRegistry erst nach setzen der Altersfreigabe
+        Try
 
-        'SterneBewertungControl setzten und dann dessen Eventhandling einschalten.
-        sbcBewertung.Bewertung = aktuelleSettings.Bewertung
-        sbcBewertung.EndInitialization()
-        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", aktuelleSettings.Bewertung.ToString)
+            lstVerzeichnisse.Items.Clear()
+            lstWhiteList.Items.Clear()
+            lstBlackList.Items.Clear()
 
-        'Altersfreigabe - RadioButtons & Black-List Einträge
-        Select Case aktuelleSettings.Altersfreigabe
-            Case "18+"
-                rdo18.Checked = True
-                'Blacklist Tags setzen/löschen
-                lstBlackList.Items.Remove("18+")
-                lstBlackList.Items.Remove("Akt")
-                lstBlackList.Items.Remove("Lingerie")
-                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "18+")
-            Case "Akt"
-                rdoAkt.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
+            'Verzeichnisse
+            If aktuelleSettings.Verzeichnisse IsNot Nothing Then
+
+                For Each item In aktuelleSettings.Verzeichnisse
+
+                    If Not String.IsNullOrWhiteSpace(item) Then
+                        lstVerzeichnisse.Items.Add(item)
+                    End If
+
+                Next
+
+            End If
+
+            'Whitelist
+            If aktuelleSettings.WhiteListTags IsNot Nothing Then
+
+                For Each item In aktuelleSettings.WhiteListTags
+
+                    If Not String.IsNullOrWhiteSpace(item) AndAlso Not ListBoxEnthaeltTag(lstWhiteList, item) Then
+
+                        lstWhiteList.Items.Add(item.Trim())
+
+                    End If
+
+                Next
+
+            End If
+
+            'Sichtbare Benutzer-Blacklist
+            aktuelleSettings.BlackListTags = BereinigeBenutzerBlacklist(aktuelleSettings.BlackListTags)
+
+            For Each item In aktuelleSettings.BlackListTags
+
+                If Not String.IsNullOrWhiteSpace(item) AndAlso Not ListBoxEnthaeltTag(lstBlackList, item) Then
+
+                    lstBlackList.Items.Add(item.Trim())
+
                 End If
-                lstBlackList.Items.Remove("Akt")
-                lstBlackList.Items.Remove("Lingerie")
-                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Akt")
-            Case "Lingerie"
-                rdoLingerie.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
-                End If
-                If Not lstBlackList.Items.Contains("Akt") Then
-                    lstBlackList.Items.Add("Akt")
-                End If
-                lstBlackList.Items.Remove("Lingerie")
-                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Lingerie")
-            Case "Jugendfrei"
-                rdoJugendfrei.Checked = True
-                'Blacklist Tags setzen/löschen
-                If Not lstBlackList.Items.Contains("18+") Then
-                    lstBlackList.Items.Add("18+")
-                End If
-                If Not lstBlackList.Items.Contains("Akt") Then
-                    lstBlackList.Items.Add("Akt")
-                End If
-                If Not lstBlackList.Items.Contains("Lingerie") Then
-                    lstBlackList.Items.Add("Lingerie")
-                End If
-                WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", "Jugendfrei")
-        End Select
-        SaveListBoxToRegistry(lstBlackList, SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags")
+
+            Next
+
+            'Bewertung
+            sbcBewertung.Bewertung = aktuelleSettings.Bewertung
+
+            sbcBewertung.EndInitialization()
+
+            'Altersfreigabe
+            Select Case aktuelleSettings.Altersfreigabe
+
+                Case "18+"
+
+                    rdo18.Checked = True
+
+                Case "Akt"
+
+                    rdoAkt.Checked = True
+
+                Case "Lingerie"
+
+                    rdoLingerie.Checked = True
+
+                Case "Jugendfrei"
+
+                    rdoJugendfrei.Checked = True
+
+                Case Else
+
+                    aktuelleSettings.Altersfreigabe = "Jugendfrei"
+                    rdoJugendfrei.Checked = True
+
+            End Select
+
+            AktualisiereButtonStatus()
+
+        Finally
+
+            initialisierungLaeuft = False
+
+        End Try
+
+    End Sub
+
+    Private Sub AktualisiereButtonStatus()
+        'Aktualisiert die Aktivierung der Listenbuttons.
+
+        btnVerzeichnisseLöschen.Enabled = (lstVerzeichnisse.SelectedIndex >= 0)
+        btnVerzeichnisseListeLöschen.Enabled = (lstVerzeichnisse.Items.Count > 0)
+
+        btnWhiteListLöschen.Enabled = (lstWhiteList.SelectedIndex >= 0)
+        btnWhiteListListeLöschen.Enabled = (lstWhiteList.Items.Count > 0)
+
+        btnBlackListLöschen.Enabled = (lstBlackList.SelectedIndex >= 0)
+        btnBlackListListeLöschen.Enabled = (lstBlackList.Items.Count > 0)
 
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Default-Werte einlesen und Steuerelemente entsprechend setzen
+        'Lädt die Defaultwerte, aktualisiert die UI und speichert sie direkt.
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaults einlesen
         defaults = GetBildauswahlDefaultSettings()
 
-        'AktuelleSettings aktualisieren
         aktuelleSettings.Verzeichnisse = SplitSemicolonList(defaults("Verzeichnisse"))
         aktuelleSettings.WhiteListTags = SplitSemicolonList(defaults("WhiteListTags"))
-        aktuelleSettings.BlackListTags = SplitSemicolonList(defaults("BlackListTags"))
+        aktuelleSettings.BlackListTags = BereinigeBenutzerBlacklist(SplitSemicolonList(defaults("BlackListTags")))
         aktuelleSettings.Altersfreigabe = defaults("Altersfreigabe")
         aktuelleSettings.Bewertung = CInt(defaults("Bewertung"))
 
-        'Listen leeren
-        lstVerzeichnisse.Items.Clear()
-        lstWhiteList.Items.Clear()
-        lstBlackList.Items.Clear()
-
-        'Steuerelemente setzen
         IniOrReinitialise()
 
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Verzeichnisse", String.Join(";", aktuelleSettings.Verzeichnisse))
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "WhiteListTags", String.Join(";", aktuelleSettings.WhiteListTags))
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "BlackListTags", String.Join(";", aktuelleSettings.BlackListTags))
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe", aktuelleSettings.Altersfreigabe)
+        WriteToRegistry(SLIDESHOWBILDAUSWAHL_PATH & "Bewertung", aktuelleSettings.Bewertung.ToString())
+
     End Sub
+    Private Sub SpeichereAltersfreigabe(altersfreigabe As String)
+        'Speichert die aktuelle Altersfreigabe im Settingsobjekt und in der Registry.
+
+        aktuelleSettings.Altersfreigabe = altersfreigabe
+
+        WriteToRegistry(
+            SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe",
+            aktuelleSettings.Altersfreigabe)
+
+    End Sub
+
+    Private Sub SetzeAltersfreigabeUndRadioButton(altersfreigabe As String)
+        'Setzt die Altersfreigabe und den zugehörigen RadioButton konsistent.
+
+        initialisierungLaeuft = True
+
+        Try
+
+            Select Case altersfreigabe
+
+                Case "18+"
+
+                    aktuelleSettings.Altersfreigabe = "18+"
+                    rdo18.Checked = True
+
+                Case "Akt"
+
+                    aktuelleSettings.Altersfreigabe = "Akt"
+                    rdoAkt.Checked = True
+
+                Case "Lingerie"
+
+                    aktuelleSettings.Altersfreigabe = "Lingerie"
+                    rdoLingerie.Checked = True
+
+                Case "Jugendfrei"
+
+                    aktuelleSettings.Altersfreigabe = "Jugendfrei"
+                    rdoJugendfrei.Checked = True
+
+                Case Else
+
+                    aktuelleSettings.Altersfreigabe = "Jugendfrei"
+                    rdoJugendfrei.Checked = True
+
+            End Select
+
+        Finally
+
+            initialisierungLaeuft = False
+
+        End Try
+
+        WriteToRegistry(
+            SLIDESHOWBILDAUSWAHL_PATH & "Altersfreigabe",
+            aktuelleSettings.Altersfreigabe)
+
+    End Sub
+
+    Private Function ListBoxEnthaeltTag(listBox As ListBox, tag As String) As Boolean
+        'Prüft case-insensitiv, ob ein Tag bereits in einer ListBox enthalten ist.
+
+        Dim item As Object
+        Dim vorhandenesTag As String
+
+        If listBox Is Nothing OrElse String.IsNullOrWhiteSpace(tag) Then
+
+            Return False
+
+        End If
+
+        For Each item In listBox.Items
+
+            vorhandenesTag = Convert.ToString(item)
+
+            If String.Equals(
+                vorhandenesTag,
+                tag,
+                StringComparison.OrdinalIgnoreCase) Then
+
+                Return True
+
+            End If
+
+        Next
+
+        Return False
+
+    End Function
+
 End Class
 

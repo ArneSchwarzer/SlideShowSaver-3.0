@@ -10,7 +10,9 @@ Imports SlideShowInterfaces.InfoHandling
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowLoader
 Imports SlideShowLogging
+Imports SlideShowTools.BildHandling
 Imports SlideShowTools.ColorHandling
+Imports SlideShowTools.FileHandling
 Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
@@ -58,10 +60,10 @@ Partial Public Class wpfModulMain
     'Timer
     Public WithEvents tmrModul As New DispatcherTimer()
     Public WithEvents tmrPresentation As New DispatcherTimer()
+    Private WithEvents tmrInitialisierung As New DispatcherTimer()
 
     'Initialisierungsphase
-    Private hasFirstVerzeichnisse As Boolean = False
-    Private hasFirstBilder As Boolean = False
+    Private initialesBildWurdeGeladen As Boolean
     Private hintergrundWM As Windows.Media.Color
     Private sbBilder As Storyboard
     Private sbVerz As Storyboard
@@ -76,19 +78,14 @@ Partial Public Class wpfModulMain
 
 #End Region
 
+#Region "Konstruktor, Fensterstart und Settings"
+
     'Initialisierungen
     Public Sub New()
-        'Erzeugt und initialisiert das Fenster und seine Komponenten
+        'Erzeugt und initialisiert das Fenster und seine Komponenten.
 
-        'Eventhandler
-        AddHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
-        AddHandler BildauswahlMain.ErsteBilderGefunden, AddressOf BildauswahlMain_ErsteBilderGefunden
-        AddHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf BildauswahlMain_ErsteVerzeichnisseGefunden
-
-        'Initialisierung der Komponenten
         InitializeComponent()
 
-        ' Fenster in den Vordergrund und maximiert
         Me.WindowState = WindowState.Maximized
 
     End Sub
@@ -151,9 +148,25 @@ Partial Public Class wpfModulMain
         StartHourglassAnimation(hourglassBilder, rtBilder)
         StartHourglassAnimation(hourglassVerz, rtVerz)
 
-        CheckYourMail()
+        BereiteInitialisierungsanzeigeVor()
+        StarteInitialisierungspruefung()
 
         Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, New Action(AddressOf MeldeDarstellungsbereitschaft))
+
+    End Sub
+
+    Public Sub AktualisiereSettings(neueSettings As ModulMain.SettingsModul_SSS)
+        'Übernimmt aktualisierte Moduleinstellungen direkt von ModulMain.
+
+        aktuelleSettings = neueSettings
+
+        hintergrundWM = SDColorToWMColor(HintergrundFarbeSaver)
+
+        Me.Background = New SolidColorBrush(hintergrundWM)
+
+        txbPräsentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
+
+        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
 
     End Sub
 
@@ -172,93 +185,164 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-    Private Sub BildauswahlMain_ErsteVerzeichnisseGefunden()
+#End Region
 
-        Dispatcher.Invoke(Sub()
-                              lblInitialisiereVerzeichnisse.Content &= "OK"
-                              StopHourglassAnimation(rtVerz)
-                              hourglassVerz.Visibility = Visibility.Collapsed
-                              hasFirstVerzeichnisse = True
-                              VersucheErstesBildZuLaden()
-                          End Sub)
+#Region "Initialisierung und erste Bildauswahl"
+
+    Private Sub BereiteInitialisierungsanzeigeVor()
+        'Zeigt nur den Status des tatsächlich benötigten Auswahlbestands an.
+
+        initialesBildWurdeGeladen = False
+
+        pnlStatus.Visibility = Visibility.Visible
+
+        txbPräsentationsschirm.Visibility = Visibility.Visible
+
+        Select Case aktuelleSettings.Bildauswahl
+
+            Case "Zufallsverzeichnis"
+
+                lblInitialisiereBilder.Visibility = Visibility.Collapsed
+                hourglassBilder.Visibility = Visibility.Collapsed
+
+                StopHourglassAnimation(rtBilder)
+
+                lblInitialisiereVerzeichnisse.Visibility = Visibility.Visible
+                hourglassVerz.Visibility = Visibility.Visible
+
+            Case Else
+
+                lblInitialisiereVerzeichnisse.Visibility = Visibility.Collapsed
+                hourglassVerz.Visibility = Visibility.Collapsed
+
+                StopHourglassAnimation(rtVerz)
+
+                lblInitialisiereBilder.Visibility = Visibility.Visible
+                hourglassBilder.Visibility = Visibility.Visible
+
+        End Select
 
     End Sub
 
-    Private Sub BildauswahlMain_ErsteBilderGefunden()
+    Private Sub StarteInitialisierungspruefung()
+        'Prüft in kurzen Abständen, ob ein erstes Bild verfügbar ist.
 
-        Dispatcher.Invoke(Sub()
-                              lblInitialisiereBilder.Content &= "OK"
-                              StopHourglassAnimation(rtBilder)
-                              hourglassBilder.Visibility = Visibility.Collapsed
-                              hasFirstBilder = True
-                              VersucheErstesBildZuLaden()
-                          End Sub)
+        tmrInitialisierung.Stop()
+
+        tmrInitialisierung.Interval = TimeSpan.FromMilliseconds(200)
+
+        'Unmittelbar prüfen, bevor der erste Timer-Tick abgewartet wird.
+        If VersucheErstesBildZuLaden() Then
+            Exit Sub
+        End If
+
+        tmrInitialisierung.Start()
 
     End Sub
 
-    Private Sub VersucheErstesBildZuLaden()
-        Dispatcher.Invoke(Sub()
-                              'Erst laden, wenn beide Events eingetroffen sind
-                              If hasFirstBilder AndAlso hasFirstVerzeichnisse Then
+    Private Sub TmrInitialisierung_Tick(sender As Object, e As EventArgs) Handles tmrInitialisierung.Tick
+        'Prüft, ob der benötigte Bildbestand inzwischen verfügbar ist.
 
-                                  'Init-Overlay ausblenden
-                                  pnlStatus.Visibility = Visibility.Collapsed
-                                  txbPräsentationsschirm.Visibility = Visibility.Collapsed
+        If initialesBildWurdeGeladen Then
 
-                                  'Erstes Bild laden
-                                  LadeErstesBild()
-                              End If
-                          End Sub)
+            tmrInitialisierung.Stop()
+
+            Exit Sub
+
+        End If
+
+        VersucheErstesBildZuLaden()
+
     End Sub
 
-    Private Sub LadeErstesBild()
-        'Wählt die ersten Bilder zur Anzeige aus. 
+    Private Function VersucheErstesBildZuLaden() As Boolean
+        'Versucht, das erste für den gewählten Modus verfügbare Bild zu laden.
 
-#Region "Erstes Bild laden"
-        Do
-            If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
-                Do
-                    aktuellesVerzeichnis = GetPicturesByDirectory()
-                Loop Until aktuellesVerzeichnis.Count >= 1
-                '.Count zählt von 1 bis 2, aktuellesVerzeichnisCounter von 0 bis 1...
-                aktuellesVerzeichnisCounter = 0
-                bildPfad = aktuellesVerzeichnis(0)
+        Dim ausgewaehlterPfad As String
+        Dim ausgewaehltesBild As Image
+        Dim verzeichnisBilder As List(Of String)
+        Dim bildIndex As Integer
 
-                'Präsentationsmodus aktivieren, wenn eingestellt
-                If aktuelleSettings.Präsentationsschirm Then
-                    präsentationAnzeigen = True
-                Else
-                    präsentationAnzeigen = False
+        ausgewaehlterPfad = Nothing
+        ausgewaehltesBild = Nothing
+        verzeichnisBilder = Nothing
+        bildIndex = -1
+
+        If initialesBildWurdeGeladen Then
+            Return True
+        End If
+
+        Select Case aktuelleSettings.Bildauswahl
+
+            Case "Zufallsverzeichnis"
+
+                If Not TryGetRandomDirectoryPictures(verzeichnisBilder) Then
+
+                    Return False
+
                 End If
 
-            Else
-                bildPfad = GetPictures(1).Item(0)
+                If Not TryLadeBildAusVerzeichnis(verzeichnisBilder, 0, ausgewaehlterPfad, ausgewaehltesBild, bildIndex) Then
+
+                    Return False
+
+                End If
+
+                aktuellesVerzeichnis = verzeichnisBilder
+                aktuellesVerzeichnisCounter = bildIndex
+
+                präsentationAnzeigen = aktuelleSettings.Präsentationsschirm
+
+            Case Else
+
+                If Not TryLadeZufaelligesEinzelbild(ausgewaehlterPfad, ausgewaehltesBild) Then
+
+                    Return False
+
+                End If
+
+                aktuellesVerzeichnis = New List(Of String)
+                aktuellesVerzeichnisCounter = 0
                 präsentationAnzeigen = False
-            End If
 
-            aktuellesImage = GetPictureByName(bildPfad)
+        End Select
 
-        Loop Until aktuellesImage IsNot Nothing
+        bildPfad = ausgewaehlterPfad
+        aktuellesImage = ausgewaehltesBild
 
-        'Shader anwenden 
         LadeNeuenShader(True)
 
         If aktiverShader IsNot Nothing Then
+
             aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfad, GetNativeScreenResolution())
+
         End If
 
-        'Für Anzeige in imgAnzeige und in Transitionen konvertieren
         aktuellesBild = ConvertImageToBitmapImage(aktuellesImage)
 
-#End Region
+        initialesBildWurdeGeladen = True
+
+        tmrInitialisierung.Stop()
+
+        StopHourglassAnimation(rtBilder)
+        StopHourglassAnimation(rtVerz)
+
+        pnlStatus.Visibility = Visibility.Collapsed
+        txbPräsentationsschirm.Visibility = Visibility.Collapsed
 
         If präsentationAnzeigen Then
+
             PräsentationsschirmAnzeigen()
+
         Else
+
             BildAnzeigen()
+
         End If
 
-    End Sub
+        Return True
+
+    End Function
 
     Private Sub StartHourglassAnimation(elem As UIElement, ByRef rt As RotateTransform)
         If rt Is Nothing Then
@@ -283,6 +367,114 @@ Partial Public Class wpfModulMain
         End If
     End Sub
 
+    Private Function TryLadeZufaelligesEinzelbild(ByRef ausgewaehlterPfad As String,
+                                                  ByRef ausgewaehltesBild As Image) As Boolean
+        'Versucht mehrere unterschiedliche vorbereitete Bildpfade zu laden.
+
+        Dim versuchtePfade As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        Dim kandidatPfad As String
+        Dim kandidatBild As Image
+        Dim maximaleVersuche As Integer
+        Dim versuch As Integer
+
+        ausgewaehlterPfad = Nothing
+        ausgewaehltesBild = Nothing
+
+        maximaleVersuche =
+        Math.Min(
+            Math.Max(
+                GetPreparedPictureCount(),
+                1),
+            25)
+
+        For versuch = 1 To maximaleVersuche
+
+            kandidatPfad = Nothing
+            kandidatBild = Nothing
+
+            If Not TryGetRandomPicture(kandidatPfad) Then
+
+                Return False
+
+            End If
+
+            If Not versuchtePfade.Add(kandidatPfad) Then
+
+                Continue For
+
+            End If
+
+            kandidatBild = LadeBild(kandidatPfad)
+
+            If kandidatBild IsNot Nothing Then
+
+                ausgewaehlterPfad = kandidatPfad
+                ausgewaehltesBild = kandidatBild
+
+                Return True
+
+            End If
+
+        Next
+
+        Return False
+
+    End Function
+
+    Private Function TryLadeBildAusVerzeichnis(
+    verzeichnisBilder As List(Of String),
+    startIndex As Integer,
+    ByRef ausgewaehlterPfad As String,
+    ByRef ausgewaehltesBild As Image,
+    ByRef ausgewaehlterIndex As Integer
+) As Boolean
+        'Sucht ab dem angegebenen Index zyklisch nach einem ladbaren Bild.
+
+        Dim index As Integer
+        Dim pruefIndex As Integer
+        Dim kandidatPfad As String
+        Dim kandidatBild As Image
+
+        ausgewaehlterPfad = Nothing
+        ausgewaehltesBild = Nothing
+        ausgewaehlterIndex = -1
+
+        If verzeichnisBilder Is Nothing OrElse verzeichnisBilder.Count = 0 Then
+
+            Return False
+
+        End If
+
+        If startIndex < 0 Then
+            startIndex = 0
+        End If
+
+        For index = 0 To verzeichnisBilder.Count - 1
+
+            pruefIndex = (startIndex + index) Mod verzeichnisBilder.Count
+            kandidatPfad = verzeichnisBilder(pruefIndex)
+            kandidatBild = LadeBild(kandidatPfad)
+
+            If kandidatBild IsNot Nothing Then
+
+                ausgewaehlterPfad = kandidatPfad
+                ausgewaehltesBild = kandidatBild
+                ausgewaehlterIndex = pruefIndex
+
+                Return True
+
+            End If
+
+        Next
+
+        Return False
+
+    End Function
+
+#End Region
+
+#Region "Bildanzeige und Hauptschleife"
 
     'Hauptschleife
     Private Async Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
@@ -403,50 +595,103 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub NächstesBildLaden()
-        'Sucht ein neues Bild aus und bestimmt, ob eine Transition oder der Präsentationsschirm als
-        'nächstes angezeigt werden soll
+        'Bereitet das nächste Bild vor. Ist momentan kein neues Bild verfügbar,
+        'wird das aktuelle Bild beziehungsweise Verzeichnis wiederholt.
 
-        'Neues Bild laden. 
-        Do
-            If aktuelleSettings.Bildauswahl = "Zufallsverzeichnis" Then
+        Dim naechsterPfad As String
+        Dim naechstesImage As Image
+        Dim neueVerzeichnisBilder As List(Of String)
+        Dim naechsterIndex As Integer
+        Dim bildWurdeGeladen As Boolean
+        Dim verzeichnisWurdeGewechselt As Boolean
 
-                aktuellesVerzeichnisCounter += 1
+        naechsterPfad = Nothing
+        naechstesImage = Nothing
+        neueVerzeichnisBilder = Nothing
+        naechsterIndex = -1
+        bildWurdeGeladen = False
+        verzeichnisWurdeGewechselt = False
 
-                'Wenn wir das letzte Bild des aktuellen Verzeichnisses angezeigt haben, neues Verzeichnis laden
-                If aktuellesVerzeichnisCounter >= aktuellesVerzeichnis.Count Then
+        Select Case aktuelleSettings.Bildauswahl
 
-                    aktuellesVerzeichnisCounter = 0
+            Case "Zufallsverzeichnis"
 
-                    Do
-                        aktuellesVerzeichnis = GetPicturesByDirectory()
-                    Loop Until aktuellesVerzeichnis.Count >= 1
+                If aktuellesVerzeichnis Is Nothing OrElse aktuellesVerzeichnis.Count = 0 Then
 
-                    If aktuelleSettings.Präsentationsschirm Then
-                        präsentationAnzeigen = True
-                    Else
-                        präsentationAnzeigen = False
+                    If TryGetRandomDirectoryPictures(neueVerzeichnisBilder) Then
+
+                        aktuellesVerzeichnis = neueVerzeichnisBilder
+
+                        aktuellesVerzeichnisCounter = 0
+                        verzeichnisWurdeGewechselt = True
+
+                    End If
+
+                Else
+
+                    naechsterIndex = aktuellesVerzeichnisCounter + 1
+
+                    If naechsterIndex >= aktuellesVerzeichnis.Count Then
+
+                        If TryGetRandomDirectoryPictures(neueVerzeichnisBilder) Then
+
+                            aktuellesVerzeichnis = neueVerzeichnisBilder
+
+                        End If
+
+                        naechsterIndex = 0
+                        verzeichnisWurdeGewechselt = True
+
                     End If
 
                 End If
 
-                bildPfad = aktuellesVerzeichnis(aktuellesVerzeichnisCounter)
+                If aktuellesVerzeichnis IsNot Nothing AndAlso aktuellesVerzeichnis.Count > 0 Then
 
-            Else
+                    bildWurdeGeladen = TryLadeBildAusVerzeichnis(aktuellesVerzeichnis, naechsterIndex,
+                                                                 naechsterPfad, naechstesImage, naechsterIndex)
+
+                End If
+
+                If bildWurdeGeladen Then
+
+                    aktuellesVerzeichnisCounter = naechsterIndex
+
+                    präsentationAnzeigen = verzeichnisWurdeGewechselt AndAlso
+                    aktuelleSettings.Präsentationsschirm
+
+                End If
+
+            Case Else
+
+                bildWurdeGeladen = TryLadeZufaelligesEinzelbild(naechsterPfad, naechstesImage)
+
                 präsentationAnzeigen = False
-                bildPfad = GetPictures(1).Item(0)
-            End If
 
-            neuesImage = GetPictureByName(bildPfad)
+        End Select
 
-        Loop Until neuesImage IsNot Nothing
+        If Not bildWurdeGeladen Then
+            'Es ist momentan kein neues ladbares Bild verfügbar.
+            'Das aktuelle Bild wird als nächstes Bild wiederverwendet.
+
+            neuesImage = aktuellesImage
+            neuesBild = aktuellesBild
+
+            Return
+
+        End If
+
+        bildPfad = naechsterPfad
+        neuesImage = naechstesImage
 
         LadeNeuenShader(False)
 
         If aktiverShader IsNot Nothing Then
+
             neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
+
         End If
 
-        'Für Transitionen und imgAnzeige konvertieren
         neuesBild = ConvertImageToBitmapImage(neuesImage)
 
     End Sub
@@ -493,6 +738,11 @@ Partial Public Class wpfModulMain
         BildAnzeigen()
 
     End Sub
+
+
+#End Region
+
+#Region "Transitionen"
 
     'Hilfs- und Verwaltungsfunktionen
     'Transitionen
@@ -585,6 +835,11 @@ Partial Public Class wpfModulMain
 
     End Sub
 
+
+#End Region
+
+#Region "Shader"
+
     'Shader
     Private Sub LadeNeuenShader(istInitialisierung As Boolean)
 
@@ -661,22 +916,12 @@ Partial Public Class wpfModulMain
 
     End Sub
 
+
+#End Region
+
+#Region "Tastatur- und Mausereignisse"
+
     'Settings & Verwaltung
-    Private Sub CheckYourMail()
-        'Liest die aktuelleSettings ein
-
-        aktuelleSettings = GetSettings(Of ModulMain.SettingsModul_SSS)(ModulMain.nameModul)
-
-        'Hintergrund- und TextBox-Farbe setzen
-        hintergrundWM = SDColorToWMColor(HintergrundFarbeSaver)
-        Me.Background = New SolidColorBrush(hintergrundWM)
-        txbPräsentationsschirm.Foreground = New SolidColorBrush(InvertWMColor(hintergrundWM))
-
-        'Timer anpassen
-        tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
-
-    End Sub
-
     Private Sub Window_KeyDown(sender As Object, e As System.Windows.Input.KeyEventArgs)
         'Leitet Tastatureingaben über den Global Key Event an das MCP weiter
 
@@ -695,28 +940,45 @@ Partial Public Class wpfModulMain
 
     End Sub
 
+
+#End Region
+
+#Region "Pausemodus"
+
     'Pause-Modus Veraltung
     Public Sub FortsetzenNachPause()
-        ' Sicherstellen, dass wir im normalen Anzeigezustand sind
+        'Setzt die Darstellung nach dem Pausemodus fort.
+
         txbPräsentationsschirm.Visibility = Visibility.Collapsed
         imgAnzeige.Visibility = Visibility.Visible
+
         transitionIstAktiv = False
 
-        ' Das zuletzt aktive Bild wieder anzeigen
+        If Not initialesBildWurdeGeladen Then
+
+            StarteInitialisierungspruefung()
+
+            Exit Sub
+
+        End If
+
         If aktuellesBild IsNot Nothing Then
             imgAnzeige.Source = aktuellesBild
         End If
 
-        ' Falls noch kein nächstes Bild vorbereitet ist, jetzt laden
         If neuesBild Is Nothing Then
             NächstesBildLaden()
         End If
 
-        ' Timer sauber neu starten
         tmrModul.Stop()
         tmrModul.Interval = TimeSpan.FromSeconds(aktuelleSettings.Anzeigedauer)
         tmrModul.Start()
+
     End Sub
+
+#End Region
+
+#Region "Aufräumen und Fensterende"
 
     'Ende
     Private Sub wpfModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
@@ -725,17 +987,18 @@ Partial Public Class wpfModulMain
             aktiveTransition.StopTransition()
         End If
 
-        'Handler entfernen
-        RemoveHandler ModulMain.YouHaveMail_SSS, AddressOf CheckYourMail
-        RemoveHandler BildauswahlMain.ErsteBilderGefunden, AddressOf BildauswahlMain_ErsteBilderGefunden
-        RemoveHandler BildauswahlMain.ErsteVerzeichnisseGefunden, AddressOf BildauswahlMain_ErsteVerzeichnisseGefunden
-
         'Shader & Transitionen freigeben
         aktiverShader = Nothing
         aktiveTransition = Nothing
 
-        'Timer freigeben
+        'Timer stoppen und freigeben
+        tmrInitialisierung.Stop()
+        tmrModul.Stop()
+        tmrPresentation.Stop()
+
+        tmrInitialisierung = Nothing
         tmrModul = Nothing
+        tmrPresentation = Nothing
 
         ' Bilder freigeben
         imgAnzeige.Source = Nothing
@@ -749,5 +1012,7 @@ Partial Public Class wpfModulMain
         GC.Collect()
 
     End Sub
+
+#End Region
 
 End Class

@@ -78,10 +78,12 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BildHandling.vb" />
     <Compile Include="CheckedListBoxHandling.vb" />
     <Compile Include="ColorHandling.vb" />
     <Compile Include="ConversionHandling.vb" />
     <Compile Include="CursorHandling.vb" />
+    <Compile Include="FileHandling.vb" />
     <Compile Include="FormsHandling.vb" />
     <Compile Include="GraphicsSizeModeHandling.vb" />
     <Compile Include="ImageConversionHandling.vb" />

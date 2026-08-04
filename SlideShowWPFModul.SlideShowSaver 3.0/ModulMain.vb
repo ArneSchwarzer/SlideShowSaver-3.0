@@ -80,7 +80,6 @@ Public Class ModulMain
 #Region "Events"
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
     Public Event ModulIstDarstellungsbereit() Implements ISlideShowModul.ModulIstDarstellungsbereit
-    Public Shared Event YouHaveMail_SSS()
 #End Region
 
     'Start/Stop/Pause
@@ -275,27 +274,32 @@ Public Class ModulMain
 
     'Info-Kommunikation
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
-        '(Re-)Initalisierung der Optionen aus der Registry nachdem das MCP eine Änderung gemeldet hat.
+        '(Re-)Initialisiert die Moduloptionen nach einer Settingsänderung.
 
-        Dim sekunden As Integer
-
-        'Liest die aktuellen Settings und legt sie in der SettingsInbox ab
         ReadModulSettingsFromRegistryOrDefaults()
         StoreSettings(nameModul, aktuelleSettings)
 
-        'Der Form-Instanz Bescheid geben
-        RaiseEvent YouHaveMail_SSS()
+        If sssScreen IsNot Nothing Then
 
-        'Basierend auf den aktuellen Settings die Instanz der frmPictureInfo ein- oder ausblenden  
+            sssScreen.AktualisiereSettings(aktuelleSettings)
+
+        End If
+
+        'Basierend auf den aktuellen Settings frmPictureInfo ein- oder ausblenden.
         If aktuelleSettings.BildInfoAnzeigen Then
+
             If sssInfo Is Nothing Then
                 sssInfo = New frmPictureInfo()
             End If
+
             sssInfo.Show()
+
         ElseIf sssInfo IsNot Nothing Then
+
             sssInfo.Close()
             sssInfo.Dispose()
             sssInfo = Nothing
+
         End If
 
     End Sub

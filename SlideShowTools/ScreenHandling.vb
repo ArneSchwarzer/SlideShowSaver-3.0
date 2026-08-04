@@ -1,6 +1,7 @@
 ﻿Imports System.Runtime.InteropServices
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports System.Drawing.Imaging
 
 Public Class ScreenHandling
 
@@ -83,6 +84,50 @@ Public Class ScreenHandling
         Else
             Return GetNativeScreenResolution(Screen.PrimaryScreen)
         End If
+    End Function
+
+    ''' <summary>
+    ''' Erstellt einen Screenshot des angegebenen Bildschirms.
+    ''' </summary>
+    Public Shared Function ErstelleScreenshot(targetScreen As Screen) As Image
+
+        Dim bounds As Rectangle
+        Dim screenshot As Bitmap
+
+        If targetScreen Is Nothing Then
+            Return Nothing
+        End If
+
+        bounds = targetScreen.Bounds
+
+        screenshot =
+            New Bitmap(
+                bounds.Width,
+                bounds.Height,
+                Imaging.PixelFormat.Format32bppArgb)
+
+        Using grafik As Graphics = Graphics.FromImage(screenshot)
+
+            grafik.CopyFromScreen(
+                bounds.Location,
+                Point.Empty,
+                bounds.Size,
+                CopyPixelOperation.SourceCopy)
+
+        End Using
+
+        Return screenshot
+
+    End Function
+
+    ''' <summary>
+    ''' Erstellt einen Screenshot des primären Bildschirms.
+    ''' </summary>
+    Public Shared Function ErstelleScreenshot() As Image
+
+        Return ErstelleScreenshot(
+            Screen.PrimaryScreen)
+
     End Function
 
 End Class

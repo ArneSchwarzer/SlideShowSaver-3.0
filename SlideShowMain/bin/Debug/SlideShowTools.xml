@@ -22,6 +22,34 @@ SlideShowTools
   Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
 </summary>
 </member>
+<member name="M:SlideShowTools.BildHandling.LadeBild(System.String,System.Boolean)">
+ <summary>
+ Lädt ein Bild vollständig in den Arbeitsspeicher, ohne die Quelldatei
+ anschließend gesperrt zu halten.
+ </summary>
+ <param name="bildPfad">
+ Vollständiger Pfad der zu ladenden Bilddatei.
+ </param>
+ <param name="ausrichtungKorrigieren">
+ Gibt an, ob bei JPEG-Dateien die EXIF-Ausrichtung berücksichtigt wird.
+ </param>
+</member>
+<member name="M:SlideShowTools.BildHandling.KorrigiereBildausrichtung(System.Drawing.Image,System.String)">
+ <summary>
+ Korrigiert die Darstellung eines Bildes anhand des in der JPEG-Datei
+ gespeicherten EXIF-Orientierungswertes.
+ </summary>
+ <remarks>
+ Das übergebene Bild wird direkt verändert.
+ </remarks>
+</member>
+<member name="M:SlideShowTools.BildHandling.DreheBild(System.Drawing.Image,System.Single)">
+ <summary>
+ Erzeugt eine neue Bildinstanz, die um den angegebenen Winkel gedreht ist.
+ Der vollständige Bildinhalt bleibt erhalten; neu entstehende Randbereiche
+ sind transparent.
+ </summary>
+</member>
 <member name="M:SlideShowTools.CheckedListBoxHandling.GetCheckedItemsAsString(System.Windows.Forms.CheckedListBox)">
  <summary>
  Gibt alle als "Checked" markierten Items in einer CheckedListBox als Semikolon-getrennte Zeichenkette zurück.
@@ -64,6 +92,40 @@ SlideShowTools
 <member name="M:SlideShowTools.CursorHandling.CursorPowerShow">
  <summary>
  Macht den Cursor sichtbar – egal wie oft Cursor.Hide() vorher aufgerufen wurde.
+ </summary>
+</member>
+<member name="M:SlideShowTools.FileHandling.ErmittleVerzeichnisse(System.Collections.Generic.IEnumerable{System.String},SlideShowTools.FileHandling.VerzeichnisSuchmodus,System.Threading.CancellationToken)">
+ <summary>
+ Ermittelt alle Verzeichnisse, die gemäß dem angegebenen Suchmodus
+ auf unmittelbar enthaltene Dateien geprüft werden sollen.
+ </summary>
+ <param name="startVerzeichnisse">
+ Die Ausgangsverzeichnisse der Suche.
+ </param>
+ <param name="suchmodus">
+ Legt fest, ob alle Verzeichnisse oder ausschließlich Blattverzeichnisse
+ zurückgegeben werden.
+ </param>
+ <param name="cancellationToken">
+ Ermöglicht den kontrollierten Abbruch einer laufenden Suche.
+ </param>
+</member>
+<member name="M:SlideShowTools.FileHandling.ErmittleDateienImVerzeichnis(System.String,System.Collections.Generic.IEnumerable{System.String},System.Threading.CancellationToken)">
+ <summary>
+ Ermittelt alle unmittelbar in einem Verzeichnis liegenden Dateien,
+ deren Dateiendung in der übergebenen Endungsliste enthalten ist.
+ Unterverzeichnisse werden nicht durchsucht.
+ </summary>
+</member>
+<member name="M:SlideShowTools.FileHandling.HatDateiendung(System.String,System.Collections.Generic.IEnumerable{System.String})">
+ <summary>
+ Prüft, ob die Dateiendung des angegebenen Pfades einer der
+ übergebenen Endungen entspricht.
+ </summary>
+</member>
+<member name="M:SlideShowTools.FileHandling.IstJpegDatei(System.String)">
+ <summary>
+ Prüft, ob der angegebene Pfad die Dateiendung .jpg oder .jpeg besitzt.
  </summary>
 </member>
 <member name="M:SlideShowTools.KeyAndMouseHandling.ForwardKeyDown(System.Object,System.Windows.Forms.KeyEventArgs)">
@@ -165,6 +227,16 @@ SlideShowTools
 <member name="M:SlideShowTools.ScreenHandling.GetNativeScreenResolution">
  <summary>
  Gibt die native Auflösung des Bildschirms zurück, auf dem sich das aktive Formular befindet.
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.ErstelleScreenshot(System.Windows.Forms.Screen)">
+ <summary>
+ Erstellt einen Screenshot des angegebenen Bildschirms.
+ </summary>
+</member>
+<member name="M:SlideShowTools.ScreenHandling.ErstelleScreenshot">
+ <summary>
+ Erstellt einen Screenshot des primären Bildschirms.
  </summary>
 </member>
 <member name="T:SlideShowTools.SettingsHandling">

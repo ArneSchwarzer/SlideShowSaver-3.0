@@ -80,3 +80,4 @@ C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\Sl
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.dll
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.xml
 C:\Users\arnod\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.pdb
+C:\Users\Arne\source\repos\SlideShowSaver 3.0\SlideShowBildauswahl\obj\Debug\SlideShowBildauswahl.frmAltersfreigabeWarnung.resources

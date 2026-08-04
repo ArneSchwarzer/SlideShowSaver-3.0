@@ -81,6 +81,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BildauswahlMain.vb" />
+    <Compile Include="frmAltersfreigabeWarnung.Designer.vb">
+      <DependentUpon>frmAltersfreigabeWarnung.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAltersfreigabeWarnung.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmMessageBildauswahl.Designer.vb">
       <DependentUpon>frmMessageBildauswahl.vb</DependentUpon>
     </Compile>
@@ -117,6 +123,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmAltersfreigabeWarnung.resx">
+      <DependentUpon>frmAltersfreigabeWarnung.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmMessageBildauswahl.resx">
       <DependentUpon>frmMessageBildauswahl.vb</DependentUpon>
     </EmbeddedResource>
@@ -165,21 +174,13 @@
     <None Include="Resources\Flying Kitchen-Aid Logo Transparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Lang\DE\" />
-    <Folder Include="Lang\EN\" />
-    <Folder Include="Lang\ES\" />
-    <Folder Include="Lang\FR\" />
-    <Folder Include="Lang\HI\" />
-    <Folder Include="Lang\PL\" />
-    <Folder Include="Lang\RU\" />
     <Folder Include="Lang\TLH\" />
-    <Folder Include="Lang\ZH\" />
   </ItemGroup>
   <ItemGroup>
-  <EmbeddedResource Include="Lang\**\*.csv">
-    <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
-    <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-  </EmbeddedResource>
-</ItemGroup>
+    <EmbeddedResource Include="Lang\**\*.csv">
+      <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
+      <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
