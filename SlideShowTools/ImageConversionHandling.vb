@@ -169,6 +169,35 @@ Public Class ImageConversionHandling
 
     End Function
 
+    Public Shared Sub RenderImageInRenderTargetBitmap(bmp As Bitmap, renderTarget As RenderTargetBitmap,
+                                                      drawingVisual As DrawingVisual)
+        'Rendert ein GDI-Bitmap in ein bereits vorhandenes WPF-RenderTargetBitmap.
+
+        Dim source As BitmapSource
+        Dim zielRechteck As Rect
+
+        source = Nothing
+
+        If bmp Is Nothing OrElse renderTarget Is Nothing OrElse drawingVisual Is Nothing Then
+
+            Exit Sub
+
+        End If
+
+        source = CreateBitmapSourceFromGdiBitmap(bmp)
+        zielRechteck = New Rect(0.0, 0.0, renderTarget.PixelWidth, renderTarget.PixelHeight)
+
+        Using drawingContext As DrawingContext = drawingVisual.RenderOpen()
+
+            'Der Frame ist vollständig deckend. Dadurch überschreibt er den
+            'Inhalt des vorherigen Frames vollständig.
+            drawingContext.DrawImage(source, zielRechteck)
+
+        End Using
+
+        renderTarget.Render(drawingVisual)
+
+    End Sub
 
     'BitmapImage to...
     Public Shared Function ConvertBitmapImageToImage(bmpImage As BitmapImage) As System.Drawing.Image

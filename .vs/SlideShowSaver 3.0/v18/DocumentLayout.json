@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{136EF778-9383-42F3-B4E4-36149597413E}|SlideShowTransition.BlendenUeberblenden\\SlideShowTransition.Blenden\u00DCberblenden.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowtransition.blendenueberblenden\\transitionmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{136EF778-9383-42F3-B4E4-36149597413E}|SlideShowTransition.BlendenUeberblenden\\SlideShowTransition.Blenden\u00DCberblenden.vbproj|solutionrelative:slideshowtransition.blendenueberblenden\\transitionmain.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+      "AbsoluteMoniker": "D:0:0:{C8879C38-0B4D-4692-8152-DF4F176F9B97}|NewFolder1{C8879C38-0B4D-4692-8152-DF4F176F9B97}|C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{C8879C38-0B4D-4692-8152-DF4F176F9B97}|NewFolder1{C8879C38-0B4D-4692-8152-DF4F176F9B97}|solutionrelative:BeendenUndBereinigenKopiervorlage.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,14 +27,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "TransitionMain.vb",
-              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowTransition.BlendenUeberblenden\\TransitionMain.vb",
-              "RelativeDocumentMoniker": "SlideShowTransition.BlendenUeberblenden\\TransitionMain.vb",
-              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowTransition.BlendenUeberblenden\\TransitionMain.vb*",
-              "RelativeToolTip": "SlideShowTransition.BlendenUeberblenden\\TransitionMain.vb*",
-              "ViewState": "AgIAACkBAAAAAAAAAAArwDEBAAAAAAAAAAAAAA==",
+              "Title": "BeendenUndBereinigenKopiervorlage.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb",
+              "RelativeDocumentMoniker": "BeendenUndBereinigenKopiervorlage.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb",
+              "RelativeToolTip": "BeendenUndBereinigenKopiervorlage.vb",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
-              "WhenOpened": "2026-08-04T17:00:13.94Z",
+              "WhenOpened": "2026-08-05T11:34:06.703Z",
               "EditorCaption": ""
             }
           ]

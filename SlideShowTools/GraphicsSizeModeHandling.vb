@@ -69,7 +69,12 @@ Public Class GraphicsSizeModeHandling
         Dim bmp As New RenderTargetBitmap(CInt(zielgröße.Width), CInt(zielgröße.Height), 96, 96, PixelFormats.Pbgra32)
         bmp.Render(drawingVisual)
 
+        If bmp.CanFreeze Then
+            bmp.Freeze()
+        End If
+
         Return bmp
+
     End Function
 
 End Class

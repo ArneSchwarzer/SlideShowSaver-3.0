@@ -48,13 +48,18 @@ Public Class TransitionMain
     Private containerRect As Rectangle
 
     'Rendering
-    Private Shared sizeWPF As Windows.Size
-    Private Shared sizeWF As System.Drawing.Size
+    Private sizeWPF As Windows.Size
+    Private sizeWF As System.Drawing.Size
+
     Private gdiFrameTimer As DispatcherTimer
-    Private gdiStartTime As DateTime
     Private gdiRenderSize As Windows.Size
     Private gdiDrawAction As Action(Of Windows.Size)
-    Private requestEndOfTransition As Boolean = False
+
+    Private renderTargetCache As RenderTargetBitmap
+    Private renderTargetVisual As DrawingVisual
+
+    Private requestEndOfTransition As Boolean
+    Private transitionLaeuft As Boolean
 
     'Sonstiges
     Private rnd As New Random
@@ -90,23 +95,20 @@ Public Class TransitionMain
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
     Public Event TransitionFrameIstFertig As ISlideShowTransition.TransitionFrameIstFertigEventHandler Implements ISlideShowTransition.TransitionFrameIstFertig
 
-    Public Sub RunTransition(
-    oldImage As BitmapImage,
-    picBoxModeOld As PictureBoxSizeMode,
-    newImage As BitmapImage,
-    picBoxModeNew As PictureBoxSizeMode,
-    clientSize As System.Drawing.Size,
-    Optional durationMs As Integer = 0
-) Implements ISlideShowTransition.RunTransition
-        'Bereitet die Animation vor und startet den Render-Loop.
+    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage,
+                             picBoxModeNew As PictureBoxSizeMode, clientSize As System.Drawing.Size,
+                             Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+        'Bereitet die Animation vor und startet den Renderloop.
 
-        'Mögliche Ressourcen eines vorherigen Durchlaufs freigeben.
         StopGDIRenderLoop()
         GebeBildressourcenFrei()
+        GebeRenderressourcenFrei()
 
         requestEndOfTransition = False
+        transitionLaeuft = True
 
         ReadTransitionSettingsFromRegistryOrDefaults()
+
         StoreSettings(TransitionName, aktuelleSettings)
 
         RaiseEvent TransitionIsRunning(True)
@@ -114,14 +116,12 @@ Public Class TransitionMain
         sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
         sizeWF = clientSize
 
-        'Gerahmte WPF-Bilder erzeugen.
         oldRTB = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
         newRTB = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
         oldBmpSource = oldRTB
         newBmpSource = newRTB
 
-        'Nur diese beiden GDI-Bilder werden tatsächlich zum Zeichnen benötigt.
         oldImg = ConvertRenderTargetBitmapToBitmap(oldRTB)
         newImg = ConvertRenderTargetBitmapToBitmap(newRTB)
 
@@ -129,8 +129,8 @@ Public Class TransitionMain
         newSize = New System.Drawing.Size(newImage.PixelWidth, newImage.PixelHeight)
 
         containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
-        drawRectOld = GetDrawRectangle(oldSize, containerRect, picBoxModeOld)
 
+        drawRectOld = GetDrawRectangle(oldSize, containerRect, picBoxModeOld)
         drawRectNew = GetDrawRectangle(newSize, containerRect, picBoxModeNew)
 
         If aktuelleSettings.Modus = "Zufall" Then
@@ -144,7 +144,9 @@ Public Class TransitionMain
         End If
 
         If aktuelleSettings.Zufallsfarbe Then
+
             aktuelleSettings.Farbton = SetzeZufallsFarbe()
+
         End If
 
         If durationMs > 0 Then
@@ -161,13 +163,18 @@ Public Class TransitionMain
         dauerInMS = 1000 * aktuelleSettings.Geschwindigkeit
         startTime = DateTime.Now
 
-        StartGDIRenderLoop(AddressOf DrawGDITransitionFrame, dauerInMS, sizeWPF)
+        StartGDIRenderLoop(AddressOf DrawGDITransitionFrame, sizeWPF)
 
     End Sub
 
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Beendet Renderloop und Timer und gibt sämtliche Bildressourcen frei.
+        'Beendet Renderloop und Timer und gibt sämtliche gehaltenen Ressourcen frei.
 
+        If Not transitionLaeuft Then
+            Exit Sub
+        End If
+
+        transitionLaeuft = False
         requestEndOfTransition = True
 
         StopGDIRenderLoop()
@@ -180,9 +187,8 @@ Public Class TransitionMain
 
         End If
 
-        gdiDrawAction = Nothing
-
         GebeBildressourcenFrei()
+        GebeRenderressourcenFrei()
 
         RaiseEvent TransitionIsRunning(False)
 
@@ -247,7 +253,7 @@ Public Class TransitionMain
     End Function
 
     'Abbruch- und Endverwaltung
-    Public Sub EndBildZeichnen()
+    Private Sub EndBildZeichnen()
         'Gibt das Endbild aus
 
         RaiseEvent TransitionFrameIstFertig(newRTB)
@@ -266,16 +272,15 @@ Public Class TransitionMain
 
     'Animation und rendern 
     Private Sub DrawGDITransitionFrame(size As Windows.Size)
-        'Zeichnet einen einzelnen GDI-Frame und gibt sämtliche temporären
-        'GDI-Ressourcen unmittelbar nach der Konvertierung wieder frei.
+        'Zeichnet einen GDI-Frame, überträgt ihn in das wiederverwendete
+        'WPF-RenderTarget und gibt sämtliche temporären GDI-Ressourcen frei.
 
         Dim phasenDauer1 As Single
         Dim phasenDauer2 As Single
         Dim phasenDauer3 As Single
         Dim morphColor As System.Drawing.Color
         Dim progress As Double
-        Dim frameBitmap As Bitmap
-        Dim frameBitmapSource As RenderTargetBitmap
+        Dim frameBitmap As System.Drawing.Bitmap
 
         morphColor = System.Drawing.Color.FromArgb(255, aktuelleSettings.Farbton.R, aktuelleSettings.Farbton.G,
                                                    aktuelleSettings.Farbton.B)
@@ -298,15 +303,15 @@ Public Class TransitionMain
         End If
 
         frameBitmap = Nothing
-        frameBitmapSource = Nothing
 
         Try
 
-            frameBitmap = New Bitmap(CInt(size.Width), CInt(size.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+            frameBitmap = New System.Drawing.Bitmap(CInt(size.Width), CInt(size.Height),
+                                                    System.Drawing.Imaging.PixelFormat.Format32bppArgb)
 
-            Using gfx As Graphics = Graphics.FromImage(frameBitmap)
+            Using gfx As System.Drawing.Graphics = System.Drawing.Graphics.FromImage(frameBitmap)
 
-                Using morphBrush As New SolidBrush(morphColor)
+                Using morphBrush As New System.Drawing.SolidBrush(morphColor)
 
                     Using rahmenPen As New System.Drawing.Pen(System.Drawing.Color.DarkGray, 1.0F)
 
@@ -316,7 +321,8 @@ Public Class TransitionMain
 
                         If aktuelleSettings.Modus = "Fade" Then
 
-                            ZeichneFadeFrame(gfx, morphBrush, rahmenPen, progress, phasenDauer1, phasenDauer2, phasenDauer3)
+                            ZeichneFadeFrame(gfx, morphBrush, rahmenPen, progress, phasenDauer1, phasenDauer2,
+                                             phasenDauer3)
 
                         Else
 
@@ -330,9 +336,9 @@ Public Class TransitionMain
 
             End Using
 
-            frameBitmapSource = ConvertImageToRenderTargetBitmap(frameBitmap)
+            RenderImageInRenderTargetBitmap(frameBitmap, renderTargetCache, renderTargetVisual)
 
-            RaiseEvent TransitionFrameIstFertig(frameBitmapSource)
+            RaiseEvent TransitionFrameIstFertig(renderTargetCache)
 
         Finally
 
@@ -521,17 +527,28 @@ Public Class TransitionMain
 
     End Function
 
-    Public Sub StartGDIRenderLoop(drawAction As Action(Of Windows.Size), dauerInMS As Integer, size As Windows.Size)
-        'Startet den GDI-Renderloop.
+    Private Sub StartGDIRenderLoop(drawAction As Action(Of Windows.Size), size As Windows.Size)
+        'Startet den GDI-Renderloop und legt den wiederverwendeten
+        'WPF-RenderTarget-Cache an.
+
+        Dim pixelBreite As Integer
+        Dim pixelHoehe As Integer
 
         StopGDIRenderLoop()
+        GebeRenderressourcenFrei()
+
+        pixelBreite = Math.Max(CInt(size.Width), 1)
+        pixelHoehe = Math.Max(CInt(size.Height), 1)
 
         requestEndOfTransition = False
+
         gdiDrawAction = drawAction
         gdiRenderSize = size
-        gdiStartTime = DateTime.Now
 
-        gdiFrameTimer = New DispatcherTimer()
+        renderTargetCache = New RenderTargetBitmap(pixelBreite, pixelHoehe, 96.0, 96.0, PixelFormats.Pbgra32)
+        renderTargetVisual = New DrawingVisual()
+
+        gdiFrameTimer = New DispatcherTimer(DispatcherPriority.Render)
 
         AddHandler gdiFrameTimer.Tick, AddressOf OnGDIFrameTick
 
@@ -540,22 +557,48 @@ Public Class TransitionMain
 
     End Sub
 
-    Public Sub StopGDIRenderLoop()
+    Private Sub StopGDIRenderLoop()
+        'Beendet ausschließlich den laufenden DispatcherTimer.
+
         If gdiFrameTimer IsNot Nothing Then
+
             gdiFrameTimer.Stop()
-            RemoveHandler gdiFrameTimer.Tick, AddressOf OnGDIFrameTick
+
+            RemoveHandler gdiFrameTimer.Tick,
+            AddressOf OnGDIFrameTick
+
             gdiFrameTimer = Nothing
+
         End If
+
     End Sub
 
     Private Sub OnGDIFrameTick(sender As Object, e As EventArgs)
-        If gdiDrawAction IsNot Nothing Then
-            gdiDrawAction.Invoke(gdiRenderSize)
-        End If
+        'Erzeugt den nächsten Frame des laufenden Renderloops.
 
         If requestEndOfTransition Then
+
             StopGDIRenderLoop()
+
+            Exit Sub
+
         End If
+
+        If gdiDrawAction Is Nothing Then
+            Exit Sub
+        End If
+
+        gdiDrawAction.Invoke(gdiRenderSize)
+
+    End Sub
+
+    Private Sub GebeRenderressourcenFrei()
+        'Entfernt die Referenzen auf den WPF-Rendercache und dessen Visual.
+
+        gdiDrawAction = Nothing
+
+        renderTargetVisual = Nothing
+        renderTargetCache = Nothing
 
     End Sub
 

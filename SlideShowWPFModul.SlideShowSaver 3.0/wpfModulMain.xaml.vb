@@ -550,15 +550,21 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub Transition_TransitionFrameIstFertig(rtb As RenderTargetBitmap)
-        'Bildanzeige während Transitionen
+        'Zeigt den von der Transition aktualisierten Frame an.
 
-        imgAnzeige.Source = Nothing
+        If rtb Is Nothing Then
+            Exit Sub
+        End If
 
-        'Notwendig, um "Leere Frames" zu verhindern
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
+        If Not ReferenceEquals(imgAnzeige.Source, rtb) Then
 
-        imgAnzeige.Source = rtb
+            imgAnzeige.Source = rtb
+
+        Else
+
+            imgAnzeige.InvalidateVisual()
+
+        End If
 
     End Sub
 
@@ -746,6 +752,7 @@ Partial Public Class wpfModulMain
 
     'Hilfs- und Verwaltungsfunktionen
     'Transitionen
+
     Private Sub LadeNeueTransition(istInitialisierung As Boolean)
 
         LegitimeTransitionsListeErstellen()

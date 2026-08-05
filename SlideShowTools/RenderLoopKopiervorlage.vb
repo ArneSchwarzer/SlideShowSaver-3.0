@@ -93,11 +93,11 @@ Public Class RenderLoopKopiervorlage
                            zielGroesse As Windows.Size)
         'RenderLoop starten und einmaliges renderTargetBitmap anlegen
 
+        StopRenderLoop()
+
         drawAction = drawActionInput
         renderSize = zielGroesse
-
-        'Alten Timer starten
-        StopRenderLoop()
+        stopRequested = False
 
         ' Falls Größe geändert → neues RTB erzeugen
         If rtbCache Is Nothing OrElse

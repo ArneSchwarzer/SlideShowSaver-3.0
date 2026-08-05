@@ -27,6 +27,7 @@ Public Class InterfaceDeclarations
     ''' </summary>
 
     Public Interface ISlideShowModul
+        Inherits IDisposable
 
         'Eigenschaften
         ReadOnly Property ModulName As String
@@ -75,6 +76,7 @@ Public Class InterfaceDeclarations
     ''' </summary>
 
     Public Interface ISlideShowTransition
+        Inherits IDisposable
 
         'Eigenschaften
         ReadOnly Property TransitionName As String
@@ -114,6 +116,7 @@ Public Class InterfaceDeclarations
     ''' </summary>
 
     Public Interface ISlideShowShader
+        Inherits IDisposable
 
         'Eigenschaften
         ReadOnly Property ShaderName As String

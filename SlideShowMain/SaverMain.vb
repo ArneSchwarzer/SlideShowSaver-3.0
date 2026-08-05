@@ -111,13 +111,11 @@ Module SaverMain
     Private transitionHost As SW.Window = Nothing
     Private transitionHostGrid As SWC.Grid = Nothing
     Private transitionHostImage As SWC.Image = Nothing
-    Private transitionHostWriteableBitmap As SWMI.WriteableBitmap = Nothing
-    Private transitionFramePuffer() As Byte = Nothing
-    Private transitionFrameStride As Integer = 0
 
     Private transitionIstAktiv As Boolean = False
     Private transitionIstVorbereitet As Boolean = False
     Private transitionHostWartetAufErstdarstellung As Boolean = False
+    Private transitionHostZeigtDynamischeFrames As Boolean
 
     Private WithEvents tmrTitelcard As New Timer()
 
@@ -799,12 +797,7 @@ Module SaverMain
 
         AktualisiereStartBild()
 
-        If activeModule IsNot Nothing Then
-
-            activeModule.StopModul()
-            activeModule = Nothing
-
-        End If
+        BeendeUndBereinigeModul(activeModule)
 
         If fallbackInstanz IsNot Nothing Then
             fallbackInstanz.Show()
@@ -1191,20 +1184,17 @@ Module SaverMain
 
         If activeTransition IsNot Nothing Then
 
-            RemoveHandler activeTransition.TransitionFrameIstFertig,
-            AddressOf TransitionFrameIstFertig
+            RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
+            RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
 
-            RemoveHandler activeTransition.TransitionIsRunning,
-            AddressOf TransitionIsRunning
+            letzteTransition = activeTransition.TransitionName
 
-            letzteTransition =
-            activeTransition.TransitionName
-
-            WriteToRegistry(
-            SLIDESHOWMAIN_PATH & "LetztgespieleTransition",
-            letzteTransition)
+            WriteToRegistry(SLIDESHOWMAIN_PATH & "LetztgespieleTransition", letzteTransition)
 
         End If
+
+        'Das Startbild wird ab jetzt nicht mehr benötigt
+        startBild = Nothing
 
         TitelcardPhaseStarten()
 
@@ -1243,13 +1233,25 @@ Module SaverMain
     End Sub
 
     Private Sub TransitionBereinigen()
-        'Entfernt Eventhandler und gibt die Transitioninstanz frei.
+        'Beendet eine gegebenenfalls noch laufende Transition,
+        'entfernt ihre Eventhandler und gibt die Instanz frei.
 
         If activeTransition Is Nothing Then
             Exit Sub
         End If
 
         Try
+
+            Try
+
+                activeTransition.StopTransition()
+
+            Catch ex As Exception
+
+                LogHandling.LogWarn("Die Modultransition konnte während der Bereinigung " &
+                                    "nicht nochmals beendet werden: " & ex.Message)
+
+            End Try
 
             RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
             RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
@@ -1406,6 +1408,8 @@ Module SaverMain
         TransitionHostVorbereiten()
 
         Try
+            transitionHostZeigtDynamischeFrames = False
+
             bildBrush = New SWM.ImageBrush(bild)
             bildBrush.Stretch = SWM.Stretch.Fill
             bildBrush.AlignmentX = SWM.AlignmentX.Center
@@ -1419,7 +1423,6 @@ Module SaverMain
             transitionHostGrid.Background = bildBrush
 
             transitionHostImage.Source = Nothing
-            transitionHostWriteableBitmap = Nothing
 
             transitionHostImage.Source = bild
             transitionHostImage.InvalidateVisual()
@@ -1437,12 +1440,8 @@ Module SaverMain
     End Sub
 
     Private Sub TransitionFrameIstFertig(bitmap As SWMI.RenderTargetBitmap)
-        'Kopiert den fertigen Transitionframe in einen dauerhaft
-        'wiederverwendeten WPF-Framebuffer.
-
-        Dim quellRechteck As SW.Int32Rect
-        Dim benoetigteBytes As Integer
-        Dim neuerStride As Integer
+        'Zeigt den wiederverwendeten RenderTargetBitmap-Cache
+        'der Transition direkt im TransitionHost an.
 
         If bitmap Is Nothing Then
             Exit Sub
@@ -1450,76 +1449,72 @@ Module SaverMain
 
         Try
 
-            If transitionHost Is Nothing OrElse
-           transitionHostImage Is Nothing Then
+            If transitionHost Is Nothing OrElse transitionHostImage Is Nothing Then
 
                 TransitionHostVorbereiten()
 
             End If
 
-            If transitionHostWriteableBitmap Is Nothing OrElse
-           transitionHostWriteableBitmap.PixelWidth <> bitmap.PixelWidth OrElse
-           transitionHostWriteableBitmap.PixelHeight <> bitmap.PixelHeight OrElse
-           transitionHostWriteableBitmap.Format <> bitmap.Format Then
+            If transitionHost Is Nothing OrElse transitionHostImage Is Nothing Then
 
-                transitionHostWriteableBitmap =
-            New SWMI.WriteableBitmap(
-            bitmap.PixelWidth,
-            bitmap.PixelHeight,
-            bitmap.DpiX,
-            bitmap.DpiY,
-            bitmap.Format,
-            bitmap.Palette)
-
-                transitionHostImage.Source =
-            transitionHostWriteableBitmap
+                Exit Sub
 
             End If
 
-            neuerStride =
-        CInt(
-        Math.Ceiling(
-        bitmap.PixelWidth *
-        bitmap.Format.BitsPerPixel / 8.0))
+            If Not transitionHostZeigtDynamischeFrames Then
 
-            benoetigteBytes =
-        neuerStride * bitmap.PixelHeight
-
-            If transitionFramePuffer Is Nothing OrElse
-           transitionFramePuffer.Length <> benoetigteBytes Then
-
-                ReDim transitionFramePuffer(benoetigteBytes - 1)
+                SetzeTransitionHostHintergrundfarbe()
+                transitionHostZeigtDynamischeFrames = True
 
             End If
 
-            transitionFrameStride = neuerStride
+            If Not ReferenceEquals(transitionHostImage.Source, bitmap) Then
 
-            quellRechteck =
-        New SW.Int32Rect(
-        0,
-        0,
-        bitmap.PixelWidth,
-        bitmap.PixelHeight)
+                transitionHostImage.Source = bitmap
 
-            bitmap.CopyPixels(
-        quellRechteck,
-        transitionFramePuffer,
-        transitionFrameStride,
-        0)
+            Else
 
-            transitionHostWriteableBitmap.WritePixels(
-        quellRechteck,
-        transitionFramePuffer,
-        transitionFrameStride,
-        0)
+                transitionHostImage.InvalidateVisual()
+
+            End If
 
         Catch ex As Exception
 
-            LogHandling.LogError(
-        "Fehler beim Anzeigen eines WPF-Transitionframes: " &
-        ex.ToString())
+            LogHandling.LogError("Fehler beim Anzeigen eines WPF-Transitionframes: " & ex.ToString())
 
         End Try
+
+    End Sub
+
+    Private Sub SetzeTransitionHostHintergrundfarbe()
+        'Entfernt statische ImageBrush-Referenzen vom Host
+        'und stellt den normalen Hintergrund wieder her.
+
+        Dim hintergrundFarbe As SWM.Color
+        Dim hintergrundBrush As SWM.SolidColorBrush
+
+        hintergrundFarbe = SWM.Color.FromArgb(255,
+                                              aktuelleSettings.Hintergrundfarbe.R,
+                                              aktuelleSettings.Hintergrundfarbe.G,
+                                              aktuelleSettings.Hintergrundfarbe.B)
+
+        hintergrundBrush = New SWM.SolidColorBrush(hintergrundFarbe)
+
+        If hintergrundBrush.CanFreeze Then
+            hintergrundBrush.Freeze()
+        End If
+
+        If transitionHost IsNot Nothing Then
+
+            transitionHost.Background = hintergrundBrush
+
+        End If
+
+        If transitionHostGrid IsNot Nothing Then
+
+            transitionHostGrid.Background = hintergrundBrush
+
+        End If
 
     End Sub
 
@@ -1552,11 +1547,16 @@ Module SaverMain
     End Sub
 
     Private Sub TransitionHostClosed(sender As Object, e As EventArgs)
-        'Entfernt Referenzen auf einen geschlossenen WPF-Host.
+        'Entfernt sämtliche Referenzen auf einen geschlossenen WPF-Host.
 
-        transitionHost = Nothing
-        transitionHostGrid = Nothing
         transitionHostImage = Nothing
+        transitionHostGrid = Nothing
+        transitionHost = Nothing
+
+        transitionHostZeigtDynamischeFrames = False
+
+        startBild = Nothing
+        zielBild = Nothing
 
     End Sub
 
@@ -1613,14 +1613,14 @@ Module SaverMain
             transitionHostImage = Nothing
             transitionHostGrid = Nothing
             transitionHost = Nothing
-            transitionHostWriteableBitmap = Nothing
-            transitionFramePuffer = Nothing
-            transitionFrameStride = 0
+
+            transitionHostZeigtDynamischeFrames = False
 
             startBild = Nothing
             zielBild = Nothing
 
         End Try
+
 
     End Sub
 
@@ -1787,7 +1787,10 @@ Module SaverMain
         MCPWechselPhase.Titelcard
 
         If zielBild IsNot Nothing Then
+
             ZeigeBildImTransitionHost(zielBild)
+            zielBild = Nothing
+
         End If
 
         tmrTitelcard.Stop()
@@ -1832,6 +1835,8 @@ Module SaverMain
         Try
 
             AddHandler activeModule.ModulIstDarstellungsbereit, AddressOf ActiveModule_ModulIstDarstellungsbereit
+
+            LogHandling.LogInfo("Modul wird gestartet: " & vorbereiteterModulName)
 
             activeModule.StartModul(Screen.PrimaryScreen)
 
@@ -1885,7 +1890,7 @@ Module SaverMain
 
         TransitionHostSchliessen()
 
-        LogHandling.LogInfo("Neues Modul gestartet: " & vorbereiteterModulName)
+        LogHandling.LogInfo("Modul ist darstellungsbereit: " & vorbereiteterModulName)
 
         ModulwechselAbschliessen()
 
@@ -2068,12 +2073,7 @@ Module SaverMain
 
             'Ab diesem Zeitpunkt existiert eine tatsächlich gerenderte
             'Vollbildabdeckung. Das alte Modul darf nun beendet werden.
-            If activeModule IsNot Nothing Then
-
-                activeModule.StopModul()
-                activeModule = Nothing
-
-            End If
+            BeendeUndBereinigeModul(activeModule)
 
             If fallbackIsActive AndAlso fallbackInstanz IsNot Nothing Then
 
@@ -2174,6 +2174,62 @@ Module SaverMain
         End If
 
         ModulwechselAbschliessen()
+
+    End Sub
+
+    Private Sub BeendeUndBereinigeModul(ByRef modul As ISlideShowModul)
+        'Beendet eine Modulinstanz, entfernt bekannte Handler,
+        'gibt optionale Ressourcen frei und löscht die Referenz.
+
+        Dim modulName As String
+
+        modulName = "Unbekannt"
+
+        If modul Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            Try
+
+                modulName = modul.ModulName
+
+            Catch
+                'Der Name ist nur für die Protokollierung relevant.
+            End Try
+
+            RemoveHandler modul.ModulIstDarstellungsbereit, AddressOf ActiveModule_ModulIstDarstellungsbereit
+
+            Try
+
+                modul.StopModul()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Fehler beim Stoppen des Moduls """ & modulName & """: " & ex.ToString())
+
+            End Try
+
+            If TypeOf modul Is IDisposable Then
+
+                Try
+
+                    DirectCast(modul, IDisposable).Dispose()
+
+                Catch ex As Exception
+
+                    LogHandling.LogError("Fehler beim Freigeben des Moduls """ & modulName & """: " & ex.ToString())
+
+                End Try
+
+            End If
+
+        Finally
+
+            modul = Nothing
+
+        End Try
 
     End Sub
 
@@ -2558,6 +2614,7 @@ Module SaverMain
 #End Region
 
 #Region "Framework-Shutdown"
+
 
     Private Sub CloseSlideShowSaver()
         'Beendet den Bildschirmschoner kontrolliert und gibt alle zentralen Instanzen frei.

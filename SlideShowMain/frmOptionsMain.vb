@@ -402,36 +402,66 @@ Public Class frmOptionsMain
         tabOptions.TabPages.Remove(tpTransitions)
         tabOptions.TabPages.Remove(tpShader)
 
-        'Und nun in der korrekten Reihenfolge wieder einschalten
         If aufrufendeTabPage IsNot tpModul Then
+
             If modulSichtbar Then
 
-                ' Neues Modul UC laden
+                Dim modulOptionsControl As UserControl
+                Dim ucTransition As ISlideShowTransitionCommunication
+                Dim ucShader As ISlideShowShaderCommunication
+
+                modulOptionsControl = Nothing
+                ucTransition = Nothing
+                ucShader = Nothing
+
+                tpModul.Controls.Clear()
+
                 If aktuellGeladenesModul IsNot Nothing Then
-                    uc = aktuellGeladenesModul.GetModulOptionsDialog()
-                    uc.Dock = DockStyle.Fill
-                    tpModul.Controls.Add(uc)
+
+                    modulOptionsControl = aktuellGeladenesModul.GetModulOptionsDialog()
+
+                End If
+
+                If modulOptionsControl IsNot Nothing Then
+
+                    modulOptionsControl.Dock = DockStyle.Fill
+
+                    tpModul.Controls.Add(modulOptionsControl)
 
                     tabOptions.TabPages.Add(tpModul)
-                End If
 
-                'Handler für Transitionen und Shader hinzufügen (RemoveHandler des Vorgänger-Moduls hat bereits
-                'in clbModule.SelectedIndexChanged() stattgefunden.
-                Dim ucTransition = TryCast(tpModul.Controls(0), ISlideShowTransitionCommunication)
-                If ucTransition IsNot Nothing Then
-                    AddHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
-                End If
+                    ucTransition = TryCast(modulOptionsControl, ISlideShowTransitionCommunication)
 
-                Dim ucShader = TryCast(tpModul.Controls(0), ISlideShowShaderCommunication)
-                If ucShader IsNot Nothing Then
-                    AddHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+                    If ucTransition IsNot Nothing Then
+
+                        AddHandler ucTransition.PleaseChangeToTransition, AddressOf Modul_BitteWechseleZuTransition
+
+                    End If
+
+                    ucShader = TryCast(modulOptionsControl, ISlideShowShaderCommunication)
+
+                    If ucShader IsNot Nothing Then
+
+                        AddHandler ucShader.PleaseChangeToShader, AddressOf Modul_BitteWechseleZuShader
+
+                    End If
+
+                Else
+
+                    tpModulIstSichtbar = False
+
+                    LogHandling.LogWarn("Das Modul """ & If(aktuellGeladenesModul?.ModulName, "Unbekannt") &
+                                        """ hat kein Options-UserControl geliefert.")
+
                 End If
 
             Else
-                tabOptions.TabPages.Remove(tpModul)
-            End If
-        End If
 
+                tabOptions.TabPages.Remove(tpModul)
+
+            End If
+
+        End If
 
         If bildlauswahlSichtbar Then
             uc = New ucOptionsBildauswahl()
