@@ -18,13 +18,29 @@ Public Class frmPauseModusOverlay
     Private indexListe As Integer
     Private bildPfad As String
     Private bild As BitmapImage
-    Private meineInstanz As ModulMain = TryCast(ModulMain.activeModuleInstanz, ModulMain)
+    Private ReadOnly meineInstanz As ModulMain
     Private pauseInfoScreen As frmPictureInfo = Nothing
     Private xmlPfad As String = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 "SlideShowSaver 3.0\Module\SlideShowSaver 3.0\Markierte Fotos.xml"
             )
     Private markierteFotos As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+    'Konstruktor und Initialisierung
+    Friend Sub New(modulInstanz As ModulMain)
+        'Erzeugt das Pausefenster für genau eine Modulinstanz.
+
+        If modulInstanz Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(modulInstanz))
+
+        End If
+
+        InitializeComponent()
+
+        meineInstanz = modulInstanz
+
+    End Sub
 
     Private Sub frmPauseModusOverlay_Load(sender As Object, e As EventArgs) Handles Me.Load
         Dim screen As Screen = Screen.FromControl(Me)
@@ -59,7 +75,23 @@ Public Class frmPauseModusOverlay
 
         'Listen und Variablen setzen
         If meineInstanz IsNot Nothing Then
-            anzeigeListe = meineInstanz.sssScreen.listeDerZuletztAngezeigtenBilder
+            If meineInstanz.sssScreen IsNot Nothing Then
+
+                anzeigeListe = New List(Of String)(meineInstanz.sssScreen.ListeDerZuletztAngezeigtenBilder)
+
+            End If
+        End If
+
+        If anzeigeListe.Count = 0 Then
+
+            LogHandling.LogWarn("Der Pausemodus konnte nicht geöffnet werden, " &
+                                "weil noch kein angezeigtes Bild verfügbar ist.")
+
+            Me.DialogResult = DialogResult.Cancel
+            Me.Close()
+
+            Exit Sub
+
         End If
 
         indexListe = anzeigeListe.Count
@@ -106,11 +138,26 @@ Public Class frmPauseModusOverlay
 
         'Hier ggf. Transition stoppen, falls "Running". Aber erst, sobald die ersten Transitionen implementiert sind
 
-        If meineInstanz IsNot Nothing Then
-            meineInstanz.sssScreen.tmrModul.Stop()
+        If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen IsNot Nothing Then
+
+            meineInstanz.sssScreen.PausiereDarstellung()
 
             tempImage = LadeBild(bildPfad)
-            bild = ConvertImageToBitmapImage(tempImage)
+
+            If tempImage IsNot Nothing Then
+
+                Try
+
+                    bild = ConvertImageToBitmapImage(tempImage)
+
+                Finally
+
+                    tempImage.Dispose()
+                    tempImage = Nothing
+
+                End Try
+
+            End If
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild
 
@@ -121,139 +168,14 @@ Public Class frmPauseModusOverlay
 
     End Sub
 
-    Private Sub btnPausePause_Click(sender As Object, e As EventArgs) Handles btnPausePause.Click
-        Me.DialogResult = DialogResult.OK
-        Me.Close()
-    End Sub
-
-    Private Sub frmPauseModusOverlay_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
-
-        If e.KeyCode = Keys.Escape Then
-            If Not lblOptionsDialogDisabled.Visible Then
-                Me.Size = New Size(Me.Size.Width, Me.Size.Height + 82)
-            End If
-            lblOptionsDialogDisabled.Visible = True
-            tmrWarnLabelAnzeige.Start()
-        ElseIf e.KeyCode = Keys.Left Then
-            btnPauseBack.PerformClick()
-        ElseIf e.KeyCode = Keys.Right Then
-            btnPauseForward.PerformClick()
-        ElseIf e.KeyCode = Keys.Space OrElse e.KeyCode = Keys.M Then
-            If chkPauseMarkPicture.Checked = True Then
-                chkPauseMarkPicture.Checked = False
-            Else
-                chkPauseMarkPicture.Checked = True
-            End If
-        ElseIf e.KeyCode = Keys.P Then
-            Me.Close()
-        End If
-
-    End Sub
-
-    Private Sub frmPauseModusOverlay_Closed(sender As Object, e As EventArgs) Handles Me.Closed
-
-        'Liste der markierten Fotos wieder zurückspeichern
-        XmlHandling.SpeichereWerteliste(xmlPfad, markierteFotos, "Markierungen", "Foto", "Pfad")
-
-        If pauseInfoScreen IsNot Nothing Then
-            pauseInfoScreen.Close()
-            pauseInfoScreen.Dispose()
-            pauseInfoScreen = Nothing
-        End If
-
-        Cursor.Hide()
-
-        'Modul geordnet fortsetzen
-        If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen IsNot Nothing Then
-            meineInstanz.sssScreen.FortsetzenNachPause()
-        End If
-
-    End Sub
-
-    Private Sub frmPauseModusOverlay_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
-
-        If e.Button = MouseButtons.Right Then
-            If Not lblOptionsDialogDisabled.Visible Then
-                Me.Size = New Size(Me.Size.Width, Me.Size.Height + 82)
-            End If
-            lblOptionsDialogDisabled.Visible = True
-            tmrWarnLabelAnzeige.Start()
-        End If
-    End Sub
-
+    'Warning-Label
     Private Sub tmrWarnLabelAnzeige_Tick(sender As Object, e As EventArgs) Handles tmrWarnLabelAnzeige.Tick
         lblOptionsDialogDisabled.Visible = False
         Me.Size = New Size(Me.Size.Width, Me.Size.Height - 82)
         tmrWarnLabelAnzeige.Stop()
     End Sub
 
-    Private Sub chkBewerten_CheckStateChanged(sender As Object, e As EventArgs) Handles chkBewerten.CheckStateChanged
-        If chkBewerten.Checked = True Then
-            sbcBewerten.Visible = True
-        Else
-            sbcBewerten.Visible = False
-        End If
-    End Sub
-
-    Private Sub sbcBewerten_BewertungGeaendert(sender As Object, neueBewertung As Integer) Handles sbcBewerten.BewertungGeaendert
-        Dim tempImage As Image
-
-        If Not String.IsNullOrEmpty(bildPfad) Then
-            Try
-                ' Bild aus der PictureBox entfernen
-                If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen.imgAnzeige.Source IsNot Nothing Then
-                    meineInstanz.sssScreen.imgAnzeige.Source = Nothing
-                End If
-
-                ' Metadaten mit BitmapMetadata aktualisieren (nur JPEG)
-                Dim encoder As New JpegBitmapEncoder()
-                Dim bitmap As BitmapImage = New BitmapImage(New Uri(bildPfad))
-                encoder.Frames.Add(BitmapFrame.Create(bitmap))
-
-                Dim metadata As BitmapMetadata = TryCast(BitmapFrame.Create(bitmap).Metadata.Clone(), BitmapMetadata)
-
-                If metadata IsNot Nothing Then
-                    metadata.SetQuery("/xmp/xmp:Rating", neueBewertung)
-                    encoder.Frames.Clear()
-                    encoder.Frames.Add(BitmapFrame.Create(bitmap, Nothing, metadata, Nothing))
-
-                    ' Sicherung des Originals erstellen
-                    Dim backupPfad As String = bildPfad & ".bak"
-                    If Not File.Exists(backupPfad) Then
-                        File.Copy(bildPfad, backupPfad)
-                    End If
-
-                    ' Datei überschreiben
-                    Using filestream As New FileStream(bildPfad, FileMode.Create, FileAccess.Write)
-                        encoder.Save(filestream)
-                    End Using
-                End If
-
-                ' Bild wieder neu einladen (nach dem Speichern)
-                tempImage = LadeBild(bildPfad)
-                bild = ConvertImageToBitmapImage(tempImage)
-
-                meineInstanz.sssScreen.imgAnzeige.Source = bild
-
-            Catch ex As Exception
-                LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen der Bewertung für Bild " & bildPfad & ": " & ex.ToString)
-            End Try
-        End If
-    End Sub
-
-
-
-    Private Sub chkPauseMarkPicture_CheckStateChanged(sender As Object, e As EventArgs) Handles chkPauseMarkPicture.CheckStateChanged
-
-        'Hier die Werte in der Liste "Markierte Fotos.xml" anpassen
-        If chkPauseMarkPicture.CheckState Then
-            markierteFotos.Add(bildPfad)
-        Else
-            markierteFotos.Remove(bildPfad)
-        End If
-
-    End Sub
-
+    'Bildanzeigesteuerung
     Private Sub btnPauseBack_Click(sender As Object, e As EventArgs) Handles btnPauseBack.Click
 
         Dim tempImage As Image
@@ -305,8 +227,24 @@ Public Class frmPauseModusOverlay
         If meineInstanz IsNot Nothing Then
 
             tempImage = LadeBild(bildPfad)
-            bild = ConvertImageToBitmapImage(tempImage)
+
+            If tempImage IsNot Nothing Then
+
+                Try
+
+                    bild = ConvertImageToBitmapImage(tempImage)
+
+                Finally
+
+                    tempImage.Dispose()
+                    tempImage = Nothing
+
+                End Try
+
+            End If
+
             meineInstanz.sssScreen.imgAnzeige.Source = bild
+
         End If
 
         pauseInfoScreen.RefreshLabels(bildPfad)
@@ -363,14 +301,184 @@ Public Class frmPauseModusOverlay
 
         'Bild anzeigen
         If meineInstanz IsNot Nothing Then
+
             tempImage = LadeBild(bildPfad)
-            bild = ConvertImageToBitmapImage(tempImage)
+
+            If tempImage IsNot Nothing Then
+
+                Try
+
+                    bild = ConvertImageToBitmapImage(tempImage)
+
+                Finally
+
+                    tempImage.Dispose()
+                    tempImage = Nothing
+
+                End Try
+
+            End If
 
             meineInstanz.sssScreen.imgAnzeige.Source = bild
+
         End If
 
         pauseInfoScreen.RefreshLabels(bildPfad)
         pauseInfoScreen.Refresh()
+
+    End Sub
+
+    'Editierfunktionen
+    Private Sub chkBewerten_CheckStateChanged(sender As Object, e As EventArgs) Handles chkBewerten.CheckStateChanged
+        If chkBewerten.Checked = True Then
+            sbcBewerten.Visible = True
+        Else
+            sbcBewerten.Visible = False
+        End If
+    End Sub
+
+    Private Sub sbcBewerten_BewertungGeaendert(sender As Object, neueBewertung As Integer) Handles sbcBewerten.BewertungGeaendert
+        Dim tempImage As Image
+
+        If Not String.IsNullOrEmpty(bildPfad) Then
+            Try
+                ' Bild aus der PictureBox entfernen
+                If meineInstanz IsNot Nothing AndAlso meineInstanz.sssScreen.imgAnzeige.Source IsNot Nothing Then
+                    meineInstanz.sssScreen.imgAnzeige.Source = Nothing
+                End If
+
+                ' Metadaten mit BitmapMetadata aktualisieren (nur JPEG)
+                Dim encoder As New JpegBitmapEncoder()
+                Dim bitmap As BitmapImage = New BitmapImage(New Uri(bildPfad))
+                encoder.Frames.Add(BitmapFrame.Create(bitmap))
+
+                Dim metadata As BitmapMetadata = TryCast(BitmapFrame.Create(bitmap).Metadata.Clone(), BitmapMetadata)
+
+                If metadata IsNot Nothing Then
+                    metadata.SetQuery("/xmp/xmp:Rating", neueBewertung)
+                    encoder.Frames.Clear()
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap, Nothing, metadata, Nothing))
+
+                    ' Sicherung des Originals erstellen
+                    Dim backupPfad As String = bildPfad & ".bak"
+                    If Not File.Exists(backupPfad) Then
+                        File.Copy(bildPfad, backupPfad)
+                    End If
+
+                    ' Datei überschreiben
+                    Using filestream As New FileStream(bildPfad, FileMode.Create, FileAccess.Write)
+                        encoder.Save(filestream)
+                    End Using
+                End If
+
+                ' Bild wieder neu einladen (nach dem Speichern)
+                tempImage = LadeBild(bildPfad)
+
+                If tempImage IsNot Nothing Then
+
+                    Try
+
+                        bild = ConvertImageToBitmapImage(tempImage)
+
+                    Finally
+
+                        tempImage.Dispose()
+                        tempImage = Nothing
+
+                    End Try
+
+                End If
+
+                meineInstanz.sssScreen.imgAnzeige.Source = bild
+
+            Catch ex As Exception
+                LogHandling.LogError("SlideShowSaver 3.0\PauseOverlay: Fehler beim Setzen der Bewertung für Bild " & bildPfad & ": " & ex.ToString)
+            End Try
+        End If
+    End Sub
+
+    Private Sub chkPauseMarkPicture_CheckStateChanged(sender As Object, e As EventArgs) Handles chkPauseMarkPicture.CheckStateChanged
+
+        'Hier die Werte in der Liste "Markierte Fotos.xml" anpassen
+        If chkPauseMarkPicture.CheckState Then
+            markierteFotos.Add(bildPfad)
+        Else
+            markierteFotos.Remove(bildPfad)
+        End If
+
+    End Sub
+
+    'Key- & Mousehandling
+    Private Sub frmPauseModusOverlay_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
+
+        If e.KeyCode = Keys.Escape Then
+            If Not lblOptionsDialogDisabled.Visible Then
+                Me.Size = New Size(Me.Size.Width, Me.Size.Height + 82)
+            End If
+            lblOptionsDialogDisabled.Visible = True
+            tmrWarnLabelAnzeige.Start()
+        ElseIf e.KeyCode = Keys.Left Then
+            btnPauseBack.PerformClick()
+        ElseIf e.KeyCode = Keys.Right Then
+            btnPauseForward.PerformClick()
+        ElseIf e.KeyCode = Keys.Space OrElse e.KeyCode = Keys.M Then
+            If chkPauseMarkPicture.Checked = True Then
+                chkPauseMarkPicture.Checked = False
+            Else
+                chkPauseMarkPicture.Checked = True
+            End If
+        ElseIf e.KeyCode = Keys.P Then
+            Me.Close()
+        End If
+
+    End Sub
+
+    Private Sub frmPauseModusOverlay_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
+
+        If e.Button = MouseButtons.Right Then
+            If Not lblOptionsDialogDisabled.Visible Then
+                Me.Size = New Size(Me.Size.Width, Me.Size.Height + 82)
+            End If
+            lblOptionsDialogDisabled.Visible = True
+            tmrWarnLabelAnzeige.Start()
+        End If
+    End Sub
+
+    'Pausemodus beenden
+    Private Sub btnPausePause_Click(sender As Object, e As EventArgs) Handles btnPausePause.Click
+        Me.DialogResult = DialogResult.OK
+        Me.Close()
+    End Sub
+
+    Private Sub frmPauseModusOverlay_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+
+        'Liste der markierten Fotos wieder zurückspeichern
+        XmlHandling.SpeichereWerteliste(xmlPfad, markierteFotos, "Markierungen", "Foto", "Pfad")
+
+        If pauseInfoScreen IsNot Nothing Then
+            pauseInfoScreen.Close()
+            pauseInfoScreen.Dispose()
+            pauseInfoScreen = Nothing
+        End If
+
+        Cursor.Hide()
+
+        tmrWarnLabelAnzeige.Stop()
+
+        bild = Nothing
+        bildPfad = Nothing
+
+        anzeigeListe.Clear()
+        markierteFotos.Clear()
+
+        'Modul geordnet fortsetzen
+        If meineInstanz IsNot Nothing AndAlso
+           Not meineInstanz.WirdBeendet AndAlso
+           meineInstanz.sssScreen IsNot Nothing Then
+
+            meineInstanz.sssScreen.FortsetzenNachPause()
+
+        End If
 
     End Sub
 

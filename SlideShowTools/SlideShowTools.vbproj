@@ -85,6 +85,7 @@
     <Compile Include="CursorHandling.vb" />
     <Compile Include="FileHandling.vb" />
     <Compile Include="FormsHandling.vb" />
+    <Compile Include="GradientenHandling.vb" />
     <Compile Include="GraphicsSizeModeHandling.vb" />
     <Compile Include="ImageConversionHandling.vb" />
     <Compile Include="KeyAndMouseHandling.vb" />
@@ -112,6 +113,7 @@
     <Compile Include="ScreenHandling.vb" />
     <Compile Include="SettingsHandling.vb" />
     <Compile Include="SharedDataHandling.vb" />
+    <Compile Include="SlideShowGradient.vb" />
     <Compile Include="TextureHandling.vb" />
     <Compile Include="ToolTipHandling.vb" />
     <Compile Include="RenderLoopKopiervorlage.vb" />

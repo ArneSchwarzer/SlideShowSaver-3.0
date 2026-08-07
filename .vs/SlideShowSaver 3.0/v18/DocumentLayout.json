@@ -3,8 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C8879C38-0B4D-4692-8152-DF4F176F9B97}|NewFolder1{C8879C38-0B4D-4692-8152-DF4F176F9B97}|C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
-      "RelativeMoniker": "D:0:0:{C8879C38-0B4D-4692-8152-DF4F176F9B97}|NewFolder1{C8879C38-0B4D-4692-8152-DF4F176F9B97}|solutionrelative:BeendenUndBereinigenKopiervorlage.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\wpfmodulmain.xaml.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowwpfmodul.mandelbrot\\mandelbrotkameracontroller.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\mandelbrotkameracontroller.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|c:\\users\\arne\\source\\repos\\slideshowsaver 3.0\\slideshowwpfmodul.mandelbrot\\mandelbrotkamerazustand.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}",
+      "RelativeMoniker": "D:0:0:{EC277055-58DE-459D-AC2A-F46978AFA816}|SlideShowWPFModul.Mandelbrot\\SlideShowWPFModul.Mandelbrot.vbproj|solutionrelative:slideshowwpfmodul.mandelbrot\\mandelbrotkamerazustand.vb||{2C015C70-C72C-11D0-88C3-00A0C9110049}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,15 +34,41 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "BeendenUndBereinigenKopiervorlage.vb",
-              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb",
-              "RelativeDocumentMoniker": "BeendenUndBereinigenKopiervorlage.vb",
-              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\BeendenUndBereinigenKopiervorlage.vb",
-              "RelativeToolTip": "BeendenUndBereinigenKopiervorlage.vb",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "MandelbrotKameraZustand.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MandelbrotKameraZustand.vb",
+              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\MandelbrotKameraZustand.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MandelbrotKameraZustand.vb",
+              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\MandelbrotKameraZustand.vb",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
-              "WhenOpened": "2026-08-05T11:34:06.703Z",
+              "WhenOpened": "2026-08-07T00:15:39.188Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MandelbrotKameraController.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MandelbrotKameraController.vb",
+              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\MandelbrotKameraController.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\MandelbrotKameraController.vb",
+              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\MandelbrotKameraController.vb",
+              "ViewState": "AgIAAL4AAAAAAAAAAAAQwGgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-08-06T23:47:38.415Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "wpfModulMain.xaml.vb",
+              "DocumentMoniker": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "RelativeDocumentMoniker": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "ToolTip": "C:\\Users\\Arne\\source\\repos\\SlideShowSaver 3.0\\SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "RelativeToolTip": "SlideShowWPFModul.Mandelbrot\\wpfModulMain.xaml.vb",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAkwCEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003361|",
+              "WhenOpened": "2026-08-06T23:33:42.056Z",
               "EditorCaption": ""
             }
           ]

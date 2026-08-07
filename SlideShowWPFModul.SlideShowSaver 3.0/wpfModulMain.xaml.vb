@@ -38,15 +38,23 @@ Partial Public Class wpfModulMain
     Private aktuellesVerzeichnisCounter As Integer
 
     'Für frmPauseModul
-    Public Shared listeDerZuletztAngezeigtenBilder As New List(Of String)
+    Friend ReadOnly Property ListeDerZuletztAngezeigtenBilder As List(Of String)
+
+        Get
+            Return listeDerZuletztAngezeigtenBilderIntern
+        End Get
+
+    End Property
+
+    Private listeDerZuletztAngezeigtenBilderIntern As New List(Of String)
 
     'Präsentationsmodus
     Private präsentationAnzeigen As Boolean = False
 
     'Transitionen
-    Public aktiveTransition As ISlideShowTransition = Nothing
+    Private aktiveTransition As ISlideShowTransition
     Private neueTransition As String = Nothing
-    Public transitionIstAktiv As Boolean = False
+    Private transitionIstAktiv As Boolean = False
     Private listOfAvailableTransitions As List(Of SlideShowTransitionInfo)
     Private listOfEnabledTransitions As List(Of String)
     Private sizeWinForm As System.Drawing.Size
@@ -58,9 +66,10 @@ Partial Public Class wpfModulMain
     Private listOfEnabledShaders As List(Of String)
 
     'Timer
-    Public WithEvents tmrModul As New DispatcherTimer()
-    Public WithEvents tmrPresentation As New DispatcherTimer()
+    Private WithEvents tmrModul As New DispatcherTimer()
+    Private WithEvents tmrPresentation As New DispatcherTimer()
     Private WithEvents tmrInitialisierung As New DispatcherTimer()
+    Private bringToFrontTimer As DispatcherTimer
 
     'Initialisierungsphase
     Private initialesBildWurdeGeladen As Boolean
@@ -68,9 +77,12 @@ Partial Public Class wpfModulMain
     Private sbBilder As Storyboard
     Private sbVerz As Storyboard
 
+    'Besitzer und Lebenszyklus
+    Private ReadOnly eigentuemerModul As ModulMain
+    Private ressourcenWurdenBereinigt As Boolean
+
     'Events
     Public Event DarstellungIstBereit()
-
     Private darstellungsbereitschaftWurdeGemeldet As Boolean = False
 
     'Sonstiges
@@ -81,8 +93,16 @@ Partial Public Class wpfModulMain
 #Region "Konstruktor, Fensterstart und Settings"
 
     'Initialisierungen
-    Public Sub New()
-        'Erzeugt und initialisiert das Fenster und seine Komponenten.
+    Public Sub New(eigentuemer As ModulMain)
+        'Erzeugt das Darstellungsfenster für genau eine Modulinstanz.
+
+        If eigentuemer Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(eigentuemer))
+
+        End If
+
+        eigentuemerModul = eigentuemer
 
         InitializeComponent()
 
@@ -105,14 +125,14 @@ Partial Public Class wpfModulMain
 
         'Versuch, das Fenster in den Vordergrund zu bringen - Ebene 2
         ' Nach einem kleinen Delay erneut aktivieren
-        Dim bringToFrontTimer As New DispatcherTimer With {.Interval = TimeSpan.FromMilliseconds(250)}
-        AddHandler bringToFrontTimer.Tick,
-                                            Sub()
-                                                bringToFrontTimer.Stop()
-                                                Me.Topmost = False
-                                                Me.Focus()
-                                                Me.Activate()
-                                            End Sub
+        BereinigeBringToFrontTimer()
+
+        bringToFrontTimer = New DispatcherTimer()
+
+        bringToFrontTimer.Interval = TimeSpan.FromMilliseconds(250)
+
+        AddHandler bringToFrontTimer.Tick, AddressOf BringToFrontTimer_Tick
+
         bringToFrontTimer.Start()
 
         'Initialisierungslabel einstellen
@@ -155,6 +175,21 @@ Partial Public Class wpfModulMain
 
     End Sub
 
+    Private Sub BringToFrontTimer_Tick(sender As Object, e As EventArgs)
+        'Aktiviert das Modulfenster einmalig nach dem Aufbau.
+
+        BereinigeBringToFrontTimer()
+
+        If ressourcenWurdenBereinigt Then
+            Exit Sub
+        End If
+
+        Me.Topmost = False
+        Me.Focus()
+        Me.Activate()
+
+    End Sub
+
     Public Sub AktualisiereSettings(neueSettings As ModulMain.SettingsModul_SSS)
         'Übernimmt aktualisierte Moduleinstellungen direkt von ModulMain.
 
@@ -171,10 +206,12 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub MeldeDarstellungsbereitschaft()
-        'Meldet den vollständig aufgebauten Initialisierungsbildschirm einmalig an ModulMain.
+        'Meldet den vollständig aufgebauten Initialisierungsbildschirm einmalig.
 
-        If darstellungsbereitschaftWurdeGemeldet Then
+        If ressourcenWurdenBereinigt OrElse darstellungsbereitschaftWurdeGemeldet Then
+
             Exit Sub
+
         End If
 
         darstellungsbereitschaftWurdeGemeldet = True
@@ -314,7 +351,7 @@ Partial Public Class wpfModulMain
 
         If aktiverShader IsNot Nothing Then
 
-            aktuellesImage = aktiverShader.RunShader(aktuellesImage, bildPfad, GetNativeScreenResolution())
+            aktuellesImage = FuehreShaderAus(aktuellesImage, bildPfad)
 
         End If
 
@@ -481,6 +518,7 @@ Partial Public Class wpfModulMain
         'Nac Beendigung der Anzeige des Bildes gemäß Anzeigedauer startet der Timer die nächste Transition
         'oder, falls keine ausgewählt ist, initiiert den Bildwechsel.
 
+        If ressourcenWurdenBereinigt Then Exit Sub
         If transitionIstAktiv Then Exit Sub
 
         'Timer beenden
@@ -488,6 +526,10 @@ Partial Public Class wpfModulMain
 
         ' Kleine Verzögerung, damit Stop() garantiert fertig ist
         Await Task.Delay(750)
+
+        If ressourcenWurdenBereinigt Then
+            Exit Sub
+        End If
 
         'Falls der Päsentationsschirm angezeigt werden soll, diesen starten
         If präsentationAnzeigen Then
@@ -576,18 +618,20 @@ Partial Public Class wpfModulMain
 
         'BildInfo des Bildes aktualisieren
         If aktuelleSettings.BildInfoAnzeigen Then
-            If ModulMain.sssInfo IsNot Nothing AndAlso bildPfad IsNot Nothing Then
-                ModulMain.sssInfo.RefreshLabels(bildPfad)
-                ModulMain.sssInfo.Refresh()
-                ModulMain.sssInfo.BringToFront()
+            If eigentuemerModul.sssInfo IsNot Nothing AndAlso bildPfad IsNot Nothing Then
+
+                eigentuemerModul.sssInfo.RefreshLabels(bildPfad)
+                eigentuemerModul.sssInfo.Refresh()
+                eigentuemerModul.sssInfo.BringToFront()
+
             End If
         End If
 
         'Liste der letzten 10 Bilder befüllen und ggf. das erste Element wieder aus der Liste löschen.
         If bildPfad IsNot Nothing Then
-            listeDerZuletztAngezeigtenBilder.Add(bildPfad)
-            If listeDerZuletztAngezeigtenBilder.Count > 10 Then
-                listeDerZuletztAngezeigtenBilder.RemoveAt(0)
+            listeDerZuletztAngezeigtenBilderIntern.Add(bildPfad)
+            If listeDerZuletztAngezeigtenBilderIntern.Count > 10 Then
+                ListeDerZuletztAngezeigtenBilder.RemoveAt(0)
             End If
         End If
 
@@ -610,6 +654,18 @@ Partial Public Class wpfModulMain
         Dim naechsterIndex As Integer
         Dim bildWurdeGeladen As Boolean
         Dim verzeichnisWurdeGewechselt As Boolean
+
+        If neuesImage IsNot Nothing AndAlso Not ReferenceEquals(neuesImage, aktuellesImage) Then
+
+            DisposeImage(neuesImage)
+
+        Else
+
+            neuesImage = Nothing
+
+        End If
+
+        neuesBild = Nothing
 
         naechsterPfad = Nothing
         naechstesImage = Nothing
@@ -694,7 +750,7 @@ Partial Public Class wpfModulMain
 
         If aktiverShader IsNot Nothing Then
 
-            neuesImage = aktiverShader.RunShader(neuesImage, bildPfad, GetNativeScreenResolution())
+            neuesImage = FuehreShaderAus(neuesImage, bildPfad)
 
         End If
 
@@ -703,11 +759,31 @@ Partial Public Class wpfModulMain
     End Sub
 
     Private Sub BildWechseln()
-        'Hilfsfunktion zum tatsächlichen Wechsel der Bilder (wird je nach Präsentationsschirm/Transition/direkter
-        'Wechsel zu unterschiedlichen Zeitpunkten aufgerufen)
+        'Überträgt den vorbereiteten Bildbesitz auf die aktuelle Anzeige.
 
+        Dim altesImage As Image
+
+        altesImage = aktuellesImage
         aktuellesImage = neuesImage
         aktuellesBild = neuesBild
+
+        neuesImage = Nothing
+        neuesBild = Nothing
+
+        If altesImage IsNot Nothing AndAlso Not ReferenceEquals(altesImage, aktuellesImage) Then
+
+            Try
+
+                altesImage.Dispose()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Das vorherige aktuelle Bild konnte nicht freigegeben werden: " &
+                                     ex.ToString())
+
+            End Try
+
+        End If
 
     End Sub
 
@@ -798,19 +874,27 @@ Partial Public Class wpfModulMain
 
             End Select
 
-            If aktiveTransition IsNot Nothing Then
-                'Alte Handler entfernen
-                RemoveHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                RemoveHandler aktiveTransition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
-            End If
+            BeendeUndBereinigeTransition(aktiveTransition)
 
-            aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+            Try
 
-            If aktiveTransition IsNot Nothing Then
-                'Neue Handler hinzufügen
-                AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                AddHandler aktiveTransition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
-            End If
+                aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+
+                If aktiveTransition IsNot Nothing Then
+
+                    AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+                    AddHandler aktiveTransition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
+
+                End If
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Die Transition """ & neueTransition & """ konnte nicht geladen werden: " &
+                                     ex.ToString())
+
+                BeendeUndBereinigeTransition(aktiveTransition)
+
+            End Try
 
         End If
 
@@ -891,11 +975,66 @@ Partial Public Class wpfModulMain
                     neuerShader = listOfEnabledShaders(rnd.Next(listOfEnabledShaders.Count))
             End Select
 
-            aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
+            BeendeUndBereinigeShader(aktiverShader)
+
+            Try
+
+                aktiverShader = ShaderByNameLoader.LadeShaderNachName(neuerShader)
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Der Shader """ & neuerShader & """ konnte nicht geladen werden: " &
+                                     ex.ToString())
+
+                BeendeUndBereinigeShader(aktiverShader)
+
+            End Try
 
         End If
 
     End Sub
+
+    Private Function FuehreShaderAus(eingabeBild As Image, imagePath As String) As Image
+        'Führt den aktiven Shader aus und bereinigt das Eingabebild,
+        'wenn der Shader eine neue Bildinstanz zurückgibt.
+
+        Dim shaderErgebnis As Image
+
+        shaderErgebnis = Nothing
+
+        If eingabeBild Is Nothing Then
+            Return Nothing
+        End If
+
+        If aktiverShader Is Nothing Then
+            Return eingabeBild
+        End If
+
+        shaderErgebnis = aktiverShader.RunShader(eingabeBild, imagePath, GetNativeScreenResolution())
+
+        If shaderErgebnis Is Nothing Then
+
+            Return eingabeBild
+
+        End If
+
+        If Not ReferenceEquals(shaderErgebnis, eingabeBild) Then
+
+            Try
+
+                eingabeBild.Dispose()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Das Shader-Eingabebild konnte nicht freigegeben werden: " & ex.ToString())
+
+            End Try
+
+        End If
+
+        Return shaderErgebnis
+
+    End Function
 
     Public Sub LegitimeShaderListeErstellen()
         'Aktualisiert die Liste der Shader, die das Modul SlideShowSaver 3.0 aktuell anzeigen darf
@@ -953,8 +1092,40 @@ Partial Public Class wpfModulMain
 #Region "Pausemodus"
 
     'Pause-Modus Veraltung
+    Friend Sub PausiereDarstellung()
+        'Stoppt die aktive Darstellung kontrolliert für den Pausemodus.
+
+        If ressourcenWurdenBereinigt Then
+            Exit Sub
+        End If
+
+        tmrInitialisierung.Stop()
+        tmrModul.Stop()
+        tmrPresentation.Stop()
+
+        If aktiveTransition IsNot Nothing Then
+
+            Try
+
+                aktiveTransition.StopTransition()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Die Transition konnte beim Pausieren nicht gestoppt werden: " &
+                                     ex.ToString())
+
+            End Try
+
+        End If
+
+        transitionIstAktiv = False
+
+    End Sub
+
     Public Sub FortsetzenNachPause()
         'Setzt die Darstellung nach dem Pausemodus fort.
+
+        If ressourcenWurdenBereinigt Then Exit Sub
 
         txbPräsentationsschirm.Visibility = Visibility.Collapsed
         imgAnzeige.Visibility = Visibility.Visible
@@ -987,36 +1158,199 @@ Partial Public Class wpfModulMain
 
 #Region "Aufräumen und Fensterende"
 
-    'Ende
-    Private Sub wpfModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
-        'Aufräumen
-        If transitionIstAktiv Then
-            aktiveTransition.StopTransition()
+    Friend Sub BereinigeRessourcen()
+        'Beendet und löst sämtliche vom WPF-Modulfenster
+        'besessenen Ressourcen.
+
+        If ressourcenWurdenBereinigt Then
+            Exit Sub
         End If
 
-        'Shader & Transitionen freigeben
-        aktiverShader = Nothing
-        aktiveTransition = Nothing
+        ressourcenWurdenBereinigt = True
 
-        'Timer stoppen und freigeben
+        BereinigeBringToFrontTimer()
+
         tmrInitialisierung.Stop()
         tmrModul.Stop()
         tmrPresentation.Stop()
 
-        tmrInitialisierung = Nothing
-        tmrModul = Nothing
-        tmrPresentation = Nothing
+        StopHourglassAnimation(rtBilder)
+        StopHourglassAnimation(rtVerz)
 
-        ' Bilder freigeben
-        imgAnzeige.Source = Nothing
+        BeendeUndBereinigeTransition(aktiveTransition)
+        BeendeUndBereinigeShader(aktiverShader)
 
-        ' Inhalte leeren
+        If imgAnzeige IsNot Nothing Then
+
+            imgAnzeige.Source = Nothing
+
+        End If
+
+        BereinigeBildressourcen()
+
+        If aktuellesVerzeichnis IsNot Nothing Then
+
+            aktuellesVerzeichnis.Clear()
+            aktuellesVerzeichnis = Nothing
+
+        End If
+
+        If listeDerZuletztAngezeigtenBilderIntern IsNot Nothing Then
+
+            listeDerZuletztAngezeigtenBilderIntern.Clear()
+            listeDerZuletztAngezeigtenBilderIntern = Nothing
+
+        End If
+
+        listOfAvailableTransitions = Nothing
+        listOfEnabledTransitions = Nothing
+
+        listOfAvailableShaders = Nothing
+        listOfEnabledShaders = Nothing
+
+        sbBilder = Nothing
+        sbVerz = Nothing
+
+        rnd = Nothing
+
         Me.Content = Nothing
 
-        ' Garbage Collection
-        GC.Collect()
-        GC.WaitForPendingFinalizers()
-        GC.Collect()
+    End Sub
+
+    Private Sub BereinigeBringToFrontTimer()
+        'Stoppt und trennt den einmaligen Vordergrund-Timer.
+
+        If bringToFrontTimer Is Nothing Then
+            Exit Sub
+        End If
+
+        bringToFrontTimer.Stop()
+
+        RemoveHandler bringToFrontTimer.Tick,
+        AddressOf BringToFrontTimer_Tick
+
+        bringToFrontTimer = Nothing
+
+    End Sub
+
+    Private Sub BereinigeBildressourcen()
+        'Gibt sämtliche vom Modulfenster besessenen Bilder frei,
+        'ohne eine gemeinsam referenzierte Instanz doppelt zu disposen.
+
+        If ReferenceEquals(aktuellesImage, neuesImage) Then
+
+            DisposeImage(aktuellesImage)
+            neuesImage = Nothing
+
+        Else
+
+            DisposeImage(aktuellesImage)
+            DisposeImage(neuesImage)
+
+        End If
+
+        aktuellesBild = Nothing
+        neuesBild = Nothing
+
+        bildPfad = Nothing
+
+    End Sub
+
+    Private Sub BeendeUndBereinigeTransition(ByRef transition As ISlideShowTransition)
+        'Beendet und disposed eine vom Modulfenster besessene Transition.
+
+        If transition Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            RemoveHandler transition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            RemoveHandler transition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
+
+        Catch ex As Exception
+
+            LogHandling.LogWarn("Handler der internen Transition konnten nicht vollständig entfernt werden: " &
+                                ex.Message)
+
+        End Try
+
+        Try
+
+            transition.StopTransition()
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Stoppen der internen Transition: " & ex.ToString())
+
+        End Try
+
+        Try
+
+            transition.Dispose()
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Freigeben der internen Transition: " & ex.ToString())
+
+        Finally
+
+            transition = Nothing
+            transitionIstAktiv = False
+
+        End Try
+
+    End Sub
+
+    Private Sub BeendeUndBereinigeShader(ByRef shader As ISlideShowShader)
+        'Disposed einen vom Modulfenster besessenen Shader.
+
+        If shader Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            shader.Dispose()
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Freigeben des internen Shaders: " & ex.ToString())
+
+        Finally
+
+            shader = Nothing
+
+        End Try
+
+    End Sub
+
+    Private Sub DisposeImage(ByRef image As Image)
+        'Disposed ein besessenes GDI-Bild und löscht die Referenz.
+
+        If image Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            image.Dispose()
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Fehler beim Freigeben eines Modulbildes: " & ex.ToString())
+
+        Finally
+
+            image = Nothing
+
+        End Try
+
+    End Sub
+
+    Private Sub wpfModulMain_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+
+        BereinigeRessourcen()
 
     End Sub
 

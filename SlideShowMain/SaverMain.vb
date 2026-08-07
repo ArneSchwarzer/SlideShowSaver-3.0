@@ -410,7 +410,7 @@ Module SaverMain
 
         End If
 
-        letzteTransition = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespieleTransition")
+        letzteTransition = ReadFromRegistry(SLIDESHOWMAIN_PATH & "LetztgespielteTransition")
 
         Select Case aktuelleSettings.ModulTransitionReihenfolge
 
@@ -666,8 +666,8 @@ Module SaverMain
         Dim modulName As String
         Dim geladenesModul As ISlideShowModul
 
-        activeModule = Nothing
-        nextModule = Nothing
+        BeendeUndBereinigeModul(activeModule)
+        BeendeUndBereinigeModul(nextModule)
 
         fallbackIsActive = False
         fallbackPaused = False
@@ -708,7 +708,9 @@ Module SaverMain
         Dim geladenesModul As ISlideShowModul
 
         aktuellerModulName = Nothing
-        nextModule = Nothing
+
+        'Eine eventuell noch vorhandene, aber nie übernommene Vorbereitungsinstanz muss endgültig freigegeben werden.
+        BeendeUndBereinigeModul(nextModule)
 
         If activeModule IsNot Nothing Then
             aktuellerModulName = activeModule.ModulName
@@ -780,10 +782,10 @@ Module SaverMain
 #Region "Fallback-Verwaltung"
 
     Private Sub AktiviereFallbackSaver()
-        'Aktiviert den FallbackSaver, wenn kein reguläres Modul verwendet werden kann.
+        'Markiert den FallbackSaver als nächstes Ziel.
+        'Das aktuell sichtbare Modul wird erst nach sicherer Abdeckung beendet.
 
-        activeModule = Nothing
-        nextModule = Nothing
+        BeendeUndBereinigeModul(nextModule)
 
         fallbackIsActive = True
         fallbackPaused = False
@@ -998,7 +1000,7 @@ Module SaverMain
         Dim gueltigeTransitionen As List(Of String)
         Dim ausgewaehlterName As String
 
-        activeTransition = Nothing
+        BeendeUndBereinigeTransition(activeTransition)
         ausgewaehlterName = Nothing
 
         If listOfEnabledTransitions Is Nothing OrElse listOfEnabledTransitions.Count = 0 Then
@@ -1088,9 +1090,10 @@ Module SaverMain
 
         Catch ex As Exception
 
-            activeTransition = Nothing
+            LogHandling.LogError("Fehler beim Laden der Modultransition """ & ausgewaehlterName & """: " &
+                                 ex.ToString())
 
-            LogHandling.LogError("Fehler beim Laden der Modultransition """ & ausgewaehlterName & """: " & ex.ToString())
+            BeendeUndBereinigeTransition(activeTransition)
 
             Return False
 
@@ -1232,11 +1235,15 @@ Module SaverMain
 
     End Sub
 
-    Private Sub TransitionBereinigen()
-        'Beendet eine gegebenenfalls noch laufende Transition,
-        'entfernt ihre Eventhandler und gibt die Instanz frei.
+    Private Sub BeendeUndBereinigeTransition(ByRef transition As ISlideShowTransition)
+        'Beendet eine Transition, entfernt Frameworkhandler,
+        'gibt ihre Ressourcen frei und löscht die Referenz.
 
-        If activeTransition Is Nothing Then
+        Dim transitionName As String
+
+        transitionName = "Unbekannt"
+
+        If transition Is Nothing Then
             Exit Sub
         End If
 
@@ -1244,31 +1251,53 @@ Module SaverMain
 
             Try
 
-                activeTransition.StopTransition()
+                transitionName = transition.TransitionName
 
             Catch ex As Exception
 
-                LogHandling.LogWarn("Die Modultransition konnte während der Bereinigung " &
-                                    "nicht nochmals beendet werden: " & ex.Message)
+                LogHandling.LogWarn("Der Name der zu bereinigenden Transition konnte nicht gelesen werden: " &
+                                    ex.Message)
 
             End Try
 
-            RemoveHandler activeTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
-            RemoveHandler activeTransition.TransitionIsRunning, AddressOf TransitionIsRunning
+            'Nur Handler entfernen, die SaverMain selbst registriert hat.
+            Try
 
-            If TypeOf activeTransition Is IDisposable Then
+                RemoveHandler transition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
+                RemoveHandler transition.TransitionIsRunning, AddressOf TransitionIsRunning
 
-                DirectCast(activeTransition, IDisposable).Dispose()
+            Catch ex As Exception
 
-            End If
+                LogHandling.LogWarn("Frameworkhandler der Transition """ & transitionName &
+                                    """ konnten nicht vollständig entfernt werden: " & ex.Message)
 
-        Catch ex As Exception
+            End Try
 
-            LogHandling.LogError("Fehler beim Freigeben der Modultransition: " & ex.ToString())
+            Try
+
+                transition.StopTransition()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Fehler beim Stoppen der Transition """ & transitionName &
+                                     """: " & ex.ToString())
+
+            End Try
+
+            Try
+
+                transition.Dispose()
+
+            Catch ex As Exception
+
+                LogHandling.LogError("Fehler beim Freigeben der Transition """ & transitionName & """: " &
+                                     ex.ToString())
+
+            End Try
 
         Finally
 
-            activeTransition = Nothing
+            transition = Nothing
             transitionIstAktiv = False
 
         End Try
@@ -2111,7 +2140,7 @@ Module SaverMain
         'Gibt die Wechselressourcen frei und aktiviert wieder
         'die normale MCP-Steuerung.
 
-        TransitionBereinigen()
+        BeendeUndBereinigeTransition(activeTransition)
 
         aktuelleWechselPhase = MCPWechselPhase.Keine
 
@@ -2136,7 +2165,7 @@ Module SaverMain
         transitionIstVorbereitet = False
 
         TransitionHostSchliessen()
-        TransitionBereinigen()
+        BeendeUndBereinigeTransition(activeTransition)
 
         If activeModule Is Nothing AndAlso
        nextModule IsNot Nothing Then
@@ -2150,12 +2179,10 @@ Module SaverMain
 
                 Catch ex As Exception
 
-                    LogHandling.LogError(
-                    "Auch das vorbereitete Ersatzmodul konnte nicht " &
-                    "gestartet werden: " &
-                    ex.ToString())
+                    LogHandling.LogError("Auch das vorbereitete Ersatzmodul konnte nicht gestartet werden: " &
+                                         ex.ToString())
 
-                    activeModule = Nothing
+                    BeendeUndBereinigeModul(activeModule)
 
                 End Try
 
@@ -2177,9 +2204,11 @@ Module SaverMain
 
     End Sub
 
-    Private Sub BeendeUndBereinigeModul(ByRef modul As ISlideShowModul)
-        'Beendet eine Modulinstanz, entfernt bekannte Handler,
-        'gibt optionale Ressourcen frei und löscht die Referenz.
+    Private Sub BeendeUndBereinigeModul(
+    ByRef modul As ISlideShowModul
+)
+        'Beendet eine Modulinstanz, entfernt Frameworkhandler,
+        'gibt die Modulressourcen frei und löscht die Referenz.
 
         Dim modulName As String
 
@@ -2195,11 +2224,23 @@ Module SaverMain
 
                 modulName = modul.ModulName
 
-            Catch
-                'Der Name ist nur für die Protokollierung relevant.
+            Catch ex As Exception
+
+                LogHandling.LogWarn("Der Name des zu bereinigenden Moduls konnte nicht gelesen werden: " & ex.Message)
+
             End Try
 
-            RemoveHandler modul.ModulIstDarstellungsbereit, AddressOf ActiveModule_ModulIstDarstellungsbereit
+            'Nur Handler entfernen, die SaverMain selbst registriert hat.
+            Try
+
+                RemoveHandler modul.ModulIstDarstellungsbereit, AddressOf ActiveModule_ModulIstDarstellungsbereit
+
+            Catch ex As Exception
+
+                LogHandling.LogWarn("Der Darstellungsbereit-Handler des Moduls """ & modulName &
+                                    """ konnte nicht entfernt werden: " & ex.Message)
+
+            End Try
 
             Try
 
@@ -2211,19 +2252,16 @@ Module SaverMain
 
             End Try
 
-            If TypeOf modul Is IDisposable Then
+            'Dispose muss auch dann versucht werden, wenn StopModul fehlschlug.
+            Try
 
-                Try
+                modul.Dispose()
 
-                    DirectCast(modul, IDisposable).Dispose()
+            Catch ex As Exception
 
-                Catch ex As Exception
+                LogHandling.LogError("Fehler beim Freigeben des Moduls """ & modulName & """: " & ex.ToString())
 
-                    LogHandling.LogError("Fehler beim Freigeben des Moduls """ & modulName & """: " & ex.ToString())
-
-                End Try
-
-            End If
+            End Try
 
         Finally
 
@@ -2615,7 +2653,6 @@ Module SaverMain
 
 #Region "Framework-Shutdown"
 
-
     Private Sub CloseSlideShowSaver()
         'Beendet den Bildschirmschoner kontrolliert und gibt alle zentralen Instanzen frei.
 
@@ -2651,7 +2688,7 @@ Module SaverMain
         aktuelleWechselPhase = MCPWechselPhase.Keine
         ausstehendeAktion = AktionNachModulwechsel.Keine
 
-        TransitionBereinigen()
+        BeendeUndBereinigeTransition(activeTransition)
 
         TransitionHostSchliessen()
 
@@ -2665,31 +2702,17 @@ Module SaverMain
 
                 WriteToRegistry(SLIDESHOWMAIN_PATH & "LetztgespieltesModul", activeModule.ModulName)
 
-                activeModule.StopModul()
-
             Catch ex As Exception
 
-                LogHandling.LogError("Fehler beim Beenden des aktiven Moduls """ & activeModule.ModulName & """: " & ex.ToString())
-
-            Finally
-
-                activeModule = Nothing
+                LogHandling.LogWarn("Das zuletzt gespielte Modul konnte beim Beenden nicht gespeichert werden: " &
+                                    ex.Message)
 
             End Try
 
         End If
 
-        If nextModule IsNot Nothing Then
-
-            Try
-                nextModule.StopModul()
-            Catch ex As Exception
-                LogHandling.LogError("Fehler beim Aufräumen des vorbereiteten Moduls: " & ex.ToString())
-            Finally
-                nextModule = Nothing
-            End Try
-
-        End If
+        BeendeUndBereinigeModul(activeModule)
+        BeendeUndBereinigeModul(nextModule)
 
         If optionsDialog IsNot Nothing Then
 

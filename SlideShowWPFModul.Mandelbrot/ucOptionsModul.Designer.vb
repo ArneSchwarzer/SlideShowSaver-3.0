@@ -31,6 +31,7 @@ Partial Class ucOptionsModul
         Me.trkZoomgeschwindigkeit = New System.Windows.Forms.TrackBar()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.chkRotation = New System.Windows.Forms.CheckBox()
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkZoomgeschwindigkeit, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -125,10 +126,21 @@ Partial Class ucOptionsModul
         Me.chkRotation.Text = "Rotation"
         Me.chkRotation.UseVisualStyleBackColor = True
         '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(654, 22)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(185, 57)
+        Me.btnDefaults.TabIndex = 28
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.chkRotation)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.trkZoomgeschwindigkeit)
@@ -157,4 +169,5 @@ Partial Class ucOptionsModul
     Friend WithEvents trkZoomgeschwindigkeit As Forms.TrackBar
     Friend WithEvents Label2 As Forms.Label
     Friend WithEvents chkRotation As Forms.CheckBox
+    Friend WithEvents btnDefaults As Forms.Button
 End Class

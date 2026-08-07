@@ -174,21 +174,13 @@
     <None Include="Resources\Flying KitchenAid Logo Matrix Transparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Lang\DE\" />
-    <Folder Include="Lang\EN\" />
-    <Folder Include="Lang\ES\" />
-    <Folder Include="Lang\FR\" />
-    <Folder Include="Lang\HI\" />
-    <Folder Include="Lang\PL\" />
-    <Folder Include="Lang\RU\" />
     <Folder Include="Lang\TLH\" />
-    <Folder Include="Lang\ZH\" />
   </ItemGroup>
   <ItemGroup>
-  <EmbeddedResource Include="Lang\**\*.csv">
-    <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
-    <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-  </EmbeddedResource>
-</ItemGroup>
+    <EmbeddedResource Include="Lang\**\*.csv">
+      <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
+      <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

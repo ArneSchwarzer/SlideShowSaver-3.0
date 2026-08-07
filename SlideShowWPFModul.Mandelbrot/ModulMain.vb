@@ -20,6 +20,8 @@ Public Class ModulMain
 
     'Sonstiges
     Public mandelbrotScreen As wpfModulMain
+    Private wurdeBereinigt As Boolean
+
 #End Region
 
 #Region "Structures & Enums"
@@ -74,38 +76,29 @@ Public Class ModulMain
     ' === Events ===
     Public Event ModulStateChanged(newState As String) Implements ISlideShowModul.ModulStateChanged
     Public Event ModulIstDarstellungsbereit() Implements ISlideShowModul.ModulIstDarstellungsbereit
-    Public Shared Event YouHaveMail_Mandelbrot()
 #End Region
 
 
     'Start, Stopp & Pause
-    Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False, Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
+    Public Sub StartModul(targetScreen As Screen, Optional isPreview As Boolean = False,
+                          Optional targetHandle As IntPtr = Nothing) Implements ISlideShowModul.StartModul
         'Initialisiert und zeigt das Mandelbrot-Modul
 
-        'Eine eventuell noch vorhandene Fensterinstanz
-        'darf nicht wiederverwendet werden.
-        If mandelbrotScreen IsNot Nothing Then
+        If wurdeBereinigt Then
 
-            Try
-
-                RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
-
-                mandelbrotScreen.Close()
-
-            Catch
-                'Eine alte oder bereits geschlossene Fensterinstanz
-                'ist nicht mehr verwendbar.
-            Finally
-                mandelbrotScreen = Nothing
-            End Try
+            Throw New ObjectDisposedException(NameOf(ModulMain))
 
         End If
+
+        BeendeUndBereinigeMandelbrotFenster("Modul Mandelbrot - ModulMain.StartModul(): " &
+                                   "Fehler beim Schließen einer vorhandenen Fensterinstanz: ")
 
         CheckYourSettings()
 
         Try
 
-            mandelbrotScreen = New wpfModulMain()
+            mandelbrotScreen =
+            New wpfModulMain(aktuelleSettings)
 
             AddHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
             AddHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
@@ -117,27 +110,11 @@ Public Class ModulMain
 
         Catch ex As Exception
 
-            LogError(
-            "Modul Mandelbrot - ModulMain.StartModul(): " &
-            "Das Modul konnte nicht gestartet werden: " &
-            ex.ToString())
+            LogError("Modul Mandelbrot - ModulMain.StartModul(): Das Modul konnte nicht gestartet werden: " &
+                     ex.ToString())
 
-            If mandelbrotScreen IsNot Nothing Then
-
-                Try
-
-                    RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
-                    RemoveHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
-
-                    mandelbrotScreen.Close()
-
-                Catch
-                    'Keine weitere Behandlung notwendig
-                Finally
-                    mandelbrotScreen = Nothing
-                End Try
-
-            End If
+            BeendeUndBereinigeMandelbrotFenster("Modul Mandelbrot - ModulMain.StartModul(): " &
+                                       "Fehler beim Aufräumen nach einem fehlgeschlagenen Start: ")
 
             RaiseEvent ModulStateChanged("Error")
 
@@ -147,35 +124,29 @@ Public Class ModulMain
 
     End Sub
 
-    Public Sub StopModul() _
-    Implements ISlideShowModul.StopModul
+    Public Sub StopModul() Implements ISlideShowModul.StopModul
         'Räumt auf und beendet das Mandelbrot-Modul
 
-        If mandelbrotScreen IsNot Nothing Then
-
-            Try
-
-                RemoveHandler mandelbrotScreen.Closed, AddressOf MandelbrotScreen_Closed
-                RemoveHandler mandelbrotScreen.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
-
-                mandelbrotScreen.Close()
-
-            Catch ex As Exception
-
-                LogError(
-                "Modul Mandelbrot - ModulMain.StopModul(): " &
-                "Fehler beim Schließen des Modulfensters: " &
-                ex.ToString())
-
-            Finally
-
-                mandelbrotScreen = Nothing
-
-            End Try
-
-        End If
+        BeendeUndBereinigeMandelbrotFenster("Modul Mandelbrot - ModulMain.StopModul(): " &
+                                   "Fehler beim Schließen des Modulfensters: ")
 
         RaiseEvent ModulStateChanged("Stopped")
+
+    End Sub
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        'Beendet das Modul und gibt alle gehaltenen Ressourcen frei.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        wurdeBereinigt = True
+
+        BeendeUndBereinigeMandelbrotFenster("Modul Mandelbrot - ModulMain.Dispose(): " &
+                                            "Fehler beim Beenden und Bereinigen des Modulfensters: ")
+
+        GC.SuppressFinalize(Me)
 
     End Sub
 
@@ -198,14 +169,16 @@ Public Class ModulMain
 
     'Info-Kommunikation
     Public Sub CheckYourSettings() Implements ISlideShowModul.CheckYourSettings
-        ' Initialisierung und Re-Initalisierung der Optionen aus der Registry
+        'Initialisiert oder aktualisiert die Optionen aus der Registry.
 
-        'aktuelleSettings einlesen und gleich auch in der SettingsInbox bereitstellen
         ReadModuleSettingsFromRegistryOrDefaults()
         StoreSettings(nameModul, aktuelleSettings)
 
-        'Der Instanz mandelbrotScreen auch Bescheid geben
-        RaiseEvent YouHaveMail_Mandelbrot()
+        If mandelbrotScreen IsNot Nothing Then
+
+            mandelbrotScreen.AktualisiereSettings(aktuelleSettings)
+
+        End If
 
     End Sub
 
@@ -218,7 +191,7 @@ Public Class ModulMain
 
     End Sub
 
-    Private Function GetModulDefaultSettings() As Dictionary(Of String, String)
+    Friend Shared Function GetModulDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Werte des Moduls
 
         Dim defaults As New Dictionary(Of String, String)
@@ -258,30 +231,54 @@ Public Class ModulMain
         aktuelleSettings.Rotation = CBool(ReadFromRegOrDefaults(SLIDESHOWMODUL_MANDELBROT_FULLPATH & "Rotation", defaults))
     End Sub
 
-    Private Sub MandelbrotScreen_Closed(
-    sender As Object,
-    e As EventArgs)
-        'Entfernt die Fensterreferenz auch bei internem Schließen.
+    Private Sub MandelbrotScreen_Closed(sender As Object, e As EventArgs)
+        'Entfernt alle Frameworkhandler und die Fensterreferenz.
 
         Dim geschlossenesFenster As wpfModulMain
 
-        geschlossenesFenster =
-            TryCast(sender, wpfModulMain)
+        geschlossenesFenster = TryCast(sender, wpfModulMain)
 
-        If geschlossenesFenster IsNot Nothing Then
-
-            RemoveHandler geschlossenesFenster.Closed,
-                AddressOf MandelbrotScreen_Closed
-
+        If geschlossenesFenster Is Nothing Then
+            Exit Sub
         End If
 
-        If ReferenceEquals(
-            mandelbrotScreen,
-            geschlossenesFenster) Then
+        RemoveHandler geschlossenesFenster.Closed, AddressOf MandelbrotScreen_Closed
+        RemoveHandler geschlossenesFenster.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
+
+        If ReferenceEquals(mandelbrotScreen, geschlossenesFenster) Then
 
             mandelbrotScreen = Nothing
 
         End If
+
+    End Sub
+
+    Private Sub BeendeUndBereinigeMandelbrotFenster(fehlerPraefix As String)
+        'Beendet das aktuelle Mandelbrot-Fenster und löst alle
+        'von ModulMain registrierten Verbindungen.
+
+        Dim zuBeendendesFenster As wpfModulMain
+
+        zuBeendendesFenster = mandelbrotScreen
+
+        mandelbrotScreen = Nothing
+
+        If zuBeendendesFenster Is Nothing Then
+            Exit Sub
+        End If
+
+        Try
+
+            RemoveHandler zuBeendendesFenster.Closed, AddressOf MandelbrotScreen_Closed
+            RemoveHandler zuBeendendesFenster.DarstellungIstBereit, AddressOf MandelbrotScreen_DarstellungIstBereit
+
+            zuBeendendesFenster.Close()
+
+        Catch ex As Exception
+
+            LogError(fehlerPraefix & ex.ToString())
+
+        End Try
 
     End Sub
 

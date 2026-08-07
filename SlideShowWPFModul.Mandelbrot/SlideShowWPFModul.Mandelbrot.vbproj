@@ -76,8 +76,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="MandelbrotEffekt.vb" />
-    <Compile Include="MandelbrotGradient.vb" />
-    <Compile Include="MandelbrotGradientRepository.vb" />
+    <Compile Include="MandelbrotKameraController.vb" />
+    <Compile Include="MandelbrotKameraZustand.vb" />
+    <Compile Include="MandelbrotMathematik.vb" />
+    <Compile Include="MandelbrotZiel.vb" />
+    <Compile Include="MandelbrotZielAuswahl.vb" />
+    <Compile Include="MandelbrotZielRepository.vb" />
     <Compile Include="ModulMain.vb" />
     <Compile Include="ucMandelbrotZielOverlay.xaml.vb">
       <DependentUpon>ucMandelbrotZielOverlay.xaml</DependentUpon>

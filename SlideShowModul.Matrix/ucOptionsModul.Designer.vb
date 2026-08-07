@@ -23,20 +23,16 @@ Partial Class ucOptionsModul
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.lblModulname = New System.Windows.Forms.Label()
-Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblNlblModulname = New System.Windows.Forms.Label()
         Me.btnHighlighttextListeLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextLöschen = New System.Windows.Forms.Button()
         Me.btnHighlighttextHinzufügen = New System.Windows.Forms.Button()
         Me.lstHiglightTexte = New System.Windows.Forms.ListBox()
-Me.lstHiglightTexte.Tag = "langKey=lstHiglightTexte"
         Me.lblSzenendauer = New System.Windows.Forms.Label()
-Me.lblSzenendauer.Tag = "langKey=lblSzenendauer"
         Me.trkSzenendauer = New System.Windows.Forms.TrackBar()
         Me.lblNtrbSzenendauer = New System.Windows.Forms.Label()
-Me.lblNtrbSzenendauer.Tag = "langKey=lblNtrbSzenendauer"
         Me.lblNclbHighlighttexte = New System.Windows.Forms.Label()
-Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
+        Me.btnDefaults = New System.Windows.Forms.Button()
         CType(Me.trkSzenendauer, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -49,6 +45,7 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lblModulname.Name = "lblModulname"
         Me.lblModulname.Size = New System.Drawing.Size(113, 41)
         Me.lblModulname.TabIndex = 17
+        Me.lblModulname.Tag = "langKey=lblModulname"
         Me.lblModulname.Text = "Matrix"
         '
         'lblNlblModulname
@@ -102,6 +99,7 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lstHiglightTexte.Name = "lstHiglightTexte"
         Me.lstHiglightTexte.Size = New System.Drawing.Size(744, 373)
         Me.lstHiglightTexte.TabIndex = 18
+        Me.lstHiglightTexte.Tag = "langKey=lstHiglightTexte"
         '
         'lblSzenendauer
         '
@@ -113,6 +111,7 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lblSzenendauer.Name = "lblSzenendauer"
         Me.lblSzenendauer.Size = New System.Drawing.Size(157, 58)
         Me.lblSzenendauer.TabIndex = 24
+        Me.lblSzenendauer.Tag = "langKey=lblSzenendauer"
         Me.lblSzenendauer.Text = "20 s"
         Me.lblSzenendauer.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -135,6 +134,7 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lblNtrbSzenendauer.Name = "lblNtrbSzenendauer"
         Me.lblNtrbSzenendauer.Size = New System.Drawing.Size(189, 41)
         Me.lblNtrbSzenendauer.TabIndex = 22
+        Me.lblNtrbSzenendauer.Tag = "langKey=lblNtrbSzenendauer"
         Me.lblNtrbSzenendauer.Text = "Szenendauer"
         '
         'lblNclbHighlighttexte
@@ -144,12 +144,24 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lblNclbHighlighttexte.Name = "lblNclbHighlighttexte"
         Me.lblNclbHighlighttexte.Size = New System.Drawing.Size(289, 41)
         Me.lblNclbHighlighttexte.TabIndex = 25
+        Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
         Me.lblNclbHighlighttexte.Text = "Hervorhebungstexte"
+        '
+        'btnDefaults
+        '
+        Me.btnDefaults.Location = New System.Drawing.Point(681, 57)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(185, 57)
+        Me.btnDefaults.TabIndex = 29
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
         '
         'ucOptionsModul
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.lblNclbHighlighttexte)
         Me.Controls.Add(Me.lblSzenendauer)
         Me.Controls.Add(Me.trkSzenendauer)
@@ -180,4 +192,5 @@ Me.lblNclbHighlighttexte.Tag = "langKey=lblNclbHighlighttexte"
     Friend WithEvents trkSzenendauer As Windows.Forms.TrackBar
     Friend WithEvents lblNtrbSzenendauer As Windows.Forms.Label
     Friend WithEvents lblNclbHighlighttexte As Windows.Forms.Label
+    Friend WithEvents btnDefaults As Windows.Forms.Button
 End Class
