@@ -14,9 +14,15 @@ Public Class ShaderMain
 
     'Variablendeklaration
     'Allgemeines
-    Private aktuelleSettings As ShaderSettings_LUT
     Public Const SLIDESHOWSHADER_LUT_FULLPATH As String = SLIDESHOWSHADER_PATH & "LUT\"
     Public Const nameShader As String = "LUT"
+
+    Private aktuelleSettings As ShaderSettings_LUT
+
+    Private ReadOnly rnd As New Random()
+    Private shaderRunner As WpfShaderRunner
+
+    Private wurdeBereinigt As Boolean
 
     'LUT Verarbeitung
     Private currentLUT As LutInfo
@@ -44,18 +50,48 @@ Public Class ShaderMain
         End Get
     End Property
 
-    Public Function RunShader(baseImage As Image, Optional imagePath As String = "", Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
-        'Der eigentliche Shader
-        Dim rnd As New Random
+    Public Function RunShader(baseImage As Image, Optional imagePath As String = "",
+                              Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
+        'Wendet eine zufällig ausgewählte aktivierte LUT auf das Bild an.
 
-        'Aktuelle Settings abholen und in SettingsInbox speichern
+        Dim lutName As String
+        Dim intensitaet As Single
+
+        If wurdeBereinigt Then
+
+            Throw New ObjectDisposedException(NameOf(ShaderMain))
+
+        End If
+
+        If baseImage Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(baseImage))
+
+        End If
+
         ReadShaderSettingsFromRegistryOrDefaults()
+
         StoreSettings(nameShader, aktuelleSettings)
 
-        'LUT aus der Liste der LUTs aussuchen
-        currentLUT = LUTByNameLoader(aktuelleSettings.LUTs(rnd.Next(aktuelleSettings.LUTs.Count)))
+        If aktuelleSettings.LUTs Is Nothing OrElse aktuelleSettings.LUTs.Count = 0 Then
 
-        Return WpfShaderRunner.ApplyLutEffect(baseImage, currentLUT, CSng(aktuelleSettings.intensitaet))
+            Return DirectCast(baseImage.Clone(), Image)
+
+        End If
+
+        lutName = aktuelleSettings.LUTs(rnd.Next(aktuelleSettings.LUTs.Count))
+
+        currentLUT = LUTByNameLoader(lutName)
+
+        intensitaet = CSng(aktuelleSettings.intensitaet / 100.0F)
+
+        If shaderRunner Is Nothing Then
+
+            shaderRunner = New WpfShaderRunner()
+
+        End If
+
+        Return shaderRunner.ApplyLutEffect(baseImage, currentLUT, intensitaet)
 
     End Function
 
@@ -72,7 +108,7 @@ Public Class ShaderMain
     'Private Metohden
 
     'Settings
-    Public Shared Function GetShaderDefaultSettings() As Dictionary(Of String, String)
+    Friend Shared Function GetShaderDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Werte des Shaders
 
         Dim defaults As New Dictionary(Of String, String)
@@ -94,4 +130,36 @@ Public Class ShaderMain
         aktuelleSettings.intensitaet = CInt(ReadFromRegOrDefaults(SLIDESHOWSHADER_LUT_FULLPATH & "Intensität", defaults))
 
     End Sub
+
+    'Bereinigen und Dispose
+#Region "IDisposable"
+
+    Public Sub Dispose() _
+    Implements IDisposable.Dispose
+        'Gibt sämtliche vom LUT-Shader gehaltenen Ressourcen frei.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        wurdeBereinigt =
+        True
+
+        If shaderRunner IsNot Nothing Then
+
+            shaderRunner.Dispose()
+            shaderRunner = Nothing
+
+        End If
+
+        currentLUT =
+        Nothing
+
+        GC.SuppressFinalize(
+        Me)
+
+    End Sub
+
+#End Region
+
 End Class

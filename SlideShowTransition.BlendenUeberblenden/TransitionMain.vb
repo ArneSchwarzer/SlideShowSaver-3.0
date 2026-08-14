@@ -1,4 +1,5 @@
-﻿Imports System.Drawing
+﻿Imports System.Diagnostics
+Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Windows
 Imports System.Windows.Forms
@@ -26,17 +27,14 @@ Public Class TransitionMain
     Public Const nameTransition As String = "Blenden & Überblenden"
     Private aktuelleSettings As TransitionSettings_FadeCrossfade
 
-    'Timer und Zeitmanagement
-    Private WithEvents tmrDuration As New Timer
-    Private startTime As DateTime
+    'Zeitmanagement
+    Private ReadOnly laufzeit As New Stopwatch()
     Private dauerInMS As Integer
-    Private Const FPS As Integer = 120
+    Private externeDauerInMS As Integer
 
     'Transitions-Bilder
     Private oldImg As Image
     Private newImg As Image
-    Private oldBmpSource As BitmapSource
-    Private newBmpSource As BitmapSource
     Private oldRTB As RenderTargetBitmap
     Private newRTB As RenderTargetBitmap
     Private oldSize As System.Drawing.Size
@@ -55,11 +53,11 @@ Public Class TransitionMain
     Private gdiRenderSize As Windows.Size
     Private gdiDrawAction As Action(Of Windows.Size)
 
-    Private renderTargetCache As RenderTargetBitmap
-    Private renderTargetVisual As DrawingVisual
+    Private gdiFrameBitmap As Bitmap
+    Private gdiFrameSource As WriteableBitmap
 
-    Private requestEndOfTransition As Boolean
     Private transitionLaeuft As Boolean
+    Private wurdeBereinigt As Boolean
 
     'Sonstiges
     Private rnd As New Random
@@ -73,7 +71,8 @@ Public Class TransitionMain
     End Structure
 #End Region
 
-    'Eigenschaften
+#Region "Eigenschaften"
+
     Public ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
         Get
             Return nameTransition
@@ -92,105 +91,124 @@ Public Class TransitionMain
         End Get
     End Property
 
+#End Region
+
+#Region "Events"
+
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
     Public Event TransitionFrameIstFertig As ISlideShowTransition.TransitionFrameIstFertigEventHandler Implements ISlideShowTransition.TransitionFrameIstFertig
 
-    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage,
-                             picBoxModeNew As PictureBoxSizeMode, clientSize As System.Drawing.Size,
-                             Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+
+#End Region
+
+    Public Sub RunTransition(
+        oldImage As BitmapImage,
+        picBoxModeOld As PictureBoxSizeMode,
+        newImage As BitmapImage,
+        picBoxModeNew As PictureBoxSizeMode,
+        clientSize As System.Drawing.Size,
+        Optional durationMs As Integer = 0) _
+             Implements ISlideShowTransition.RunTransition
+
         'Bereitet die Animation vor und startet den Renderloop.
 
-        StopGDIRenderLoop()
-        GebeBildressourcenFrei()
-        GebeRenderressourcenFrei()
+        If wurdeBereinigt Then
 
-        requestEndOfTransition = False
-        transitionLaeuft = True
+            Throw New ObjectDisposedException(NameOf(TransitionMain))
 
-        ReadTransitionSettingsFromRegistryOrDefaults()
+        End If
 
-        StoreSettings(TransitionName, aktuelleSettings)
+        If transitionLaeuft Then
 
-        RaiseEvent TransitionIsRunning(True)
+            StopTransition()
 
-        sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
-        sizeWF = clientSize
+        Else
 
-        oldRTB = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
-        newRTB = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
+            BeendeUndBereinigeTransition()
 
-        oldBmpSource = oldRTB
-        newBmpSource = newRTB
+        End If
 
-        oldImg = ConvertRenderTargetBitmapToBitmap(oldRTB)
-        newImg = ConvertRenderTargetBitmapToBitmap(newRTB)
+        Try
 
-        oldSize = New System.Drawing.Size(oldImage.PixelWidth, oldImage.PixelHeight)
-        newSize = New System.Drawing.Size(newImage.PixelWidth, newImage.PixelHeight)
+            ReadTransitionSettingsFromRegistryOrDefaults()
 
-        containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
+            StoreSettings(TransitionName, aktuelleSettings)
 
-        drawRectOld = GetDrawRectangle(oldSize, containerRect, picBoxModeOld)
-        drawRectNew = GetDrawRectangle(newSize, containerRect, picBoxModeNew)
+            sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
+            sizeWF = clientSize
 
-        If aktuelleSettings.Modus = "Zufall" Then
+            oldRTB = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
+            newRTB = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
-            If rnd.Next(2) > 0 Then
-                aktuelleSettings.Modus = "Fade"
-            Else
-                aktuelleSettings.Modus = "Crossfade"
+            oldImg = ConvertRenderTargetBitmapToBitmap(oldRTB)
+            newImg = ConvertRenderTargetBitmapToBitmap(newRTB)
+
+            oldSize = New System.Drawing.Size(oldImage.PixelWidth, oldImage.PixelHeight)
+            newSize = New System.Drawing.Size(newImage.PixelWidth, newImage.PixelHeight)
+
+            containerRect = New Rectangle(0, 0, sizeWF.Width, sizeWF.Height)
+            drawRectOld = GetDrawRectangle(oldSize, containerRect, picBoxModeOld)
+            drawRectNew = GetDrawRectangle(newSize, containerRect, picBoxModeNew)
+
+            If aktuelleSettings.Modus = "Zufall" Then
+
+                If rnd.Next(2) > 0 Then
+
+                    aktuelleSettings.Modus = "Fade"
+
+                Else
+
+                    aktuelleSettings.Modus = "Crossfade"
+
+                End If
+
             End If
 
-        End If
+            If aktuelleSettings.Zufallsfarbe Then
 
-        If aktuelleSettings.Zufallsfarbe Then
+                aktuelleSettings.Farbton = SetzeZufallsFarbe()
 
-            aktuelleSettings.Farbton = SetzeZufallsFarbe()
-
-        End If
-
-        If durationMs > 0 Then
-
-            If tmrDuration Is Nothing Then
-                tmrDuration = New Timer()
             End If
 
-            tmrDuration.Interval = durationMs
-            tmrDuration.Start()
+            externeDauerInMS = Math.Max(0, durationMs)
+            dauerInMS = Math.Max(1, 1000 * aktuelleSettings.Geschwindigkeit)
 
-        End If
+            laufzeit.Restart()
 
-        dauerInMS = 1000 * aktuelleSettings.Geschwindigkeit
-        startTime = DateTime.Now
+            transitionLaeuft = True
 
-        StartGDIRenderLoop(AddressOf DrawGDITransitionFrame, sizeWPF)
+            StartGDIRenderLoop(AddressOf DrawGDITransitionFrame, sizeWPF)
+
+            RaiseEvent TransitionIsRunning(True)
+
+        Catch ex As Exception
+
+            LogError("Transition Blenden & Überblenden - TransitionMain.RunTransition(): " &
+                     "Fehler beim Starten der Transition: " & ex.ToString())
+
+            BeendeUndBereinigeTransition()
+
+            Throw
+
+        End Try
 
     End Sub
 
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Beendet Renderloop und Timer und gibt sämtliche gehaltenen Ressourcen frei.
+        'Beendet die Transition und gibt sämtliche gehaltenen
+        'Ressourcen frei.
 
-        If Not transitionLaeuft Then
-            Exit Sub
-        End If
+        Dim warAktiv As Boolean
 
-        transitionLaeuft = False
-        requestEndOfTransition = True
+        warAktiv = transitionLaeuft
 
-        StopGDIRenderLoop()
+        BeendeUndBereinigeTransition()
 
-        If tmrDuration IsNot Nothing Then
+        If warAktiv Then
 
-            tmrDuration.Stop()
-            tmrDuration.Dispose()
-            tmrDuration = Nothing
+            RaiseEvent TransitionIsRunning(False)
 
         End If
-
-        GebeBildressourcenFrei()
-        GebeRenderressourcenFrei()
-
-        RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
@@ -209,37 +227,39 @@ Public Class TransitionMain
     'Private Funktionen
 
     ' Settings und Defaultwerte
-    Sub ReadTransitionSettingsFromRegistryOrDefaults()
-        'Setzt aktuelleTransitonSettings mit den Werten aus der Registry oder mit Defaultwerten.
+    Private Sub ReadTransitionSettingsFromRegistryOrDefaults()
+        'Liest die Transitionseinstellungen aus der Registry
+        'oder verwendet die definierten Defaultwerte.
 
-        Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
+        Dim defaults As Dictionary(Of String, String)
         Dim colorString As String
 
+        defaults = GetTransitionDefaultSettings()
+
         colorString = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Farbton", defaults)
+
         If String.IsNullOrWhiteSpace(colorString) Then
+
             colorString = defaults("Farbton")
+
         End If
 
         aktuelleSettings.Farbton = ColorHandling.StringToColor(colorString)
 
-        If ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Zufallsfarbe", defaults) = "True" Then
-            aktuelleSettings.Zufallsfarbe = True
-        Else
-            aktuelleSettings.Zufallsfarbe = False
-        End If
+        aktuelleSettings.Zufallsfarbe = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH &
+                                                              "Zufallsfarbe", defaults) = "True"
 
-        If ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Morphing", defaults) = "True" Then
-            aktuelleSettings.Morphing = True
-        Else
-            aktuelleSettings.Morphing = False
-        End If
+        aktuelleSettings.Morphing = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH &
+                                                          "Morphing", defaults) = "True"
 
         aktuelleSettings.Modus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", defaults)
-        aktuelleSettings.Geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Geschwindigkeit", defaults))
+
+        aktuelleSettings.Geschwindigkeit = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH &
+                                                                      "Geschwindigkeit", defaults))
 
     End Sub
 
-    Public Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
+    Friend Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
         Dim defaults As New Dictionary(Of String, String)
 
         defaults.Add("Farbton", "0, 0, 0, 255")
@@ -254,38 +274,42 @@ Public Class TransitionMain
 
     'Abbruch- und Endverwaltung
     Private Sub EndBildZeichnen()
-        'Gibt das Endbild aus
+        'Gibt den finalen Transitionframe aus.
+
+        If newRTB Is Nothing Then
+            Exit Sub
+        End If
 
         RaiseEvent TransitionFrameIstFertig(newRTB)
 
     End Sub
 
-    Sub tmrDuration_Tick() Handles tmrDuration.Tick
-        'Bricht die Transition nach Ende von DurationMS ab.
-
-        'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
-        EndBildZeichnen()
-
-        StopTransition()
-
-    End Sub
-
     'Animation und rendern 
     Private Sub DrawGDITransitionFrame(size As Windows.Size)
-        'Zeichnet einen GDI-Frame, überträgt ihn in das wiederverwendete
-        'WPF-RenderTarget und gibt sämtliche temporären GDI-Ressourcen frei.
+        'Zeichnet einen GDI-Frame, überträgt dessen Pixel
+        'direkt in das wiederverwendete WriteableBitmap
+        'und meldet dieses als fertigen Frame.
 
         Dim phasenDauer1 As Single
         Dim phasenDauer2 As Single
         Dim phasenDauer3 As Single
         Dim morphColor As System.Drawing.Color
         Dim progress As Double
-        Dim frameBitmap As System.Drawing.Bitmap
 
-        morphColor = System.Drawing.Color.FromArgb(255, aktuelleSettings.Farbton.R, aktuelleSettings.Farbton.G,
-                                                   aktuelleSettings.Farbton.B)
+        If gdiFrameBitmap Is Nothing OrElse gdiFrameSource Is Nothing Then
 
-        progress = (DateTime.Now - startTime).TotalMilliseconds / dauerInMS
+            Exit Sub
+
+        End If
+
+        morphColor =
+        System.Drawing.Color.FromArgb(
+            255,
+            aktuelleSettings.Farbton.R,
+            aktuelleSettings.Farbton.G,
+            aktuelleSettings.Farbton.B)
+
+        progress = laufzeit.Elapsed.TotalMilliseconds / dauerInMS
         progress = Math.Min(progress, 1.0)
 
         If aktuelleSettings.Morphing Then
@@ -302,54 +326,36 @@ Public Class TransitionMain
 
         End If
 
-        frameBitmap = Nothing
+        Using gfx As Graphics = Graphics.FromImage(gdiFrameBitmap)
 
-        Try
+            Using morphBrush As New SolidBrush(morphColor)
 
-            frameBitmap = New System.Drawing.Bitmap(CInt(size.Width), CInt(size.Height),
-                                                    System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                Using rahmenPen As New System.Drawing.Pen(System.Drawing.Color.DarkGray, 1.0F)
 
-            Using gfx As System.Drawing.Graphics = System.Drawing.Graphics.FromImage(frameBitmap)
+                    gfx.Clear(HintergrundFarbeSaver)
 
-                Using morphBrush As New System.Drawing.SolidBrush(morphColor)
+                    rahmenPen.Alignment = Drawing2D.PenAlignment.Inset
 
-                    Using rahmenPen As New System.Drawing.Pen(System.Drawing.Color.DarkGray, 1.0F)
+                    If aktuelleSettings.Modus = "Fade" Then
 
-                        gfx.Clear(HintergrundFarbeSaver)
+                        ZeichneFadeFrame(gfx, morphBrush, rahmenPen, progress,
+                                         phasenDauer1, phasenDauer2, phasenDauer3)
 
-                        rahmenPen.Alignment = Drawing2D.PenAlignment.Inset
+                    Else
 
-                        If aktuelleSettings.Modus = "Fade" Then
+                        ZeichneCrossfadeFrame(gfx, progress)
 
-                            ZeichneFadeFrame(gfx, morphBrush, rahmenPen, progress, phasenDauer1, phasenDauer2,
-                                             phasenDauer3)
-
-                        Else
-
-                            ZeichneCrossfadeFrame(gfx, progress)
-
-                        End If
-
-                    End Using
+                    End If
 
                 End Using
 
             End Using
 
-            RenderImageInRenderTargetBitmap(frameBitmap, renderTargetCache, renderTargetVisual)
+        End Using
 
-            RaiseEvent TransitionFrameIstFertig(renderTargetCache)
+        AktualisiereWriteableBitmap(gdiFrameBitmap, gdiFrameSource)
 
-        Finally
-
-            If frameBitmap IsNot Nothing Then
-
-                frameBitmap.Dispose()
-                frameBitmap = Nothing
-
-            End If
-
-        End Try
+        RaiseEvent TransitionFrameIstFertig(gdiFrameSource)
 
         If progress >= 1.0 Then
 
@@ -361,14 +367,14 @@ Public Class TransitionMain
     End Sub
 
     Private Sub ZeichneFadeFrame(
-    gfx As Graphics,
-    morphBrush As SolidBrush,
-    rahmenPen As System.Drawing.Pen,
-    progress As Double,
-    phasenDauer1 As Single,
-    phasenDauer2 As Single,
-    phasenDauer3 As Single
-)
+            gfx As Graphics,
+            morphBrush As SolidBrush,
+            rahmenPen As System.Drawing.Pen,
+            progress As Double,
+            phasenDauer1 As Single,
+            phasenDauer2 As Single,
+            phasenDauer3 As Single
+        )
         'Zeichnet einen Frame des dreiphasigen Fade-Modus.
 
         Dim alpha As Double
@@ -484,8 +490,6 @@ Public Class TransitionMain
 
         End If
 
-        oldBmpSource = Nothing
-        newBmpSource = Nothing
         oldRTB = Nothing
         newRTB = Nothing
 
@@ -512,24 +516,36 @@ Public Class TransitionMain
     End Function
 
     Private Function SetzeZufallsFarbe() As System.Drawing.Color
-        'Sucht eine zufällige Farbe aus der Liste der benannten Farben (Systemfarben werden ignoriert)
+        'Sucht eine zufällige benannte Nicht-Systemfarbe aus.
 
+        Dim bekannteFarben As Array
+        Dim echteFarben As List(Of KnownColor)
+        Dim farbName As KnownColor
         Dim zufallsFarbe As System.Drawing.Color
-        Dim rnd As New Random()
-        Dim knownColors = [Enum].GetValues(GetType(KnownColor))
-        Dim echteFarben = knownColors.Cast(Of KnownColor)().
-                Where(Function(kc) Not System.Drawing.Color.FromKnownColor(kc).IsSystemColor).ToList()
-        Dim colorName = echteFarben(rnd.Next(echteFarben.Count))
 
-        zufallsFarbe = System.Drawing.Color.FromKnownColor(colorName)
+        bekannteFarben = [Enum].GetValues(GetType(KnownColor))
+
+        echteFarben = bekannteFarben.
+        Cast(Of KnownColor)().
+        Where(
+            Function(kc)
+
+                Return Not System.Drawing.Color.FromKnownColor(kc).IsSystemColor
+
+            End Function).
+        ToList()
+
+        farbName = echteFarben(rnd.Next(echteFarben.Count))
+
+        zufallsFarbe = System.Drawing.Color.FromKnownColor(farbName)
 
         Return zufallsFarbe
 
     End Function
 
     Private Sub StartGDIRenderLoop(drawAction As Action(Of Windows.Size), size As Windows.Size)
-        'Startet den GDI-Renderloop und legt den wiederverwendeten
-        'WPF-RenderTarget-Cache an.
+        'Startet den GDI-Renderloop und legt die beiden
+        'wiederverwendeten Frame-Puffer an.
 
         Dim pixelBreite As Integer
         Dim pixelHoehe As Integer
@@ -540,19 +556,25 @@ Public Class TransitionMain
         pixelBreite = Math.Max(CInt(size.Width), 1)
         pixelHoehe = Math.Max(CInt(size.Height), 1)
 
-        requestEndOfTransition = False
+        gdiFrameBitmap = New Bitmap(pixelBreite, pixelHoehe, System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+
+        gdiFrameSource =
+        New WriteableBitmap(
+            pixelBreite,
+            pixelHoehe,
+            96.0,
+            96.0,
+            PixelFormats.Bgra32,
+            Nothing)
 
         gdiDrawAction = drawAction
         gdiRenderSize = size
-
-        renderTargetCache = New RenderTargetBitmap(pixelBreite, pixelHoehe, 96.0, 96.0, PixelFormats.Pbgra32)
-        renderTargetVisual = New DrawingVisual()
-
         gdiFrameTimer = New DispatcherTimer(DispatcherPriority.Render)
 
         AddHandler gdiFrameTimer.Tick, AddressOf OnGDIFrameTick
 
-        gdiFrameTimer.Interval = TimeSpan.FromMilliseconds(33)
+        gdiFrameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0)
+
         gdiFrameTimer.Start()
 
     End Sub
@@ -574,11 +596,21 @@ Public Class TransitionMain
     End Sub
 
     Private Sub OnGDIFrameTick(sender As Object, e As EventArgs)
-        'Erzeugt den nächsten Frame des laufenden Renderloops.
+        'Erzeugt den nächsten Frame des laufenden Renderloops
+        'und überwacht eine optionale externe Maximaldauer.
 
-        If requestEndOfTransition Then
+        If Not transitionLaeuft Then
 
             StopGDIRenderLoop()
+
+            Exit Sub
+
+        End If
+
+        If externeDauerInMS > 0 AndAlso laufzeit.Elapsed.TotalMilliseconds >= externeDauerInMS Then
+
+            EndBildZeichnen()
+            StopTransition()
 
             Exit Sub
 
@@ -592,14 +624,59 @@ Public Class TransitionMain
 
     End Sub
 
+    'Bereinigung & Dispose
+
+    Private Sub BeendeUndBereinigeTransition()
+        'Beendet sämtliche laufenden Arbeiten und gibt
+        'alle von der Transition gehaltenen Ressourcen frei.
+
+        transitionLaeuft = False
+
+        laufzeit.Stop()
+
+        StopGDIRenderLoop()
+
+        GebeBildressourcenFrei()
+        GebeRenderressourcenFrei()
+
+        externeDauerInMS = 0
+
+    End Sub
+
     Private Sub GebeRenderressourcenFrei()
-        'Entfernt die Referenzen auf den WPF-Rendercache und dessen Visual.
+        'Gibt sämtliche wiederverwendeten Renderressourcen frei.
 
         gdiDrawAction = Nothing
 
-        renderTargetVisual = Nothing
-        renderTargetCache = Nothing
+        If gdiFrameBitmap IsNot Nothing Then
+
+            gdiFrameBitmap.Dispose()
+            gdiFrameBitmap = Nothing
+
+        End If
+
+        gdiFrameSource = Nothing
 
     End Sub
+
+#Region "IDisposable"
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        'Beendet die Transition endgültig und gibt
+        'sämtliche gehaltenen Ressourcen frei.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        wurdeBereinigt = True
+
+        BeendeUndBereinigeTransition()
+
+        GC.SuppressFinalize(Me)
+
+    End Sub
+
+#End Region
 
 End Class

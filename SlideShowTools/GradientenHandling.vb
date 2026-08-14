@@ -81,13 +81,12 @@ Public NotInheritable Class GradientenHandling
 
             If gradient.Stops.Count > 0 Then
 
-                gradient.Stops =
-                    gradient.Stops.
-                    OrderBy(
-                        Function(stopElement)
-                            Return stopElement.Position
-                        End Function).
-                    ToList()
+                gradient.Stops.Sort(
+                            Function(stopA, stopB)
+
+                                Return stopA.Position.CompareTo(stopB.Position)
+
+                            End Function)
 
                 result.Add(gradient)
 
@@ -174,32 +173,48 @@ Public NotInheritable Class GradientenHandling
 
 #End Region
 
-#Region "WPF-Gradiententextur"
+#Region "Gradiententextur"
 
-    Public Shared Function ErzeugeGradientBrush(gradient As SlideShowGradient, Optional breite As Integer = 1024) As ImageBrush
-        'Erzeugt eine horizontale WPF-Textur aus einem Gradient.
+    Public Shared Function ErzeugeGradientBitmap(gradient As SlideShowGradient, Optional breite As Integer = 1024) _
+        As BitmapSource
+
+        'Rastert einen beliebig aufgebauten SlideShowGradient in eine horizontale
+        '1D-Textur.
+        '
+        'Diese Methode enthält bewusst die gemeinsame technische Darstellung eines
+        'Gradienten für alle Renderer:
+        '
+        '   SlideShowGradient
+        '           ↓
+        '   SampleGradient()
+        '           ↓
+        '   1024 x 1 BGRA32 BitmapSource
+        '
+        'WPF kann daraus anschließend einen ImageBrush erzeugen.
+        'Direct3D kann dieselbe BitmapSource als Texture2D hochladen.
+        '
+        'Damit existiert nur EINE Interpolationslogik für GradientStops und deren
+        'Positionen. Renderer müssen weder XML-Struktur noch Stop-Interpolation
+        'kennen.
 
         Dim wb As WriteableBitmap
         Dim pixels() As Integer
+
         Dim t As Double
         Dim farbe As Color
-        Dim brush As ImageBrush
 
         If gradient Is Nothing Then
-
             Throw New ArgumentNullException(NameOf(gradient))
-
         End If
 
         If gradient.Stops Is Nothing OrElse gradient.Stops.Count = 0 Then
-
             Throw New ArgumentException("Der Gradient besitzt keine Farbstopps.", NameOf(gradient))
-
         End If
 
         If breite < 2 Then
 
-            Throw New ArgumentOutOfRangeException(NameOf(breite), "Die Gradiententextur muss mindestens zwei Pixel breit sein.")
+            Throw New ArgumentOutOfRangeException(NameOf(breite),
+                                                  "Die Gradiententextur muss mindestens zwei Pixel breit sein.")
 
         End If
 
@@ -220,29 +235,32 @@ Public NotInheritable Class GradientenHandling
 
             farbe = SampleGradient(gradient, t)
 
-            pixels(x) =
-                (CInt(farbe.A) << 24) Or
-                (CInt(farbe.R) << 16) Or
-                (CInt(farbe.G) << 8) Or
-                CInt(farbe.B)
+            pixels(x) = (CInt(farbe.A) << 24) Or (CInt(farbe.R) << 16) Or (CInt(farbe.G) << 8) Or CInt(farbe.B)
 
         Next
 
-        wb.WritePixels(
-            New Int32Rect(
-                0,
-                0,
-                breite,
-                1),
-            pixels,
-            breite * 4,
-            0)
+        wb.WritePixels(New Int32Rect(0, 0, breite, 1), pixels, breite * 4, 0)
 
         wb.Freeze()
 
+        Return wb
+
+    End Function
+
+    Public Shared Function ErzeugeGradientBrush(gradient As SlideShowGradient, Optional breite As Integer = 1024) _
+        As ImageBrush
+
+        'Erzeugt für WPF einen ImageBrush aus derselben gemeinsamen
+        'Gradiententextur, die auch anderen Renderern zur Verfügung steht.
+
+        Dim bitmap As BitmapSource
+        Dim brush As ImageBrush
+
+        bitmap = ErzeugeGradientBitmap(gradient, breite)
+
         brush =
             New ImageBrush(
-                wb) With {
+                bitmap) With {
                 .Stretch = Stretch.Fill,
                 .TileMode = TileMode.None
             }

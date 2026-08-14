@@ -10,147 +10,139 @@ Public Class ucOptionsTransition
     'Variablendeklaration
     Private aktuelleSettings As SlideShowTransitionSettings_GradientWischen
 
-    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
-        'Initialisiert die Steuerelemente der ucOptionsTransition
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
 
-        'Aktuelle Settings abholen
+    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
+        'Initialisiert die Steuerelemente des Optionsdialogs.
+
         CheckYourMail()
 
-        'Steuerelemente initialisieren
-        IniOrReinitialise()
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
-    Private Sub tbtNW_CheckChanged(sender As Object, e As EventArgs) Handles tbtNW.CheckChanged
-        'Button Nord-West
+    Private Sub Richtung_CheckChanged(sender As Object, e As EventArgs) _
+    Handles tbtN.CheckChanged,
+            tbtNO.CheckChanged,
+            tbtO.CheckChanged,
+            tbtSO.CheckChanged,
+            tbtS.CheckChanged,
+            tbtSW.CheckChanged,
+            tbtW.CheckChanged,
+            tbtNW.CheckChanged,
+            tbtZOut.CheckChanged,
+            tbtZIn.CheckChanged
+        'Aktualisiert die Richtungswahl.
 
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs) Handles tbtN.CheckChanged
-        'Button Nord
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs) Handles tbtNO.CheckChanged
-        'Button Nord-Ost
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs) Handles tbtO.CheckChanged
-        'Button Ost
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs) Handles tbtSO.CheckChanged
-        'Button Süd-Ost
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs) Handles tbtS.CheckChanged
-        'Button Süd
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs) Handles tbtSW.CheckChanged
-        'Button Süd-West
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs) Handles tbtW.CheckChanged
-        'Button West
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtZOut_CheckChanged(sender As Object, e As EventArgs) Handles tbtZOut.CheckChanged
-        'Button Zentrum nach Außen
-
-        'DirectCommit
-        RichtungStringBauen()
-
-    End Sub
-
-    Private Sub tbtZIn_CheckChanged(sender As Object, e As EventArgs) Handles tbtZIn.CheckChanged
-        'Button Zentrum nach Außen
-
-        'DirectCommit
         RichtungStringBauen()
 
     End Sub
 
     Private Sub trkGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkGeschwindigkeit.ValueChanged
-        'TrackBar Geschwindigkeit
+        'Behandelt die Transitionsgeschwindigkeit.
 
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString() & " s"
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Geschwindigkeit", ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString)
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.geschwindigkeit = (trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value
+
+        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Geschwindigkeit",
+                        aktuelleSettings.geschwindigkeit.ToString())
 
     End Sub
 
     Private Sub trkBreite_ValueChanged(sender As Object, e As EventArgs) Handles trkBreite.ValueChanged
-        'TrackBar Breite
+        'Behandelt die Breite des weichen Übergangs.
 
-        lblBreiteProzent.Text = trkBreite.Value.ToString & " %"
+        lblBreiteProzent.Text = trkBreite.Value.ToString() & " %"
 
-        'Direct Commit
-        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Breite", trkBreite.Value.ToString)
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.breite = trkBreite.Value
+
+        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Breite", aktuelleSettings.breite.ToString())
 
     End Sub
 
     Private Sub RichtungStringBauen()
-        'Setzt den Richtungsstring zusammen, speichert ihn in die Registry und setzt auch gleich das
-        'lblanker entsprechend.
+        'Ermittelt die aktuell markierten Richtungen,
+        'aktualisiert UI und lokale Settings und speichert
+        'die Auswahl bei Benutzeränderungen per Direct Commit.
 
-        Dim richtungsString As String = ""
         Dim richtung As New List(Of String)
+        Dim richtungsString As String
 
-        If tbtN.Checked Then richtung.Add("N")
-        If tbtNO.Checked Then richtung.Add("NO")
-        If tbtO.Checked Then richtung.Add("O")
-        If tbtSO.Checked Then richtung.Add("SO")
-        If tbtS.Checked Then richtung.Add("S")
-        If tbtSW.Checked Then richtung.Add("SW")
-        If tbtW.Checked Then richtung.Add("W")
-        If tbtNW.Checked Then richtung.Add("NW")
-        If tbtZOut.Checked Then richtung.Add("ZOut")
-        If tbtZIn.Checked Then richtung.Add("ZIn")
+        If tbtN.Checked Then
+            richtung.Add("N")
+        End If
 
+        If tbtNO.Checked Then
+            richtung.Add("NO")
+        End If
+
+        If tbtO.Checked Then
+            richtung.Add("O")
+        End If
+
+        If tbtSO.Checked Then
+            richtung.Add("SO")
+        End If
+
+        If tbtS.Checked Then
+            richtung.Add("S")
+        End If
+
+        If tbtSW.Checked Then
+            richtung.Add("SW")
+        End If
+
+        If tbtW.Checked Then
+            richtung.Add("W")
+        End If
+
+        If tbtNW.Checked Then
+            richtung.Add("NW")
+        End If
+
+        If tbtZOut.Checked Then
+            richtung.Add("ZOut")
+        End If
+
+        If tbtZIn.Checked Then
+            richtung.Add("ZIn")
+        End If
+
+        lblKeineRichtung.Visible = richtung.Count = 0
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.richtungen = New List(Of String)(richtung)
 
         richtungsString = String.Join(";", richtung)
 
-        'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Richtungen", richtungsString)
-
-        'Label ein- oder ausschalten
-        If richtung.Count = 0 Then
-            lblKeineRichtung.Visible = True
-        Else
-            lblKeineRichtung.Visible = False
-        End If
 
     End Sub
 
@@ -162,7 +154,8 @@ Public Class ucOptionsTransition
     End Sub
 
     Private Sub IniOrReinitialise()
-        'Ankerpunkte
+        'Initialisiert sämtliche Controls aus aktuelleSettings.
+
         tbtN.Checked = False
         tbtNO.Checked = False
         tbtO.Checked = False
@@ -174,65 +167,104 @@ Public Class ucOptionsTransition
         tbtZOut.Checked = False
         tbtZIn.Checked = False
 
-        For Each richtung In aktuelleSettings.richtungen
+        If aktuelleSettings.richtungen IsNot Nothing Then
 
-            Select Case richtung
-                Case "N"
-                    tbtN.Checked = True
-                Case "NO"
-                    tbtNO.Checked = True
-                Case "O"
-                    tbtO.Checked = True
-                Case "SO"
-                    tbtSO.Checked = True
-                Case "S"
-                    tbtS.Checked = True
-                Case "SW"
-                    tbtSW.Checked = True
-                Case "W"
-                    tbtW.Checked = True
-                Case "NW"
-                    tbtNW.Checked = True
-                Case "ZOut"
-                    tbtZOut.Checked = True
-                Case "ZIn"
-                    tbtZIn.Checked = True
-            End Select
+            For Each richtung As String In aktuelleSettings.richtungen
 
-        Next
+                Select Case richtung
 
-        'Label "Kein Ankerpunkt ausgewählt"
-        If aktuelleSettings.richtungen.Count = 0 Then
-            lblKeineRichtung.Visible = True
-        Else
-            lblKeineRichtung.Visible = False
+                    Case "N"
+                        tbtN.Checked = True
+
+                    Case "NO"
+                        tbtNO.Checked = True
+
+                    Case "O"
+                        tbtO.Checked = True
+
+                    Case "SO"
+                        tbtSO.Checked = True
+
+                    Case "S"
+                        tbtS.Checked = True
+
+                    Case "SW"
+                        tbtSW.Checked = True
+
+                    Case "W"
+                        tbtW.Checked = True
+
+                    Case "NW"
+                        tbtNW.Checked = True
+
+                    Case "ZOut"
+                        tbtZOut.Checked = True
+
+                    Case "ZIn"
+                        tbtZIn.Checked = True
+
+                End Select
+
+            Next
+
         End If
 
-        'Breite
-        trkBreite.Value = aktuelleSettings.breite
-        lblBreiteProzent.Text = aktuelleSettings.breite.ToString & " %"
+        If aktuelleSettings.richtungen Is Nothing Then
 
-        'Geschwindigkeit
+            lblKeineRichtung.Visible = True
+
+        Else
+
+            lblKeineRichtung.Visible = aktuelleSettings.richtungen.Count = 0
+
+        End If
+
+        trkBreite.Value = aktuelleSettings.breite
+        lblBreiteProzent.Text = aktuelleSettings.breite.ToString() & " %"
+
         trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        lblGeschwindigkeit.Text = aktuelleSettings.geschwindigkeit.ToString() & " s"
 
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Defaults einlesen und Steuerelemente entsprechend setzen
+        'Stellt die Defaultwerte wieder her und speichert
+        'diese gemäß Direct-Commit-Architektur explizit.
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaults einlesen
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
         defaults = GetTransitionDefaultSettings()
 
-        'AktuelleSettings aktualisieren
         aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
         aktuelleSettings.richtungen = SplitSemicolonList(defaults("Richtungen"))
         aktuelleSettings.breite = CInt(defaults("Breite"))
 
-        'Steuerelemente setzen
-        IniOrReinitialise()
+        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Geschwindigkeit", defaults("Geschwindigkeit"))
+        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Richtungen", defaults("Richtungen"))
+        WriteToRegistry(SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH & "Breite", defaults("Breite"))
+
+        wirdInitialisiert = True
+
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
+
+    End Sub
+
+    Private Sub ucOptionsTransition_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+        'Verhindert Direct-Commit-Aktionen nach der Freigabe.
+
+        wurdeBereinigt = True
 
     End Sub
 

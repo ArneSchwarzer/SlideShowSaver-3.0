@@ -10,86 +10,80 @@ Imports SlideShowTools
 Public Class ucOptionsTransition
     Inherits UserControl
 
+#Region "Variablendeklaration"
     'Variablendeklaration
+
     Private aktuelleSettings As TransitionSettings_FadeCrossfade
 
-    Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
-        'Initialisiert die Steuerelemente des ucOptionShader
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
 
-        'Settings abholen
+#End Region
+
+#Region "Initialisierung"
+
+    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
+        'Initialisiert das Options-Control.
+
         CheckYourMail()
-
-        'Steuerelemente setzen
-        IniOrReinitialise()
+        InitialisiereControls()
 
     End Sub
 
-    Private Sub picFarbton_Click(sender As Object, e As EventArgs) Handles picFarbton.Click
-        'Behandelt PictureBox Farbton
+    Private Sub InitialisiereControls()
+        'Initialisiert sämtliche Steuerelemente aus den
+        'aktuellen Settings ohne Direct Commit.
 
-        Dim bg As Color = HintergrundFarbeSaver
-        Dim inv As Color = InvertSDColor(HintergrundFarbeSaver)
+        wirdInitialisiert = True
 
-        ' Array mit 16 Einträgen
-        Dim custom(15) As Integer
-        custom(0) = ColorTranslator.ToOle(bg)      ' Hintergrundfarbe
-        custom(1) = ColorTranslator.ToOle(inv)     ' Inversion
+        Try
 
-        Using dlg As New ColorDialog()
-            dlg.AllowFullOpen = True
-            dlg.AnyColor = True
-            dlg.FullOpen = True
+            picFarbton.BackColor = aktuelleSettings.Farbton
+            chkZufallsfarbe.Checked = aktuelleSettings.Zufallsfarbe
+            chkMorphing.Checked = aktuelleSettings.Morphing
 
-            ' WICHTIG: erst Color, dann CustomColors
-            dlg.Color = aktuelleSettings.Farbton
-            dlg.CustomColors = custom
+            Select Case aktuelleSettings.Modus
 
-            If dlg.ShowDialog() = DialogResult.OK Then
-                picFarbton.BackColor = dlg.Color
-                aktuelleSettings.Farbton = dlg.Color
-                WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Farbton", ColorToString(dlg.Color))
-            End If
-        End Using
+                Case "Fade"
 
-    End Sub
+                    rdoBlenden.Checked = True
 
-    Private Sub rdoBlenden_CheckedChanged(sender As Object, e As EventArgs) Handles rdoBlenden.CheckedChanged
-        'Behandelt RadioButton Blenden
+                Case "Crossfade"
 
-        If rdoBlenden.Checked = True Then
+                    rdoÜberblenden.Checked = True
 
-            chkMorphing.Enabled = True
+                Case "Zufall"
 
-            If chkMorphing.Checked Then
+                    rdoZufall.Checked = True
 
-                chkZufallsfarbe.Enabled = True
+            End Select
 
-                If chkZufallsfarbe.Checked Then
-                    picFarbton.BackColor = Color.Transparent
-                    lblNpicFarbton.Enabled = False
-                    picFarbton.Enabled = False
-                Else
-                    picFarbton.BackColor = aktuelleSettings.Farbton
-                    lblNpicFarbton.Enabled = True
-                    picFarbton.Enabled = True
-                End If
+            trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.Geschwindigkeit
 
-            Else
-                chkZufallsfarbe.Enabled = False
-                lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = HintergrundFarbeSaver
-                picFarbton.Enabled = False
-            End If
+            AktualisiereGeschwindigkeitText()
+            AktualisiereOptionsStatus()
 
-            WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", "Fade")
-        End If
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
-    Private Sub rdoÜberblenden_CheckedChanged(sender As Object, e As EventArgs) Handles rdoÜberblenden.CheckedChanged
-        'Behandelt RadioButton Färben
+#End Region
 
-        If rdoÜberblenden.Checked = True Then
+#Region "Optionsstatus"
+
+    Private Sub AktualisiereOptionsStatus()
+        'Aktualisiert Enabled-Status und Farbdarstellung
+        'abhängig von Modus, Morphing und Zufallsfarbe.
+
+        Dim fadeOptionenAktiv As Boolean
+
+        fadeOptionenAktiv = rdoBlenden.Checked OrElse rdoZufall.Checked
+
+        If Not fadeOptionenAktiv Then
 
             chkMorphing.Enabled = False
             chkZufallsfarbe.Enabled = False
@@ -97,187 +91,270 @@ Public Class ucOptionsTransition
             picFarbton.BackColor = Color.Transparent
             picFarbton.Enabled = False
 
-            WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", "Crossfade")
+            Exit Sub
+
+        End If
+
+        chkMorphing.Enabled = True
+
+        If Not chkMorphing.Checked Then
+
+            chkZufallsfarbe.Enabled = False
+            lblNpicFarbton.Enabled = False
+            picFarbton.BackColor = HintergrundFarbeSaver
+            picFarbton.Enabled = False
+
+            Exit Sub
+
+        End If
+
+        chkZufallsfarbe.Enabled = True
+
+        If chkZufallsfarbe.Checked Then
+
+            picFarbton.BackColor = Color.Transparent
+            lblNpicFarbton.Enabled = False
+            picFarbton.Enabled = False
+
+        Else
+
+            picFarbton.BackColor = aktuelleSettings.Farbton
+            lblNpicFarbton.Enabled = True
+            picFarbton.Enabled = True
+
         End If
 
     End Sub
 
-    Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rdoZufall.CheckedChanged
-        'Behandelt Radiobutton Zufall
+#End Region
 
-        If rdoZufall.Checked = True Then
+#Region "Modus"
 
-            chkMorphing.Enabled = True
+    Private Sub rdoBlenden_CheckedChanged(sender As Object, e As EventArgs) Handles rdoBlenden.CheckedChanged
 
-            If chkMorphing.Checked Then
-
-                chkZufallsfarbe.Enabled = True
-
-                If chkZufallsfarbe.Checked Then
-                    picFarbton.BackColor = Color.Transparent
-                    lblNpicFarbton.Enabled = False
-                    picFarbton.Enabled = False
-                Else
-                    picFarbton.BackColor = aktuelleSettings.Farbton
-                    lblNpicFarbton.Enabled = True
-                    picFarbton.Enabled = True
-                End If
-
-            Else
-                chkZufallsfarbe.Enabled = False
-                lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = HintergrundFarbeSaver
-                picFarbton.Enabled = False
-            End If
-
-            WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", "Zufall")
+        If Not rdoBlenden.Checked Then
+            Exit Sub
         End If
 
+        AktualisiereOptionsStatus()
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Modus = "Fade"
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", aktuelleSettings.Modus)
+
     End Sub
+
+    Private Sub rdoÜberblenden_CheckedChanged(sender As Object, e As EventArgs) Handles rdoÜberblenden.CheckedChanged
+
+        If Not rdoÜberblenden.Checked Then
+            Exit Sub
+        End If
+
+        AktualisiereOptionsStatus()
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Modus = "Crossfade"
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", aktuelleSettings.Modus)
+
+    End Sub
+
+    Private Sub rdoZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rdoZufall.CheckedChanged
+
+        If Not rdoZufall.Checked Then
+            Exit Sub
+        End If
+
+        AktualisiereOptionsStatus()
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Modus = "Zufall"
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", aktuelleSettings.Modus)
+
+    End Sub
+
+#End Region
+
+#Region "Fade-Einstellungen"
 
     Private Sub chkZufallsfarbe_CheckedChanged(sender As Object, e As EventArgs) Handles chkZufallsfarbe.CheckedChanged
-        'Behandelt Checkbox Zufallsfarbe
 
-        ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
-        ' nachdem der Checked-Zustand aktualisiert wurde
-        BeginInvoke(Sub()
-                        If chkZufallsfarbe.Checked = True Then
-                            picFarbton.BackColor = Color.Transparent
-                            lblNpicFarbton.Enabled = False
-                            picFarbton.Enabled = False
-                        Else
-                            picFarbton.BackColor = aktuelleSettings.Farbton
-                            lblNpicFarbton.Enabled = True
-                            picFarbton.Enabled = True
-                        End If
+        AktualisiereOptionsStatus()
 
-                        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
-                    End Sub)
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Zufallsfarbe = chkZufallsfarbe.Checked
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Zufallsfarbe",
+                        aktuelleSettings.Zufallsfarbe.ToString())
 
     End Sub
+
+    Private Sub chkMorphing_CheckedChanged(sender As Object, e As EventArgs) Handles chkMorphing.CheckedChanged
+
+        AktualisiereOptionsStatus()
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Morphing = chkMorphing.Checked
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Morphing", aktuelleSettings.Morphing.ToString())
+
+    End Sub
+
+    Private Sub picFarbton_Click(
+        sender As Object,
+        e As EventArgs) _
+        Handles picFarbton.Click
+        'Öffnet die Farbauswahl für den Morph-Farbton.
+
+        Dim bg As Color
+        Dim inv As Color
+        Dim custom(15) As Integer
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        bg = HintergrundFarbeSaver
+        inv = InvertSDColor(HintergrundFarbeSaver)
+
+        custom(0) = ColorTranslator.ToOle(bg)
+        custom(1) = ColorTranslator.ToOle(inv)
+
+        Using dlg As New ColorDialog()
+
+            dlg.AllowFullOpen = True
+            dlg.AnyColor = True
+            dlg.FullOpen = True
+            dlg.Color = aktuelleSettings.Farbton
+            dlg.CustomColors = custom
+
+            If dlg.ShowDialog() <> DialogResult.OK Then
+
+                Exit Sub
+
+            End If
+
+            aktuelleSettings.Farbton = dlg.Color
+
+            picFarbton.BackColor = aktuelleSettings.Farbton
+
+            WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Farbton",
+                            ColorToString(aktuelleSettings.Farbton))
+
+        End Using
+
+    End Sub
+
+#End Region
+
+#Region "Geschwindigkeit"
 
     Private Sub trkGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkGeschwindigkeit.ValueChanged
-        'TrackBar Geschwindigkeit
 
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        AktualisiereGeschwindigkeitText()
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Geschwindigkeit", ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString)
+        If wirdInitialisiert OrElse
+           wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.Geschwindigkeit = (trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Geschwindigkeit",
+                        aktuelleSettings.Geschwindigkeit.ToString())
 
     End Sub
 
+    Private Sub AktualisiereGeschwindigkeitText()
+        'Aktualisiert die lesbare Daueranzeige.
+
+        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString() & " s"
+
+    End Sub
+
+#End Region
+
+#Region "Defaults"
+
+    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
+        'Übernimmt die Defaultwerte, speichert sie explizit
+        'und initialisiert anschließend die Controls neu.
+
+        Dim defaults As Dictionary(Of String, String)
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        defaults = GetTransitionDefaultSettings()
+
+        aktuelleSettings.Farbton = ColorHandling.StringToColor(defaults("Farbton"))
+        aktuelleSettings.Zufallsfarbe = defaults("Zufallsfarbe") = "True"
+        aktuelleSettings.Morphing = defaults("Morphing") = "True"
+        aktuelleSettings.Modus = defaults("Modus")
+        aktuelleSettings.Geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Farbton", defaults("Farbton"))
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Zufallsfarbe", defaults("Zufallsfarbe"))
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Morphing", defaults("Morphing"))
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Modus", defaults("Modus"))
+        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Geschwindigkeit", defaults("Geschwindigkeit"))
+
+        InitialisiereControls()
+
+    End Sub
+
+#End Region
+
+#Region "Settings"
+
     Private Sub CheckYourMail()
-        'Liest aktuelleSettings aus der SettingsInbox aus
+        'Liest aktuelleSettings aus der SettingsInbox.
 
         aktuelleSettings = GetSettings(Of TransitionSettings_FadeCrossfade)(nameTransition)
 
     End Sub
 
-    Private Sub chkMorphing_CheckedChanged(sender As Object, e As EventArgs) Handles chkMorphing.CheckedChanged
-        BeginInvoke(Sub()
-                        If chkMorphing.Checked Then
+#End Region
 
-                            chkZufallsfarbe.Enabled = True
+#Region "Bereinigung"
 
-                            If chkZufallsfarbe.Checked Then
-                                picFarbton.BackColor = Color.Transparent
-                                lblNpicFarbton.Enabled = False
-                                picFarbton.Enabled = False
-                            Else
-                                picFarbton.BackColor = aktuelleSettings.Farbton
-                                lblNpicFarbton.Enabled = True
-                                picFarbton.Enabled = True
-                            End If
+    Private Sub ucOptionsTransition_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+        'Verhindert weitere Aktionen nach der Freigabe.
 
-                        Else
-                            chkZufallsfarbe.Enabled = False
-                            lblNpicFarbton.Enabled = False
-                            picFarbton.BackColor = HintergrundFarbeSaver
-                            picFarbton.Enabled = False
-                        End If
-
-                        WriteToRegistry(SLIDESHOWTRANSITION_FADECROSSFADE_FULLPATH & "Morphing", chkMorphing.Checked.ToString)
-
-                    End Sub)
-    End Sub
-
-    Private Sub IniOrReinitialise()
-        'Farbton picFarbton setzen
-        picFarbton.BackColor = aktuelleSettings.Farbton
-
-        'chkZufallsfarbe setzen
-        If aktuelleSettings.Zufallsfarbe Then
-            chkZufallsfarbe.Checked = True
-            picFarbton.BackColor = Color.Transparent
-            lblNpicFarbton.Enabled = False
-            picFarbton.Enabled = False
-        Else
-            chkZufallsfarbe.Checked = False
-            picFarbton.BackColor = aktuelleSettings.Farbton
-            lblNpicFarbton.Enabled = True
-            picFarbton.Enabled = True
-        End If
-
-        'chkMorphing setzen
-        If aktuelleSettings.Morphing Then
-            chkMorphing.Checked = True
-        Else
-            chkMorphing.Checked = False
-            chkZufallsfarbe.Enabled = False
-            lblNpicFarbton.Enabled = False
-            picFarbton.BackColor = HintergrundFarbeSaver
-            picFarbton.Enabled = False
-        End If
-
-        'Modus setzen
-        Select Case aktuelleSettings.Modus
-            Case "Fade"
-                rdoBlenden.Checked = True
-            Case "Crossfade"
-                rdoÜberblenden.Checked = True
-                chkMorphing.Enabled = False
-                chkZufallsfarbe.Enabled = False
-                lblNpicFarbton.Enabled = False
-                picFarbton.BackColor = Color.Transparent
-                picFarbton.Enabled = False
-            Case "Zufall"
-                rdoZufall.Checked = True
-        End Select
-
-        'Geschwindigkeit
-        trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.Geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        wurdeBereinigt = True
 
     End Sub
 
-    Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Defaults einlesen und Steuerelemente setzen
+#End Region
 
-        Dim defaults As Dictionary(Of String, String)
-
-        'Defaults einlesen
-        defaults = GetTransitionDefaultSettings()
-
-        'AktuelleSettings aktualisieren
-        aktuelleSettings.Farbton = ColorHandling.StringToColor(defaults("Farbton"))
-
-        If defaults("Zufallsfarbe") = "True" Then
-            aktuelleSettings.Zufallsfarbe = True
-        Else
-            aktuelleSettings.Zufallsfarbe = False
-        End If
-
-        If defaults("Morphing") = "True" Then
-            aktuelleSettings.Morphing = True
-        Else
-            aktuelleSettings.Morphing = False
-        End If
-
-        aktuelleSettings.Modus = defaults("Modus")
-        aktuelleSettings.Geschwindigkeit = CInt(defaults("Geschwindigkeit"))
-
-        'Steuerelemente setzen
-        IniOrReinitialise()
-
-    End Sub
 End Class

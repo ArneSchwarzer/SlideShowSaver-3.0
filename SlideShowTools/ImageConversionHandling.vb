@@ -169,33 +169,68 @@ Public Class ImageConversionHandling
 
     End Function
 
-    Public Shared Sub RenderImageInRenderTargetBitmap(bmp As Bitmap, renderTarget As RenderTargetBitmap,
-                                                      drawingVisual As DrawingVisual)
-        'Rendert ein GDI-Bitmap in ein bereits vorhandenes WPF-RenderTargetBitmap.
+    Public Shared Sub AktualisiereWriteableBitmap(
+    bmp As Bitmap,
+    zielBitmap As WriteableBitmap)
+        'Überträgt die Pixel eines vorhandenen GDI-Bitmaps direkt in ein vorhandenes WriteableBitmap.
+        'Es werden weder HBITMAP noch DrawingVisual noch RenderTargetBitmap als Zwischenstufe erzeugt.
 
-        Dim source As BitmapSource
-        Dim zielRechteck As Rect
+        Dim bitmapData As BitmapData
+        Dim bitmapRect As Rectangle
+        Dim bufferGroesse As Integer
 
-        source = Nothing
+        bitmapData = Nothing
 
-        If bmp Is Nothing OrElse renderTarget Is Nothing OrElse drawingVisual Is Nothing Then
+        If bmp Is Nothing OrElse zielBitmap Is Nothing Then
 
             Exit Sub
 
         End If
 
-        source = CreateBitmapSourceFromGdiBitmap(bmp)
-        zielRechteck = New Rect(0.0, 0.0, renderTarget.PixelWidth, renderTarget.PixelHeight)
+        If zielBitmap.PixelWidth <> bmp.Width OrElse zielBitmap.PixelHeight <> bmp.Height Then
 
-        Using drawingContext As DrawingContext = drawingVisual.RenderOpen()
+            Throw New ArgumentException("GDI-Bitmap und WriteableBitmap besitzen unterschiedliche Abmessungen.")
 
-            'Der Frame ist vollständig deckend. Dadurch überschreibt er den
-            'Inhalt des vorherigen Frames vollständig.
-            drawingContext.DrawImage(source, zielRechteck)
+        End If
 
-        End Using
+        bitmapRect =
+        New Rectangle(
+            0,
+            0,
+            bmp.Width,
+            bmp.Height)
 
-        renderTarget.Render(drawingVisual)
+        Try
+
+            bitmapData =
+            bmp.LockBits(
+                bitmapRect,
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+
+            bufferGroesse =
+            Math.Abs(bitmapData.Stride) *
+            bitmapData.Height
+
+            zielBitmap.WritePixels(
+            New Int32Rect(
+                0,
+                0,
+                bmp.Width,
+                bmp.Height),
+            bitmapData.Scan0,
+            bufferGroesse,
+            bitmapData.Stride)
+
+        Finally
+
+            If bitmapData IsNot Nothing Then
+
+                bmp.UnlockBits(bitmapData)
+
+            End If
+
+        End Try
 
     End Sub
 

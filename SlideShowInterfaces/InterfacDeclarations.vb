@@ -1,5 +1,6 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
+Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
 Imports SlideShowInterfaces.InfoHandling
 
@@ -16,8 +17,8 @@ Public Class InterfaceDeclarations
     ''' 
     ''' Wichtige Hinweis zu Modul-Implementierung und Eventweiterleitung:
     '''
-    '''Neben den in diesem Interface vorgegebenen Methoden sollte ein Modul auch immer
-    '''eine Struktur ModulSettings_Modulname sowie diese beiden Methoden anbieten:
+    ''' Neben den in diesem Interface vorgegebenen Methoden sollte ein Modul auch immer
+    ''' eine Struktur ModulSettings_Modulname sowie diese beiden Methoden anbieten:
     '''
     ''' Private Function GetModulDefaultSettings() as Dictionary(Of String, String)
     ''' Private Sub ReadModulSettingsFromRegistryOrDefault()
@@ -67,11 +68,11 @@ Public Class InterfaceDeclarations
     ''' 
     ''' Wichtige Hinweis zur Transition-Implementierung:
     '''
-    '''Neben den in diesem Interface vorgegebenen Methoden sollte eine Transition auch immer
-    '''eine Struktur TransitionSettings_TransitionName sowie diese beiden Methoden anbieten:
+    ''' Neben den in diesem Interface vorgegebenen Methoden sollte eine Transition auch immer
+    ''' eine Struktur TransitionSettings_TransitionName sowie diese beiden Methoden anbieten:
     '''
     ''' Private Function GetTransitionDefaultSettings() as Dictionary(Of String, String)
-    ''' Private Sub ReaTransitionSettingsFromRegistryOrDefault()
+    ''' Private Sub ReadTransitionSettingsFromRegistryOrDefault()
     ''' 
     ''' </summary>
 
@@ -85,7 +86,7 @@ Public Class InterfaceDeclarations
 
         'Events
         Event TransitionIsRunning(state As Boolean)
-        Event TransitionFrameIstFertig(bitmap As RenderTargetBitmap)
+        Event TransitionFrameIstFertig(bitmap As ImageSource)
 
         'Ausführung
         Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs As Integer = 0)
@@ -107,8 +108,8 @@ Public Class InterfaceDeclarations
     ''' 
     ''' Wichtige Hinweis zur Shader-Implementierung:
     '''
-    '''Neben den in diesem Interface vorgegebenen Methoden sollte ein Shader auch immer eine Struktur
-    '''ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
+    ''' Neben den in diesem Interface vorgegebenen Methoden sollte ein Shader auch immer eine Struktur
+    ''' ShaderSettings_ShaderName sowie diese beiden Methoden anbieten:
     '''
     ''' Private Function GetShaderDefaultSettings() as Dictionary(Of String, String)
     ''' Private Sub ReadShaderSettingsFromRegistryOrDefault()

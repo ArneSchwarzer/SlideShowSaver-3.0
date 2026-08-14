@@ -8,22 +8,107 @@ Imports SlideShowTools.SettingsHandling
 Public Class ucOptionsShader
     Inherits UserControl
 
-    'Variablendeklaration
+#Region "Variablendeklaration"
+
     Private aktuelleSettings As ShaderSettings_ToenenFaerben
 
-    Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
-        'Initialisiert die Steuerelemente des ucOptionShader
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
 
-        'Settings abholen
+#End Region
+
+#Region "Initialisierung"
+
+    Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
+        'Initialisiert die Steuerelemente des Options-Control.
+
         CheckYourMail()
 
-        'Steuerelemente setzen
-        IniOrReinitialise()
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
+    Private Sub CheckYourMail()
+        'Liest aktuelleSettings aus der SettingsInbox.
+
+        aktuelleSettings = GetSettings(Of ShaderSettings_ToenenFaerben)(nameShader)
+
+    End Sub
+
+    Private Sub IniOrReinitialise()
+        'Setzt sämtliche Controls entsprechend aktuelleSettings.
+
+        picFarbton.BackColor = aktuelleSettings.Farbton
+        chkZufallsfarbe.Checked = aktuelleSettings.Zufallsfarbe
+
+        AktualisiereFarbtonControls()
+
+        trkIntensität.Value = aktuelleSettings.Intensitaet
+        lblIntensität.Text = aktuelleSettings.Intensitaet.ToString() & " %"
+
+        Select Case aktuelleSettings.Modus
+
+            Case ShaderModus.Toenen
+
+                rdoTönen.Checked = True
+
+            Case ShaderModus.Faerben
+
+                rdoFärben.Checked = True
+
+            Case ShaderModus.Zufaellig
+
+                rdoZufall.Checked = True
+
+        End Select
+
+    End Sub
+
+#End Region
+
+#Region "Control-Logik"
+
+    Private Sub AktualisiereFarbtonControls()
+        'Aktiviert oder deaktiviert die manuelle Farbwahl.
+
+        Dim manuelleFarbwahlAktiv As Boolean
+
+        manuelleFarbwahlAktiv = Not chkZufallsfarbe.Checked
+
+        lblNpicFarbton.Enabled = manuelleFarbwahlAktiv
+
+        picFarbton.Enabled = manuelleFarbwahlAktiv
+
+        If manuelleFarbwahlAktiv Then
+
+            picFarbton.BackColor = aktuelleSettings.Farbton
+
+        Else
+
+            picFarbton.BackColor = Color.Transparent
+
+        End If
+
+    End Sub
+
+#End Region
+
+#Region "Direct Commit"
+
     Private Sub picFarbton_Click(sender As Object, e As EventArgs) Handles picFarbton.Click
-        'Behandelt PictureBox Farbton
+        'Öffnet die Farbauswahl für den manuellen Farbton.
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
 
         Using dlg As New ColorDialog()
 
@@ -33,133 +118,162 @@ Public Class ucOptionsShader
             dlg.FullOpen = True
 
             If dlg.ShowDialog() = DialogResult.OK Then
-                picFarbton.BackColor = dlg.Color
+
                 aktuelleSettings.Farbton = dlg.Color
+
+                picFarbton.BackColor = dlg.Color
+
                 WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Farbton", ColorToString(dlg.Color))
+
             End If
+
         End Using
 
     End Sub
 
     Private Sub trkIntensität_ValueChanged(sender As Object, e As EventArgs) Handles trkIntensität.ValueChanged
-        'Behandelt Trackbar Intensität
+        'Behandelt die Intensität des Farb-Overlays.
 
-        lblIntensität.Text = trkIntensität.Value & " %"
-        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Intensität", trkIntensität.Value.ToString)
+        lblIntensität.Text = trkIntensität.Value.ToString() & " %"
 
-    End Sub
-
-    Private Sub rdoTönen_CheckedChanged(sender As Object, e As EventArgs) Handles rdoTönen.CheckedChanged
-        'Behandelt RadioButton Tönen
-
-        If rdoTönen.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Tönen")
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
         End If
 
+        aktuelleSettings.Intensitaet = trkIntensität.Value
+
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Intensität",
+                        aktuelleSettings.Intensitaet.ToString())
+
     End Sub
 
-    Private Sub rdoFärben_CheckedChanged(sender As Object, e As EventArgs) Handles rdoFärben.CheckedChanged
-        'Behandelt RadioButton Färben
+    Private Sub Modus_CheckedChanged(sender As Object, e As EventArgs) _
+        Handles rdoTönen.CheckedChanged,
+                rdoFärben.CheckedChanged,
+                rdoZufall.CheckedChanged
+        'Übernimmt den gewählten Shadermodus.
 
-        If rdoFärben.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Färben")
+        Dim modusString As String
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
         End If
 
-    End Sub
+        If rdoTönen.Checked Then
 
-    Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rdoZufall.CheckedChanged
-        'Behandelt Radiobutton Zufall
+            aktuelleSettings.Modus = ShaderModus.Toenen
 
-        If rdoZufall.Checked = True Then
-            WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", "Zufall")
-        End If
+            modusString = "Tönen"
 
-    End Sub
+        ElseIf rdoFärben.Checked Then
 
-    Private Sub chkZufallsfarbe_CheckedChanged(sender As Object, e As EventArgs) Handles chkZufallsfarbe.CheckedChanged
-        'Behandelt Checkbox Zufallsfarbe
+            aktuelleSettings.Modus = ShaderModus.Faerben
 
-        ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
-        ' nachdem der Checked-Zustand aktualisiert wurde
-        BeginInvoke(Sub()
-                        If chkZufallsfarbe.Checked = True Then
-                            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
-                            lblNpicFarbton.Enabled = False
-                            picFarbton.Enabled = False
-                        Else
-                            picFarbton.BackColor = aktuelleSettings.Farbton
-                            lblNpicFarbton.Enabled = True
-                            picFarbton.Enabled = True
-                        End If
+            modusString = "Färben"
 
-                        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", chkZufallsfarbe.Checked.ToString)
-                    End Sub)
+        ElseIf rdoZufall.Checked Then
 
-    End Sub
+            aktuelleSettings.Modus = ShaderModus.Zufaellig
 
-    Private Sub CheckYourMail()
-        'Liest aktuelleSettings aus der SettingsInbox aus
+            modusString = "Zufall"
 
-        aktuelleSettings = GetSettings(Of ShaderSettings_ToenenFaerben)(nameShader)
-
-    End Sub
-
-    Private Sub IniOrReinitialise()
-        'Farbton picFarbton setzen
-        picFarbton.BackColor = aktuelleSettings.Farbton
-
-        'chkZufallsfarbe setzen
-        If aktuelleSettings.Zufallsfarbe Then
-            chkZufallsfarbe.Checked = True
-            picFarbton.BackColor = Color.FromKnownColor(KnownColor.Transparent)
-            lblNpicFarbton.Enabled = False
-            picFarbton.Enabled = False
         Else
-            chkZufallsfarbe.Checked = False
-            picFarbton.BackColor = aktuelleSettings.Farbton
-            lblNpicFarbton.Enabled = True
-            picFarbton.Enabled = True
+
+            Exit Sub
+
         End If
 
-        'trkIntensität setzen
-        trkIntensität.Value = aktuelleSettings.Intensitaet
-        lblIntensität.Text = trkIntensität.Value & " %"
-
-        'Modus setzen
-        Select Case aktuelleSettings.Modus
-            Case ShaderModus.Toenen
-                rdoTönen.Checked = True
-            Case ShaderModus.Faerben
-                rdoFärben.Checked = True
-            Case ShaderModus.Zufaellig
-                rdoZufall.Checked = True
-        End Select
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", modusString)
 
     End Sub
+
+    Private Sub chkZufallsfarbe_CheckedChanged(sender As Object, e As EventArgs) _
+        Handles chkZufallsfarbe.CheckedChanged
+        'Behandelt die automatische Farbauswahl.
+
+        AktualisiereFarbtonControls()
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        aktuelleSettings.Zufallsfarbe = chkZufallsfarbe.Checked
+
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe",
+                        aktuelleSettings.Zufallsfarbe.ToString())
+
+    End Sub
+
+#End Region
+
+#Region "Defaults"
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Liest die Default-Werte ein und setzt die Steuerelemente entsprechend
+        'Stellt sämtliche Defaultwerte wieder her und
+        'speichert sie explizit per Direct Commit.
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaults einlesen
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
         defaults = GetShaderDefaultSettings()
 
-        'AktuelleSettings aktualisieren
         aktuelleSettings.Farbton = StringToColor(defaults("Farbton"))
         aktuelleSettings.Zufallsfarbe = CBool(defaults("Zufallsfarbe"))
         aktuelleSettings.Intensitaet = CInt(defaults("Intensität"))
+
         Select Case defaults("Modus")
+
             Case "Tönen"
+
                 aktuelleSettings.Modus = ShaderModus.Toenen
+
             Case "Färben"
+
                 aktuelleSettings.Modus = ShaderModus.Faerben
+
             Case "Zufall"
+
                 aktuelleSettings.Modus = ShaderModus.Zufaellig
+
+            Case Else
+
+                aktuelleSettings.Modus = ShaderModus.Toenen
+
         End Select
 
-        'Steuerelemente setzen
-        IniOrReinitialise()
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Farbton", defaults("Farbton"))
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Zufallsfarbe", defaults("Zufallsfarbe"))
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Intensität", defaults("Intensität"))
+        WriteToRegistry(SLIDESHOWSHADER_TOENENFAERBEN_FULLPATH & "Modus", defaults("Modus"))
+
+        wirdInitialisiert = True
+
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
+
+#End Region
+
+#Region "Bereinigung"
+
+    Private Sub ucOptionsShader_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+        'Verhindert Direct-Commit-Aktionen nach der Freigabe.
+
+        wurdeBereinigt = True
+
+    End Sub
+
+#End Region
+
 End Class

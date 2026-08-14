@@ -48,6 +48,25 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>SlideShowWPFModul.SlideShowSaver 3.0.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>SlideShowWPFModul.SlideShowSaver 3.0.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MetadataExtractor, Version=2.8.1.0, Culture=neutral, PublicKeyToken=b66b5ccaf776c301, processorArchitecture=MSIL">
       <HintPath>..\packages\MetadataExtractor.2.8.1\lib\net45\MetadataExtractor.dll</HintPath>
@@ -205,23 +224,12 @@
   <ItemGroup>
     <None Include="Resources\Zurück Transparent.png" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Lang\DE\" />
-    <Folder Include="Lang\EN\" />
-    <Folder Include="Lang\ES\" />
-    <Folder Include="Lang\FR\" />
-    <Folder Include="Lang\HI\" />
-    <Folder Include="Lang\PL\" />
-    <Folder Include="Lang\RU\" />
-    <Folder Include="Lang\TLH\" />
-    <Folder Include="Lang\ZH\" />
+    <EmbeddedResource Include="Lang\**\*.csv">
+      <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
+      <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-  <EmbeddedResource Include="Lang\**\*.csv">
-    <!-- sorgt für stabile Ressourcename-Suffixe "Lang/DE/ucOptionsShader.csv" -->
-    <LogicalName>Lang/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
-  </EmbeddedResource>
-</ItemGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

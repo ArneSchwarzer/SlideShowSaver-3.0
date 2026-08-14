@@ -13,13 +13,22 @@ Public Class ucOptionsShader
     'Variablendeklaration
     Private aktuelleSettings As ShaderSettings_LUT
 
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
+
     Private Sub ucOptionsShader_Load(sender As Object, e As EventArgs) Handles Me.Load
 
-        'Aktuelle Settings einlesen
         CheckYourMail()
 
-        'Steuerelemente setzten
-        IniOrReinitialize()
+        Try
+
+            IniOrReinitialize()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
@@ -63,42 +72,89 @@ Public Class ucOptionsShader
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Lädt und setzt die Default-Werte für die Dialogbox
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaultwerte einlesen
-        defaults = ShaderMain.GetShaderDefaultSettings()
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
 
-        'AktuelleSettings aktualisieren
+        defaults = GetShaderDefaultSettings()
+
         aktuelleSettings.intensitaet = CInt(defaults("Intensität"))
         aktuelleSettings.LUTs = SplitSemicolonList(defaults("LUTs"))
 
-        'Steuerelemente re-initialisieren
-        IniOrReinitialize()
+        WriteToRegistry(SLIDESHOWSHADER_LUT_FULLPATH & "Intensität", defaults("Intensität"))
+        WriteToRegistry(SLIDESHOWSHADER_LUT_FULLPATH & "LUTs", defaults("LUTs"))
+
+        wirdInitialisiert = True
+
+        Try
+
+            IniOrReinitialize()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
     Private Sub trkIntensitaet_ValueChanged(sender As Object, e As EventArgs) Handles trkIntensitaet.ValueChanged
-        'Behandelt die Trackbar "Intensität"
 
-        lblIntensitaet.Text = trkIntensitaet.Value.ToString & " %"
+        lblIntensitaet.Text = trkIntensitaet.Value.ToString() & " %"
 
-        'Direct Commit
-        WriteToRegistry(SLIDESHOWSHADER_LUT_FULLPATH & "Intensität", trkIntensitaet.Value)
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        aktuelleSettings.intensitaet = trkIntensitaet.Value
+
+        WriteToRegistry(SLIDESHOWSHADER_LUT_FULLPATH & "Intensität", aktuelleSettings.intensitaet)
 
     End Sub
 
     Private Sub clbLUTs_ItemCheck(sender As Object, e As ItemCheckEventArgs) Handles clbLUTs.ItemCheck
-        'DirectCommit für chlbModule sobald ein Eintrag gechecked/ungeschecked wird.
+        'Übernimmt Änderungen der aktivierten LUTs per Direct Commit.
 
-        ' BeginInvoke sorgt dafür, dass der Code erst ausgeführt wird,
-        ' nachdem der Checked-Zustand aktualisiert wurde
-        Dim clb As CheckedListBox = DirectCast(sender, CheckedListBox)
+        Dim clb As CheckedListBox
 
-        BeginInvoke(New MethodInvoker(Sub()
-                                          CheckedListBoxHandling.SaveListBoxToRegistry(clb, SLIDESHOWSHADER_LUT_FULLPATH & "LUTs")
-                                      End Sub))
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        clb = DirectCast(sender, CheckedListBox)
+
+        BeginInvoke(
+        New MethodInvoker(
+            Sub()
+
+                Dim lutString As String
+
+                If wirdInitialisiert OrElse wurdeBereinigt Then
+                    Exit Sub
+                End If
+
+                lutString =
+                    GetCheckedItemsAsString(
+                        Of LutInfo)(
+                            clb,
+                            Function(lut)
+                                Return lut.LUTName
+                            End Function)
+
+                aktuelleSettings.LUTs = SplitSemicolonList(lutString)
+
+                WriteToRegistry(SLIDESHOWSHADER_LUT_FULLPATH & "LUTs", lutString)
+
+            End Sub))
+
+    End Sub
+
+    Private Sub ucOptionsShader_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+
+        wurdeBereinigt = True
 
     End Sub
 

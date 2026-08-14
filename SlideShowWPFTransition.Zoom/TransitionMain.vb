@@ -1,4 +1,7 @@
-﻿Imports System.Drawing
+﻿Imports System.Diagnostics
+Imports System.Windows.Media.Imaging
+Imports System.Drawing
+Imports System.Drawing.Drawing2D
 Imports System.Windows.Forms
 Imports System.Windows.Threading
 Imports SlideShowInterfaces.InterfaceDeclarations
@@ -6,6 +9,7 @@ Imports SlideShowLogging.LogHandling
 Imports SlideShowTools
 Imports SlideShowTools.ColorHandling
 Imports SlideShowTools.GraphicsSizeModeHandling
+Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.ListHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
@@ -17,19 +21,23 @@ Public Class TransitionMain
     'Variablendeklaration
 
     'Settings und Konstanten
-    Public Const SLIDESHOWTRANSITION_ZOOM_FULLPATH As String = SLIDESHOWTRANSITION_PATH & "Zoom\"
-    Public Const nameTransition As String = "Zoom"
+    Public Const SLIDESHOWTRANSITION_ZOOM_FULLPATH As String =
+    SLIDESHOWTRANSITION_PATH & "Zoom\"
+
+    Public Const nameTransition As String =
+    "Zoom"
+
     Private aktuelleSettings As SlideShowTransitionSettings_Zoom
 
-    'Timer und Zeitmanagement
-    Private WithEvents tmrDuration As New Timer
-    Private startTime As DateTime
+    'Zeitmanagement
+    Private ReadOnly laufzeit As New Stopwatch()
     Private dauerInMS As Integer
-    Private Const FPS As Integer = 120
+    Private externeDauerInMS As Integer
 
     'Transitions-Bilder
-    Private oldBmpSource As BitmapSource
-    Private newBmpSource As BitmapSource
+    Private oldBmp As Bitmap
+    Private newBmp As Bitmap
+
     Private oldBmpGerahmt As RenderTargetBitmap
     Private newBmpGerahmt As RenderTargetBitmap
 
@@ -37,14 +45,18 @@ Public Class TransitionMain
     Private aktuellerAnkerpunktOld As String
     Private aktuellerAnkerpunktNew As String
 
-    Private clntSize As Windows.Size
+    Private clientSize As System.Drawing.Size
 
     'Rendering
-    Private drawAction As Action(Of DrawingContext, Windows.Size)
     Private frameTimer As DispatcherTimer
-    Private renderSize As Windows.Size
-    Private rtbCache As RenderTargetBitmap
-    Private stopRequested As Boolean = False
+    Private frameSource As WriteableBitmap
+
+    'Lifecycle
+    Private transitionLaeuft As Boolean
+    Private wurdeBereinigt As Boolean
+
+    'Sonstiges
+    Private ReadOnly rnd As New Random()
 
     Public Structure SlideShowTransitionSettings_Zoom
         Public ankerpunkte As List(Of String)
@@ -76,73 +88,132 @@ Public Class TransitionMain
     Public Event TransitionFrameIstFertig As ISlideShowTransition.TransitionFrameIstFertigEventHandler Implements ISlideShowTransition.TransitionFrameIstFertig
 
     'Start, Stop & OptionsDialog
-    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
-        'Bereitet die Animation vor und startet den Render-Loop
-        Dim ankerArray() As String = {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "Z"}
-        Dim rnd As New Random
+    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage,
+                             picBoxModeNew As PictureBoxSizeMode, clientSizeInput As System.Drawing.Size,
+                             Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+        'Initialisiert und startet eine neue Zoom-Transition.
 
-        'Interne Initialisierungen & Formalitäten
-        ReadTransitionSettingsFromRegistryOrDefaults()
-        StoreSettings(nameTransition, aktuelleSettings)
+        Dim ankerArray() As String
 
-        RaiseEvent TransitionIsRunning(True)
+        If wurdeBereinigt Then
 
-        'Konvertieren und in lokalen Variablen speichern
-        clntSize = New Windows.Size(clientSize.Width, clientSize.Height)
+            Throw New ObjectDisposedException(NameOf(TransitionMain))
 
-        ' Bilder vorbereiten
-        oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
-        newBmpGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
-        oldBmpSource = CType(oldBmpGerahmt, ImageSource)
-        newBmpSource = CType(newBmpGerahmt, ImageSource)
-
-        'Zufällige Ankerpunkte wählen
-        If aktuelleSettings.ankerpunkte.Count > 0 Then
-            aktuellerAnkerpunktOld = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
-        Else
-            aktuellerAnkerpunktOld = ankerArray(rnd.Next(9))
         End If
 
-        If aktuelleSettings.gleicherAnkerpunkt Then
-            aktuellerAnkerpunktNew = aktuellerAnkerpunktOld
-        Else
-            If aktuelleSettings.ankerpunkte.Count > 0 Then
-                aktuellerAnkerpunktNew = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
-            Else
-                aktuellerAnkerpunktNew = ankerArray(rnd.Next(9))
+        BeendeUndBereinigeTransition()
+
+        If oldImage Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(oldImage))
+
+        End If
+
+        If newImage Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(newImage))
+
+        End If
+
+        If clientSizeInput.Width <= 0 OrElse clientSizeInput.Height <= 0 Then
+
+            Throw New ArgumentOutOfRangeException(NameOf(clientSizeInput))
+
+        End If
+
+        ankerArray = New String() {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "Z"}
+
+        Try
+
+            clientSize = clientSizeInput
+
+            ReadTransitionSettingsFromRegistryOrDefaults()
+
+            StoreSettings(nameTransition, aktuelleSettings)
+
+            oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
+            newBmpGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
+
+            oldBmp = ConvertRenderTargetBitmapToBitmap(oldBmpGerahmt)
+            newBmp = ConvertRenderTargetBitmapToBitmap(newBmpGerahmt)
+
+            If oldBmp Is Nothing OrElse newBmp Is Nothing Then
+
+                Throw New InvalidOperationException("Die GDI-Quellbilder der Zoom-Transition konnten nicht " &
+                                                    "erzeugt werden.")
+
             End If
-        End If
 
-        'Falls vom Modul gewünscht, Notbremse setzen.
-        If durationMs > 0 Then
-            If tmrDuration Is Nothing Then tmrDuration = New Timer()
-            tmrDuration.Interval = durationMs
-            AddHandler tmrDuration.Tick, Sub()
-                                             StopTransition()
-                                         End Sub
-            tmrDuration.Start()
-        End If
+            If oldBmpGerahmt Is Nothing OrElse newBmpGerahmt Is Nothing Then
 
-        ' Animation starten 
-        dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
-        startTime = DateTime.Now
+                Throw New InvalidOperationException("Die gerahmten Transitionsbilder konnten nicht erzeugt " &
+                                                    "werden.")
 
-        StartRenderLoop(AddressOf DrawTransitionFrame, clntSize)
+            End If
+
+            If aktuelleSettings.ankerpunkte IsNot Nothing AndAlso aktuelleSettings.ankerpunkte.Count > 0 Then
+
+                aktuellerAnkerpunktOld = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
+
+            Else
+
+                aktuellerAnkerpunktOld = ankerArray(rnd.Next(ankerArray.Length))
+
+            End If
+
+            If aktuelleSettings.gleicherAnkerpunkt Then
+
+                aktuellerAnkerpunktNew = aktuellerAnkerpunktOld
+
+            ElseIf aktuelleSettings.ankerpunkte IsNot Nothing AndAlso aktuelleSettings.ankerpunkte.Count > 0 Then
+
+                aktuellerAnkerpunktNew = aktuelleSettings.ankerpunkte(rnd.Next(aktuelleSettings.ankerpunkte.Count))
+
+            Else
+
+                aktuellerAnkerpunktNew = ankerArray(rnd.Next(ankerArray.Length))
+
+            End If
+
+            dauerInMS = Math.Max(1, aktuelleSettings.geschwindigkeit * 1000)
+            externeDauerInMS = Math.Max(0, durationMs)
+
+            InitialisiereRenderpuffer()
+
+            laufzeit.Restart()
+
+            transitionLaeuft = True
+
+            StartRenderLoop()
+
+            RaiseEvent TransitionIsRunning(True)
+
+        Catch ex As Exception
+
+            LogError("Transition Zoom - RunTransition(): " & ex.ToString())
+
+            BeendeUndBereinigeTransition()
+
+            Throw
+
+        End Try
 
     End Sub
 
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Aufräumen und Transition beenden.
+        'Beendet eine aktive Zoom-Transition kontrolliert.
 
-        If tmrDuration IsNot Nothing Then
-            tmrDuration.Stop()
-            tmrDuration.Dispose()
-            tmrDuration = Nothing
+        Dim warAktiv As Boolean
+
+        warAktiv = transitionLaeuft
+
+        BeendeUndBereinigeTransition()
+
+        If warAktiv Then
+
+            RaiseEvent TransitionIsRunning(False)
+
         End If
-
-        stopRequested = True
-
-        RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
@@ -161,7 +232,7 @@ Public Class TransitionMain
     'Private Funktionen
 
     ' Settings und Defaultwerte
-    Sub ReadTransitionSettingsFromRegistryOrDefaults()
+    Private Sub ReadTransitionSettingsFromRegistryOrDefaults()
         'Setzt aktuelleTransitonSettings mit den Werten aus der Registry oder mit Defaultwerten.
 
         Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
@@ -176,7 +247,7 @@ Public Class TransitionMain
 
     End Sub
 
-    Public Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
+    Friend Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
         Dim defaults As New Dictionary(Of String, String)
 
         defaults.Add("Geschwindigkeit", "10")
@@ -188,192 +259,316 @@ Public Class TransitionMain
     End Function
 
     'Abbruch- und Endverwaltung
-    Public Sub EndBildZeichnen()
-        'Gibt das Endbild aus
+    Private Sub EndBildZeichnen()
+        'Gibt garantiert das vollständige Zielbild aus.
+
+        If newBmpGerahmt Is Nothing Then
+            Exit Sub
+        End If
 
         RaiseEvent TransitionFrameIstFertig(newBmpGerahmt)
 
     End Sub
 
-    Sub tmrDuration_Tick() Handles tmrDuration.Tick
-        'Bricht die Transition nach Ende von DurationMS ab.
-
-        'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
-        EndBildZeichnen()
-
-        StopTransition()
-
-    End Sub
-
     'Animation und rendern
-    Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
-        Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
-        Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
+    Private Sub DrawTransitionFrame()
+        'Zeichnet einen einzelnen Zoom-Frame direkt
+        'in den wiederverwendeten WPF-Renderpuffer.
 
-        Dim oldSize As Windows.Size
-        Dim newSize As Windows.Size
+        Dim progress As Double
+        Dim faktor As Double
 
-        Dim oldPoint As Windows.Point
-        Dim newPoint As Windows.Point
+        Dim bildBreite As Double
+        Dim bildHoehe As Double
 
-        Dim oldRect As Rect
-        Dim newRect As Rect
+        Dim bildPosition As Windows.Point
+        Dim zielRect As RectangleF
 
-        'Rectangles berechnen (linear interpoliert)
+        Dim quellBild As Bitmap
+        Dim ankerpunkt As String
 
-        'Größen...
-        If progress <= 0.5 Then
-            Dim faktor As Double = 1.0 - (progress / 0.5)
-            Dim w As Double = Math.Max(1.0, clntSize.Width * faktor)
-            Dim h As Double = Math.Max(1.0, clntSize.Height * faktor)
-            oldSize = New Windows.Size(w, h)
-            newSize = New Windows.Size(1, 1) ' wird nicht verwendet
-        Else
-            Dim faktor As Double = (progress - 0.5) / 0.5
-            Dim w As Double = Math.Max(1.0, clntSize.Width * faktor)
-            Dim h As Double = Math.Max(1.0, clntSize.Height * faktor)
-            oldSize = New Windows.Size(1, 1) ' wird nicht verwendet
-            newSize = New Windows.Size(w, h)
+        If Not transitionLaeuft OrElse frameSource Is Nothing OrElse oldBmp Is Nothing OrElse newBmp Is Nothing Then
+            Exit Sub
         End If
 
-        '...und Eckpunkte
-        Select Case aktuellerAnkerpunktOld
-            Case "NW"
-                oldPoint = New Windows.Point(0, 0)
-            Case "N"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, 0)
-            Case "NO"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), 0)
-            Case "O"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), (clntSize.Height - oldSize.Height) \ 2)
-            Case "SO"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width), (clntSize.Height - oldSize.Height))
-            Case "S"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, (clntSize.Height - oldSize.Height))
-            Case "SW"
-                oldPoint = New Windows.Point(0, (clntSize.Height - oldSize.Height))
-            Case "W"
-                oldPoint = New Windows.Point(0, (clntSize.Height - oldSize.Height) \ 2)
-            Case "Z"
-                oldPoint = New Windows.Point((clntSize.Width - oldSize.Width) \ 2, (clntSize.Height - oldSize.Height) \ 2)
-        End Select
+        progress = Math.Min(1.0, laufzeit.Elapsed.TotalMilliseconds / dauerInMS)
 
-        Select Case aktuellerAnkerpunktNew
-            Case "NW"
-                newPoint = New Windows.Point(0, 0)
-            Case "N"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, 0)
-            Case "NO"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), 0)
-            Case "O"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height) \ 2)
-            Case "SO"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width), (clntSize.Height - newSize.Height))
-            Case "S"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, (clntSize.Height - newSize.Height))
-            Case "SW"
-                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height))
-            Case "W"
-                newPoint = New Windows.Point(0, (clntSize.Height - newSize.Height) \ 2)
-            Case "Z"
-                newPoint = New Windows.Point((clntSize.Width - newSize.Width) \ 2, (clntSize.Height - newSize.Height) \ 2)
-        End Select
-
-        'Rects erzeugen
-        oldRect = New Rect(oldPoint, oldSize)
-        newRect = New Rect(newPoint, newSize)
-
-        'Bilder zeichnen
-        If progress <= 0.5 Then
-            dc.DrawImage(oldBmpSource, oldRect)
-        Else
-            dc.DrawImage(newBmpSource, newRect)
-        End If
-
-        'Fertig?
         If progress >= 1.0 Then
+
+            EndBildZeichnen()
             StopTransition()
+
+            Exit Sub
+
         End If
+
+        If progress <= 0.5 Then
+
+            faktor = 1.0 - progress / 0.5
+            quellBild = oldBmp
+            ankerpunkt = aktuellerAnkerpunktOld
+
+        Else
+
+            faktor = (progress - 0.5) / 0.5
+            quellBild = newBmp
+            ankerpunkt = aktuellerAnkerpunktNew
+
+        End If
+
+        bildBreite = Math.Max(1.0, clientSize.Width * faktor)
+        bildHoehe = Math.Max(1.0, clientSize.Height * faktor)
+
+        bildPosition = BerechneAnkerpunkt(ankerpunkt, bildBreite, bildHoehe)
+
+        zielRect = New RectangleF(CSng(bildPosition.X), CSng(bildPosition.Y), CSng(bildBreite), CSng(bildHoehe))
+
+        ZeichneDirektInFrameSource(quellBild, zielRect)
+
+        RaiseEvent TransitionFrameIstFertig(frameSource)
 
     End Sub
 
-    Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
-                           zielGroesse As Windows.Size)
-        'RenderLoop starten und einmaliges renderTargetBitmap anlegen
+    Private Sub InitialisiereRenderpuffer()
+        'Erzeugt den einzigen wiederverwendeten Ausgabepuffer.
+        'Die Transition zeichnet direkt in dessen BackBuffer.
 
-        drawAction = drawActionInput
-        renderSize = zielGroesse
+        frameSource = New WriteableBitmap(clientSize.Width, clientSize.Height, 96.0, 96.0, PixelFormats.Pbgra32,
+                                          Nothing)
 
-        'Alten Timer stoppen
+    End Sub
+
+    Private Sub StartRenderLoop()
+        'Startet den einzigen Frame-Timer der Transition.
+
         StopRenderLoop()
 
-        'Falls Größe geändert → neues RTB erzeugen
-        If rtbCache Is Nothing OrElse
-       rtbCache.PixelWidth <> CInt(renderSize.Width) OrElse
-       rtbCache.PixelHeight <> CInt(renderSize.Height) Then
+        frameTimer = New DispatcherTimer(DispatcherPriority.Render)
 
-            rtbCache = New RenderTargetBitmap(CInt(renderSize.Width),
-                                          CInt(renderSize.Height),
-                                          96, 96, PixelFormats.Pbgra32)
-        End If
-
-        'Neuen Timer starten
-        frameTimer = New DispatcherTimer()
         AddHandler frameTimer.Tick, AddressOf OnFrameTick
-        frameTimer.Interval = TimeSpan.FromMilliseconds(1000 \ FPS)
+
+        frameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0)
+
         frameTimer.Start()
+
     End Sub
 
     Private Sub OnFrameTick(sender As Object, e As EventArgs)
-        'Zeichnet einen einzelnen Frame
-        Dim hintergrundBrush As New Media.SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
+        'Steuert die zeitliche Ausführung der Transition.
 
-        If rtbCache Is Nothing OrElse drawAction Is Nothing Then Exit Sub
+        If Not transitionLaeuft Then
 
-        Dim drawingVisual As New DrawingVisual()
-        Using dc As DrawingContext = drawingVisual.RenderOpen()
-            ' Hintergrund leeren
-            dc.DrawRectangle(hintergrundBrush, Nothing, New Rect(0, 0, renderSize.Width, renderSize.Height))
-            'Animation aufrufen
-            drawAction.Invoke(dc, renderSize)
-        End Using
-
-        'RTB mit neuem Inhalt füllen
-        ClearRTB(rtbCache)
-        rtbCache.Render(drawingVisual)
-
-        RaiseEvent TransitionFrameIstFertig(rtbCache)
-
-        'Aufräumen nach dem letzten Frame
-        If stopRequested Then
             StopRenderLoop()
-            rtbCache = Nothing
+
+            Exit Sub
+
         End If
 
-    End Sub
+        If externeDauerInMS > 0 AndAlso laufzeit.Elapsed.TotalMilliseconds >= externeDauerInMS Then
 
-    Public Sub StopRenderLoop()
-        'RenderLoop beenden und aufräumen
+            EndBildZeichnen()
+            StopTransition()
 
-        If frameTimer IsNot Nothing Then
-            frameTimer.Stop()
-            RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
-            frameTimer = Nothing
+            Exit Sub
+
         End If
 
-    End Sub
-
-    Public Sub ClearRTB(rtb As RenderTargetBitmap)
-        'rtbCache leeren
-
-        If rtb Is Nothing Then Exit Sub
-        Dim dv As New DrawingVisual()
-        Using dc As DrawingContext = dv.RenderOpen()
-            dc.DrawRectangle(Media.Brushes.Transparent, Nothing,
-                             New Rect(0, 0, rtb.PixelWidth, rtb.PixelHeight))
-        End Using
-        rtb.Render(dv)
+        DrawTransitionFrame()
 
     End Sub
+
+    Private Sub ZeichneDirektInFrameSource(quellBild As Bitmap, zielRect As RectangleF)
+        'Skaliert das aktuelle Bild unmittelbar in den
+        'WPF-BackBuffer, ohne einen Zwischenframe zu erzeugen.
+
+        Dim backBufferBitmap As Bitmap
+        Dim graphics As Graphics
+
+        backBufferBitmap = Nothing
+        graphics = Nothing
+
+        If frameSource Is Nothing OrElse quellBild Is Nothing Then
+            Exit Sub
+        End If
+
+        frameSource.Lock()
+
+        Try
+
+            backBufferBitmap =
+            New Bitmap(
+                frameSource.PixelWidth,
+                frameSource.PixelHeight,
+                frameSource.BackBufferStride,
+                Imaging.PixelFormat.Format32bppPArgb,
+                frameSource.BackBuffer)
+
+            graphics = Graphics.FromImage(backBufferBitmap)
+            graphics.CompositingMode = CompositingMode.SourceCopy
+            graphics.CompositingQuality = CompositingQuality.HighSpeed
+            graphics.InterpolationMode = InterpolationMode.Low
+            graphics.SmoothingMode = SmoothingMode.None
+            graphics.Clear(HintergrundFarbeSaver)
+            graphics.DrawImage(quellBild, zielRect)
+
+            frameSource.AddDirtyRect(New Int32Rect(0, 0, frameSource.PixelWidth, frameSource.PixelHeight))
+
+        Finally
+
+            If graphics IsNot Nothing Then
+
+                graphics.Dispose()
+                graphics = Nothing
+
+            End If
+
+            If backBufferBitmap IsNot Nothing Then
+
+                backBufferBitmap.Dispose()
+                backBufferBitmap = Nothing
+
+            End If
+
+            frameSource.Unlock()
+
+        End Try
+
+    End Sub
+
+    Private Sub StopRenderLoop()
+        'Stoppt den Frame-Timer und trennt dessen Eventhandler.
+
+        If frameTimer Is Nothing Then
+            Exit Sub
+        End If
+
+        frameTimer.Stop()
+
+        RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
+
+        frameTimer = Nothing
+
+    End Sub
+
+    'Hilfsfunktionen
+    Private Function BerechneAnkerpunkt(ankerpunkt As String, bildBreite As Double, bildHoehe As Double) _
+        As Windows.Point
+
+        'Berechnet die linke obere Position eines skalierten Bildes anhand des gewählten Ankerpunktes.
+
+        Dim x As Double
+        Dim y As Double
+
+        x = 0.0F
+        y = 0.0F
+
+        Select Case ankerpunkt
+
+            Case "NW"
+
+                x = 0.0F
+                y = 0.0F
+
+            Case "N"
+
+                x = (clientSize.Width - bildBreite) / 2.0F
+                y = 0.0F
+
+            Case "NO"
+
+                x = clientSize.Width - bildBreite
+                y = 0.0F
+
+            Case "O"
+
+                x = clientSize.Width - bildBreite
+                y = (clientSize.Height - bildHoehe) / 2.0F
+
+            Case "SO"
+
+                x = clientSize.Width - bildBreite
+                y = clientSize.Height - bildHoehe
+
+            Case "S"
+
+                x = (clientSize.Width - bildBreite) / 2.0F
+                y = clientSize.Height - bildHoehe
+
+            Case "SW"
+
+                x = 0.0F
+                y = clientSize.Height - bildHoehe
+
+            Case "W"
+
+                x = 0.0F
+                y = (clientSize.Height - bildHoehe) / 2.0F
+
+            Case "Z"
+
+                x = (clientSize.Width - bildBreite) / 2.0F
+                y = (clientSize.Height - bildHoehe) / 2.0F
+
+        End Select
+
+        Return New Windows.Point(x, y)
+
+    End Function
+
+    'Bereinigen und Dispose
+    Private Sub BeendeUndBereinigeTransition()
+        'Stoppt die Transition und gibt sämtliche gehaltenen
+        'Render- und Bildressourcen frei.
+
+        transitionLaeuft = False
+
+        laufzeit.Stop()
+
+        StopRenderLoop()
+
+        frameSource = Nothing
+
+        If oldBmp IsNot Nothing Then
+
+            oldBmp.Dispose()
+            oldBmp = Nothing
+
+        End If
+
+        If newBmp IsNot Nothing Then
+
+            newBmp.Dispose()
+            newBmp = Nothing
+
+        End If
+
+        oldBmpGerahmt = Nothing
+        newBmpGerahmt = Nothing
+
+        aktuellerAnkerpunktOld = Nothing
+        aktuellerAnkerpunktNew = Nothing
+
+        externeDauerInMS = 0
+
+    End Sub
+
+#Region "IDisposable"
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        'Gibt sämtliche Ressourcen dieser Transition endgültig frei.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        wurdeBereinigt = True
+
+        BeendeUndBereinigeTransition()
+
+        GC.SuppressFinalize(Me)
+
+    End Sub
+
+#End Region
 
 End Class

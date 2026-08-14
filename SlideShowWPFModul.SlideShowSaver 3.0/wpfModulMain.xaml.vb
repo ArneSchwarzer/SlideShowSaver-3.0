@@ -2,6 +2,7 @@
 Imports System.IO
 Imports System.Windows.Forms
 Imports System.Windows.Interop
+Imports System.Windows.Media
 Imports System.Windows.Media.Animation
 Imports System.Windows.Threading
 Imports SlideShowBildauswahl
@@ -87,6 +88,9 @@ Partial Public Class wpfModulMain
 
     'Sonstiges
     Private rnd As New Random()
+
+    'Debugging
+    Private Const DEBUGGING_TOPMOST_OFF As Boolean = True
 
 #End Region
 
@@ -517,6 +521,7 @@ Partial Public Class wpfModulMain
     Private Async Sub TmrModul_Tick(sender As Object, e As EventArgs) Handles tmrModul.Tick
         'Nac Beendigung der Anzeige des Bildes gemäß Anzeigedauer startet der Timer die nächste Transition
         'oder, falls keine ausgewählt ist, initiiert den Bildwechsel.
+        Dim transitionWurdeGeladen As Boolean
 
         If ressourcenWurdenBereinigt Then Exit Sub
         If transitionIstAktiv Then Exit Sub
@@ -546,25 +551,26 @@ Partial Public Class wpfModulMain
 
             txbPräsentationsschirm.Visibility = Visibility.Collapsed
             imgAnzeige.Visibility = Visibility.Visible
-            LadeNeueTransition(False)
 
-            If listOfEnabledTransitions.Count > 0 AndAlso aktuellesBild IsNot Nothing Then
+            transitionWurdeGeladen = LadeNeueTransition(False)
+
+            If transitionWurdeGeladen AndAlso aktiveTransition IsNot Nothing AndAlso
+                aktuellesBild IsNot Nothing AndAlso neuesBild IsNot Nothing Then
 
                 'Transition vorbereiten und Status setzen
                 sizeWinForm = New Size(Me.RenderSize.Width, Me.RenderSize.Height)
                 transitionIstAktiv = True
 
                 'Transition starten
-                aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild, PictureBoxSizeMode.Zoom, sizeWinForm)
+                aktiveTransition.RunTransition(aktuellesBild, PictureBoxSizeMode.Zoom, neuesBild,
+                                               PictureBoxSizeMode.Zoom, sizeWinForm)
 
             Else
-                'Wenn weder der Präsentationsschirm gezeigt werden soll, noch eine legitime Transition gefunden
-                'wurde, dann muss der Timer halt selber ran...
 
-                'Status setzen
+                'Keine funktionsfähige Transition vorhanden:
+                'direkter Bildwechsel
                 transitionIstAktiv = False
 
-                'Bildanzeige starten
                 BildWechseln()
                 BildAnzeigen()
 
@@ -591,16 +597,15 @@ Partial Public Class wpfModulMain
 
     End Sub
 
-    Private Sub Transition_TransitionFrameIstFertig(rtb As RenderTargetBitmap)
-        'Zeigt den von der Transition aktualisierten Frame an.
+    Private Sub TransitionFrameIstFertig(image As ImageSource)
 
-        If rtb Is Nothing Then
+        If imgAnzeige Is Nothing Then
             Exit Sub
         End If
 
-        If Not ReferenceEquals(imgAnzeige.Source, rtb) Then
+        If Not ReferenceEquals(imgAnzeige.Source, image) Then
 
-            imgAnzeige.Source = rtb
+            imgAnzeige.Source = image
 
         Else
 
@@ -829,76 +834,109 @@ Partial Public Class wpfModulMain
     'Hilfs- und Verwaltungsfunktionen
     'Transitionen
 
-    Private Sub LadeNeueTransition(istInitialisierung As Boolean)
+    Private Function LadeNeueTransition(istInitialisierung As Boolean) As Boolean
+
+        Dim letzteTransitionName As String
+
+        letzteTransitionName = Nothing
 
         LegitimeTransitionsListeErstellen()
 
-        'Transition aussuchen
-        If listOfEnabledTransitions.Count > 0 Then
-            Select Case aktuelleSettings.TransitionsReihenfolge
-                Case "In Reihenfolge"
-
-                    If istInitialisierung Then
-                        neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
-                        If neueTransition = Nothing Then neueTransition = ""
-                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
-                    Else
-                        WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition", aktiveTransition.TransitionName)
-                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, aktiveTransition.TransitionName)
-                    End If
-
-                Case "Zufällig"
-
-                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-
-                Case "Zufällig bei Start"
-                    'TODO - Echte Logik einbauen, so dass NUR bei Änderungen der Einstellungen eine "Not-Transition" geladen wird.
-
-                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-
-                Case "In Reihenfolge bei Start"
-                    'TODO - Echte Logik einbauen, so dass NUR bei Änderungen der Einstellungen eine "Not-Transition" geladen wird.
-
-                    If istInitialisierung Then
-                        neueTransition = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
-                        If neueTransition = Nothing Then neueTransition = ""
-                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, neueTransition)
-                    Else
-                        neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, aktiveTransition.TransitionName)
-                    End If
-
-                Case Else
-
-                    'Entspricht "Zufällig bei Start"
-                    neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
-
-            End Select
+        If listOfEnabledTransitions Is Nothing OrElse listOfEnabledTransitions.Count = 0 Then
 
             BeendeUndBereinigeTransition(aktiveTransition)
 
-            Try
-
-                aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
-
-                If aktiveTransition IsNot Nothing Then
-
-                    AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-                    AddHandler aktiveTransition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
-
-                End If
-
-            Catch ex As Exception
-
-                LogHandling.LogError("Die Transition """ & neueTransition & """ konnte nicht geladen werden: " &
-                                     ex.ToString())
-
-                BeendeUndBereinigeTransition(aktiveTransition)
-
-            End Try
+            Return False
 
         End If
 
-    End Sub
+        If aktiveTransition IsNot Nothing Then
+            letzteTransitionName = aktiveTransition.TransitionName
+        End If
+
+        Select Case aktuelleSettings.TransitionsReihenfolge
+
+            Case "In Reihenfolge"
+
+                If istInitialisierung OrElse String.IsNullOrWhiteSpace(letzteTransitionName) Then
+
+                    letzteTransitionName = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+
+                    If letzteTransitionName Is Nothing Then
+                        letzteTransitionName = ""
+                    End If
+
+                Else
+
+                    WriteToRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition", letzteTransitionName)
+
+                End If
+
+                neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransitionName)
+
+            Case "Zufällig"
+
+                neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+
+            Case "Zufällig bei Start"
+
+                'TODO - Echte Logik einbauen, so dass NUR bei Änderungen
+                'der Einstellungen eine "Not-Transition" geladen wird.
+
+                neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+
+            Case "In Reihenfolge bei Start"
+
+                If istInitialisierung OrElse String.IsNullOrWhiteSpace(letzteTransitionName) Then
+
+                    letzteTransitionName = ReadFromRegistry(ModulMain.SLIDESHOWMODUL_SSS_FULLPATH & "LetzteTransition")
+
+                    If letzteTransitionName Is Nothing Then
+                        letzteTransitionName = ""
+                    End If
+
+                End If
+
+                neueTransition = GetNextAlphabeticItemName(listOfEnabledTransitions, letzteTransitionName)
+
+            Case Else
+
+                'Entspricht "Zufällig bei Start"
+                neueTransition = listOfEnabledTransitions(rnd.Next(listOfEnabledTransitions.Count))
+
+        End Select
+
+        BeendeUndBereinigeTransition(aktiveTransition)
+
+        Try
+
+            aktiveTransition = TransitionByNameLoader.LadeTransitionNachName(neueTransition)
+
+            If aktiveTransition Is Nothing Then
+
+                LogHandling.LogWarn("Die Transition """ & neueTransition & """ konnte nicht geladen werden.")
+
+                Return False
+
+            End If
+
+            AddHandler aktiveTransition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
+            AddHandler aktiveTransition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
+
+            Return True
+
+        Catch ex As Exception
+
+            LogHandling.LogError("Die Transition """ & neueTransition & """ konnte nicht geladen werden: " &
+                                 ex.ToString())
+
+            BeendeUndBereinigeTransition(aktiveTransition)
+
+            Return False
+
+        End Try
+
+    End Function
 
     Public Sub LegitimeTransitionsListeErstellen()
         'Aktualisiert die Liste der Transitionen, die das Modul SlideShowSaver 3.0 aktuell anzeigen darf
@@ -1266,7 +1304,7 @@ Partial Public Class wpfModulMain
         Try
 
             RemoveHandler transition.TransitionIsRunning, AddressOf Transition_TransitionIsRunning
-            RemoveHandler transition.TransitionFrameIstFertig, AddressOf Transition_TransitionFrameIstFertig
+            RemoveHandler transition.TransitionFrameIstFertig, AddressOf TransitionFrameIstFertig
 
         Catch ex As Exception
 

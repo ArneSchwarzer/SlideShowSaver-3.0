@@ -44,11 +44,12 @@ Public Class frmOptionsMain
     Private sprachenOptionsControl As UserControl
 
     'Formularbereinigung & Initialisierungssteuerung
-    Private wirdInitialisiert As Boolean
+    Private wirdInitialisiert As Boolean = True
     Private formularWurdeBereinigt As Boolean
 
     'Sonstiges
     Private aktuelleSettings As SettingsMain
+
 #End Region
 
 #Region "Formular-Lebenszyklus"
@@ -63,9 +64,9 @@ Public Class frmOptionsMain
 
         CursorPowerShow()
 
-        CheckYourMail()
-
-        wirdInitialisiert = True
+        'Für den Direct-Commit-Dialog ist die Registry
+        'die maßgebliche Settingsquelle.
+        aktuelleSettings = SaverMain.ReadMainSettingsFromRegistryOrDefaults()
 
         Try
 
@@ -109,13 +110,6 @@ Public Class frmOptionsMain
 #End Region
 
 #Region "Initialisierung und Settings"
-
-    Private Sub CheckYourMail()
-        'aktuelleSettings aus der SettingsInbox abholen
-
-        aktuelleSettings = GetSettings(Of SettingsMain)("Main")
-
-    End Sub
 
     Private Sub IniOrReinitialise()
         ' Modul-Liste laden
@@ -175,40 +169,37 @@ Public Class frmOptionsMain
 
         'Checklistbox clbTransitionsModule
         If transitionList.Count = 0 Then
+
             clbTransitionsModule.Enabled = False
             lblNclbTransitionsModule.Enabled = False
-            cmbTransitionsReihenfolge.Enabled = False
-            lblNcmbAbspielmodusTransitionsModule.Enabled = False
-            lblKeineTransitionsModule.Visible = True
+
         Else
-            lblKeineTransitionsModule.Visible = False
+
+            clbTransitionsModule.Enabled = True
+            lblNclbTransitionsModule.Enabled = True
+
             clbTransitionsModule.Items.Clear()
+
             For Each transition In transitionList
+
                 clbTransitionsModule.Items.Add(transition)
+
             Next
 
             EnableToolTipsForCLB(clbTransitionsModule)
 
             markierteTransitionen = JoinSemicolonList(aktuelleSettings.ModulTransitionListe)
-            SetCheckedItemsByName(Of SlideShowTransitionInfo)(
-            clbTransitionsModule,
-            markierteTransitionen,
-            Function(m) m.TransitionName
-            )
+            SetCheckedItemsByName(Of SlideShowTransitionInfo)(clbTransitionsModule, markierteTransitionen,
+                                                              Function(m) m.TransitionName)
 
             clbTransitionsModule.Sorted = True
+
         End If
 
         'Combobox cmbTransitionsReihenfolge
         cmbTransitionsReihenfolge.SelectedItem = aktuelleSettings.ModulTransitionReihenfolge
 
-        If clbTransitionsModule.CheckedItems.Count <= 1 Then
-            cmbTransitionsReihenfolge.Enabled = False
-            lblNcmbAbspielmodusTransitionsModule.Enabled = False
-        Else
-            cmbTransitionsReihenfolge.Enabled = True
-            lblNcmbAbspielmodusTransitionsModule.Enabled = True
-        End If
+        KeineTransitionsLabelLogik(clbTransitionsModule.CheckedItems.Count)
 
         'Checkbox MultiMonitor Support
         'Solange noch kein MultiMonitor Support implementiert ist
@@ -667,6 +658,34 @@ Public Class frmOptionsMain
 
     End Sub
 
+    Private Sub cmbModulwechsel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbModulwechsel.SelectedIndexChanged
+
+        If cmbModulwechsel.SelectedIndex = 0 OrElse cmbModulwechsel.SelectedIndex = 2 Then
+
+            lblNtrkDauerModulwechsel.Enabled = False
+            lblDauerModuswechsel.Enabled = False
+            trkDauerModulwechsel.Enabled = False
+
+        Else
+
+            lblNtrkDauerModulwechsel.Enabled = True
+            lblDauerModuswechsel.Enabled = True
+            trkDauerModulwechsel.Enabled = True
+
+        End If
+
+        If wirdInitialisiert OrElse formularWurdeBereinigt OrElse cmbModulwechsel.SelectedIndex < 0 Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.ModulReihenfolge = cmbModulwechsel.SelectedItem.ToString()
+
+        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulReihenfolge", cmbModulwechsel.SelectedItem.ToString())
+
+    End Sub
+
 #End Region
 
 #Region "Transitionauswahl und Transitionoptionen"
@@ -743,7 +762,8 @@ Public Class frmOptionsMain
     End Sub
 
     Private Sub SpeichereModulTransitionsAuswahl()
-        'Speichert die vollständig aktualisierte Transitionauswahl.
+        'Speichert die vollständig aktualisierte Transitionauswahl
+        'und aktualisiert den zugehörigen UI-Zustand.
 
         If wirdInitialisiert OrElse formularWurdeBereinigt OrElse IsDisposed OrElse Disposing Then
 
@@ -754,17 +774,7 @@ Public Class frmOptionsMain
         CheckedListBoxHandling.SaveListBoxToRegistry(clbTransitionsModule, SLIDESHOWMAIN_PATH &
                                                      "ModulTransitionListe")
 
-        If clbTransitionsModule.CheckedItems.Count <= 1 Then
-
-            cmbTransitionsReihenfolge.Enabled = False
-            lblNcmbAbspielmodusTransitionsModule.Enabled = False
-
-        Else
-
-            cmbTransitionsReihenfolge.Enabled = True
-            lblNcmbAbspielmodusTransitionsModule.Enabled = True
-
-        End If
+        KeineTransitionsLabelLogik(clbTransitionsModule.CheckedItems.Count)
 
     End Sub
 
@@ -772,6 +782,42 @@ Public Class frmOptionsMain
 
         If clbTransitionsModule.SelectedItem IsNot Nothing Then
             Modul_BitteWechseleZuTransition(clbTransitionsModule, clbTransitionsModule.SelectedItem.ToString)
+        End If
+
+    End Sub
+
+    Private Sub KeineTransitionsLabelLogik(anzahlMarkierteTransitionen As Integer)
+        'Aktualisiert Warnhinweis und Abspielmodus abhängig
+        'von geladenen und ausgewählten Modul-Transitionen.
+
+        If clbTransitionsModule.Items.Count = 0 Then
+
+            lblKeineTransitionsModule.Visible = True
+
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+
+        ElseIf anzahlMarkierteTransitionen = 0 Then
+
+            lblKeineTransitionsModule.Visible = True
+
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+
+        ElseIf anzahlMarkierteTransitionen = 1 Then
+
+            lblKeineTransitionsModule.Visible = False
+
+            cmbTransitionsReihenfolge.Enabled = False
+            lblNcmbAbspielmodusTransitionsModule.Enabled = False
+
+        Else
+
+            lblKeineTransitionsModule.Visible = False
+
+            cmbTransitionsReihenfolge.Enabled = True
+            lblNcmbAbspielmodusTransitionsModule.Enabled = True
+
         End If
 
     End Sub
@@ -867,33 +913,9 @@ Public Class frmOptionsMain
 
         End If
 
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulDauer", trkDauerModulwechsel.Value.ToString())
+        aktuelleSettings.ModulDauer = trkDauerModulwechsel.Value
 
-    End Sub
-
-    Private Sub cmbModulwechsel_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbModulwechsel.SelectedIndexChanged
-
-        If cmbModulwechsel.SelectedIndex = 0 OrElse cmbModulwechsel.SelectedIndex = 2 Then
-
-            lblNtrkDauerModulwechsel.Enabled = False
-            lblDauerModuswechsel.Enabled = False
-            trkDauerModulwechsel.Enabled = False
-
-        Else
-
-            lblNtrkDauerModulwechsel.Enabled = True
-            lblDauerModuswechsel.Enabled = True
-            trkDauerModulwechsel.Enabled = True
-
-        End If
-
-        If wirdInitialisiert OrElse formularWurdeBereinigt OrElse cmbModulwechsel.SelectedIndex < 0 Then
-
-            Exit Sub
-
-        End If
-
-        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulReihenfolge", cmbModulwechsel.SelectedItem.ToString())
+        WriteToRegistry(SLIDESHOWMAIN_PATH & "ModulDauer", aktuelleSettings.ModulDauer.ToString())
 
     End Sub
 
@@ -906,6 +928,8 @@ Public Class frmOptionsMain
         End If
 
         'DirectCommit
+        aktuelleSettings.MultiMonitor = chkMultiMonitor.Checked
+
         WriteToRegistry(SLIDESHOWMAIN_PATH & "MultiMonitor", chkMultiMonitor.Checked.ToString)
 
     End Sub
@@ -926,6 +950,7 @@ Public Class frmOptionsMain
                 WriteToRegistry(SLIDESHOWMAIN_PATH & "Hintergrundfarbe", ColorToString(dlg.Color))
             End If
         End Using
+
     End Sub
 
 #End Region

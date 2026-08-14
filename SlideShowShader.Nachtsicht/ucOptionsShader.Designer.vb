@@ -23,11 +23,9 @@ Partial Class ucOptionsShader
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.lblShadername = New System.Windows.Forms.Label()
-Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblNShaderName = New System.Windows.Forms.Label()
-Me.lblNShaderName.Tag = "langKey=lblNShaderName"
-        Me.lblNoOptions = New System.Windows.Forms.Label()
-Me.lblNoOptions.Tag = "langKey=lblNoOptions"
+        Me.btnDefaults = New System.Windows.Forms.Button()
+        Me.chkBNDOverlay = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
         'lblShadername
@@ -38,6 +36,7 @@ Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblShadername.Name = "lblShadername"
         Me.lblShadername.Size = New System.Drawing.Size(168, 41)
         Me.lblShadername.TabIndex = 17
+        Me.lblShadername.Tag = "langKey=lblShadername"
         Me.lblShadername.Text = "Nachtsicht"
         '
         'lblNShaderName
@@ -47,22 +46,37 @@ Me.lblNoOptions.Tag = "langKey=lblNoOptions"
         Me.lblNShaderName.Name = "lblNShaderName"
         Me.lblNShaderName.Size = New System.Drawing.Size(110, 41)
         Me.lblNShaderName.TabIndex = 16
+        Me.lblNShaderName.Tag = "langKey=lblNShaderName"
         Me.lblNShaderName.Text = "Shader"
         '
-        'lblNoOptions
+        'btnDefaults
         '
-        Me.lblNoOptions.AutoSize = True
-        Me.lblNoOptions.Location = New System.Drawing.Point(34, 144)
-        Me.lblNoOptions.Name = "lblNoOptions"
-        Me.lblNoOptions.Size = New System.Drawing.Size(676, 41)
-        Me.lblNoOptions.TabIndex = 18
-        Me.lblNoOptions.Text = "Dieser Shader bietet keine einstellbaren Optionen"
+        Me.btnDefaults.Location = New System.Drawing.Point(667, 20)
+        Me.btnDefaults.Name = "btnDefaults"
+        Me.btnDefaults.Size = New System.Drawing.Size(181, 52)
+        Me.btnDefaults.TabIndex = 23
+        Me.btnDefaults.Tag = "langKey=btnDefaults"
+        Me.btnDefaults.Text = "Standards"
+        Me.btnDefaults.UseVisualStyleBackColor = True
+        '
+        'chkBNDOverlay
+        '
+        Me.chkBNDOverlay.AutoSize = True
+        Me.chkBNDOverlay.Font = New System.Drawing.Font("Segoe UI", 10.0!)
+        Me.chkBNDOverlay.Location = New System.Drawing.Point(41, 130)
+        Me.chkBNDOverlay.Name = "chkBNDOverlay"
+        Me.chkBNDOverlay.Size = New System.Drawing.Size(353, 45)
+        Me.chkBNDOverlay.TabIndex = 29
+        Me.chkBNDOverlay.Tag = "langKey=chkBNDOverlay"
+        Me.chkBNDOverlay.Text = "BND Overlay aktivieren"
+        Me.chkBNDOverlay.UseVisualStyleBackColor = True
         '
         'ucOptionsShader
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.lblNoOptions)
+        Me.Controls.Add(Me.chkBNDOverlay)
+        Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.lblShadername)
         Me.Controls.Add(Me.lblNShaderName)
         Me.Font = New System.Drawing.Font("Segoe UI", 10.0!)
@@ -76,5 +90,6 @@ Me.lblNoOptions.Tag = "langKey=lblNoOptions"
 
     Friend WithEvents lblShadername As Windows.Forms.Label
     Friend WithEvents lblNShaderName As Windows.Forms.Label
-    Friend WithEvents lblNoOptions As Windows.Forms.Label
+    Friend WithEvents btnDefaults As Windows.Forms.Button
+    Friend WithEvents chkBNDOverlay As Windows.Forms.CheckBox
 End Class

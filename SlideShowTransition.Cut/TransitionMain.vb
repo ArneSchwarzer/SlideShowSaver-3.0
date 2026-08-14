@@ -4,67 +4,159 @@ Imports System.Windows.Media.Imaging
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.ImageConversionHandling
 
-
 Public Class TransitionMain
     Implements ISlideShowTransition
 
-    'Variablendeklaration
-    Private newImg As BitmapImage
-    Private newRTImg As RenderTargetBitmap
-    Private newPicBoxSM As PictureBoxSizeMode
-    Private clntSize As Size
+#Region "Variablendeklaration"
+
+    Private transitionLaeuft As Boolean
+    Private wurdeBereinigt As Boolean
+
+#End Region
+
+#Region "Eigenschaften"
 
     Public ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
+
         Get
             Return "Direkter Übergang"
         End Get
+
     End Property
 
     Public ReadOnly Property TransitionKurzBeschreibung As String Implements ISlideShowTransition.TransitionKurzBeschreibung
+
         Get
             Return "Wechselt sofort auf das nächste Bild"
         End Get
+
     End Property
 
     Public ReadOnly Property TransitionVersion As Version Implements ISlideShowTransition.TransitionVersion
+
         Get
             Return New Version(1, 0, 0, 0)
         End Get
+
     End Property
 
+#End Region
+
+#Region "Events"
+
     Public Event TransitionIsRunning As ISlideShowTransition.TransitionIsRunningEventHandler Implements ISlideShowTransition.TransitionIsRunning
+
     Public Event TransitionFrameIstFertig As ISlideShowTransition.TransitionFrameIstFertigEventHandler Implements ISlideShowTransition.TransitionFrameIstFertig
 
-    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
-                         newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode,
-                         clientSize As Size, Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+#End Region
 
-        Dim sizeWPF As New Windows.Size(clientSize.Width, clientSize.Height)
+#Region "Transition"
 
-        'Lohnt eigentlich gar nicht...
-        RaiseEvent TransitionIsRunning(True)
+    Public Sub RunTransition(
+        oldImage As BitmapImage,
+        picBoxModeOld As PictureBoxSizeMode,
+        newImage As BitmapImage,
+        picBoxModeNew As PictureBoxSizeMode,
+        clientSize As Size,
+        Optional durationMs As Integer = 0) _
+        Implements ISlideShowTransition.RunTransition
+        'Erzeugt direkt den finalen Ziel-Frame und meldet ihn
+        'als fertiges Transitionsergebnis.
 
-        newRTImg = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
+        Dim sizeWPF As Windows.Size
+        Dim zielFrame As RenderTargetBitmap
 
-        'Dem Modul 1/2 Sekunde Zeit zum aufholen geben und dann das Bild direkt als fertig zurückgeben
-        System.Threading.Thread.Sleep(500)
+        If wurdeBereinigt Then
 
-        RaiseEvent TransitionFrameIstFertig(newRTImg)
-        RaiseEvent TransitionIsRunning(False)
+            Throw New ObjectDisposedException(NameOf(TransitionMain))
+
+        End If
+
+        BeendeUndBereinigeTransition()
+
+        sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
+
+        zielFrame = Nothing
+
+        Try
+
+            transitionLaeuft = True
+
+            RaiseEvent TransitionIsRunning(True)
+
+            zielFrame = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
+
+            'Dem aufrufenden Modul kurz Zeit zum Umschalten geben.
+            System.Threading.Thread.Sleep(500)
+
+            If Not transitionLaeuft Then
+                Exit Sub
+            End If
+
+            RaiseEvent TransitionFrameIstFertig(zielFrame)
+
+        Finally
+
+            BeendeUndBereinigeTransition()
+
+        End Try
 
     End Sub
-
 
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Nichts zu tun, Frame wurde bereits geliefert
+        'Beendet eine gegebenenfalls noch laufende Cut-Transition.
+
+        BeendeUndBereinigeTransition()
+
+    End Sub
+
+#End Region
+
+#Region "Optionsdialog"
+
+    Public Function GetTransitionOptionsDialog() As UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
+        'Stellt frmOptionsMain das - leere - ucOptionsTransition zur Verfügung
+
+        Return New ucOptionsTransition
+
+    End Function
+
+#End Region
+
+#Region "Bereinigung"
+
+    Private Sub BeendeUndBereinigeTransition()
+        'Setzt den Laufzustand kontrolliert zurück.
+
+        If Not transitionLaeuft Then
+            Exit Sub
+        End If
+
+        transitionLaeuft = False
 
         RaiseEvent TransitionIsRunning(False)
 
     End Sub
 
-    'Optionen & OptionsDialog
-    Public Function GetTransitionOptionsDialog() As Windows.Forms.UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
-        Return New ucOptonsTransition
-    End Function
+#End Region
+
+#Region "IDisposable"
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        'Beendet die Transition endgültig.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        BeendeUndBereinigeTransition()
+
+        wurdeBereinigt = True
+
+        GC.SuppressFinalize(Me)
+
+    End Sub
+
+#End Region
 
 End Class

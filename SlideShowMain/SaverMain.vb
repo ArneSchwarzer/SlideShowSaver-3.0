@@ -126,6 +126,10 @@ Module SaverMain
 
     Private Const TITELCARD_ANZEIGEDAUER_MS As Integer = 3000
     Private Const TITELCARD_SCHRIFTGROESSE_PT As Double = 72.0
+
+    'Debugging
+    Private Const DEBUGGING_TOPMOST_OFF As Boolean = True
+
 #End Region
 
 #Region "DWM und native Fenstersteuerung"
@@ -348,10 +352,10 @@ Module SaverMain
 #Region "Framework-Initialisierung"
 
     Private Sub IniAndReinitialize()
-        '(Re-)Initialisieren der zentralen Framework-Daten gemäß Settings
+        '(Re-)Initialisiert die zentralen Framework-Daten
+        'gemäß den persistenten Settings.
 
-        'Basisdaten auslesen
-        ReadMainSettingsFromRegistryOrDefaults()
+        aktuelleSettings = ReadMainSettingsFromRegistryOrDefaults()
 
         'Aktuelle Settings für andere Framework-Komponenten bereitstellen
         StoreSettings("Main", aktuelleSettings)
@@ -1124,8 +1128,13 @@ Module SaverMain
 
             transitionIstAktiv = True
 
+            LogHandling.LogDebug("RunTransition() wird aufgerufen: " & activeTransition.TransitionName &
+                                 "; Größe: " & clientSize.Width.ToString() & "x" & clientSize.Height.ToString())
+
             activeTransition.RunTransition(startBild, PictureBoxSizeMode.Zoom, zielBild, PictureBoxSizeMode.CenterImage,
                                             clientSize)
+
+            LogHandling.LogDebug("RunTransition() ist zurückgekehrt: " & activeTransition.TransitionName)
 
             Return True
 
@@ -1321,7 +1330,11 @@ Module SaverMain
                 aktuelleSettings.Hintergrundfarbe.G,
                 aktuelleSettings.Hintergrundfarbe.B)
 
+        LogHandling.LogDebug("TransitionHostVorbereiten(): Host vorhanden: " & (transitionHost IsNot Nothing).ToString())
+
         If transitionHost Is Nothing Then
+
+            LogHandling.LogDebug("TransitionHostVorbereiten(): Neuer WPF-Host wird erzeugt.")
 
             transitionHost = New SW.Window()
 
@@ -1331,7 +1344,7 @@ Module SaverMain
 
             transitionHost.ShowInTaskbar = False
             transitionHost.ShowActivated = False
-            transitionHost.Topmost = True
+            transitionHost.Topmost = Not DEBUGGING_TOPMOST_OFF
 
             transitionHost.WindowState = SW.WindowState.Normal
 
@@ -1361,6 +1374,8 @@ Module SaverMain
 
         End If
 
+        LogHandling.LogDebug("TransitionHostVorbereiten(): WPF-Host vollständig erzeugt.")
+
         transitionHost.Background = New SWM.SolidColorBrush(hintergrundFarbe)
         transitionHostGrid.Background = New SWM.SolidColorBrush(hintergrundFarbe)
 
@@ -1368,6 +1383,8 @@ Module SaverMain
         'Angezeigt wird es erst, nachdem eine gültige Bildquelle gesetzt wurde.
 
         transitionHost.Topmost = True
+
+        LogHandling.LogDebug("TransitionHostVorbereiten(): Host vorbereitet.")
 
     End Sub
 
@@ -1386,13 +1403,29 @@ Module SaverMain
             If Not transitionHost.IsVisible Then
 
                 'Die endgültige Geometrie wird unmittelbar vor Show() noch einmal gesetzt.
+                LogHandling.LogDebug("TransitionHostAnzeigen(): Host wird positioniert.")
+
                 TransitionHostAufPrimaerbildschirmPositionieren()
 
+                LogHandling.LogDebug("TransitionHostAnzeigen(): Host positioniert.")
+
                 transitionHost.Topmost = True
+
+                LogHandling.LogDebug("TransitionHostAnzeigen(): Show() beginnt.")
+
                 transitionHost.Show()
 
+                LogHandling.LogDebug("TransitionHostAnzeigen(): Show() abgeschlossen.")
+
+                LogHandling.LogDebug("TransitionHostAnzeigen(): native Z-Order wird gesetzt.")
+
                 TransitionHostNachVorneSetzen()
+
+                LogHandling.LogDebug("TransitionHostAnzeigen(): WPF-Darstellung wird synchronisiert.")
+
                 TransitionHostDarstellungErzwingen()
+
+                LogHandling.LogDebug("TransitionHostAnzeigen(): WPF-Darstellung synchronisiert.")
 
             End If
 
@@ -1436,6 +1469,8 @@ Module SaverMain
 
         TransitionHostVorbereiten()
 
+        LogHandling.LogDebug("ZeigeBildImTransitionHost(): Host vorbereitet, statisches Bild wird gesetzt.")
+
         Try
             transitionHostZeigtDynamischeFrames = False
 
@@ -1456,7 +1491,13 @@ Module SaverMain
             transitionHostImage.Source = bild
             transitionHostImage.InvalidateVisual()
 
+            SWM.RenderOptions.SetBitmapScalingMode(transitionHostImage, SWM.BitmapScalingMode.HighQuality)
+
+            LogHandling.LogDebug("ZeigeBildImTransitionHost(): Bildquelle gesetzt. Host wird angezeigt.")
+
             TransitionHostAnzeigen()
+
+            LogHandling.LogDebug("ZeigeBildImTransitionHost(): TransitionHostAnzeigen() zurückgekehrt.")
 
         Catch ex As Exception
 
@@ -1468,11 +1509,11 @@ Module SaverMain
 
     End Sub
 
-    Private Sub TransitionFrameIstFertig(bitmap As SWMI.RenderTargetBitmap)
-        'Zeigt den wiederverwendeten RenderTargetBitmap-Cache
-        'der Transition direkt im TransitionHost an.
+    Private Sub TransitionFrameIstFertig(image As SWM.ImageSource)
+        'Zeigt den von der Transition gelieferten Bitmap-Frame
+        'direkt im TransitionHost an.
 
-        If bitmap Is Nothing Then
+        If image Is Nothing Then
             Exit Sub
         End If
 
@@ -1493,13 +1534,16 @@ Module SaverMain
             If Not transitionHostZeigtDynamischeFrames Then
 
                 SetzeTransitionHostHintergrundfarbe()
+
+                SWM.RenderOptions.SetBitmapScalingMode(transitionHostImage, SWM.BitmapScalingMode.LowQuality)
+
                 transitionHostZeigtDynamischeFrames = True
 
             End If
 
-            If Not ReferenceEquals(transitionHostImage.Source, bitmap) Then
+            If Not ReferenceEquals(transitionHostImage.Source, image) Then
 
-                transitionHostImage.Source = bitmap
+                transitionHostImage.Source = image
 
             Else
 
@@ -1761,6 +1805,8 @@ Module SaverMain
             Exit Sub
         End If
 
+        LogHandling.LogDebug("TransitionHost ContentRendered wurde ausgelöst.")
+
         transitionHostWartetAufErstdarstellung = False
 
         If transitionHost Is Nothing Then
@@ -1770,10 +1816,11 @@ Module SaverMain
 
         End If
 
+        LogHandling.LogDebug("Fortsetzung nach Host-Erstdarstellung wird in Dispatcher eingereiht.")
+
         transitionHost.Dispatcher.BeginInvoke(
-    SWD.DispatcherPriority.ContextIdle,
-    New Action(
-        AddressOf TransitionHostNachErstdarstellungFortsetzen))
+                SWD.DispatcherPriority.ContextIdle,
+                New Action(AddressOf TransitionHostNachErstdarstellungFortsetzen))
 
     End Sub
 
@@ -1785,21 +1832,25 @@ Module SaverMain
             Exit Sub
         End If
 
-        If aktuelleWechselPhase <>
-       MCPWechselPhase.HostVorbereitung Then
+        If aktuelleWechselPhase <> MCPWechselPhase.HostVorbereitung Then
 
             Exit Sub
 
         End If
 
+        LogHandling.LogDebug("DWM-Präsentationsbarriere beginnt.")
+
         If Not TransitionHostDWMAnzeigeAbwarten() Then
 
-            LogHandling.LogWarn(
-        "Die DWM-Darstellung des TransitionHosts konnte nicht " &
-        "eindeutig bestätigt werden. Der Modulwechsel wird dennoch " &
-        "fortgesetzt.")
+            LogHandling.LogWarn("Die DWM-Darstellung des TransitionHosts konnte nicht " &
+                                "eindeutig bestätigt werden. Der Modulwechsel wird dennoch " &
+                                "fortgesetzt.")
 
         End If
+
+        LogHandling.LogDebug("DWM-Präsentationsbarriere beendet.")
+
+        LogHandling.LogDebug("Hostdarstellung bestätigt. Modulwechselpipeline wird fortgesetzt.")
 
         ModulwechselNachHostDarstellungFortsetzen()
 
@@ -1932,6 +1983,7 @@ Module SaverMain
     Private Sub tmrMCP_Tick(sender As Object, e As EventArgs) Handles tmrMCP.Tick
         'Fordert einen automatischen Modulwechsel an.
 
+        LogHandling.LogDebug("MCP-Timer ausgelöst. Automatischer Modulwechsel wird angefordert.")
         MCPModulwechsel()
 
     End Sub
@@ -1977,6 +2029,8 @@ Module SaverMain
         End If
 
         modulwechselIstAktiv = True
+
+        LogHandling.LogDebug("MCP-Modulwechsel gestartet. Initialer Wechsel: " & istInitialerWechsel.ToString())
 
         aktuelleWechselPhase = MCPWechselPhase.Keine
         vorbereiteterModulName = Nothing
@@ -2036,6 +2090,8 @@ Module SaverMain
 
             vorbereiteterModulName = nextModule.ModulName
 
+            LogHandling.LogDebug("Folgemodul vorbereitet: " & vorbereiteterModulName)
+
             'Beim initialen Wechsel liegt der Desktop-Screenshot
             'bereits aus Main() in startBild.
             'Bei späteren Wechseln wird das aktuell laufende Modul aufgenommen.
@@ -2043,9 +2099,17 @@ Module SaverMain
                 AktualisiereStartBild()
             End If
 
+            LogHandling.LogDebug("Startbild für Modulwechsel erstellt. Verfügbar: " & (startBild IsNot Nothing).ToString())
+
             ZielBildErstellen()
 
+            LogHandling.LogDebug("Titelcard für Modulwechsel erstellt. Verfügbar: " & (zielBild IsNot Nothing).ToString())
+
             transitionIstVorbereitet = TransitionseffektAuswaehlen()
+
+            LogHandling.LogDebug("Transitionsauswahl abgeschlossen. Transition vorbereitet: " &
+                                  transitionIstVorbereitet.ToString() & "; Transition: " &
+                                  If(activeTransition IsNot Nothing, activeTransition.TransitionName, "Keine"))
 
             If zielBild Is Nothing Then
 
@@ -2062,6 +2126,8 @@ Module SaverMain
             transitionHostWartetAufErstdarstellung = True
 
             If startBild IsNot Nothing Then
+
+                LogHandling.LogDebug("TransitionHost-Vorbereitung beginnt. Startbild wird an Host übergeben.")
 
                 ZeigeBildImTransitionHost(startBild)
 
@@ -2102,7 +2168,13 @@ Module SaverMain
 
             'Ab diesem Zeitpunkt existiert eine tatsächlich gerenderte
             'Vollbildabdeckung. Das alte Modul darf nun beendet werden.
+
+            LogHandling.LogDebug("Altes Modul wird beendet: " & If(activeModule IsNot Nothing,
+                                 activeModule.ModulName, "Keines"))
+
             BeendeUndBereinigeModul(activeModule)
+
+            LogHandling.LogDebug("Altes Modul wurde beendet und bereinigt.")
 
             If fallbackIsActive AndAlso fallbackInstanz IsNot Nothing Then
 
@@ -2114,7 +2186,13 @@ Module SaverMain
 
             If transitionIstVorbereitet Then
 
+                LogHandling.LogDebug("Transition wird gestartet: " & If(activeTransition IsNot Nothing,
+                                     activeTransition.TransitionName, "Keine"))
+
                 transitionWurdeGestartet = TransitionseffektStarten()
+
+                LogHandling.LogDebug("TransitionseffektStarten() zurückgekehrt. Erfolgreich: " &
+                                     transitionWurdeGestartet.ToString())
 
             End If
 
@@ -2382,6 +2460,9 @@ Module SaverMain
 
         Dim dialogErgebnis As DialogResult
         Dim modulwechselIstNotwendig As Boolean
+        Dim alteTransitionListe As List(Of String)
+        Dim alteTransitionReihenfolge As String
+        Dim transitionSettingsWurdenGeaendert As Boolean
 
         If optionsDialogIsActive OrElse shutdownWurdeGestartet Then
             Exit Sub
@@ -2389,9 +2470,24 @@ Module SaverMain
 
         dialogErgebnis = DialogResult.Cancel
         modulwechselIstNotwendig = False
+        alteTransitionListe = Nothing
+        alteTransitionReihenfolge = Nothing
+        transitionSettingsWurdenGeaendert = False
+
+        If aktuelleSettings.ModulTransitionListe IsNot Nothing Then
+
+            alteTransitionListe = New List(Of String)(aktuelleSettings.ModulTransitionListe)
+
+        Else
+
+            alteTransitionListe = New List(Of String)()
+
+        End If
+
+        alteTransitionReihenfolge = aktuelleSettings.ModulTransitionReihenfolge
 
         'Aktuelle Settings in die SettingsInbox stellen
-        ReadMainSettingsFromRegistryOrDefaults()
+        aktuelleSettings = ReadMainSettingsFromRegistryOrDefaults()
         StoreSettings("Main", aktuelleSettings)
 
         Try
@@ -2430,6 +2526,25 @@ Module SaverMain
         'Zentrale Frameworkdaten neu einlesen
         IniAndReinitialize()
         LegitimeListeErstellen()
+
+        transitionSettingsWurdenGeaendert =
+                Not New HashSet(Of String)(
+                    alteTransitionListe,
+                    StringComparer.OrdinalIgnoreCase).
+                    SetEquals(
+                        If(
+                            aktuelleSettings.ModulTransitionListe,
+                            New List(Of String)())) OrElse
+                Not String.Equals(
+                    alteTransitionReihenfolge,
+                    aktuelleSettings.ModulTransitionReihenfolge,
+                    StringComparison.OrdinalIgnoreCase)
+
+        If transitionSettingsWurdenGeaendert Then
+
+            InitialisiereMCPTransitionen()
+
+        End If
 
         'Den Timer aktualisieren.
         AktualisiereMCPTimer()
@@ -2597,40 +2712,47 @@ Module SaverMain
 #End Region
 
 #Region "Settings"
-    Private Sub ReadMainSettingsFromRegistryOrDefaults()
-        'Liest die aktuellen Settings aus der Registry oder verwendet die definierten Standardwerte
 
+    Friend Function ReadMainSettingsFromRegistryOrDefaults() As SettingsMain
+        'Liest die aktuellen Framework-Settings aus der Registry
+        'oder verwendet die definierten Standardwerte.
+
+        Dim settings As SettingsMain
         Dim tmpRegistryValues As String
         Dim mainDefaults As Dictionary(Of String, String)
 
         mainDefaults = GetMainDefaultSettings()
 
         'ModulDauer
-        aktuelleSettings.ModulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", mainDefaults))
+        settings.ModulDauer = CInt(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulDauer", mainDefaults))
 
         'ModulReihenfolge
-        aktuelleSettings.ModulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", mainDefaults)
+        settings.ModulReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulReihenfolge", mainDefaults)
 
         'Aktivierte Module
         tmpRegistryValues = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulAktivListe", mainDefaults)
 
-        aktuelleSettings.ModulAktivListe = SplitSemicolonList(tmpRegistryValues)
+        settings.ModulAktivListe = SplitSemicolonList(tmpRegistryValues)
 
         'MultiMonitor
-        aktuelleSettings.MultiMonitor = CBool(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "MultiMonitor", mainDefaults))
+        settings.MultiMonitor = CBool(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "MultiMonitor", mainDefaults))
 
         'Modul-Transitionen
         tmpRegistryValues = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionListe", mainDefaults)
 
-        aktuelleSettings.ModulTransitionListe = SplitSemicolonList(tmpRegistryValues)
+        settings.ModulTransitionListe = SplitSemicolonList(tmpRegistryValues)
 
         'Reihenfolge der Modul-Transitionen
-        aktuelleSettings.ModulTransitionReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "ModulTransitionReihenfolge", mainDefaults)
+        settings.ModulTransitionReihenfolge = ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH &
+                                                                    "ModulTransitionReihenfolge", mainDefaults)
 
         'Hintergrundfarbe
-        aktuelleSettings.Hintergrundfarbe = StringToColor(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH & "Hintergrundfarbe", mainDefaults))
+        settings.Hintergrundfarbe = StringToColor(ReadFromRegOrDefaults(SLIDESHOWMAIN_PATH &
+                                                                        "Hintergrundfarbe", mainDefaults))
 
-    End Sub
+        Return settings
+
+    End Function
 
     'Defaultwerte für allgemeine Einstellungen
     Friend Function GetMainDefaultSettings() As Dictionary(Of String, String)
@@ -2649,6 +2771,7 @@ Module SaverMain
         Return mainDefaults
 
     End Function
+
 #End Region
 
 #Region "Framework-Shutdown"
@@ -2776,17 +2899,69 @@ Module SaverMain
 #End Region
 
 #Region "Exception Handling"
+
     Private Sub ThreadExceptionHandler(sender As Object, e As Threading.ThreadExceptionEventArgs)
+
         LogHandling.LogError("ThreadException: " & e.Exception.ToString())
+
+        LoggeMCPFehlerzustand("ThreadException-Zustand")
+
         MessageBox.Show("Fehler im UI-Thread: " & e.Exception.Message)
+
     End Sub
 
     Private Sub UnhandledExceptionHandler(sender As Object, e As UnhandledExceptionEventArgs)
-        Dim ex = TryCast(e.ExceptionObject, Exception)
-        If ex IsNot Nothing Then
-            LogHandling.LogError("UnhandledException: " & ex.ToString())
-            MessageBox.Show("Nicht abgefangene Ausnahme: " & ex.Message)
+
+        Dim ex As Exception
+
+        ex = TryCast(e.ExceptionObject, Exception)
+
+        If ex Is Nothing Then
+            Exit Sub
         End If
+
+        LogHandling.LogError("UnhandledException: " & ex.ToString())
+
+        LoggeMCPFehlerzustand("UnhandledException-Zustand")
+
+        MessageBox.Show("Nicht abgefangene Ausnahme: " & ex.Message)
+
+    End Sub
+
+    Private Sub LoggeMCPFehlerzustand(quelle As String)
+
+        LogHandling.LogError(
+            quelle &
+            " | Wechselphase: " &
+            aktuelleWechselPhase.ToString() &
+            " | Modulwechsel aktiv: " &
+            modulwechselIstAktiv.ToString() &
+            " | Transition aktiv: " &
+            transitionIstAktiv.ToString() &
+            " | Transition: " &
+            If(
+                activeTransition IsNot Nothing,
+                activeTransition.TransitionName,
+                "Keine") &
+            " | Aktives Modul: " &
+            If(
+                activeModule IsNot Nothing,
+                activeModule.ModulName,
+                "Keines") &
+            " | Vorbereitetes Modul: " &
+            If(
+                String.IsNullOrWhiteSpace(
+                    vorbereiteterModulName),
+                "Keines",
+                vorbereiteterModulName) &
+            " | Host vorhanden: " &
+            (transitionHost IsNot Nothing).ToString() &
+            " | Host sichtbar: " &
+            If(
+                transitionHost IsNot Nothing,
+                transitionHost.IsVisible.ToString(),
+                "False"))
+
     End Sub
 
 #End Region

@@ -1,4 +1,5 @@
-﻿Imports System.Drawing
+﻿Imports System.Diagnostics
+Imports System.Drawing
 Imports System.Drawing.Imaging
 Imports System.Runtime.InteropServices
 Imports System.Windows
@@ -25,18 +26,18 @@ Namespace TransitionMain_GradientWischen
         Implements ISlideShowTransition
 
 #Region "Variablendeklaration, Structures & Enums ect."
-        'Variablen, Enums und Structures
-
         'Settings und Konstanten
-        Public Const SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH As String = SLIDESHOWTRANSITION_PATH & "Gradient-Wischen\"
-        Public Const nameTransition As String = "Gradient-Wischen"
-        Private aktuelleSettings As New SlideShowTransitionSettings_GradientWischen
+        Public Const SLIDESHOWTRANSITION_GRADIENTWISCHEN_FULLPATH As String = SLIDESHOWTRANSITION_PATH &
+            "Gradient-Wischen\"
 
-        'Timer und Zeitmanagement
-        Private WithEvents tmrDuration As New Timer
-        Private startTime As DateTime
+        Public Const nameTransition As String = "Gradient-Wischen"
+
+        Private aktuelleSettings As New SlideShowTransitionSettings_GradientWischen()
+
+        'Zeitmanagement
+        Private ReadOnly laufzeit As New Stopwatch()
         Private dauerInMS As Integer
-        Private Const FPS As Integer = 120
+        Private externeDauerInMS As Integer
 
         'Transitions-Bilder
         Private oldBmpGerahmt As RenderTargetBitmap
@@ -46,11 +47,13 @@ Namespace TransitionMain_GradientWischen
 
         'Blending-Maske
         Private mask As Bitmap
-        Private breiteGradientInPx As Integer
-        Private startX As Integer : Private startY As Integer
-        Private endX As Integer : Private endY As Integer
 
-        'Animation, Positionen, Offsets etc. - Systems.Windows-Welt
+        Private startX As Integer
+        Private startY As Integer
+        Private endX As Integer
+        Private endY As Integer
+
+        'Animation
         Private richtung As String
 
         'Zielausgabe
@@ -58,14 +61,27 @@ Namespace TransitionMain_GradientWischen
         Private sizeWinForms As System.Drawing.Size
 
         'Rendering
-        Private drawAction As Action(Of DrawingContext, Windows.Size)
         Private frameTimer As DispatcherTimer
-        Private renderSize As Windows.Size
-        Private rtbCache As RenderTargetBitmap
-        Private stopRequested As Boolean = False
+
+        Private gdiFrameBitmap As Bitmap
+        Private gdiFrameSource As WriteableBitmap
+
+        Private oldPixelBuffer() As Byte
+        Private newPixelBuffer() As Byte
+        Private maskPixelBuffer() As Byte
+        Private framePixelBuffer() As Byte
+        Private radialMaskPixelBuffer() As Byte
+
+        Private oldPixelStride As Integer
+        Private newPixelStride As Integer
+        Private framePixelStride As Integer
+        Private maskRowBytes As Integer
+
+        Private transitionLaeuft As Boolean
+        Private wurdeBereinigt As Boolean
 
         'Sonstiges
-        Private bmp As Bitmap
+        Private ReadOnly rnd As New Random()
 
         Public Structure SlideShowTransitionSettings_GradientWischen
             Public geschwindigkeit As Integer
@@ -96,81 +112,127 @@ Namespace TransitionMain_GradientWischen
 
         'Events
         Event TransitionIsRunning(state As Boolean) Implements ISlideShowTransition.TransitionIsRunning
-        Event TransitionFrameIstFertig(bitmap As RenderTargetBitmap) Implements ISlideShowTransition.TransitionFrameIstFertig
+        Event TransitionFrameIstFertig(bitmap As ImageSource) Implements ISlideShowTransition.TransitionFrameIstFertig
 
         'Transition Ausführung
-        Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode,
-                             newImage As BitmapImage, picBoxModeNew As PictureBoxSizeMode,
-                             clientSize As System.Drawing.Size,
-                             Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+        Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage,
+                                 picBoxModeNew As PictureBoxSizeMode, clientSize As System.Drawing.Size,
+                                 Optional durationMs As Integer = 0) Implements ISlideShowTransition.RunTransition
+            'Initialisiert und startet eine neue Gradient-Wischen-Transition.
 
-            Dim dx As Integer = 0, dy As Integer = 0
-            Dim richtungArray() As String = {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "ZOut", "ZIn"}
+            Dim richtungArray() As String
 
-            RaiseEvent TransitionIsRunning(True)
+            If wurdeBereinigt Then
 
-            If oldImage Is Nothing OrElse newImage Is Nothing Then
-                StopTransition()
+                Throw New ObjectDisposedException(NameOf(TransitionMain))
+
             End If
 
-            ReadTransitionSettingsFromRegistryOrDefaults()
-            StoreSettings(TransitionName, aktuelleSettings)
+            BeendeUndBereinigeTransition()
 
-            'Überführen der Parameter in Klassenvariablen
-            oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
-            newBmpGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
-            oldBmp = ConvertRenderTargetBitmapToBitmap(oldBmpGerahmt)
-            newBmp = ConvertRenderTargetBitmapToBitmap(newBmpGerahmt)
+            If oldImage Is Nothing Then
 
-            'Richtungsauswahl
-            If aktuelleSettings.richtungen?.Count > 0 Then
-                richtung = aktuelleSettings.richtungen(New Random().Next(aktuelleSettings.richtungen.Count))
-            Else
-                richtung = richtungArray(New Random().Next(10))
+                Throw New ArgumentNullException(NameOf(oldImage))
+
             End If
 
-            'Lineare Maske vorgenerieren
-            Select Case richtung
-                Case "O", "W" 'Horizontale Maske bauen
-                    mask = BuildHorizontalMask(clientSize.Width, clientSize.Height, BreiteInPixel(clientSize.Width, aktuelleSettings.breite))
-                Case "N", "S" 'Vertikale Maske bauen
-                    mask = BuildVerticalMask(clientSize.Width, clientSize.Height, BreiteInPixel(clientSize.Height, aktuelleSettings.breite))
-                Case "NW", "NO", "SO", "SW" 'Diagonale Maske bauen
-                    Dim diagLen As Double = Math.Sqrt((Math.Min(clientSize.Width, clientSize.Height) ^ 2) * 2)
-                    mask = BuildDiagonalMask(clientSize.Width, clientSize.Height, BreiteInPixel(diagLen, aktuelleSettings.breite))
-                Case Else 'Radiale Masken werden während der Laufzeit generiert
-            End Select
+            If newImage Is Nothing Then
 
-            'Falls vom Modul gewünscht, Notbremse setzen.
-            If durationMs > 0 Then
-                If tmrDuration Is Nothing Then tmrDuration = New Timer()
-                tmrDuration.Interval = durationMs
-                AddHandler tmrDuration.Tick, Sub()
-                                                 StopTransition()
-                                             End Sub
-                tmrDuration.Start()
+                Throw New ArgumentNullException(NameOf(newImage))
+
             End If
 
-            ' Animation starten 
-            dauerInMS = 1000 * aktuelleSettings.geschwindigkeit
-            startTime = DateTime.Now
+            richtungArray = New String() {"N", "NO", "O", "SO", "S", "SW", "W", "NW", "ZOut", "ZIn"}
 
-            StartRenderLoop(AddressOf DrawTransitionFrame, New Windows.Size(clientSize.Width, clientSize.Height))
+            Try
+
+                ReadTransitionSettingsFromRegistryOrDefaults()
+
+                StoreSettings(TransitionName, aktuelleSettings)
+
+                sizeWinForms = clientSize
+
+                oldBmpGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
+                newBmpGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
+
+                oldBmp = ConvertRenderTargetBitmapToBitmap(oldBmpGerahmt)
+                newBmp = ConvertRenderTargetBitmapToBitmap(newBmpGerahmt)
+
+                If aktuelleSettings.richtungen IsNot Nothing AndAlso aktuelleSettings.richtungen.Count > 0 Then
+
+                    richtung = aktuelleSettings.richtungen(rnd.Next(aktuelleSettings.richtungen.Count))
+
+                Else
+
+                    richtung = richtungArray(rnd.Next(richtungArray.Length))
+
+                End If
+
+                Select Case richtung
+
+                    Case "O", "W"
+
+                        mask = BuildHorizontalMask(clientSize.Width, clientSize.Height,
+                                                   BreiteInPixel(clientSize.Width, aktuelleSettings.breite))
+
+                    Case "N", "S"
+
+                        mask = BuildVerticalMask(clientSize.Width, clientSize.Height,
+                                                 BreiteInPixel(clientSize.Height, aktuelleSettings.breite))
+
+                    Case "NW", "NO", "SO", "SW"
+
+                        Dim diagLen As Double
+
+                        diagLen = Math.Sqrt((Math.Min(clientSize.Width, clientSize.Height) ^ 2) * 2)
+
+                        mask = BuildDiagonalMask(clientSize.Width, clientSize.Height,
+                                                 BreiteInPixel(diagLen, aktuelleSettings.breite))
+
+                    Case "ZIn", "ZOut"
+
+                        mask = New Bitmap(clientSize.Width, clientSize.Height, Imaging.PixelFormat.Format32bppArgb)
+
+                End Select
+
+                dauerInMS = Math.Max(1, 1000 * aktuelleSettings.geschwindigkeit)
+                externeDauerInMS = Math.Max(0, durationMs)
+
+                laufzeit.Restart()
+
+                transitionLaeuft = True
+
+                StartRenderLoop()
+
+                RaiseEvent TransitionIsRunning(True)
+
+            Catch ex As Exception
+
+                LogError("Transition Gradient-Wischen - TransitionMain.RunTransition(): " &
+                         "Fehler beim Starten der Transition: " & ex.ToString())
+
+                BeendeUndBereinigeTransition()
+
+                Throw
+
+            End Try
 
         End Sub
 
-        Sub StopTransition() Implements ISlideShowTransition.StopTransition
-            'Aufräumen und Transition beenden.
+        Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
+            'Beendet eine laufende Transition und gibt sämtliche gehaltenen Ressourcen frei.
 
-            If tmrDuration IsNot Nothing Then
-                tmrDuration.Stop()
-                tmrDuration.Dispose()
-                tmrDuration = Nothing
+            Dim warAktiv As Boolean
+
+            warAktiv = transitionLaeuft
+
+            BeendeUndBereinigeTransition()
+
+            If warAktiv Then
+
+                RaiseEvent TransitionIsRunning(False)
+
             End If
-
-            stopRequested = True
-
-            RaiseEvent TransitionIsRunning(False)
 
         End Sub
 
@@ -190,7 +252,7 @@ Namespace TransitionMain_GradientWischen
         'Private Funktionen
 
         ' Settings und Defaultwerte
-        Sub ReadTransitionSettingsFromRegistryOrDefaults()
+        Private Sub ReadTransitionSettingsFromRegistryOrDefaults()
             'Setzt aktuelleTransitonSettings mit den Werten aus der Registry oder mit Defaultwerten.
 
             Dim defaults As Dictionary(Of String, String) = GetTransitionDefaultSettings()
@@ -201,7 +263,7 @@ Namespace TransitionMain_GradientWischen
 
         End Sub
 
-        Public Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
+        Friend Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
             Dim defaults As New Dictionary(Of String, String)
 
             defaults.Add("Geschwindigkeit", "20")
@@ -213,61 +275,78 @@ Namespace TransitionMain_GradientWischen
         End Function
 
         'Abbruch- und Endverwaltung
-        Public Sub EndBildZeichnen()
-            'Gibt das Endbild aus
+        Private Sub EndBildZeichnen()
+            'Gibt das endgültige Zielbild aus.
+
+            If newBmpGerahmt Is Nothing Then
+                Exit Sub
+            End If
 
             RaiseEvent TransitionFrameIstFertig(newBmpGerahmt)
 
         End Sub
 
-        Sub tmrDuration_Tick() Handles tmrDuration.Tick
-            'Bricht die Transition nach Ende von DurationMS ab.
-
-            'Zum Schluss noch einmal die aufrufende targetGraphics aktualisieren
-            EndBildZeichnen()
-
-            StopTransition()
-
-        End Sub
-
         'Animation
-        Private Sub DrawTransitionFrame(dc As DrawingContext, size As System.Windows.Size)
-            Dim elapsed As Double = (DateTime.Now - startTime).TotalMilliseconds
-            Dim progress As Double = Math.Min(1.0, elapsed / dauerInMS)
-            Dim frame As Bitmap
-            Dim imgSource As ImageSource
+        Private Sub DrawTransitionFrame()
+            'Erzeugt einen Transitionframe direkt im wiederverwendeten
+            'GDI-Zielbitmap und überträgt ihn anschließend in das
+            'wiederverwendete WriteableBitmap.
+
+            Dim progress As Double
             Dim maskRectangle As Rectangle
-            ' DrawTransitionFrame – Maske/Rahmen setzen
-            Dim fullRect As New Rectangle(0, 0, CInt(size.Width), CInt(size.Height))
+            Dim fullRect As Rectangle
+
+            If gdiFrameBitmap Is Nothing OrElse gdiFrameSource Is Nothing Then
+
+                Exit Sub
+
+            End If
+
+            progress = Math.Min(1.0, laufzeit.Elapsed.TotalMilliseconds / dauerInMS)
+
+            fullRect = New Rectangle(0, 0, sizeWinForms.Width, sizeWinForms.Height)
 
             Select Case richtung
+
                 Case "ZIn"
-                    mask = GenerateRadialMask(size.Width, size.Height, progress, aktuelleSettings.breite, True)
+
+                    AktualisiereRadialMask(mask, progress, aktuelleSettings.breite, True)
+
                     maskRectangle = fullRect
+
                 Case "ZOut"
-                    mask = GenerateRadialMask(size.Width, size.Height, progress, aktuelleSettings.breite, False)
+
+                    AktualisiereRadialMask(mask, progress, aktuelleSettings.breite, False)
+
                     maskRectangle = fullRect
+
                 Case Else
-                    maskRectangle = ShiftMaskRectangle(progress, size)
+
+                    maskRectangle = ShiftMaskRectangle(progress, New Windows.Size(sizeWinForms.Width,
+                                                                                  sizeWinForms.Height))
+
             End Select
 
             If mask Is Nothing Then
-                ConvertRenderTargetBitmapToBitmap(newBmpGerahmt) ' Fallback
+
+                EndBildZeichnen()
                 StopTransition()
+
+                Exit Sub
+
             End If
 
-            'Bilder per Maske mischen
-            frame = BlendWithMask(oldBmp, newBmp, mask, maskRectangle)
+            BlendWithMask(mask, maskRectangle, gdiFrameBitmap)
 
-            'In ImageSource umwandeln
-            imgSource = ConvertBitmapToImageSource(frame)
+            AktualisiereWriteableBitmap(gdiFrameBitmap, gdiFrameSource)
 
-            ' Bild zeichnen
-            dc.DrawImage(imgSource, New Rect(0, 0, size.Width, size.Height))
+            RaiseEvent TransitionFrameIstFertig(gdiFrameSource)
 
-            ' Fertig?
             If progress >= 1.0 Then
+
+                EndBildZeichnen()
                 StopTransition()
+
             End If
 
         End Sub
@@ -512,220 +591,375 @@ Namespace TransitionMain_GradientWischen
         End Function
 
         'Radiale Maske generieren
-        Private Function GenerateRadialMask(width As Integer, height As Integer, progress As Double, breite As Double, inward As Boolean) As Bitmap
-            Dim bmp As New Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb)
-            Dim rect As New Rectangle(0, 0, width, height)
+        Private Sub AktualisiereRadialMask(zielMaske As Bitmap, progress As Double, breite As Double,
+                                           inward As Boolean)
+            'Aktualisiert eine bestehende Radialmaske in-place
+            'unter Verwendung eines wiederverwendeten Pixelpuffers.
+
+            Dim width As Integer
+            Dim height As Integer
+
+            Dim rect As Rectangle
             Dim data As Imaging.BitmapData
+
             Dim stride As Integer
             Dim bpp As Integer
-            Dim buffer() As Byte
+
             Dim weich As Integer
+
             Dim cx As Double
             Dim cy As Double
             Dim maxR As Double
             Dim startR As Double
+            Dim faktor As Double
 
-            data = bmp.LockBits(rect, Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat)
-            stride = data.Stride
-            bpp = 4
-            ReDim buffer(stride * height - 1)
+            data = Nothing
 
-            cx = (width - 1) / 2.0
-            cy = (height - 1) / 2.0
-            maxR = Math.Sqrt(cx * cx + cy * cy)
-            Dim factor As Double = Math.Max(0.0, Math.Min(1.0, breite / 100.0))
-            weich = Math.Max(1, CInt(factor * maxR))
-
-            ' progress bestimmt den Radius der „Kante“
-            If inward Then
-                startR = (maxR + weich) - progress * (maxR + weich)
-            Else
-                startR = -weich + progress * (maxR + weich)
+            If zielMaske Is Nothing Then
+                Exit Sub
             End If
 
-            For y As Integer = 0 To height - 1
-                For x As Integer = 0 To width - 1
-                    Dim dx As Double = x - cx
-                    Dim dy As Double = y - cy
-                    Dim r As Double = Math.Sqrt(dx * dx + dy * dy)
+            width = zielMaske.Width
+            height = zielMaske.Height
 
-                    Dim a As Byte
-                    If inward Then
-                        ' nach innen: weißer Bereich kollabiert zum Zentrum
-                        ' innen (klein r) zuerst weiß → nach und nach verschwindet außen
-                        a = ComputeRadial(r, startR, weich, True)
-                    Else
-                        ' nach außen: Weiß-Ring wächst
-                        a = ComputeRadial(r, startR, weich, False)
-                    End If
+            rect = New Rectangle(0, 0, width, height)
 
-                    Dim ofs As Integer = y * stride + x * bpp
-                    buffer(ofs + 0) = a
-                    buffer(ofs + 1) = a
-                    buffer(ofs + 2) = a
-                    buffer(ofs + 3) = a
+            Try
+
+                data = zielMaske.LockBits(rect, Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
+
+                stride = data.Stride
+
+                bpp = 4
+
+                If radialMaskPixelBuffer Is Nothing OrElse radialMaskPixelBuffer.Length <> Math.Abs(stride) *
+                                                                                            height Then
+
+                    ReDim radialMaskPixelBuffer(Math.Abs(stride) * height - 1)
+
+                End If
+
+                cx = (width - 1) / 2.0
+                cy = (height - 1) / 2.0
+
+                maxR = Math.Sqrt(cx * cx + cy * cy)
+
+                faktor = Math.Max(0.0, Math.Min(1.0, breite / 100.0))
+
+                weich = Math.Max(1, CInt(faktor * maxR))
+
+                If inward Then
+
+                    startR = (maxR + weich) - progress * (maxR + weich)
+
+                Else
+
+                    startR = -weich + progress * (maxR + weich)
+
+                End If
+
+                For y As Integer = 0 To height - 1
+
+                    For x As Integer = 0 To width - 1
+
+                        Dim dx As Double
+                        Dim dy As Double
+                        Dim radius As Double
+
+                        Dim alpha As Byte
+                        Dim offset As Integer
+
+                        dx = x - cx
+                        dy = y - cy
+
+                        radius = Math.Sqrt(dx * dx + dy * dy)
+
+                        alpha = ComputeRadial(radius, startR, weich, inward)
+
+                        offset = y * stride + x * bpp
+
+                        radialMaskPixelBuffer(offset + 0) = alpha
+                        radialMaskPixelBuffer(offset + 1) = alpha
+                        radialMaskPixelBuffer(offset + 2) = alpha
+                        radialMaskPixelBuffer(offset + 3) = alpha
+
+                    Next
+
                 Next
-            Next
 
-            Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, buffer.Length)
-            bmp.UnlockBits(data)
-            Return bmp
-        End Function
+                Marshal.Copy(radialMaskPixelBuffer, 0, data.Scan0, radialMaskPixelBuffer.Length)
+
+            Finally
+
+                If data IsNot Nothing Then
+
+                    zielMaske.UnlockBits(data)
+
+                End If
+
+            End Try
+
+        End Sub
 
         ' Bilder mit Maske blenden.
         ' Semantik: Weiß (Alpha 255) der Maske = ALT voll sichtbar, Schwarz (Alpha 0) = NEU voll sichtbar.
-        Private Function BlendWithMask(oldBmp As Bitmap, newBmp As Bitmap, bigMask As Bitmap, maskSrcRect As Rectangle) As Bitmap
-            Dim w As Integer = oldBmp.Width
-            Dim h As Integer = oldBmp.Height
-            Dim outBmp As New Bitmap(w, h, Imaging.PixelFormat.Format32bppArgb)
-            Dim fullRect As New Rectangle(0, 0, w, h)
+        Private Sub BlendWithMask(bigMask As Bitmap, maskSrcRect As Rectangle, zielBitmap As Bitmap)
+            'Mischt die einmalig gecachten Pixel von Alt- und Neubild
+            'anhand der aktuellen Maske direkt in den wiederverwendeten
+            'Framepuffer.
 
-            ' WICHTIG: ggf. in 32bppARGB konvertieren, bevor gelockt wird
-            If bigMask.PixelFormat <> Imaging.PixelFormat.Format32bppArgb Then
-                bigMask = bigMask.Clone(New Rectangle(0, 0, bigMask.Width, bigMask.Height), Imaging.PixelFormat.Format32bppArgb)
+            Dim dMsk As Imaging.BitmapData
+            Dim dOut As Imaging.BitmapData
+
+            Dim maskStride As Integer
+            Dim breite As Integer
+            Dim hoehe As Integer
+
+            dMsk = Nothing
+            dOut = Nothing
+
+            If bigMask Is Nothing OrElse zielBitmap Is Nothing Then
+
+                Exit Sub
+
             End If
 
-            Dim dOld As Imaging.BitmapData = Nothing
-            Dim dNew As Imaging.BitmapData = Nothing
-            Dim dMsk As Imaging.BitmapData = Nothing
-            Dim dOut As Imaging.BitmapData = Nothing
+            breite = zielBitmap.Width
+            hoehe = zielBitmap.Height
+
+            If maskSrcRect.Width <> breite OrElse
+                   maskSrcRect.Height <> hoehe OrElse
+                   maskSrcRect.X < 0 OrElse
+                   maskSrcRect.Y < 0 OrElse
+                   maskSrcRect.Right > bigMask.Width OrElse
+                   maskSrcRect.Bottom > bigMask.Height Then
+
+                Throw New ArgumentOutOfRangeException(NameOf(maskSrcRect),
+                                                      "Das Maskenrechteck liegt außerhalb der verfügbaren " &
+                                                      "Maskenfläche.")
+
+            End If
 
             Try
-                dOld = oldBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dNew = newBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dMsk = bigMask.LockBits(maskSrcRect, Imaging.ImageLockMode.ReadOnly, Imaging.PixelFormat.Format32bppArgb)
-                dOut = outBmp.LockBits(fullRect, Imaging.ImageLockMode.WriteOnly, Imaging.PixelFormat.Format32bppArgb)
 
-                Dim sOld As Integer = dOld.Stride
-                Dim sNew As Integer = dNew.Stride
-                Dim sMsk As Integer = dMsk.Stride           ' Stride der GESAMT-Maske (nicht Rect-Breite!)
-                Dim sOut As Integer = dOut.Stride
+                dMsk = bigMask.LockBits(maskSrcRect, Imaging.ImageLockMode.ReadOnly,
+                                        Imaging.PixelFormat.Format32bppArgb)
+                dOut = zielBitmap.LockBits(New Rectangle(0, 0, breite, hoehe), Imaging.ImageLockMode.WriteOnly,
+                                           Imaging.PixelFormat.Format32bppArgb)
 
-                ' Vollbild-Puffer (Stride-basiert) für alt/neu/out
-                Dim bufOld(sOld * h - 1) As Byte
-                Dim bufNew(sNew * h - 1) As Byte
-                Dim bufOut(sOut * h - 1) As Byte
+                maskStride = dMsk.Stride
 
-                ' Maske: COMPACT-Puffer in Rechteck-BREITE (w * 4) – zeilenweise kopieren!
-                Dim rowBytesMsk As Integer = w * 4
-                Dim bufMsk(rowBytesMsk * h - 1) As Byte
+                'Das benötigte Maskenrechteck zeilenweise in den
+                'bereits vorhandenen kompakten Maskenpuffer kopieren.
+                For y As Integer = 0 To hoehe - 1
 
-                ' Kopieren
-                Runtime.InteropServices.Marshal.Copy(dOld.Scan0, bufOld, 0, bufOld.Length)
-                Runtime.InteropServices.Marshal.Copy(dNew.Scan0, bufNew, 0, bufNew.Length)
+                    Dim srcPtr As IntPtr
 
-                ' Maske: pro Zeile nur die eigentliche Rect-Breite kopieren
-                For y As Integer = 0 To h - 1
-                    Dim srcPtr As IntPtr = IntPtr.Add(dMsk.Scan0, y * sMsk)
-                    Runtime.InteropServices.Marshal.Copy(srcPtr, bufMsk, y * rowBytesMsk, rowBytesMsk)
+                    srcPtr = IntPtr.Add(dMsk.Scan0, y * maskStride)
+
+                    Marshal.Copy(srcPtr, maskPixelBuffer, y * maskRowBytes, maskRowBytes)
+
                 Next
 
-                ' Mischen: weiß = ALT, schwarz = NEU
-                For y As Integer = 0 To h - 1
-                    Dim oRow As Integer = y * sOld
-                    Dim nRow As Integer = y * sNew
-                    Dim mRow As Integer = y * rowBytesMsk
-                    Dim outRow As Integer = y * sOut
+                For y As Integer = 0 To hoehe - 1
 
-                    For x As Integer = 0 To w - 1
-                        Dim oOfs As Integer = oRow + x * 4
-                        Dim nOfs As Integer = nRow + x * 4
-                        Dim mOfs As Integer = mRow + x * 4
-                        Dim outOfs As Integer = outRow + x * 4
+                    Dim oldRow As Integer
+                    Dim newRow As Integer
+                    Dim maskRow As Integer
+                    Dim frameRow As Integer
 
-                        ' aAlt = Masken-Alpha normiert: 1.0 => ALT voll sichtbar (weiß), 0.0 => ALT unsichtbar (schwarz)
-                        Dim aAlt As Double = bufMsk(mOfs + 3) / 255.0
-                        Dim aNeu As Double = 1.0 - aAlt
+                    oldRow = y * oldPixelStride
+                    newRow = y * newPixelStride
+                    maskRow = y * maskRowBytes
+                    frameRow = y * framePixelStride
 
-                        ' B, G, R (Reihenfolge: BGRA)
-                        Dim b As Double = bufOld(oOfs + 0) * aAlt + bufNew(nOfs + 0) * aNeu
-                        Dim g As Double = bufOld(oOfs + 1) * aAlt + bufNew(nOfs + 1) * aNeu
-                        Dim r As Double = bufOld(oOfs + 2) * aAlt + bufNew(nOfs + 2) * aNeu
+                    For x As Integer = 0 To breite - 1
 
-                        bufOut(outOfs + 0) = CByte(If(b < 0, 0, If(b > 255, 255, b)))
-                        bufOut(outOfs + 1) = CByte(If(g < 0, 0, If(g > 255, 255, g)))
-                        bufOut(outOfs + 2) = CByte(If(r < 0, 0, If(r > 255, 255, r)))
-                        bufOut(outOfs + 3) = 255
+                        Dim oldOffset As Integer
+                        Dim newOffset As Integer
+                        Dim maskOffset As Integer
+                        Dim frameOffset As Integer
+
+                        Dim alphaAlt As Integer
+                        Dim alphaNeu As Integer
+
+                        oldOffset = oldRow + x * 4
+                        newOffset = newRow + x * 4
+                        maskOffset = maskRow + x * 4
+                        frameOffset = frameRow + x * 4
+
+                        alphaAlt = maskPixelBuffer(maskOffset + 3)
+                        alphaNeu = 255 - alphaAlt
+
+                        framePixelBuffer(frameOffset + 0) = CByte((CInt(oldPixelBuffer(oldOffset + 0)) * alphaAlt +
+                            CInt(newPixelBuffer(newOffset + 0)) * alphaNeu) \ 255)
+
+                        framePixelBuffer(frameOffset + 1) = CByte((CInt(oldPixelBuffer(oldOffset + 1)) * alphaAlt +
+                            CInt(newPixelBuffer(newOffset + 1)) * alphaNeu) \ 255)
+
+                        framePixelBuffer(frameOffset + 2) = CByte((CInt(oldPixelBuffer(oldOffset + 2)) * alphaAlt +
+                            CInt(newPixelBuffer(newOffset + 2)) * alphaNeu) \ 255)
+
+                        framePixelBuffer(frameOffset + 3) = 255
+
                     Next
+
                 Next
 
-                Runtime.InteropServices.Marshal.Copy(bufOut, 0, dOut.Scan0, bufOut.Length)
+                Marshal.Copy(framePixelBuffer, 0, dOut.Scan0, framePixelBuffer.Length)
 
             Finally
-                If dOld IsNot Nothing Then oldBmp.UnlockBits(dOld)
-                If dNew IsNot Nothing Then newBmp.UnlockBits(dNew)
-                If dMsk IsNot Nothing Then bigMask.UnlockBits(dMsk)
-                If dOut IsNot Nothing Then outBmp.UnlockBits(dOut)
+
+                If dMsk IsNot Nothing Then
+
+                    bigMask.UnlockBits(dMsk)
+
+                End If
+
+                If dOut IsNot Nothing Then
+
+                    zielBitmap.UnlockBits(dOut)
+
+                End If
+
             End Try
 
-            Return outBmp
-        End Function
-
+        End Sub
 
         'Render-Loop
-        Public Sub StartRenderLoop(drawActionInput As Action(Of DrawingContext, Windows.Size),
-                           zielGroesse As Windows.Size)
-            'RenderLoop starten und einmaliges renderTargetBitmap anlegen
+        Private Sub StartRenderLoop()
+            'Startet den zentralen Frame-Timer und legt die
+            'wiederverwendeten Render- und Pixelpuffer an.
 
-            drawAction = drawActionInput
-            renderSize = zielGroesse
+            Dim pixelBreite As Integer
+            Dim pixelHoehe As Integer
 
-            'Alten Timer stoppen
             StopRenderLoop()
 
-            ' Falls Größe geändert → neues RTB erzeugen
-            If rtbCache Is Nothing OrElse
-               rtbCache.PixelWidth <> CInt(renderSize.Width) OrElse
-               rtbCache.PixelHeight <> CInt(renderSize.Height) Then
+            pixelBreite = Math.Max(sizeWinForms.Width, 1)
+            pixelHoehe = Math.Max(sizeWinForms.Height, 1)
 
-                rtbCache = New RenderTargetBitmap(CInt(renderSize.Width),
-                                          CInt(renderSize.Height),
-                                          96, 96, PixelFormats.Pbgra32)
+            gdiFrameBitmap = New Bitmap(pixelBreite, pixelHoehe, Imaging.PixelFormat.Format32bppArgb)
+            gdiFrameSource = New WriteableBitmap(pixelBreite, pixelHoehe, 96.0, 96.0, PixelFormats.Bgra32, Nothing)
+
+            InitialisierePixelCaches()
+
+            frameTimer = New DispatcherTimer(DispatcherPriority.Render)
+
+            AddHandler frameTimer.Tick, AddressOf OnFrameTick
+
+            frameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0)
+
+            frameTimer.Start()
+
+        End Sub
+
+        Private Sub InitialisierePixelCaches()
+            'Legt die wiederverwendeten Pixelpuffer für Altbild, Neubild, Maske und Zielbild an.
+
+            Dim fullRect As Rectangle
+
+            Dim oldData As Imaging.BitmapData
+            Dim newData As Imaging.BitmapData
+            Dim frameData As Imaging.BitmapData
+
+            oldData = Nothing
+            newData = Nothing
+            frameData = Nothing
+
+            If oldBmp Is Nothing OrElse newBmp Is Nothing OrElse gdiFrameBitmap Is Nothing Then
+
+                Throw New InvalidOperationException("Die Pixelcaches können ohne initialisierte Bildpuffer nicht" &
+                                                    " erzeugt werden.")
+
             End If
 
-            'Neuen Timer starten
-            frameTimer = New DispatcherTimer()
-            AddHandler frameTimer.Tick, AddressOf OnFrameTick
-            frameTimer.Interval = TimeSpan.FromMilliseconds(1000 \ FPS)
-            frameTimer.Start()
+            fullRect = New Rectangle(0, 0, oldBmp.Width, oldBmp.Height)
+
+            Try
+
+                oldData = oldBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, oldBmp.PixelFormat)
+                newData = newBmp.LockBits(fullRect, Imaging.ImageLockMode.ReadOnly, newBmp.PixelFormat)
+
+                frameData = gdiFrameBitmap.LockBits(fullRect, Imaging.ImageLockMode.WriteOnly,
+                                                    Imaging.PixelFormat.Format32bppArgb)
+
+                oldPixelStride = oldData.Stride
+                newPixelStride = newData.Stride
+                framePixelStride = frameData.Stride
+
+                maskRowBytes = oldBmp.Width * 4
+
+                ReDim oldPixelBuffer(Math.Abs(oldPixelStride) * oldBmp.Height - 1)
+                ReDim newPixelBuffer(Math.Abs(newPixelStride) * newBmp.Height - 1)
+                ReDim framePixelBuffer(Math.Abs(framePixelStride) * gdiFrameBitmap.Height - 1)
+                ReDim maskPixelBuffer(maskRowBytes * oldBmp.Height - 1)
+                ReDim radialMaskPixelBuffer(maskRowBytes * oldBmp.Height - 1)
+
+                Marshal.Copy(oldData.Scan0, oldPixelBuffer, 0, oldPixelBuffer.Length)
+                Marshal.Copy(newData.Scan0, newPixelBuffer, 0, newPixelBuffer.Length)
+
+            Finally
+
+                If oldData IsNot Nothing Then
+
+                    oldBmp.UnlockBits(oldData)
+
+                End If
+
+                If newData IsNot Nothing Then
+
+                    newBmp.UnlockBits(newData)
+
+                End If
+
+                If frameData IsNot Nothing Then
+
+                    gdiFrameBitmap.UnlockBits(frameData)
+
+                End If
+
+            End Try
+
         End Sub
 
         Private Sub OnFrameTick(sender As Object, e As EventArgs)
-            'Zeichnet einen einzelnen Frame
-            Dim hintergrundBrush As New Media.SolidColorBrush(SDColorToWMColor(HintergrundFarbeSaver))
+            'Steuert den zeitlichen Ablauf der Transition.
 
-            If rtbCache Is Nothing OrElse drawAction Is Nothing Then Exit Sub
+            If Not transitionLaeuft Then
 
-            Dim drawingVisual As New DrawingVisual()
-            Using dc As DrawingContext = drawingVisual.RenderOpen()
-                ' Hintergrund leeren
-                dc.DrawRectangle(hintergrundBrush, Nothing,
-                         New Rect(0, 0, renderSize.Width, renderSize.Height))
-                ' Benutzerdefinierte Zeichenlogik
-                drawAction.Invoke(dc, renderSize)
-            End Using
-
-            ' RTB mit neuem Inhalt füllen
-            ClearRTB(rtbCache)
-            rtbCache.Render(drawingVisual)
-
-            RaiseEvent TransitionFrameIstFertig(rtbCache)
-
-            'Aufräumen nach dem letzten Frame
-            If stopRequested Then
                 StopRenderLoop()
-                rtbCache = Nothing
+
+                Exit Sub
+
             End If
+
+            If externeDauerInMS > 0 AndAlso laufzeit.Elapsed.TotalMilliseconds >= externeDauerInMS Then
+
+                EndBildZeichnen()
+                StopTransition()
+
+                Exit Sub
+
+            End If
+
+            DrawTransitionFrame()
+
         End Sub
 
-        Public Sub StopRenderLoop()
-            'RenderLoop beenden und aufräumen
+        Private Sub StopRenderLoop()
+            'Stoppt den zentralen Frame-Timer und entfernt
+            'den registrierten Tick-Handler.
 
-            If frameTimer IsNot Nothing Then
-                frameTimer.Stop()
-                RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
-                frameTimer = Nothing
+            If frameTimer Is Nothing Then
+                Exit Sub
             End If
+
+            frameTimer.Stop()
+
+            RemoveHandler frameTimer.Tick, AddressOf OnFrameTick
+
+            frameTimer = Nothing
 
         End Sub
 
@@ -751,9 +985,13 @@ Namespace TransitionMain_GradientWischen
 
         Private Function BreiteInPixel(imgSize As Double, breiteProzent As Double) As Integer
 
-            Dim f As Double = Clamp01(breiteProzent / 100.0)
-            breiteGradientInPx = Math.Max(1, CInt(imgSize * f))
-            Return breiteGradientInPx
+            Dim faktor As Double
+            Dim breitePixel As Integer
+
+            faktor = Clamp01(breiteProzent / 100.0)
+            breitePixel = Math.Max(1, CInt(imgSize * faktor))
+
+            Return breitePixel
 
         End Function
 
@@ -796,6 +1034,87 @@ Namespace TransitionMain_GradientWischen
                 Return CByte(t * 255)
             End If
         End Function
+
+        'Bereinigen und Dispose
+        Private Sub BeendeUndBereinigeTransition()
+            'Beendet sämtliche laufenden Arbeiten und gibt alle von der Transition gehaltenen Ressourcen frei.
+
+            transitionLaeuft = False
+
+            laufzeit.Stop()
+
+            StopRenderLoop()
+
+            If gdiFrameBitmap IsNot Nothing Then
+
+                gdiFrameBitmap.Dispose()
+                gdiFrameBitmap = Nothing
+
+            End If
+
+            gdiFrameSource = Nothing
+
+            If mask IsNot Nothing Then
+
+                mask.Dispose()
+                mask = Nothing
+
+            End If
+
+            If oldBmp IsNot Nothing Then
+
+                oldBmp.Dispose()
+                oldBmp = Nothing
+
+            End If
+
+            If newBmp IsNot Nothing Then
+
+                newBmp.Dispose()
+                newBmp = Nothing
+
+            End If
+
+            oldBmpGerahmt = Nothing
+            newBmpGerahmt = Nothing
+
+            oldPixelBuffer = Nothing
+            newPixelBuffer = Nothing
+            maskPixelBuffer = Nothing
+            framePixelBuffer = Nothing
+            radialMaskPixelBuffer = Nothing
+
+            oldPixelStride = 0
+            newPixelStride = 0
+            framePixelStride = 0
+
+            maskRowBytes = 0
+
+            richtung = Nothing
+
+            externeDauerInMS = 0
+
+        End Sub
+
+#Region "IDisposable"
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+            'Beendet die Transition endgültig und gibt
+            'sämtliche gehaltenen Ressourcen frei.
+
+            If wurdeBereinigt Then
+                Exit Sub
+            End If
+
+            wurdeBereinigt = True
+
+            BeendeUndBereinigeTransition()
+
+            GC.SuppressFinalize(Me)
+
+        End Sub
+
+#End Region
 
     End Class
 

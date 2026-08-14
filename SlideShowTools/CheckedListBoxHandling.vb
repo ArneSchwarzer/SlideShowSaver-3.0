@@ -17,6 +17,31 @@ Public Class CheckedListBoxHandling
         Return String.Join(";", result)
     End Function
 
+    Public Shared Function GetCheckedItemsAsString(Of T)(clb As CheckedListBox, selector As Func(Of T, String)) _
+        As String
+        'Gibt die Namen aller markierten Elemente anhand
+        'einer typisierten Auswahlfunktion zurück.
+
+        Dim result As New List(Of String)
+        Dim item As Object
+        Dim typedItem As T
+
+        For Each item In clb.CheckedItems
+
+            If TypeOf item Is T Then
+
+                typedItem = CType(item, T)
+
+                result.Add(selector(typedItem))
+
+            End If
+
+        Next
+
+        Return String.Join(";", result)
+
+    End Function
+
     ''' <summary>
     ''' Markiert Elemente in einer CheckedListBox anhand eines Semikolon-getrennten Strings
     ''' </summary>

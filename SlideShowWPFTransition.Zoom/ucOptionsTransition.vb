@@ -9,135 +9,131 @@ Public Class ucOptionsTransition
     'Variablendeklaration
     Private aktuelleSettings As SlideShowTransitionSettings_Zoom
 
-    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
-        'Initialisiert die Steuerelemente der ucOptionsTransition
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
 
-        'Aktuelle Settings abholen
+    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
+        'Initialisiert die Steuerelemente der ucOptionsTransition.
+
         CheckYourMail()
 
-        'Steuerelemente initialisieren
-        IniOrReinitialise()
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
-    Private Sub tbtNW_CheckChanged(sender As Object, e As EventArgs) Handles tbtNW.CheckChanged
-        'Button Nord-West
+    Private Sub Ankerpunkt_CheckChanged(sender As Object, e As EventArgs) _
+    Handles tbtN.CheckChanged,
+            tbtNO.CheckChanged,
+            tbtO.CheckChanged,
+            tbtSO.CheckChanged,
+            tbtS.CheckChanged,
+            tbtSW.CheckChanged,
+            tbtW.CheckChanged,
+            tbtNW.CheckChanged,
+            tbtZ.CheckChanged
+        'Behandelt Änderungen der möglichen Ankerpunkte.
 
-        'DirectCommit
         AnkerStringBauen()
 
     End Sub
 
-    Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs) Handles tbtN.CheckChanged
-        'Button Nord
+    Private Sub chkGleicherAnkerpunkt_CheckedChanged(sender As Object, e As EventArgs) _
+    Handles chkGleicherAnkerpunkt.CheckedChanged
+        'Behandelt die Einstellung für identische Ankerpunkte.
 
-        'DirectCommit
-        AnkerStringBauen()
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
 
-    End Sub
+        aktuelleSettings.gleicherAnkerpunkt = chkGleicherAnkerpunkt.Checked
 
-    Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs) Handles tbtNO.CheckChanged
-        'Button Nord-Ost
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs) Handles tbtO.CheckChanged
-        'Button Ost
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs) Handles tbtSO.CheckChanged
-        'Button Süd-Ost
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs) Handles tbtS.CheckChanged
-        'Button Süd
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs) Handles tbtSW.CheckChanged
-        'Button Süd-West
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs) Handles tbtW.CheckChanged
-        'Button West
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub tbtZ_CheckChanged(sender As Object, e As EventArgs) Handles tbtZ.CheckChanged
-        'Button West
-
-        'DirectCommit
-        AnkerStringBauen()
-
-    End Sub
-
-    Private Sub chkGleicherAnkerpunkt_CheckedChanged(sender As Object, e As EventArgs) Handles chkGleicherAnkerpunkt.CheckedChanged
-        'Behandelt die Checkbox Gleicher Ankerpunkt
-
-        'Direct Commit
-        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "GleicherAnkerpunkt", chkGleicherAnkerpunkt.Checked.ToString)
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "GleicherAnkerpunkt",
+                        aktuelleSettings.gleicherAnkerpunkt.ToString())
 
     End Sub
 
     Private Sub trkGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkGeschwindigkeit.ValueChanged
-        'TrackBar Geschwindigkeit
+        'Behandelt die Zoom-Geschwindigkeit.
 
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        Dim geschwindigkeit As Integer
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Geschwindigkeit", ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString)
+        geschwindigkeit = (trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value
+
+        lblGeschwindigkeit.Text = geschwindigkeit.ToString() & " s"
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        aktuelleSettings.geschwindigkeit = geschwindigkeit
+
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Geschwindigkeit", geschwindigkeit.ToString())
 
     End Sub
 
     Private Sub AnkerStringBauen()
-        'Setzt den Richtungsstring zusammen, speichert ihn in die Registry und setzt auch gleich das
-        'lblanker entsprechend.
+        'Ermittelt die ausgewählten Ankerpunkte,
+        'aktualisiert UI und lokale Settings und speichert
+        'bei echter Benutzereingabe per Direct Commit.
 
-        Dim ankerString As String = ""
         Dim anker As New List(Of String)
+        Dim ankerString As String
 
-        If tbtN.Checked Then anker.Add("N")
-        If tbtNO.Checked Then anker.Add("NO")
-        If tbtO.Checked Then anker.Add("O")
-        If tbtSO.Checked Then anker.Add("SO")
-        If tbtS.Checked Then anker.Add("S")
-        If tbtSW.Checked Then anker.Add("SW")
-        If tbtW.Checked Then anker.Add("W")
-        If tbtNW.Checked Then anker.Add("NW")
-        If tbtZ.Checked Then anker.Add("Z")
+        If tbtN.Checked Then
+            anker.Add("N")
+        End If
+
+        If tbtNO.Checked Then
+            anker.Add("NO")
+        End If
+
+        If tbtO.Checked Then
+            anker.Add("O")
+        End If
+
+        If tbtSO.Checked Then
+            anker.Add("SO")
+        End If
+
+        If tbtS.Checked Then
+            anker.Add("S")
+        End If
+
+        If tbtSW.Checked Then
+            anker.Add("SW")
+        End If
+
+        If tbtW.Checked Then
+            anker.Add("W")
+        End If
+
+        If tbtNW.Checked Then
+            anker.Add("NW")
+        End If
+
+        If tbtZ.Checked Then
+            anker.Add("Z")
+        End If
+
+        lblKeinAnkerpunkt.Visible = anker.Count = 0
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        aktuelleSettings.ankerpunkte = New List(Of String)(anker)
 
         ankerString = String.Join(";", anker)
 
-        'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Ankerpunkte", ankerString)
-
-        'Label ein- oder ausschalten
-        If anker.Count = 0 Then
-            lblKeinAnkerpunkt.Visible = True
-        Else
-            lblKeinAnkerpunkt.Visible = False
-        End If
 
     End Sub
 
@@ -149,7 +145,8 @@ Public Class ucOptionsTransition
     End Sub
 
     Private Sub IniOrReinitialise()
-        'Ankerpunkte
+        'Setzt die Controls gemäß aktuelleSettings.
+
         tbtN.Checked = False
         tbtNO.Checked = False
         tbtO.Checked = False
@@ -160,66 +157,103 @@ Public Class ucOptionsTransition
         tbtNW.Checked = False
         tbtZ.Checked = False
 
-        For Each ankerpunkt In aktuelleSettings.ankerpunkte
+        If aktuelleSettings.ankerpunkte IsNot Nothing Then
 
-            Select Case ankerpunkt
-                Case "N"
-                    tbtN.Checked = True
-                Case "NO"
-                    tbtNO.Checked = True
-                Case "O"
-                    tbtO.Checked = True
-                Case "SO"
-                    tbtSO.Checked = True
-                Case "S"
-                    tbtS.Checked = True
-                Case "SW"
-                    tbtSW.Checked = True
-                Case "W"
-                    tbtW.Checked = True
-                Case "NW"
-                    tbtNW.Checked = True
-                Case "Z"
-                    tbtZ.Checked = True
-            End Select
+            For Each ankerpunkt As String In aktuelleSettings.ankerpunkte
 
-        Next
+                Select Case ankerpunkt
 
-        'Label "Kein Ankerpunkt ausgewählt"
-        If aktuelleSettings.ankerpunkte.Count = 0 Then
-            lblKeinAnkerpunkt.Visible = True
-        Else
-            lblKeinAnkerpunkt.Visible = False
+                    Case "N"
+                        tbtN.Checked = True
+
+                    Case "NO"
+                        tbtNO.Checked = True
+
+                    Case "O"
+                        tbtO.Checked = True
+
+                    Case "SO"
+                        tbtSO.Checked = True
+
+                    Case "S"
+                        tbtS.Checked = True
+
+                    Case "SW"
+                        tbtSW.Checked = True
+
+                    Case "W"
+                        tbtW.Checked = True
+
+                    Case "NW"
+                        tbtNW.Checked = True
+
+                    Case "Z"
+                        tbtZ.Checked = True
+
+                End Select
+
+            Next
+
         End If
 
-        'Gleicher Ankerpunkt
+        If aktuelleSettings.ankerpunkte Is Nothing Then
+
+            lblKeinAnkerpunkt.Visible = True
+
+        Else
+
+            lblKeinAnkerpunkt.Visible = aktuelleSettings.ankerpunkte.Count = 0
+
+        End If
+
         chkGleicherAnkerpunkt.Checked = aktuelleSettings.gleicherAnkerpunkt
 
-        'Geschwindigkeit
         trkGeschwindigkeit.Value = (trkGeschwindigkeit.Maximum + 1) - aktuelleSettings.geschwindigkeit
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+
+        lblGeschwindigkeit.Text = aktuelleSettings.geschwindigkeit.ToString() & " s"
 
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Default-Werte einlesen und Steuerelemente entsprechend setzten
+        'Stellt die Defaultwerte wieder her und speichert
+        'diese explizit gemäß Direct-Commit-Architektur.
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaults einlesen
-        defaults = GetTransitionDefaultSettings()
-
-        'AktuelleSettings aktualisieren
-        aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
-        aktuelleSettings.ankerpunkte = SplitSemicolonList(defaults("Ankerpunkte"))
-        If defaults("GleicherAnkerpunkt") = "True" Then
-            aktuelleSettings.gleicherAnkerpunkt = True
-        Else
-            aktuelleSettings.gleicherAnkerpunkt = False
+        If wurdeBereinigt Then
+            Exit Sub
         End If
 
-        'Steuerelemente aktualisieren
-        IniOrReinitialise()
+        defaults = GetTransitionDefaultSettings()
+
+        aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
+        aktuelleSettings.ankerpunkte = SplitSemicolonList(defaults("Ankerpunkte"))
+        aktuelleSettings.gleicherAnkerpunkt = String.Equals(defaults("GleicherAnkerpunkt"), "True",
+                                                            StringComparison.OrdinalIgnoreCase)
+
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Geschwindigkeit", defaults("Geschwindigkeit"))
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "Ankerpunkte", defaults("Ankerpunkte"))
+        WriteToRegistry(SLIDESHOWTRANSITION_ZOOM_FULLPATH & "GleicherAnkerpunkt", defaults("GleicherAnkerpunkt"))
+
+        wirdInitialisiert = True
+
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
+
+    Private Sub ucOptionsTransition_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+        'Verhindert Direct-Commit-Aktionen nach der Freigabe.
+
+        wurdeBereinigt = True
+
+    End Sub
+
 End Class

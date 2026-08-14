@@ -1,65 +1,153 @@
 ﻿Imports System.Drawing
 Imports System.Windows
+Imports System.Windows.Controls
 Imports System.Windows.Media
 Imports System.Windows.Media.Imaging
-Imports System.Windows.Controls
-Imports SlideShowTools.ImageConversionHandling  ' <— wichtig
+Imports SlideShowTools.ImageConversionHandling
 
 Public NotInheritable Class WpfShaderRunner
-    Private Sub New()
-    End Sub
+    Implements IDisposable
 
-    Public Shared Function ApplyPixelArtEffect(srcBitmap As Bitmap,
-                                               cellSize As Single,
-                                               levelsPerChannel As Integer) As Bitmap
-        If srcBitmap Is Nothing Then Return Nothing
+#Region "Variablendeklaration"
 
-        Dim width As Integer = srcBitmap.Width
-        Dim height As Integer = srcBitmap.Height
+    Private renderTarget As RenderTargetBitmap
 
-        ' 1) GDI -> WPF ohne PNG: nutzt HBITMAP + DeleteObject (kein Leak)
-        Dim bmpSource As BitmapSource = ConvertBitmapToImageSource(srcBitmap) ' liefert bereits Frozen. :contentReference[oaicite:0]{index=0}
+    Private wurdeBereinigt As Boolean
 
-        ' 2) Effekt vorbereiten (TexelSize = 1/px, Params = (cellPx, levels))
-        Dim fx As New PixelArtEffect() With {
-            .TexelSize = New System.Windows.Point(1.0 / width, 1.0 / height),
-            .Params01 = New System.Windows.Point(Math.Max(1.0, cellSize), CDbl(Math.Max(2, levelsPerChannel)))
-        }
+#End Region
 
-        ' 3) Ein echtes Element rendern
-        Dim img As New System.Windows.Controls.Image() With {
-            .Source = bmpSource,
-            .Width = width,
-            .Height = height,
-            .Stretch = Stretch.Fill,
-            .Effect = fx
-        }
-        img.Measure(New System.Windows.Size(width, height))
+#Region "Shader-Ausführung"
+
+    Public Function ApplyPixelArtEffect(srcBitmap As Bitmap, cellSize As Single, levelsPerChannel As Integer) _
+        As Bitmap
+        'Wendet den HLSL-PixelArt-Effekt auf das übergebene
+        'Bitmap an und liefert ein neues GDI-Bitmap zurück.
+
+        Dim width As Integer
+        Dim height As Integer
+
+        Dim bmpSource As BitmapSource
+
+        Dim fx As PixelArtEffect
+        Dim img As Controls.Image
+
+        Dim texelSize As System.Windows.Point
+        Dim shaderParams As System.Windows.Point
+
+        Dim renderSize As System.Windows.Size
+
+        Dim result As Bitmap
+
+        If wurdeBereinigt Then
+
+            Throw New ObjectDisposedException(NameOf(WpfShaderRunner))
+
+        End If
+
+        If srcBitmap Is Nothing Then
+
+            Throw New ArgumentNullException(NameOf(srcBitmap))
+
+        End If
+
+        width = srcBitmap.Width
+        height = srcBitmap.Height
+
+        If width <= 0 OrElse height <= 0 Then
+
+            Throw New ArgumentOutOfRangeException(NameOf(srcBitmap),
+                                                  "Das Quellbild besitzt keine gültigen Abmessungen.")
+
+        End If
+
+        cellSize = Math.Max(1.0F, cellSize)
+        levelsPerChannel = Math.Max(2, levelsPerChannel)
+        bmpSource = ConvertBitmapToImageSource(srcBitmap)
+
+        If bmpSource Is Nothing Then
+
+            Throw New InvalidOperationException("Das Quellbild konnte nicht in ein WPF-Bitmap konvertiert werden.")
+
+        End If
+
+        texelSize = New System.Windows.Point(1.0 / width, 1.0 / height)
+        shaderParams = New System.Windows.Point(cellSize, levelsPerChannel)
+
+        fx = New PixelArtEffect()
+        fx.TexelSize = texelSize
+        fx.Params01 = shaderParams
+
+        img = New Controls.Image()
+        img.Source = bmpSource
+        img.Width = width
+        img.Height = height
+        img.Stretch = Stretch.Fill
+        img.Effect = fx
+
+        renderSize = New System.Windows.Size(width, height)
+
+        img.Measure(renderSize)
         img.Arrange(New Rect(0, 0, width, height))
         img.UpdateLayout()
 
-        ' 4) Reuse eines RTB (optional, aber gut gegen LOH-Fragmentierung)
-        Static rtb As RenderTargetBitmap = Nothing
-        If rtb Is Nothing OrElse rtb.PixelWidth <> width OrElse rtb.PixelHeight <> height Then
-            rtb = New RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32)
-        Else
-            ' "Löschen": transparent drüberzeichnen
-            Dim dv As New DrawingVisual()
-            Using dc = dv.RenderOpen()
-                dc.DrawRectangle(System.Windows.Media.Brushes.Transparent, Nothing, New Rect(0, 0, width, height))
-            End Using
-            rtb.Render(dv)
-        End If
+        InitialisiereRenderTarget(width, height)
 
-        rtb.Render(img)
+        Try
 
-        ' 5) WPF -> GDI ohne PNG: direkt per CopyPixels
-        Dim result As Bitmap = ConvertRenderTargetBitmapToBitmap(rtb)
+            renderTarget.Render(img)
 
-        ' 6) Referenzen lösen, damit GC räumen kann
-        img.Source = Nothing
-        img.Effect = Nothing
+            result = ConvertRenderTargetBitmapToBitmap(renderTarget)
+
+        Finally
+
+            img.Effect = Nothing
+            img.Source = Nothing
+
+        End Try
 
         Return result
+
     End Function
+
+#End Region
+
+#Region "Renderverwaltung"
+
+    Private Sub InitialisiereRenderTarget(width As Integer, height As Integer)
+        'Erzeugt den RenderTargetBitmap nur dann neu,
+        'wenn noch keiner existiert oder sich die Größe geändert hat.
+
+        If renderTarget IsNot Nothing AndAlso
+           renderTarget.PixelWidth = width AndAlso
+           renderTarget.PixelHeight = height Then
+
+            Return
+
+        End If
+
+        renderTarget = New RenderTargetBitmap(width, height, 96.0, 96.0, PixelFormats.Pbgra32)
+
+    End Sub
+
+#End Region
+
+#Region "IDisposable"
+
+    Public Sub Dispose() Implements IDisposable.Dispose
+        'Löst sämtliche gehaltenen WPF-Renderressourcen.
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        wurdeBereinigt = True
+
+        renderTarget = Nothing
+
+        GC.SuppressFinalize(Me)
+
+    End Sub
+
+#End Region
+
 End Class

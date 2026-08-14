@@ -8,148 +8,142 @@ Public Class ucOptionsTransition
     'Variablendeklaration
     Private aktuelleSettings As SlideShowTransitionSettings_SuW
 
-    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
-        'Initialisiert die Steuerelemente der ucOptionsTransition
+    Private wirdInitialisiert As Boolean = True
+    Private wurdeBereinigt As Boolean
 
-        'Aktuelle Settings abholen
+    Private Sub ucOptionsTransition_Load(sender As Object, e As EventArgs) Handles Me.Load
+
         CheckYourMail()
 
-        'Steuerelemente initialisieren
-        IniOrReinitialise()
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
 
-    Private Sub tbtNW_CheckChanged(sender As Object, e As EventArgs) Handles tbtNW.CheckChanged
-        'Button Nord-West
+    Private Sub Richtung_CheckChanged(sender As Object, e As EventArgs) _
+    Handles tbtN.CheckChanged,
+            tbtNO.CheckChanged,
+            tbtO.CheckChanged,
+            tbtSO.CheckChanged,
+            tbtS.CheckChanged,
+            tbtSW.CheckChanged,
+            tbtW.CheckChanged,
+            tbtNW.CheckChanged
 
-        'DirectCommit
         RichtungsStringBauen()
 
     End Sub
 
-    Private Sub tbtN_CheckChanged(sender As Object, e As EventArgs) Handles tbtN.CheckChanged
-        'Button Nord
+    Private Sub Modus_CheckedChanged(sender As Object, e As EventArgs) _
+    Handles rbSchieben.CheckedChanged,
+            rbWischen.CheckedChanged,
+            rbZufall.CheckedChanged
 
-        'DirectCommit
-        RichtungsStringBauen()
+        Dim modus As String
 
-    End Sub
-
-    Private Sub tbtNO_CheckChanged(sender As Object, e As EventArgs) Handles tbtNO.CheckChanged
-        'Button Nord-Ost
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub tbtO_CheckChanged(sender As Object, e As EventArgs) Handles tbtO.CheckChanged
-        'Button Ost
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub tbtSO_CheckChanged(sender As Object, e As EventArgs) Handles tbtSO.CheckChanged
-        'Button Süd-Ost
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub tbtS_CheckChanged(sender As Object, e As EventArgs) Handles tbtS.CheckChanged
-        'Button Süd
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub tbtSW_CheckChanged(sender As Object, e As EventArgs) Handles tbtSW.CheckChanged
-        'Button Süd-West
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub tbtW_CheckChanged(sender As Object, e As EventArgs) Handles tbtW.CheckChanged
-        'Button West
-
-        'DirectCommit
-        RichtungsStringBauen()
-
-    End Sub
-
-    Private Sub rbSchieben_CheckedChanged(sender As Object, e As EventArgs) Handles rbSchieben.CheckedChanged
-        'RadioButton Schieben
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
 
         If rbSchieben.Checked Then
-            'DirectCommit
-            WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Schieben")
+
+            modus = "Schieben"
+
+        ElseIf rbWischen.Checked Then
+
+            modus = "Wischen"
+
+        ElseIf rbZufall.Checked Then
+
+            modus = "Zufällig"
+
+        Else
+
+            Exit Sub
+
         End If
 
-    End Sub
+        aktuelleSettings.modus = modus
 
-    Private Sub rbWischen_CheckedChanged(sender As Object, e As EventArgs) Handles rbWischen.CheckedChanged
-        'RadioButton Wischen
-
-        If rbWischen.Checked Then
-            'DirectCommit
-            WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Wischen")
-        End If
-
-    End Sub
-
-    Private Sub rbZufall_CheckedChanged(sender As Object, e As EventArgs) Handles rbZufall.CheckedChanged
-        'RadioButton Zufall
-
-        If rbZufall.Checked Then
-            'DirectCommit
-            WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", "Zufällig")
-        End If
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", modus)
 
     End Sub
 
     Private Sub trkGeschwindigkeit_ValueChanged(sender As Object, e As EventArgs) Handles trkGeschwindigkeit.ValueChanged
-        'TrackBar Geschwindigkeit
 
-        lblGeschwindigkeit.Text = ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString & " s"
+        Dim geschwindigkeit As Integer
 
-        'DirectCommit
-        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", ((trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value).ToString)
+        geschwindigkeit = (trkGeschwindigkeit.Maximum + 1) - trkGeschwindigkeit.Value
+
+        lblGeschwindigkeit.Text = geschwindigkeit.ToString() & " s"
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        aktuelleSettings.geschwindigkeit = geschwindigkeit
+
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", geschwindigkeit.ToString())
 
     End Sub
 
     Private Sub RichtungsStringBauen()
-        'Setzt den Richtungsstring zusammen, speichert ihn in die Registry und setzt auch gleich das
-        'lblRichtungen entsprechend.
 
-        Dim richtungsString As String = ""
+        Dim richtungsString As String
         Dim richtungen As New List(Of String)
 
-        If tbtN.Checked Then richtungen.Add("N")
-        If tbtNO.Checked Then richtungen.Add("NO")
-        If tbtO.Checked Then richtungen.Add("O")
-        If tbtSO.Checked Then richtungen.Add("SO")
-        If tbtS.Checked Then richtungen.Add("S")
-        If tbtSW.Checked Then richtungen.Add("SW")
-        If tbtW.Checked Then richtungen.Add("W")
-        If tbtNW.Checked Then richtungen.Add("NW")
+        If tbtN.Checked Then
+            richtungen.Add("N")
+        End If
+
+        If tbtNO.Checked Then
+            richtungen.Add("NO")
+        End If
+
+        If tbtO.Checked Then
+            richtungen.Add("O")
+        End If
+
+        If tbtSO.Checked Then
+            richtungen.Add("SO")
+        End If
+
+        If tbtS.Checked Then
+            richtungen.Add("S")
+        End If
+
+        If tbtSW.Checked Then
+            richtungen.Add("SW")
+        End If
+
+        If tbtW.Checked Then
+            richtungen.Add("W")
+        End If
+
+        If tbtNW.Checked Then
+            richtungen.Add("NW")
+        End If
+
+        lblKeineRichtungInfo.Visible = richtungen.Count = 0
+
+        If wirdInitialisiert OrElse wurdeBereinigt Then
+
+            Exit Sub
+
+        End If
+
+        aktuelleSettings.richtungen = New List(Of String)(richtungen)
 
         richtungsString = String.Join(";", richtungen)
 
-        'DirectCommit
         WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", richtungsString)
-
-        'Label ein- oder ausschalten
-        If richtungen.Count = 0 Then
-            lblKeineRichtungInfo.Visible = True
-        Else
-            lblKeineRichtungInfo.Visible = False
-        End If
 
     End Sub
 
@@ -218,20 +212,41 @@ Public Class ucOptionsTransition
     End Sub
 
     Private Sub btnDefaults_Click(sender As Object, e As EventArgs) Handles btnDefaults.Click
-        'Liest Default-Werte ein und setzt Steuerelemente entsprechend
 
         Dim defaults As Dictionary(Of String, String)
 
-        'Defaults einlesen
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
         defaults = GetTransitionDefaultSettings()
 
-        'AktuelleSettings aktualisieren
         aktuelleSettings.geschwindigkeit = CInt(defaults("Geschwindigkeit"))
         aktuelleSettings.richtungen = SplitSemicolonList(defaults("Richtungen"))
         aktuelleSettings.modus = defaults("Modus")
 
-        'Steuerelemente aktualisieren
-        IniOrReinitialise()
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Geschwindigkeit", defaults("Geschwindigkeit"))
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Richtungen", defaults("Richtungen"))
+        WriteToRegistry(SLIDESHOWTRANSITION_SuW_FULLPATH & "Modus", defaults("Modus"))
+
+        wirdInitialisiert = True
+
+        Try
+
+            IniOrReinitialise()
+
+        Finally
+
+            wirdInitialisiert = False
+
+        End Try
 
     End Sub
+
+    Private Sub ucOptionsTransition_Disposed(sender As Object, e As EventArgs) Handles Me.Disposed
+
+        wurdeBereinigt = True
+
+    End Sub
+
 End Class
