@@ -2760,12 +2760,12 @@ Module SaverMain
 
         Dim mainDefaults As New Dictionary(Of String, String)
 
-        mainDefaults("ModulDauer") = "2"
-        mainDefaults("ModulReihenfolge") = "Zufällig"
+        mainDefaults("ModulDauer") = "15"
+        mainDefaults("ModulReihenfolge") = "In Reihenfolge"
         mainDefaults("ModulAktivListe") = ""
         mainDefaults("MultiMonitor") = "False"
         mainDefaults("ModulTransitionListe") = ""
-        mainDefaults("ModulTransitionReihenfolge") = "Zufällig bei Start"
+        mainDefaults("ModulTransitionReihenfolge") = "Zufällig"
         mainDefaults("Hintergrundfarbe") = "0,0,0,255"
 
         Return mainDefaults

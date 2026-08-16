@@ -198,6 +198,9 @@
     <EmbeddedResource Include="Shader\RevealShaderVS.cso" />
     <EmbeddedResource Include="Shader\GradientenShaderPS.cso" />
     <EmbeddedResource Include="Shader\GradientenShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PartikelComputeShaderCS.cso" />
+    <EmbeddedResource Include="Shader\PartikelRenderShaderPS.cso" />
+    <EmbeddedResource Include="Shader\PartikelRenderShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
@@ -226,7 +229,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shader\GradientenShader.hlsl" />
+    <Content Include="Shader\PartikelComputeShader.hlsl" />
     <Content Include="Shader\RevealShader.hlsl" />
+    <Content Include="Shader\PartikelRenderShader.hlsl" />
     <EmbeddedResource Include="Ressourcen\HelloWorld.png" />
     <Resource Include="Ressourcen\ProgrammierenWieBeiMuttern.png" />
     <Content Include="Shader\Historisch und Testing\OrangeToenung.hlsl" />

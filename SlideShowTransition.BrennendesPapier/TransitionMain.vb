@@ -37,12 +37,14 @@ Public Class TransitionMain
     Private ReadOnly laufzeit As New Stopwatch()
     Private frameTimer As DispatcherTimer
     Private dauerInMS As Integer
+    Private letzteFrameZeitMS As Double
 
     'Transitionsbilder
     Private oldBitmapSource As BitmapSource
     Private newBitmapSource As BitmapSource
     Private brandMaske As BitmapSource
     Private gradientBitmap As BitmapSource
+    Private particleGradientBitmap As BitmapSource
 
     'Brandmaske
     Private Const BRANDMASKE_MAX_BREITE As Integer = 960
@@ -75,6 +77,9 @@ Public Class TransitionMain
 
     'Sonstiges
     Private ReadOnly rnd As New Random()
+    Private aktuellerModus As String
+
+#Region "Structures and Enums"
 
     'Structures und Enums
     Public Structure SlideShowTransitionSettings_BrennendesPapier
@@ -126,6 +131,9 @@ Public Class TransitionMain
         Public radius As Double
 
     End Structure
+
+#End Region
+
 
 #End Region
 
@@ -210,8 +218,6 @@ Public Class TransitionMain
             transitionLaeuft = True
 
             RaiseEvent TransitionIsRunning(True)
-
-            laufzeit.Restart()
 
             StarteDirect3DRenderPipeline(oldImage, picBoxModeOld, newImage, picBoxModeNew)
 
@@ -394,32 +400,8 @@ Public Class TransitionMain
 
         Dim brandherdIndex As Integer
 
-        Dim distanzZumKern As Double
-        Dim distanzZurMembran As Double
-        Dim relativeDistanz As Double
-
-        Dim brandWert As Double
-
         Dim noiseOffsetX As Double
         Dim noiseOffsetY As Double
-
-        Dim noiseX As Double
-        Dim noiseY As Double
-
-        Dim noiseWert As Double
-        Dim noiseEinfluss As Double
-
-        Dim relativeDistanzVerzerrt As Double
-
-        Dim eigenerHerd As Brandherd
-
-        Dim makroX As Double
-        Dim makroY As Double
-
-        Dim makroNoiseWert As Double
-        Dim makroEinfluss As Double
-
-        Dim relativeDistanzMakro As Double
 
         'Die Brandmaske muss nicht in voller Bildschirmauflösung berechnet werden.
         'Die GPU sampelt sie später auf die Rendergröße hoch.
@@ -1422,6 +1404,22 @@ Public Class TransitionMain
 
     End Function
 
+    Private Function ErmittleModusFuerAktuellenDurchlauf() As String
+
+        Dim modus As String
+
+        modus = "Feuer"
+
+        If aktuelleSettings.modi IsNot Nothing AndAlso aktuelleSettings.modi.Count > 0 Then
+
+            modus = aktuelleSettings.modi(rnd.Next(0, aktuelleSettings.modi.Count))
+
+        End If
+
+        Return modus
+
+    End Function
+
     Private Function ErmittleGradientNameFuerModus(modus As String) As String
 
         Select Case modus
@@ -1450,25 +1448,45 @@ Public Class TransitionMain
 
     End Function
 
-    Private Function ErmittleGradientFuerAktuellenDurchlauf() As BitmapSource
+    Private Function ErmittlePartikelGradientFuerAktuellenDurchlauf(modus As String) As BitmapSource
 
-        Dim modus As String
         Dim gradientName As String
-
         Dim gradienten As List(Of SlideShowGradient)
         Dim gradient As SlideShowGradient
 
-        modus = "Feuer"
-        gradientName = Nothing
+        gradientName = ErmittlePartikelGradientNameFuerModus(modus)
 
-        gradienten = Nothing
-        gradient = Nothing
+        gradienten = GradientenHandling.LadeGradienten()
 
-        If aktuelleSettings.modi IsNot Nothing AndAlso aktuelleSettings.modi.Count > 0 Then
+        gradient =
+        gradienten.FirstOrDefault(
+            Function(item)
 
-            modus = aktuelleSettings.modi(rnd.Next(0, aktuelleSettings.modi.Count))
+                Return String.Equals(
+                    item.Name,
+                    gradientName,
+                    StringComparison.OrdinalIgnoreCase)
+
+            End Function)
+
+        If gradient Is Nothing Then
+
+            Throw New InvalidOperationException("Der Partikelgradient """ & gradientName & """ für den Modus """ &
+                                                modus & """ wurde nicht gefunden.")
 
         End If
+
+        LogHandling.LogDebug(nameTransition & ": Partikelgradient: " & gradientName)
+
+        Return GradientenHandling.ErzeugeGradientBitmap(gradient, 1024)
+
+    End Function
+
+    Private Function ErmittleGradientFuerAktuellenDurchlauf(modus As String) As BitmapSource
+
+        Dim gradientName As String
+        Dim gradienten As List(Of SlideShowGradient)
+        Dim gradient As SlideShowGradient
 
         gradientName = ErmittleGradientNameFuerModus(modus)
 
@@ -1495,6 +1513,34 @@ Public Class TransitionMain
         LogHandling.LogDebug(nameTransition & ": Modus: " & modus & "; Gradient: " & gradientName)
 
         Return GradientenHandling.ErzeugeGradientBitmap(gradient, 1024)
+
+    End Function
+
+    Private Function ErmittlePartikelGradientNameFuerModus(modus As String) As String
+
+        Select Case modus
+
+            Case "Feuer"
+
+                Return "BP - Feuer - Partikel"
+
+            Case "Blitze"
+
+                Return "BP - Blitze - Partikel"
+
+            Case "Säure"
+
+                Return "BP - Säure - Partikel"
+
+            Case "Magie"
+
+                Return "BP - Magie - Partikel"
+
+            Case Else
+
+                Return "BP - Feuer - Partikel"
+
+        End Select
 
     End Function
 
@@ -1547,10 +1593,18 @@ Public Class TransitionMain
     Private Sub FrameTimer_Tick(sender As Object, e As EventArgs)
 
         Dim progress As Double
+        Dim aktuelleFrameZeitMS As Double
+        Dim deltaTime As Double
 
         If Not transitionLaeuft Then
             Exit Sub
         End If
+
+        aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
+
+        deltaTime = (aktuelleFrameZeitMS - letzteFrameZeitMS) / 1000.0
+
+        letzteFrameZeitMS = aktuelleFrameZeitMS
 
         If dauerInMS <= 0 Then
 
@@ -1558,11 +1612,11 @@ Public Class TransitionMain
 
         Else
 
-            progress = Math.Min(1.0, laufzeit.Elapsed.TotalMilliseconds / dauerInMS)
+            progress = Math.Min(1.0, aktuelleFrameZeitMS / dauerInMS)
 
         End If
 
-        DrawDirect3DFrame(progress)
+        DrawDirect3DFrame(progress, deltaTime)
 
         If progress >= 1.0 Then
 
@@ -1604,54 +1658,59 @@ Public Class TransitionMain
         newBitmapSource = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
         If oldBitmapSource Is Nothing Then
-
             Throw New InvalidOperationException("Das gerahmte alte Transitionsbild konnte nicht erzeugt werden.")
-
         End If
 
         If newBitmapSource Is Nothing Then
-
             Throw New InvalidOperationException("Das gerahmte neue Transitionsbild konnte nicht erzeugt werden.")
-
         End If
-
 
         ' Prozedurale Brandmaske erzeugen.
         ErzeugeBrandMaske()
 
         If brandMaske Is Nothing Then
-
             Throw New InvalidOperationException("Die prozedurale Brandmaske konnte nicht erzeugt werden.")
-
         End If
 
-        gradientBitmap = ErmittleGradientFuerAktuellenDurchlauf()
+
+        aktuellerModus = ErmittleModusFuerAktuellenDurchlauf()
+
+        gradientBitmap = ErmittleGradientFuerAktuellenDurchlauf(aktuellerModus)
+
+        particleGradientBitmap = ErmittlePartikelGradientFuerAktuellenDurchlauf(aktuellerModus)
 
         If gradientBitmap Is Nothing Then
+            Throw New InvalidOperationException("Die Gradiententextur konnte nicht erzeugt werden.")
+        End If
 
-            Throw New InvalidOperationException(
-        "Die Gradiententextur konnte nicht erzeugt werden.")
-
+        If particleGradientBitmap Is Nothing Then
+            Throw New InvalidOperationException("Der Partikelgradient konnte nicht erzeugt werden.")
         End If
 
         brandkantenBreite = ErmittleNormierteBrandkantenbreite()
 
         direct3DRenderer = New BrennendesPapierD3DRenderer()
         direct3DRenderer.Initialisiere(CInt(renderSize.Width), CInt(renderSize.Height), oldBitmapSource,
-                                       newBitmapSource, brandMaske, gradientBitmap, brandkantenBreite)
-
-        ' Der Consumer kennt weiterhin nur ImageSource.
-        RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
-
+                                       newBitmapSource, brandMaske, gradientBitmap, particleGradientBitmap,
+                                       brandkantenBreite)
 
         ' Erster Frame = progress 0.
-        direct3DRenderer.RenderFrame(0.0F)
+        direct3DRenderer.RenderFrame(0.0F, 0.0F)
+
+        RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
+
+        letzteFrameZeitMS = 0.0
+
+        laufzeit.Restart()
 
         StarteRenderTimer()
 
     End Sub
 
-    Private Sub DrawDirect3DFrame(progress As Double)
+    Private Sub DrawDirect3DFrame(progress As Double, deltaTime As Double)
+
+        Dim begrenzterProgress As Single
+        Dim begrenztesDeltaTime As Single
 
         If direct3DRenderer Is Nothing Then
             Exit Sub
@@ -1665,7 +1724,11 @@ Public Class TransitionMain
 
         End If
 
-        direct3DRenderer.RenderFrame(CSng(Math.Max(0.0, Math.Min(1.0, progress))))
+        begrenzterProgress = CSng(Math.Max(0.0, Math.Min(1.0, progress)))
+
+        begrenztesDeltaTime = CSng(Math.Max(0.0, Math.Min(0.1, deltaTime)))
+
+        direct3DRenderer.RenderFrame(begrenzterProgress, begrenztesDeltaTime)
 
     End Sub
 
