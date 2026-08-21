@@ -8,6 +8,9 @@ setlocal EnableExtensions
 :: Ausgabeverzeichnis von SlideShowMain und benennt die DLLs dabei in die
 :: SlideShowSaver-spezifischen Dateiendungen um.
 ::
+:: Zusaetzlich werden zentrale Laufzeitdaten wie die Ortsdatenbanken aus
+:: SlideShowTools in das Ausgabeverzeichnis von SlideShowMain kopiert.
+::
 :: Aktuelle Zielarchitektur:
 ::     x64 / Debug
 ::
@@ -29,6 +32,9 @@ set "MAIN=%ROOT%\SlideShowMain\bin\%BUILD%"
 set "TARGET_MODULE=%MAIN%\Module"
 set "TARGET_TRANSITIONS=%MAIN%\Transitions"
 set "TARGET_SHADER=%MAIN%\Shader"
+set "TARGET_ORTE=%MAIN%\Orte"
+
+set "SOURCE_ORTE=%ROOT%\SlideShowTools\Orte"
 
 
 echo.
@@ -53,6 +59,9 @@ call :CreateDirectory "%TARGET_TRANSITIONS%"
 if errorlevel 1 goto :Error
 
 call :CreateDirectory "%TARGET_SHADER%"
+if errorlevel 1 goto :Error
+
+call :CreateDirectory "%TARGET_ORTE%"
 if errorlevel 1 goto :Error
 
 
@@ -198,6 +207,36 @@ call :ExportPlugin ^
     "%ROOT%\SlideShowShader.LUT\bin\%BUILD%\SlideShowShader.LUT.pdb" ^
     "%TARGET_SHADER%\LUT.ssss" ^
     "%TARGET_SHADER%\LUT.pdb"
+if errorlevel 1 goto :Error
+
+
+:: ============================================================================
+:: ORTSDATEN
+:: ============================================================================
+::
+:: Die versionierten Quelldaten liegen unter:
+::
+::     SlideShowTools\Orte
+::
+:: Fuer die Laufzeit werden sie nach:
+::
+::     SlideShowMain\bin\<Build>\Orte
+::
+:: kopiert.
+::
+:: Dadurch bleibt bin ein reines Build-/Laufzeitverzeichnis und kann von Git
+:: vollstaendig ignoriert werden.
+:: ============================================================================
+
+echo.
+echo ============================================================================
+echo Ortsdaten
+echo ============================================================================
+echo.
+
+call :CopyDirectory ^
+    "%SOURCE_ORTE%" ^
+    "%TARGET_ORTE%"
 if errorlevel 1 goto :Error
 
 
@@ -417,6 +456,53 @@ if errorlevel 1 (
     echo.
     echo FEHLER beim Kopieren der Runtime-Abhaengigkeit:
     echo   %RUNTIME_SOURCE%
+    echo.
+    exit /b 1
+)
+
+echo   OK
+echo.
+
+exit /b 0
+
+
+:CopyDirectory
+
+set "DIRECTORY_SOURCE=%~1"
+set "DIRECTORY_TARGET=%~2"
+
+if not exist "%DIRECTORY_SOURCE%\" (
+    echo.
+    echo FEHLER: Quellverzeichnis wurde nicht gefunden:
+    echo   %DIRECTORY_SOURCE%
+    echo.
+    exit /b 1
+)
+
+echo Kopiere Verzeichnis:
+echo   %DIRECTORY_SOURCE%
+echo nach:
+echo   %DIRECTORY_TARGET%
+
+if not exist "%DIRECTORY_TARGET%\" (
+
+    mkdir "%DIRECTORY_TARGET%"
+
+    if errorlevel 1 (
+        echo.
+        echo FEHLER: Zielverzeichnis konnte nicht erstellt werden:
+        echo   %DIRECTORY_TARGET%
+        echo.
+        exit /b 1
+    )
+)
+
+xcopy "%DIRECTORY_SOURCE%\*" "%DIRECTORY_TARGET%\" /E /I /Y /Q >nul
+
+if errorlevel 1 (
+    echo.
+    echo FEHLER beim Kopieren des Verzeichnisses:
+    echo   %DIRECTORY_SOURCE%
     echo.
     exit /b 1
 )

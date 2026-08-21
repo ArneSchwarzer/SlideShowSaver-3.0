@@ -168,5 +168,9 @@
       <Name>SlideShowLogging</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Orte\Eigene Orte.xml" />
+    <Content Include="Orte\GeoNames_StadtListe_20000.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
