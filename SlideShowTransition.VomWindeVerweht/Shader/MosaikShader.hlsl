@@ -32,6 +32,7 @@ struct VSOutput
 {
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD0;
+    float2 lokaleUV : TEXCOORD1;
 };
 
 VSOutput VSMain(uint vertexID : SV_VertexID)
@@ -92,12 +93,39 @@ VSOutput VSMain(uint vertexID : SV_VertexID)
 
     output.position = float4(ndcPosition, 0.0, 1.0);
 
-    output.uv = lerp(partikel.uvRect.xy, partikel.uvRect.zw, uvFaktor);
+    output.uv =
+    lerp(
+        partikel.uvRect.xy,
+        partikel.uvRect.zw,
+        uvFaktor);
+
+    output.lokaleUV = uvFaktor;
 
     return output;
 }
 
 float4 PSMain(VSOutput input) : SV_TARGET
 {
-    return QuellBild.Sample(QuellSampler, input.uv);
+    float4 farbe;
+    float randBreite;
+    float abstandRand;
+
+    farbe =
+        QuellBild.Sample(
+            QuellSampler,
+            input.uv);
+
+    randBreite = 0.04;
+
+    abstandRand =
+        min(
+            min(input.lokaleUV.x, 1.0 - input.lokaleUV.x),
+            min(input.lokaleUV.y, 1.0 - input.lokaleUV.y));
+
+    if (abstandRand < randBreite)
+    {
+        return float4(1.0, 0.5, 0.0, 1.0);
+    }
+
+    return farbe;
 }
