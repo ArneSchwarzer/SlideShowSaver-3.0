@@ -149,6 +149,12 @@ call :ExportPlugin ^
     "%TARGET_TRANSITIONS%\Brennendes Papier.pdb"
 if errorlevel 1 goto :Error
 
+call :ExportPlugin ^
+    "%ROOT%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.dll" ^
+    "%ROOT%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.pdb" ^
+    "%TARGET_TRANSITIONS%\Vom Winde verweht.ssst" ^
+    "%TARGET_TRANSITIONS%\Vom Winde verweht.pdb"
+if errorlevel 1 goto :Error
 
 :: ============================================================================
 :: SHADER
@@ -339,7 +345,7 @@ if errorlevel 1 goto :Error
 :: ============================================================================
 
 call :CopyRuntime ^
-    "%ROOT%\SlideShowDirect3DInterop\bin\Debug\SlideShowDirect3DInterop.dll" ^
+    "%ROOT%\SlideShowDirect3DInterop\bin\x64\Debug\SlideShowDirect3DInterop.dll" ^
     "%MAIN%\SlideShowDirect3DInterop.dll"
 if errorlevel 1 goto :Error
 

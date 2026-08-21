@@ -4,6 +4,7 @@ Imports System.Windows.Media.Imaging
 Imports SlideShowInterfaces.InterfaceDeclarations
 Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.RegistryHandling
+Imports SlideShowTools.SettingsHandling
 
 Public Class TransitionMain
     Implements ISlideShowTransition
