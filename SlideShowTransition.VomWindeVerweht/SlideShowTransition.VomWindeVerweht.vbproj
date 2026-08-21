@@ -137,6 +137,8 @@
     <Compile Include="Direct3D\Direct3DResourceHandler.vb" />
     <Compile Include="Direct3D\MosaikRenderer.vb" />
     <Compile Include="Direct3D\PartikelDaten.vb" />
+    <Compile Include="Generatoren\FlowFieldDaten.vb" />
+    <Compile Include="Generatoren\FlowFieldGenerator.vb" />
     <Compile Include="Generatoren\PartikelRasterGenerator.vb" />
     <Compile Include="TransitionMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
