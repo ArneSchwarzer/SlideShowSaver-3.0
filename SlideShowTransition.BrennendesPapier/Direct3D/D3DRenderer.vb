@@ -137,6 +137,23 @@ Friend Class D3DRenderer
 
         istInitialisiert = True
 
+        '###############################################
+        '# Debugging                                   #
+        '#                                             #
+        '# Kleiner Testaufruf von BlitzTexturGenerator #
+        '# Inline-Dims sind bewusst für diese Ausnahme #
+        '# gesetzt.                                    #
+        '###############################################
+
+        Dim generator As BlitzTexturGenerator
+        Dim blitz As BlitzTexturDaten
+
+        generator = New BlitzTexturGenerator()
+
+        blitz = generator.ErzeugeBlitzTextur(512, 512, 12345)
+
+        blitz.Bitmap.Save("BlitzTest.png", Imaging.ImageFormat.Png)
+
         LogHandling.LogDebug("D3D: Initialisiere() beendet.")
 
     End Sub

@@ -53,15 +53,9 @@ Public Class BlitzTexturGenerator
 
         zufall = New Random(seed)
 
-        segmente = ErzeugeBlitzGeometrie(
-            breite,
-            hoehe,
-            zufall)
+        segmente = ErzeugeBlitzGeometrie(breite, hoehe, zufall)
 
-        bitmap = RendereBlitz(
-            breite,
-            hoehe,
-            segmente)
+        bitmap = RendereBlitz(breite, hoehe, segmente)
 
         daten = New BlitzTexturDaten()
 
@@ -74,9 +68,8 @@ Public Class BlitzTexturGenerator
 
     End Function
 
-    Private Function ErzeugeBlitzGeometrie(breite As Integer,
-                                           hoehe As Integer,
-                                           zufall As Random) As List(Of BlitzSegment)
+    Private Function ErzeugeBlitzGeometrie(breite As Integer, hoehe As Integer, zufall As Random) _
+        As List(Of BlitzSegment)
 
         Dim segmente As List(Of BlitzSegment)
         Dim startPunkt As PointF
@@ -91,29 +84,18 @@ Public Class BlitzTexturGenerator
 
         segmente = New List(Of BlitzSegment)()
 
-        startPunkt = New PointF(
-            CSng(breite * 0.5),
-            CSng(hoehe * 0.05))
+        startPunkt = New PointF(CSng(breite * 0.5), CSng(hoehe * 0.05))
+        endPunkt = New PointF(CSng(breite * 0.5), CSng(hoehe * 0.95))
 
-        endPunkt = New PointF(
-            CSng(breite * 0.5),
-            CSng(hoehe * 0.95))
-
-        segmentAnzahl = zufall.Next(
-            HAUPTAST_SEGMENTE_MIN,
-            HAUPTAST_SEGMENTE_MAX + 1)
+        segmentAnzahl = zufall.Next(HAUPTAST_SEGMENTE_MIN, HAUPTAST_SEGMENTE_MAX + 1)
 
         aktuellePosition = startPunkt
 
-        schrittY =
-            (endPunkt.Y - startPunkt.Y) /
-            CSng(segmentAnzahl)
+        schrittY = (endPunkt.Y - startPunkt.Y) / CSng(segmentAnzahl)
 
         For i = 0 To segmentAnzahl - 1
 
-            abweichungX =
-                CSng((zufall.NextDouble() * 2.0 - 1.0) *
-                SEITENABWEICHUNG_MAX)
+            abweichungX = CSng((zufall.NextDouble() * 2.0 - 1.0) * SEITENABWEICHUNG_MAX)
 
             naechstePosition = New PointF(
                 Begrenze(
@@ -122,8 +104,7 @@ Public Class BlitzTexturGenerator
                     CSng(breite * 0.9)),
                 aktuellePosition.Y + schrittY)
 
-            intensitaet =
-                CSng(1.0 - (i / CDbl(segmentAnzahl)) * 0.25)
+            intensitaet = CSng(1.0 - (i / CDbl(segmentAnzahl)) * 0.25)
 
             segmente.Add(
                 New BlitzSegment With
@@ -134,17 +115,9 @@ Public Class BlitzTexturGenerator
                     .AstTiefe = 0
                 })
 
-            If zufall.NextDouble() <
-               NEBENAST_WAHRSCHEINLICHKEIT Then
+            If zufall.NextDouble() < NEBENAST_WAHRSCHEINLICHKEIT Then
 
-                ErzeugeNebenast(
-                    segmente,
-                    aktuellePosition,
-                    naechstePosition,
-                    breite,
-                    hoehe,
-                    zufall,
-                    1)
+                ErzeugeNebenast(segmente, aktuellePosition, naechstePosition, breite, hoehe, zufall, 1)
 
             End If
 
@@ -156,13 +129,8 @@ Public Class BlitzTexturGenerator
 
     End Function
 
-    Private Sub ErzeugeNebenast(segmente As List(Of BlitzSegment),
-                                ursprung As PointF,
-                                hauptRichtung As PointF,
-                                breite As Integer,
-                                hoehe As Integer,
-                                zufall As Random,
-                                astTiefe As Integer)
+    Private Sub ErzeugeNebenast(segmente As List(Of BlitzSegment), ursprung As PointF, hauptRichtung As PointF,
+                                breite As Integer, hoehe As Integer, zufall As Random, astTiefe As Integer)
 
         Dim segmentAnzahl As Integer
         Dim aktuellePosition As PointF
@@ -178,9 +146,7 @@ Public Class BlitzTexturGenerator
             Return
         End If
 
-        segmentAnzahl = zufall.Next(
-            NEBENAST_SEGMENTE_MIN,
-            NEBENAST_SEGMENTE_MAX + 1)
+        segmentAnzahl = zufall.Next(NEBENAST_SEGMENTE_MIN, NEBENAST_SEGMENTE_MAX + 1)
 
         aktuellePosition = ursprung
 
@@ -190,17 +156,12 @@ Public Class BlitzTexturGenerator
             richtungsFaktor = 1.0F
         End If
 
-        schrittX =
-            CSng((12.0 + zufall.NextDouble() * 18.0) *
-            richtungsFaktor)
-
-        schrittY =
-            CSng(8.0 + zufall.NextDouble() * 18.0)
+        schrittX = CSng((12.0 + zufall.NextDouble() * 18.0) * richtungsFaktor)
+        schrittY = CSng(8.0 + zufall.NextDouble() * 18.0)
 
         For i = 0 To segmentAnzahl - 1
 
-            seitlicheAbweichung =
-                CSng((zufall.NextDouble() * 2.0 - 1.0) * 8.0)
+            seitlicheAbweichung = CSng((zufall.NextDouble() * 2.0 - 1.0) * 8.0)
 
             naechstePosition = New PointF(
                 Begrenze(
@@ -215,11 +176,7 @@ Public Class BlitzTexturGenerator
                     0.0F,
                     hoehe - 1.0F))
 
-            intensitaet =
-                CSng(
-                    0.75 -
-                    astTiefe * 0.15 -
-                    (i / CDbl(segmentAnzahl)) * 0.25)
+            intensitaet = CSng(0.75 - astTiefe * 0.15 - (i / CDbl(segmentAnzahl)) * 0.25)
 
             segmente.Add(
                 New BlitzSegment With
@@ -230,18 +187,9 @@ Public Class BlitzTexturGenerator
                     .AstTiefe = astTiefe
                 })
 
-            If astTiefe < MAX_AST_TIEFE AndAlso
-               zufall.NextDouble() <
-               NEBENAST_WAHRSCHEINLICHKEIT * 0.35 Then
+            If astTiefe < MAX_AST_TIEFE AndAlso zufall.NextDouble() < NEBENAST_WAHRSCHEINLICHKEIT * 0.35 Then
 
-                ErzeugeNebenast(
-                    segmente,
-                    aktuellePosition,
-                    naechstePosition,
-                    breite,
-                    hoehe,
-                    zufall,
-                    astTiefe + 1)
+                ErzeugeNebenast(segmente, aktuellePosition, naechstePosition, breite, hoehe, zufall, astTiefe + 1)
 
             End If
 
@@ -251,9 +199,7 @@ Public Class BlitzTexturGenerator
 
     End Sub
 
-    Private Function RendereBlitz(breite As Integer,
-                                  hoehe As Integer,
-                                  segmente As List(Of BlitzSegment)) As Bitmap
+    Private Function RendereBlitz(breite As Integer, hoehe As Integer, segmente As List(Of BlitzSegment)) As Bitmap
 
         Dim bitmap As Bitmap
         Dim graphics As Graphics
@@ -263,10 +209,7 @@ Public Class BlitzTexturGenerator
         Dim innerGlowBreite As Single
         Dim aeussererGlowBreite As Single
 
-        bitmap = New Bitmap(
-            breite,
-            hoehe,
-            Imaging.PixelFormat.Format32bppArgb)
+        bitmap = New Bitmap(breite, hoehe, Imaging.PixelFormat.Format32bppArgb)
 
         graphics = Graphics.FromImage(bitmap)
 
@@ -281,69 +224,33 @@ Public Class BlitzTexturGenerator
             ' Äußerer Glow
             For Each segment In segmente
 
-                alpha = CInt(
-                    38.0F *
-                    segment.Intensitaet)
+                alpha = CInt(38.0F * segment.Intensitaet)
 
-                aeussererGlowBreite =
-                    AEUSSERER_GLOW_BREITE *
-                    BerechneAstBreitenFaktor(segment.AstTiefe)
+                aeussererGlowBreite = AEUSSERER_GLOW_BREITE * BerechneAstBreitenFaktor(segment.AstTiefe)
 
-                ZeichneSegment(
-                    graphics,
-                    segment,
-                    aeussererGlowBreite,
-                    Color.FromArgb(
-                        alpha,
-                        255,
-                        120,
-                        0))
+                ZeichneSegment(graphics, segment, aeussererGlowBreite, Color.FromArgb(alpha, 255, 120, 0))
 
             Next
 
             ' Innerer Glow
             For Each segment In segmente
 
-                alpha = CInt(
-                    110.0F *
-                    segment.Intensitaet)
+                alpha = CInt(110.0F * segment.Intensitaet)
 
-                innerGlowBreite =
-                    INNERER_GLOW_BREITE *
-                    BerechneAstBreitenFaktor(segment.AstTiefe)
+                innerGlowBreite = INNERER_GLOW_BREITE * BerechneAstBreitenFaktor(segment.AstTiefe)
 
-                ZeichneSegment(
-                    graphics,
-                    segment,
-                    innerGlowBreite,
-                    Color.FromArgb(
-                        alpha,
-                        255,
-                        180,
-                        40))
+                ZeichneSegment(graphics, segment, innerGlowBreite, Color.FromArgb(alpha, 255, 180, 40))
 
             Next
 
             ' Heller Kern
             For Each segment In segmente
 
-                alpha = CInt(
-                    255.0F *
-                    segment.Intensitaet)
+                alpha = CInt(255.0F * segment.Intensitaet)
 
-                kernBreite =
-                    KERN_BREITE *
-                    BerechneAstBreitenFaktor(segment.AstTiefe)
+                kernBreite = KERN_BREITE * BerechneAstBreitenFaktor(segment.AstTiefe)
 
-                ZeichneSegment(
-                    graphics,
-                    segment,
-                    kernBreite,
-                    Color.FromArgb(
-                        alpha,
-                        255,
-                        245,
-                        210))
+                ZeichneSegment(graphics, segment, kernBreite, Color.FromArgb(alpha, 255, 245, 210))
 
             Next
 
@@ -357,26 +264,17 @@ Public Class BlitzTexturGenerator
 
     End Function
 
-    Private Sub ZeichneSegment(graphics As Graphics,
-                               segment As BlitzSegment,
-                               breite As Single,
-                               farbe As Color)
+    Private Sub ZeichneSegment(graphics As Graphics, segment As BlitzSegment, breite As Single, farbe As Color)
 
         Dim pen As Pen
 
-        pen = New Pen(
-            farbe,
-            Math.Max(1.0F, breite))
-
+        pen = New Pen(farbe, Math.Max(1.0F, breite))
         Try
 
             pen.StartCap = LineCap.Round
             pen.EndCap = LineCap.Round
 
-            graphics.DrawLine(
-                pen,
-                segment.StartPunkt,
-                segment.EndPunkt)
+            graphics.DrawLine(pen, segment.StartPunkt, segment.EndPunkt)
 
         Finally
 
@@ -403,9 +301,7 @@ Public Class BlitzTexturGenerator
 
     End Function
 
-    Private Function Begrenze(wert As Single,
-                              minimum As Single,
-                              maximum As Single) As Single
+    Private Function Begrenze(wert As Single, minimum As Single, maximum As Single) As Single
 
         If wert < minimum Then
             Return minimum
