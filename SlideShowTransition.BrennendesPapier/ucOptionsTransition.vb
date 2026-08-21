@@ -521,12 +521,12 @@ Public Class ucOptionsTransition
         aktuelleSettings.partikel = chkPartikel.Checked
         aktuelleSettings.gradient = chkGradient.Checked
         aktuelleSettings.verzerrung = chkVerzerrung.Checked
-        aktuelleSettings.textur = chkTextur.Checked
+        'aktuelleSettings.textur = chkTextur.Checked
 
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Partikel", aktuelleSettings.partikel.ToString())
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Gradient", aktuelleSettings.gradient.ToString())
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Verzerrung", aktuelleSettings.verzerrung.ToString())
-        WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Textur", aktuelleSettings.textur.ToString())
+        'WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Textur", aktuelleSettings.textur.ToString())
 
     End Sub
 
@@ -620,7 +620,7 @@ Public Class ucOptionsTransition
         aktuelleSettings.zuendmodus = defaults("Zuendmodus")
         aktuelleSettings.gradient = CBool(defaults("Gradient"))
         aktuelleSettings.verzerrung = CBool(defaults("Verzerrung"))
-        aktuelleSettings.textur = CBool(defaults("Textur"))
+        'aktuelleSettings.textur = CBool(defaults("Textur"))
         aktuelleSettings.partikelLebensdauer = Double.Parse(defaults("PartikelLebensdauer"), CultureInfo.InvariantCulture)
         aktuelleSettings.verzerrungsbreite = CInt(defaults("Verzerrungsbreite"))
         aktuelleSettings.verzerrungsstaerke = CInt(defaults("Verzerrungsstaerke"))
@@ -641,7 +641,7 @@ Public Class ucOptionsTransition
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Zuendmodus", defaults("Zuendmodus"))
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Gradient", defaults("Gradient"))
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Verzerrung", defaults("Verzerrung"))
-        WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Textur", defaults("Textur"))
+        ' WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Textur", defaults("Textur"))
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "PartikelLebensdauer", defaults("PartikelLebensdauer"))
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Verzerrungsbreite", defaults("Verzerrungsbreite"))
         WriteToRegistry(SLIDESHOWTRANSITION_BRENNENDESPAPIER_FULLPATH & "Verzerrungsstaerke", defaults("Verzerrungsstaerke"))
