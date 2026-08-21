@@ -735,12 +735,14 @@ Partial Class ucOptionsTransition
         'chkTextur
         '
         Me.chkTextur.AutoSize = True
-        Me.chkTextur.Location = New System.Drawing.Point(726, 40)
+        Me.chkTextur.Enabled = False
+        Me.chkTextur.Location = New System.Drawing.Point(731, 40)
         Me.chkTextur.Name = "chkTextur"
         Me.chkTextur.Size = New System.Drawing.Size(130, 45)
         Me.chkTextur.TabIndex = 75
         Me.chkTextur.Text = "Textur"
         Me.chkTextur.UseVisualStyleBackColor = True
+        Me.chkTextur.Visible = False
         '
         'chkVerzerrung
         '

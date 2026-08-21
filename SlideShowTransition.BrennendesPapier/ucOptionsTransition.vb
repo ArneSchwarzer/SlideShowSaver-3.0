@@ -107,7 +107,7 @@ Public Class ucOptionsTransition
         chkPartikel.Checked = aktuelleSettings.partikel
         chkGradient.Checked = aktuelleSettings.gradient
         chkVerzerrung.Checked = aktuelleSettings.verzerrung
-        chkTextur.Checked = aktuelleSettings.textur
+        ' chkTextur.Checked = aktuelleSettings.textur
 
         'Tabpage Partikel
         Select Case aktuelleSettings.schwerkraft
@@ -153,6 +153,23 @@ Public Class ucOptionsTransition
         AktualisierePartikelAbhaengigeControls()
         AktualisiereEffektTabStatus()
 
+        '##############################################
+        '#                                            #
+        '# Für die bereits geplante V 2.0 von der     #
+        '# Transition Brennendes Papier               #
+        '#                                            #
+        '# Aktuell werden hier bereits geplante       #
+        '# Controls einfach stumpf ausgeblendet.
+        '#                                            #
+        '##############################################
+
+        If tcBP.TabPages.Contains(tpTextur) Then
+
+            tcBP.TabPages.Remove(tpTextur)
+
+        End If
+
+
         '################################################################
         '#                                                              #
         '# Test- und Konfigurationsbereich                              #
@@ -192,7 +209,7 @@ Public Class ucOptionsTransition
         tpPartikel.Enabled = chkPartikel.Checked
         tpGradient.Enabled = chkGradient.Checked
         tpVerzerrung.Enabled = chkVerzerrung.Checked
-        tpTextur.Enabled = chkTextur.Checked
+        ' tpTextur.Enabled = chkTextur.Checked
 
         If tcBP.SelectedTab IsNot Nothing AndAlso Not tcBP.SelectedTab.Enabled Then
 
@@ -484,8 +501,9 @@ Public Class ucOptionsTransition
     Private Sub chkEffekt_CheckedChanged(sender As Object, e As EventArgs) _
         Handles chkPartikel.CheckedChanged,
                 chkGradient.CheckedChanged,
-                chkVerzerrung.CheckedChanged,
-                chkTextur.CheckedChanged
+                chkVerzerrung.CheckedChanged ',
+        ' chkTextur.CheckedChanged
+
         'Speichert die aktivierten Einzeleffekte und aktualisiert
         'die zugehörigen Optionsseiten.
 

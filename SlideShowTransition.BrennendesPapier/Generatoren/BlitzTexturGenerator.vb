@@ -1,6 +1,15 @@
 ﻿Imports System.Drawing
 Imports System.Drawing.Drawing2D
 
+'##############################################
+'#                                            #
+'# Für die bereits geplante V 2.0 von der     #
+'# Transition Brennendes Papier               #
+'#                                            #
+'##############################################
+
+
+
 Public Class BlitzTexturGenerator
 
     Private Class BlitzSegment
