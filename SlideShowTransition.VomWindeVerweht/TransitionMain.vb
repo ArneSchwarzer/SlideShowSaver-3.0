@@ -19,10 +19,10 @@ Public Class TransitionMain
     Private wurdeBereinigt As Boolean
 
     Structure TransitionSettings_VomWindeVerweht
-        Public PartikelGroesse As Integer
-        Public PartikelGroesseZufall As Boolean
-        Public WindStaerke As Integer
-        Public WindStaerkeZufall As Boolean
+        Public partikelGroesse As Integer
+        Public partikelGroesseZufall As Boolean
+        Public windStaerke As Integer
+        Public windStaerkeZufall As Boolean
     End Structure
 
 #End Region
@@ -32,7 +32,7 @@ Public Class TransitionMain
     Public ReadOnly Property TransitionName As String Implements ISlideShowTransition.TransitionName
 
         Get
-            Return "Direkter Übergang"
+            Return nameTransition
         End Get
 
     End Property
@@ -65,14 +65,10 @@ Public Class TransitionMain
 
 #Region "Transition"
 
-    Public Sub RunTransition(
-        oldImage As BitmapImage,
-        picBoxModeOld As PictureBoxSizeMode,
-        newImage As BitmapImage,
-        picBoxModeNew As PictureBoxSizeMode,
-        clientSize As Size,
-        Optional durationMs As Integer = 0) _
-        Implements ISlideShowTransition.RunTransition
+    Public Sub RunTransition(oldImage As BitmapImage, picBoxModeOld As PictureBoxSizeMode, newImage As BitmapImage,
+                             picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs _
+                             As Integer = 0) Implements ISlideShowTransition.RunTransition
+
         'Erzeugt direkt den finalen Ziel-Frame und meldet ihn
         'als fertiges Transitionsergebnis.
 
@@ -86,6 +82,7 @@ Public Class TransitionMain
         End If
 
         BeendeUndBereinigeTransition()
+        ReadTransitionSettingsFromRegistryOrDefaults()
 
         sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
 
@@ -127,10 +124,58 @@ Public Class TransitionMain
 
 #Region "Optionsdialog"
 
-    Public Function GetTransitionOptionsDialog() As UserControl Implements ISlideShowTransition.GetTransitionOptionsDialog
-        'Stellt frmOptionsMain das - leere - ucOptionsTransition zur Verfügung
+    Public Function GetTransitionOptionsDialog() As UserControl _
+    Implements ISlideShowTransition.GetTransitionOptionsDialog
+        'Liest die aktuellen Einstellungen ein, stellt sie dem
+        'Optionsdialog über die SettingsInbox zur Verfügung und
+        'liefert anschließend das UserControl zurück.
 
-        Return New ucOptionsTransition
+        ReadTransitionSettingsFromRegistryOrDefaults()
+
+        StoreSettings(nameTransition, aktuelleSettings)
+
+        Return New ucOptionsTransition()
+
+    End Function
+#End Region
+
+#Region "Settings"
+
+    Private Sub ReadTransitionSettingsFromRegistryOrDefaults()
+        'Liest sämtliche Transitionseinstellungen aus der Registry.
+        'Nicht vorhandene Werte werden durch die Defaultwerte ersetzt.
+
+        Dim defaults As Dictionary(Of String, String)
+
+        defaults = GetTransitionDefaultSettings()
+
+        aktuelleSettings.partikelGroesse = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                      "PartikelGroesse", defaults))
+
+        aktuelleSettings.partikelGroesseZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                             "PartikelGroesseZufall", defaults))
+
+        aktuelleSettings.windStaerke = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                  "WindStaerke", defaults))
+
+        aktuelleSettings.windStaerkeZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                         "WindStaerkeZufall", defaults))
+
+    End Sub
+
+    Friend Shared Function GetTransitionDefaultSettings() As Dictionary(Of String, String)
+        'Liefert die Standardwerte der Transition.
+
+        Dim defaults As Dictionary(Of String, String)
+
+        defaults = New Dictionary(Of String, String)()
+
+        defaults.Add("PartikelGroesse", "20")
+        defaults.Add("PartikelGroesseZufall", "False")
+        defaults.Add("WindStaerke", "3")
+        defaults.Add("WindStaerkeZufall", "False")
+
+        Return defaults
 
     End Function
 

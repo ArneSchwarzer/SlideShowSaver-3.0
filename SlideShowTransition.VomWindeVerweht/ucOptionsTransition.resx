@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="lblFlauteWarnung.Text" xml:space="preserve">
+    <value>Warnung: Bei Bft 0 herrscht totale Flaute. Es kann also kein einziges Sandkörnchen weggepustet werden. Der Übergang bleibt daher auf dem Originalbild stehen, bis hier in den Optionen ein sinnvoller Wert für die Windstärke eingestellt wird.</value>
+  </data>
 </root>

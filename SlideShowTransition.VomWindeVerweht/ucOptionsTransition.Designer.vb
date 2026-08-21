@@ -22,6 +22,7 @@ Partial Class ucOptionsTransition
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(ucOptionsTransition))
         Me.lblTransitonName = New System.Windows.Forms.Label()
         Me.lblNlblTransitionName = New System.Windows.Forms.Label()
         Me.chkPartikelGroesseZufall = New System.Windows.Forms.CheckBox()
@@ -33,6 +34,7 @@ Partial Class ucOptionsTransition
         Me.lblNtrkWindstaerke = New System.Windows.Forms.Label()
         Me.lblWindstaerke = New System.Windows.Forms.Label()
         Me.btnDefaults = New System.Windows.Forms.Button()
+        Me.lblFlauteWarnung = New System.Windows.Forms.Label()
         CType(Me.trkPartikelGroesse, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkWindstaerke, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -151,10 +153,23 @@ Partial Class ucOptionsTransition
         Me.btnDefaults.Text = "Standards"
         Me.btnDefaults.UseVisualStyleBackColor = True
         '
+        'lblFlauteWarnung
+        '
+        Me.lblFlauteWarnung.AutoSize = True
+        Me.lblFlauteWarnung.Font = New System.Drawing.Font("Segoe UI", 10.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblFlauteWarnung.ForeColor = System.Drawing.Color.Red
+        Me.lblFlauteWarnung.Location = New System.Drawing.Point(41, 463)
+        Me.lblFlauteWarnung.MaximumSize = New System.Drawing.Size(840, 0)
+        Me.lblFlauteWarnung.Name = "lblFlauteWarnung"
+        Me.lblFlauteWarnung.Size = New System.Drawing.Size(809, 205)
+        Me.lblFlauteWarnung.TabIndex = 56
+        Me.lblFlauteWarnung.Text = resources.GetString("lblFlauteWarnung.Text")
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.lblFlauteWarnung)
         Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.lblWindstaerke)
         Me.Controls.Add(Me.lblNtrkWindstaerke)
@@ -187,4 +202,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents lblNtrkWindstaerke As Windows.Forms.Label
     Friend WithEvents lblWindstaerke As Windows.Forms.Label
     Friend WithEvents btnDefaults As Windows.Forms.Button
+    Friend WithEvents lblFlauteWarnung As Windows.Forms.Label
 End Class
