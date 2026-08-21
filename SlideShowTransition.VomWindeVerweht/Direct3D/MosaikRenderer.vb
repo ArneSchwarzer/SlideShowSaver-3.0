@@ -13,22 +13,39 @@ Friend Class MosaikRenderer
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext
 
-    Private partikelBuffer As ID3D11Buffer
-    Private partikelView As ID3D11ShaderResourceView
+    '---------------------------------
+    ' Partikeldaten
+    '---------------------------------
 
-    Private bildTexture As ID3D11Texture2D
-    Private bildView As ID3D11ShaderResourceView
-
-    Private vertexShader As ID3D11VertexShader
-    Private pixelShader As ID3D11PixelShader
-    Private partikelBewegungsShader As ID3D11ComputeShader
-
-    Private partikelBewegungsParameterBuffer As ID3D11Buffer
     Private partikelBuffer As ID3D11Buffer
     Private partikelView As ID3D11ShaderResourceView
     Private partikelUnorderedAccessView As ID3D11UnorderedAccessView
 
+    '---------------------------------
+    ' Bildtextur
+    '---------------------------------
+
+    Private bildTexture As ID3D11Texture2D
+    Private bildView As ID3D11ShaderResourceView
+
+    '---------------------------------
+    ' Render-Shader
+    '---------------------------------
+
+    Private vertexShader As ID3D11VertexShader
+    Private pixelShader As ID3D11PixelShader
     Private renderParameterBuffer As ID3D11Buffer
+
+    '---------------------------------
+    ' Partikelbewegung
+    '---------------------------------
+
+    Private partikelBewegungsShader As ID3D11ComputeShader
+    Private partikelBewegungsParameterBuffer As ID3D11Buffer
+
+    '---------------------------------
+    ' Dimensionen / Status
+    '---------------------------------
 
     Private partikelAnzahl As Integer
     Private renderBreite As Integer
