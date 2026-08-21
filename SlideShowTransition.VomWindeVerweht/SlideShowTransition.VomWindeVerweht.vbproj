@@ -133,6 +133,11 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Direct3D\Direct3DRenderer.vb" />
+    <Compile Include="Direct3D\Direct3DResourceHandler.vb" />
+    <Compile Include="Direct3D\MosaikRenderer.vb" />
+    <Compile Include="Direct3D\PartikelDaten.vb" />
+    <Compile Include="Generatoren\PartikelRasterGenerator.vb" />
     <Compile Include="TransitionMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -179,11 +184,11 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Shader\MosaikShaderPS.cso" />
+    <EmbeddedResource Include="Shader\MosaikShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Direct3D\" />
     <Folder Include="Lang\" />
-    <Folder Include="Shader\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -202,6 +207,9 @@
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shader\MosaikShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets" Condition="Exists('..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets')" />

@@ -1,7 +1,9 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
 Imports System.Windows.Media.Imaging
+Imports System.Windows.Media
 Imports SlideShowInterfaces.InterfaceDeclarations
+Imports SlideShowTools.GraphicsSizeModeHandling
 Imports SlideShowTools.ImageConversionHandling
 Imports SlideShowTools.RegistryHandling
 Imports SlideShowTools.SettingsHandling
@@ -14,6 +16,15 @@ Public Class TransitionMain
     Public Const SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH As String = SLIDESHOWTRANSITION_PATH & "Vom Winde verweht\"
     Public Const nameTransition As String = "Vom Winde verweht"
     Private aktuelleSettings As TransitionSettings_VomWindeVerweht
+
+    'Direct3D Rendering
+    Private direct3DRenderer As D3DRenderer
+    Private rasterGenerator As PartikelRasterGenerator
+
+    Private oldBitmapGerahmt As RenderTargetBitmap
+    Private newBitmapGerahmt As RenderTargetBitmap
+
+    Private testPartikel() As PartikelDaten
 
     'Lifecycle
     Private transitionLaeuft As Boolean
@@ -41,7 +52,7 @@ Public Class TransitionMain
     Public ReadOnly Property TransitionKurzBeschreibung As String Implements ISlideShowTransition.TransitionKurzBeschreibung
 
         Get
-            Return "Bläst das alte Bild weg, bis das neue zum Vorschein kommt"
+            Return "Computational Fluid Dynamics mit Scarlett O'Hara"
         End Get
 
     End Property
@@ -76,6 +87,10 @@ Public Class TransitionMain
         Dim sizeWPF As Windows.Size
         Dim zielFrame As RenderTargetBitmap
 
+        Dim rasterGenerator As PartikelRasterGenerator
+        Dim testPartikel() As PartikelDaten
+
+
         If wurdeBereinigt Then
 
             Throw New ObjectDisposedException(NameOf(TransitionMain))
@@ -85,32 +100,52 @@ Public Class TransitionMain
         BeendeUndBereinigeTransition()
         ReadTransitionSettingsFromRegistryOrDefaults()
 
-        sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
+        rasterGenerator = New PartikelRasterGenerator()
 
-        zielFrame = Nothing
+        testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
+                                                             aktuelleSettings.partikelGroesse, 12345)
 
-        Try
+        oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
+        newBitmapGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
-            transitionLaeuft = True
+        direct3DRenderer = New D3DRenderer()
 
-            RaiseEvent TransitionIsRunning(True)
+        direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt)
 
-            zielFrame = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
+        transitionLaeuft = True
 
-            'Dem aufrufenden Modul kurz Zeit zum Umschalten geben.
-            System.Threading.Thread.Sleep(500)
+        RaiseEvent TransitionIsRunning(True)
 
-            If Not transitionLaeuft Then
-                Exit Sub
-            End If
+        RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
 
-            RaiseEvent TransitionFrameIstFertig(zielFrame)
+        direct3DRenderer.RenderFrame()
 
-        Finally
+        'sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
 
-            BeendeUndBereinigeTransition()
+        'zielFrame = Nothing
 
-        End Try
+        'Try
+
+        '    transitionLaeuft = True
+
+        '    RaiseEvent TransitionIsRunning(True)
+
+        '    zielFrame = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
+
+        '    'Dem aufrufenden Modul kurz Zeit zum Umschalten geben.
+        '    System.Threading.Thread.Sleep(500)
+
+        '    If Not transitionLaeuft Then
+        '        Exit Sub
+        '    End If
+
+        '    RaiseEvent TransitionFrameIstFertig(zielFrame)
+
+        'Finally
+
+        '    BeendeUndBereinigeTransition()
+
+        'End Try
 
     End Sub
 
@@ -192,6 +227,19 @@ Public Class TransitionMain
         End If
 
         transitionLaeuft = False
+
+        If direct3DRenderer IsNot Nothing Then
+
+            direct3DRenderer.Dispose()
+            direct3DRenderer = Nothing
+
+        End If
+
+        oldBitmapGerahmt = Nothing
+        newBitmapGerahmt = Nothing
+
+        testPartikel = Nothing
+        rasterGenerator = Nothing
 
         RaiseEvent TransitionIsRunning(False)
 
