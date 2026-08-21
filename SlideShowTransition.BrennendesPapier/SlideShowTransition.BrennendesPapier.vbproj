@@ -133,7 +133,9 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrandmaskenGenerator.vb" />
+    <Compile Include="Generatoren\BlitzTexturDaten.vb" />
+    <Compile Include="Generatoren\BlitzTexturGenerator.vb" />
+    <Compile Include="Generatoren\BrandmaskenGenerator.vb" />
     <Compile Include="Direct3D\D3DRenderer.vb" />
     <Compile Include="Direct3D\GradientRenderer.vb" />
     <Compile Include="Direct3D\PartikelRenderer.vb" />
