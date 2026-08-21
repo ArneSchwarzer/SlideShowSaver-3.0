@@ -21,6 +21,12 @@ Friend Class MosaikRenderer
 
     Private vertexShader As ID3D11VertexShader
     Private pixelShader As ID3D11PixelShader
+    Private partikelBewegungsShader As ID3D11ComputeShader
+
+    Private partikelBewegungsParameterBuffer As ID3D11Buffer
+    Private partikelBuffer As ID3D11Buffer
+    Private partikelView As ID3D11ShaderResourceView
+    Private partikelUnorderedAccessView As ID3D11UnorderedAccessView
 
     Private renderParameterBuffer As ID3D11Buffer
 
@@ -40,6 +46,22 @@ Friend Class MosaikRenderer
 
         Public padding1 As Single
         Public padding2 As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure PartikelBewegungsParameter
+
+        Public deltaTime As Single
+        Public geschwindigkeit As Single
+        Public renderBreite As Single
+        Public richtung As Single
+
+        Public partikelAnzahl As UInteger
+
+        Public padding1 As Single
+        Public padding2 As Single
+        Public padding3 As Single
 
     End Structure
 
@@ -85,9 +107,14 @@ Friend Class MosaikRenderer
         partikelAnzahl = partikel.Length
 
         InitialisierePartikelBuffer(partikel)
+
         InitialisiereBildTextur(bild)
+
         InitialisiereShader()
+        InitialisierePartikelBewegungsShader()
+
         InitialisiereRenderParameterBuffer()
+        InitialisierePartikelBewegungsParameterBuffer()
 
         AktualisiereRenderParameter()
 
@@ -112,9 +139,9 @@ Friend Class MosaikRenderer
         bufferGroesse = partikel.Length * stride
 
         partikelBuffer =
-            renderDevice.CreateBuffer(Of PartikelDaten)(
+             renderDevice.CreateBuffer(Of PartikelDaten)(
                 partikel,
-                BindFlags.ShaderResource,
+                BindFlags.ShaderResource Or BindFlags.UnorderedAccess,
                 ResourceUsage.Default,
                 CpuAccessFlags.None,
                 ResourceOptionFlags.BufferStructured,
@@ -133,6 +160,17 @@ Friend Class MosaikRenderer
 
             Throw New InvalidOperationException("Die ShaderResourceView des Partikelbuffers konnte nicht " &
                                                 "erzeugt werden.")
+
+        End If
+
+        partikelUnorderedAccessView =
+    renderDevice.CreateUnorderedAccessView(
+        partikelBuffer)
+
+        If partikelUnorderedAccessView Is Nothing Then
+
+            Throw New InvalidOperationException(
+                "Die UnorderedAccessView des Partikelbuffers konnte nicht erzeugt werden.")
 
         End If
 
@@ -179,6 +217,23 @@ Friend Class MosaikRenderer
 
     End Sub
 
+    Private Sub InitialisierePartikelBewegungsShader()
+
+        Dim shaderBytes() As Byte
+
+        shaderBytes = D3DRenderer.LadeShaderBytecode("PartikelBewegungsShaderCS.cso")
+
+        partikelBewegungsShader = renderDevice.CreateComputeShader(shaderBytes)
+
+        If partikelBewegungsShader Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Partikel-Bewegungs-ComputeShader konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
     Private Sub InitialisiereRenderParameterBuffer()
 
         Dim description As BufferDescription
@@ -199,6 +254,102 @@ Friend Class MosaikRenderer
             Throw New InvalidOperationException("Der Mosaik-Renderparameterbuffer konnte nicht erzeugt werden.")
 
         End If
+
+    End Sub
+
+    Private Sub InitialisierePartikelBewegungsParameterBuffer()
+
+        Dim description As BufferDescription
+        Dim bufferGroesse As Integer
+
+        bufferGroesse = Marshal.SizeOf(GetType(PartikelBewegungsParameter))
+
+        If bufferGroesse <> 32 Then
+
+            Throw New InvalidOperationException(
+            "Die Partikel-Bewegungsparameter besitzen eine unerwartete Größe. Erwartet: 32 Byte, tatsächlich: " &
+            bufferGroesse.ToString() &
+            " Byte.")
+
+        End If
+
+        description = New BufferDescription()
+        description.ByteWidth = CUInt(bufferGroesse)
+        description.Usage = ResourceUsage.Default
+        description.BindFlags = BindFlags.ConstantBuffer
+        description.CPUAccessFlags = CpuAccessFlags.None
+        description.MiscFlags = ResourceOptionFlags.None
+        description.StructureByteStride = 0UI
+
+        partikelBewegungsParameterBuffer = renderDevice.CreateBuffer(description)
+
+        If partikelBewegungsParameterBuffer Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Partikel-Bewegungsparameterbuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Friend Sub Simuliere(deltaTime As Single, geschwindigkeit As Single, richtung As Single)
+
+        Const THREADS_PRO_GRUPPE As UInteger = 64UI
+
+        Dim parameter As PartikelBewegungsParameter
+        Dim anzahlThreadGruppen As UInteger
+
+        If deltaTime <= 0.0F Then
+            Exit Sub
+        End If
+
+        If partikelAnzahl <= 0 Then
+            Exit Sub
+        End If
+
+        If richtung = 0.0F Then
+            Exit Sub
+        End If
+
+        parameter.deltaTime = deltaTime
+        parameter.geschwindigkeit = geschwindigkeit
+        parameter.renderBreite = CSng(renderBreite)
+
+        If richtung >= 0.0F Then
+            parameter.richtung = 1.0F
+        Else
+            parameter.richtung = -1.0F
+        End If
+
+        parameter.partikelAnzahl = CUInt(partikelAnzahl)
+
+        parameter.padding1 = 0.0F
+        parameter.padding2 = 0.0F
+        parameter.padding3 = 0.0F
+
+        renderContext.UpdateSubresource(parameter, partikelBewegungsParameterBuffer)
+
+        anzahlThreadGruppen = (CUInt(partikelAnzahl) + THREADS_PRO_GRUPPE - 1UI) \ THREADS_PRO_GRUPPE
+
+
+        ' Wichtig:
+        ' Der Buffer darf nicht gleichzeitig als VS-SRV
+        ' und als CS-UAV gebunden sein.
+        ' Render() räumt seine VS-SRV bereits auf.
+
+        renderContext.CSSetShader(partikelBewegungsShader)
+        renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
+        renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
+
+        renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
+
+
+        ' Unbedingt wieder lösen, bevor Render()
+        ' denselben Buffer als SRV bindet.
+
+        renderContext.CSSetUnorderedAccessView(0UI, Nothing)
+        renderContext.CSSetConstantBuffer(0UI, Nothing)
+        renderContext.CSSetShader(Nothing)
 
     End Sub
 
@@ -254,12 +405,34 @@ Friend Class MosaikRenderer
 
     Private Sub BeendeUndBereinigeMosaikRenderer()
 
+        '---------------------------------
+        ' Compute Shader
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(partikelBewegungsParameterBuffer)
+        Direct3DRessourceHandler.GebeFrei(partikelBewegungsShader)
+
+        '---------------------------------
+        ' Render Shader
+        '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(renderParameterBuffer)
         Direct3DRessourceHandler.GebeFrei(pixelShader)
         Direct3DRessourceHandler.GebeFrei(vertexShader)
+
+        '---------------------------------
+        ' Bild
+        '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(bildView)
         Direct3DRessourceHandler.GebeFrei(bildTexture)
+
+        '---------------------------------
+        ' Partikel
+        '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(partikelView)
+        Direct3DRessourceHandler.GebeFrei(partikelUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(partikelBuffer)
 
         renderDevice = Nothing

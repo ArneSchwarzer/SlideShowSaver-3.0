@@ -1,4 +1,6 @@
 ﻿Imports System.Drawing
+Imports System.Diagnostics
+Imports System.Windows.Threading
 Imports System.Windows.Forms
 Imports System.Windows.Media.Imaging
 Imports System.Windows.Media
@@ -25,6 +27,17 @@ Public Class TransitionMain
     Private newBitmapGerahmt As RenderTargetBitmap
 
     Private testPartikel() As PartikelDaten
+
+    'Zeitmanagement
+    Private Const FPS As Integer = 60
+
+    Private frameTimer As DispatcherTimer
+    Private ReadOnly laufzeit As New Stopwatch()
+
+    Private letzteFrameZeitMS As Double
+
+    Private windGeschwindigkeitTest As Single
+    Private windRichtungTest As Single
 
     'Lifecycle
     Private transitionLaeuft As Boolean
@@ -92,9 +105,7 @@ Public Class TransitionMain
 
 
         If wurdeBereinigt Then
-
             Throw New ObjectDisposedException(NameOf(TransitionMain))
-
         End If
 
         BeendeUndBereinigeTransition()
@@ -118,34 +129,14 @@ Public Class TransitionMain
 
         RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
 
-        direct3DRenderer.RenderFrame()
+        windGeschwindigkeitTest = 500.0F
+        windRichtungTest = 1.0F
 
-        'sizeWPF = New Windows.Size(clientSize.Width, clientSize.Height)
+        letzteFrameZeitMS = 0.0
 
-        'zielFrame = Nothing
+        laufzeit.Restart()
 
-        'Try
-
-        '    transitionLaeuft = True
-
-        '    RaiseEvent TransitionIsRunning(True)
-
-        '    zielFrame = ConvertBitmapImageToRenderTargetBitmap(newImage, sizeWPF)
-
-        '    'Dem aufrufenden Modul kurz Zeit zum Umschalten geben.
-        '    System.Threading.Thread.Sleep(500)
-
-        '    If Not transitionLaeuft Then
-        '        Exit Sub
-        '    End If
-
-        '    RaiseEvent TransitionFrameIstFertig(zielFrame)
-
-        'Finally
-
-        '    BeendeUndBereinigeTransition()
-
-        'End Try
+        StarteRenderTimer()
 
     End Sub
 
@@ -217,6 +208,53 @@ Public Class TransitionMain
 
 #End Region
 
+#Region "Timer"
+
+    Private Sub StarteRenderTimer()
+
+        frameTimer = New DispatcherTimer(DispatcherPriority.Render)
+
+        frameTimer.Interval = TimeSpan.FromMilliseconds(1000.0 / FPS)
+
+        AddHandler frameTimer.Tick, AddressOf FrameTimer_Tick
+
+        frameTimer.Start()
+
+    End Sub
+
+    Private Sub FrameTimer_Tick(sender As Object, e As EventArgs)
+
+        Dim aktuelleFrameZeitMS As Double
+        Dim deltaTime As Double
+
+        If Not transitionLaeuft Then
+            Exit Sub
+        End If
+
+        If direct3DRenderer Is Nothing Then
+            Exit Sub
+        End If
+
+        aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
+
+        deltaTime = (aktuelleFrameZeitMS - letzteFrameZeitMS) / 1000.0
+
+        letzteFrameZeitMS = aktuelleFrameZeitMS
+
+        If deltaTime <= 0.0 Then
+            Exit Sub
+        End If
+
+        'Verhindert nach Breakpoints oder längeren Hängern
+        'extrem große Simulationssprünge.
+        deltaTime = Math.Min(deltaTime, 0.1)
+
+        direct3DRenderer.RenderFrame(CSng(deltaTime), windGeschwindigkeitTest, windRichtungTest)
+
+    End Sub
+
+#End Region
+
 #Region "Bereinigung & Dispose"
 
     Private Sub BeendeUndBereinigeTransition()
@@ -227,6 +265,21 @@ Public Class TransitionMain
         End If
 
         transitionLaeuft = False
+
+        If frameTimer IsNot Nothing Then
+
+            frameTimer.Stop()
+
+            RemoveHandler frameTimer.Tick, AddressOf FrameTimer_Tick
+
+            frameTimer = Nothing
+
+        End If
+
+        laufzeit.Stop()
+        laufzeit.Reset()
+
+        letzteFrameZeitMS = 0.0
 
         If direct3DRenderer IsNot Nothing Then
 

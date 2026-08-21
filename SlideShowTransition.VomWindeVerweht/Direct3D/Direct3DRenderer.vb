@@ -139,15 +139,21 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Friend Sub RenderFrame()
+    Friend Sub RenderFrame(deltaTime As Single, geschwindigkeit As Single, richtung As Single)
 
-        If wurdeBereinigt OrElse
-           Not istInitialisiert OrElse
-           d3dImage Is Nothing Then
-
+        If wurdeBereinigt Then
             Exit Sub
-
         End If
+
+        If Not istInitialisiert Then
+            Exit Sub
+        End If
+
+        If d3dImage Is Nothing Then
+            Exit Sub
+        End If
+
+        mosaikRenderer.Simuliere(deltaTime, geschwindigkeit, richtung)
 
         d3dImage.RequestRender()
 

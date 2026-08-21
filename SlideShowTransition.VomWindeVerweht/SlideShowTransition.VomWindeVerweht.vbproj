@@ -186,6 +186,7 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Shader\MosaikShaderPS.cso" />
     <EmbeddedResource Include="Shader\MosaikShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PartikelBewegungsShaderCS.cso" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lang\" />
@@ -210,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shader\MosaikShader.hlsl" />
+    <Content Include="Shader\PartikelBewegungsShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets" Condition="Exists('..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets')" />
