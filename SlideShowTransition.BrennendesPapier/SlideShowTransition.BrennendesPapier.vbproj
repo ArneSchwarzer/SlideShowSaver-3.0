@@ -133,13 +133,18 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Direct3D\BrennendesPapierD3DRenderer.vb" />
+    <Compile Include="BrandmaskenGenerator.vb" />
+    <Compile Include="Direct3D\D3DRenderer.vb" />
+    <Compile Include="Direct3D\GradientRenderer.vb" />
+    <Compile Include="Direct3D\PartikelRenderer.vb" />
+    <Compile Include="Direct3D\RenderParameter.vb" />
     <Compile Include="Direct3D\Direct3DRessourceHandler.vb" />
     <Compile Include="BPResources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>BPResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Direct3D\RevealRenderer.vb" />
     <Compile Include="RevealShaderEffekt.vb" />
     <Compile Include="TransitionMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

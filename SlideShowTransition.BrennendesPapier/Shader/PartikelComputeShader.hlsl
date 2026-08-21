@@ -47,6 +47,16 @@ cbuffer ParticleSimulationParameter : register(b0)
     float progress;
     float emitterBreite;
     float spawnRate;
+
+    float schwerkraftAktiv;
+    float zeit;
+    float flowFieldStaerke;
+    float partikelMaxLebensdauer;
+
+    float padding1;
+    float padding2;
+    float padding3;
+    float padding4;
 };
 
 
@@ -291,45 +301,388 @@ float2 ErmittlePerspektivRichtung(float2 position)
 
 
 // ------------------------------------------------------------
-// Übergangs-Verwirbelung V0.4.
+// Übergangs-Verwirbelung V0.6.
 //
-// Noch KEIN kohärentes Vektorfeld.
+// Ab jetzt - kohärentes Vektorfeld.
 //
-// Jeder Funke bekommt aus Seed + Alter zwei weiche
-// Schwingungen. Dadurch verändert sich die Flugrichtung
-// kontinuierlich statt frameweise zufällig zu zittern.
-//
-// Diese Methode wird später durch unser echtes
-// Strömungs-/Vektorfeld ersetzt.
 // ------------------------------------------------------------
 
-float2 ErmittleVerwirbelung(Particle particle)
+// ------------------------------------------------------------
+// 2D-Hashwert für räumliche Felder.
+//
+// Liefert für jede ganzzahlige Zelle einen stabilen,
+// reproduzierbaren Zufallswert.
+// ------------------------------------------------------------
+
+float ZufallAusZelle(int2 zelle, uint salt)
 {
-    float phaseX;
-    float phaseY;
+    uint hash;
 
-    float frequenzX;
-    float frequenzY;
+    hash = HashUint((uint) zelle.x * 0x8DA6B343u ^ (uint) zelle.y * 0xD8163841u ^ salt);
 
-    float staerke;
-
-    float verwirbelungX;
-    float verwirbelungY;
-
-    phaseX = ZufallAusSeed(particle.seed ^ 0xA511E9B3) * 2.0 * PI;
-    phaseY = ZufallAusSeed(particle.seed ^ 0x63D83595) * 2.0 * PI;
-
-    frequenzX = 2.0 + ZufallAusSeed(particle.seed ^ 0xB5297A4D) * 3.0;
-    frequenzY = 1.5 + ZufallAusSeed(particle.seed ^ 0x68E31DA4) * 2.5;
-
-    staerke = 0.008 + ZufallAusSeed(particle.seed ^ 0x1B56C4E9) * 0.018;
-
-    verwirbelungX = sin(particle.age * frequenzX + phaseX);
-    verwirbelungY = cos(particle.age * frequenzY + phaseY);
-
-    return float2(verwirbelungX, verwirbelungY) * staerke;
+    return (float) (hash & 0x00FFFFFF) / 16777215.0;
 }
 
+
+// ------------------------------------------------------------
+// Weiche Interpolationskurve für Value Noise.
+// ------------------------------------------------------------
+
+float2 NoiseFade(float2 wert)
+{
+    return wert * wert * (3.0 - 2.0 * wert);
+}
+
+
+// ------------------------------------------------------------
+// Einfaches räumlich kohärentes 2D-Value-Noise.
+// ------------------------------------------------------------
+
+float ValueNoise2D(float2 position)
+{
+    int2 zelle;
+
+    float2 lokal;
+    float2 fade;
+
+    float wert00;
+    float wert10;
+    float wert01;
+    float wert11;
+
+    float wertOben;
+    float wertUnten;
+
+    zelle = (int2) floor(position);
+
+    lokal = frac(position);
+
+    fade = NoiseFade(lokal);
+
+    wert00 = ZufallAusZelle(zelle + int2(0, 0), 0xA511E9B3u);
+    wert10 = ZufallAusZelle(zelle + int2(1, 0), 0xA511E9B3u);
+    wert01 = ZufallAusZelle(zelle + int2(0, 1), 0xA511E9B3u);
+    wert11 = ZufallAusZelle(zelle + int2(1, 1), 0xA511E9B3u);
+
+    wertOben = lerp(wert00, wert10, fade.x);
+    wertUnten = lerp(wert01, wert11, fade.x);
+
+    return lerp(wertOben, wertUnten, fade.y);
+}
+
+
+// ------------------------------------------------------------
+// FBM.
+//
+// Vier Oktaven reichen für unser Flowfield völlig aus.
+// Das FBM erzeugt NICHT selbst die Strömungsrichtung,
+// sondern verzerrt lediglich die Voronoi-Domäne.
+// ------------------------------------------------------------
+
+float FBM2D(float2 position)
+{
+    float wert;
+    float amplitude;
+    float frequenz;
+
+    uint oktave;
+
+    wert = 0.0;
+
+    amplitude =  0.5;
+
+    frequenz = 1.0;
+
+    for (oktave = 0; oktave < 4; oktave++)
+    {
+        wert += ValueNoise2D(position * frequenz) * amplitude;
+
+        frequenz *= 2.03;
+
+        amplitude *= 0.5;
+    }
+
+    return wert;
+}
+
+
+// ------------------------------------------------------------
+// Feature-Point einer Voronoi-Zelle.
+//
+// Jede Zelle erhält einen stabilen zufälligen Punkt.
+// ------------------------------------------------------------
+
+float2 ErmittleVoronoiPunkt(int2 zelle)
+{
+    float2 offset;
+
+    offset.x = ZufallAusZelle(zelle, 0x68E31DA4u);
+    offset.y = ZufallAusZelle(zelle, 0xB5297A4Du);
+
+    return (float2) zelle + offset;
+}
+
+
+// ------------------------------------------------------------
+// Strömungsrichtung einer Voronoi-Zelle.
+//
+// Jede Zelle besitzt eine eigene Grundrichtung.
+//
+// Die Richtung verändert sich LANGSAM über die Zeit.
+// Dadurch "atmet" das Feld, ohne hektisch zu zittern.
+// ------------------------------------------------------------
+
+float2 ErmittleZellStroemung(int2 zelle, float aktuelleZeit)
+{
+    float grundWinkel;
+    float phase;
+    float zeitVariation;
+    float winkel;
+
+    grundWinkel = ZufallAusZelle(zelle, 0x1B56C4E9u) * 2.0 * PI;
+
+    phase = ZufallAusZelle(zelle, 0xC2B2AE35u) * 2.0 * PI;
+
+    zeitVariation = sin(aktuelleZeit * 0.22 + phase) * 0.45;
+
+    winkel = grundWinkel + zeitVariation;
+
+    return float2(cos(winkel), sin(winkel));
+}
+
+
+// ------------------------------------------------------------
+// FBM-verzerrtes Voronoi-Flowfield.
+//
+// 1. Bildschirmkoordinaten werden auf echtes
+//    Seitenverhältnis korrigiert.
+// 2. FBM verzerrt die Abfrageposition.
+// 3. Wir suchen die zwei nächsten Voronoi-Zellen.
+// 4. Ihre Strömungsvektoren werden an den Zellgrenzen
+//    weich ineinander überführt.
+//
+// Ergebnis:
+// Benachbarte Partikel erleben ähnliche Kräfte.
+// ------------------------------------------------------------
+
+float2 ErmittleFlowField(float2 position, float aktuelleZeit)
+{
+    uint maskenBreite;
+    uint maskenHoehe;
+
+    float aspectRatio;
+
+    float2 feldPosition;
+    float2 warpPosition;
+
+    float warpX;
+    float warpY;
+
+    int2 basisZelle;
+    int2 nachbarOffset;
+    int2 aktuelleZelle;
+
+    int2 naechsteZelle;
+    int2 zweiteZelle;
+
+    float2 featurePoint;
+    float2 differenz;
+
+    float distanzQuadrat;
+    float naechsteDistanz;
+    float zweiteDistanz;
+
+    float2 ersteRichtung;
+    float2 zweiteRichtung;
+
+    float mischung;
+
+    int x;
+    int y;
+
+    brandMaske.GetDimensions(maskenBreite, maskenHoehe);
+
+    aspectRatio = (float) maskenBreite / (float) maskenHoehe;
+
+
+    // --------------------------------------------------------
+    // Großräumige Zellen.
+    //
+    // Ca. 5 Zellen über die Bildschirmhöhe.
+    // --------------------------------------------------------
+
+    feldPosition = float2(position.x * aspectRatio, position.y) * 5.0;
+
+
+    // --------------------------------------------------------
+    // Langsam wandernder Domain-Warp.
+    // --------------------------------------------------------
+
+    warpPosition = feldPosition * 0.55 + float2(aktuelleZeit * 0.035, aktuelleZeit * -0.027);
+
+    warpX = FBM2D(warpPosition + float2(13.17, 7.31));
+    warpY = FBM2D(warpPosition + float2(41.73, 29.11));
+    
+    // Von 0..1 nach ungefähr -1..+1.
+    warpX = warpX * 2.0 - 1.0;
+    warpY = warpY * 2.0 - 1.0;
+
+
+    // Deutliche, aber nicht groteske Verformung.
+    feldPosition += float2(warpX, warpY) * 1.10;
+    
+    basisZelle = (int2) floor(feldPosition);
+
+    naechsteDistanz = 1000000.0;
+    zweiteDistanz = 1000000.0;
+    
+    naechsteZelle = basisZelle;
+    zweiteZelle = basisZelle;
+
+
+    // --------------------------------------------------------
+    // Nächste und zweitnächste Voronoi-Zelle suchen.
+    // --------------------------------------------------------
+
+    for (y = -1; y <= 1; y++)
+    {
+        for (x = -1; x <= 1; x++)
+        {
+            nachbarOffset = int2(x, y);
+
+            aktuelleZelle = basisZelle + nachbarOffset;
+
+            featurePoint = ErmittleVoronoiPunkt(aktuelleZelle);
+
+            differenz = featurePoint - feldPosition;
+
+            distanzQuadrat = dot(differenz, differenz);
+
+            if (distanzQuadrat < naechsteDistanz)
+            {
+                zweiteDistanz = naechsteDistanz;
+
+                zweiteZelle = naechsteZelle;
+
+                naechsteDistanz = distanzQuadrat;
+
+                naechsteZelle = aktuelleZelle;
+            }
+            else if (distanzQuadrat < zweiteDistanz)
+            {
+                zweiteDistanz = distanzQuadrat;
+
+                zweiteZelle = aktuelleZelle;
+            }
+        }
+    }
+
+
+    ersteRichtung = ErmittleZellStroemung(naechsteZelle, aktuelleZeit);
+
+    zweiteRichtung = ErmittleZellStroemung(zweiteZelle, aktuelleZeit);
+
+
+    // --------------------------------------------------------
+    // Je ähnlicher die beiden Distanzen sind, desto näher
+    // befinden wir uns an einer Zellgrenze.
+    //
+    // Dort mischen wir beide Richtungen weich.
+    // Tief innerhalb einer Zelle dominiert deren Richtung.
+    // --------------------------------------------------------
+
+    mischung = saturate(0.5 - (zweiteDistanz - naechsteDistanz) * 1.5);
+
+    mischung = smoothstep(0.0, 0.5, mischung);
+
+    return normalize(lerp(ersteRichtung, zweiteRichtung, mischung));
+}
+
+
+// ------------------------------------------------------------
+// Ermittelt den lokalen thermischen Einfluss der Brandmaske.
+//
+// Die Brandmaske enthält für jeden Bildpunkt den Zeitpunkt,
+// zu dem die Brandfront diesen Punkt erreicht.
+//
+// Vor der Brandfront:
+//     keine thermische Wirkung.
+//
+// Direkt an bzw. kurz hinter der Brandfront:
+//     maximale thermische Wirkung.
+//
+// Weiter hinter der Brandfront:
+//     langsames Abklingen der heißen Luft.
+// ------------------------------------------------------------
+
+
+float ErmittleHitzeEinfluss(float2 position, float aktuellerProgress)
+{
+    uint maskenBreite;
+    uint maskenHoehe;
+
+    int2 texelPosition;
+
+    float brandZeit;
+    float zeitSeitBrand;
+
+    float aufheizBreite;
+    float abkuehlBreite;
+
+    float aufheizen;
+    float abkuehlen;
+
+
+    // --------------------------------------------------------
+    // Abmessungen der zeitcodierten Brandmaske ermitteln.
+    // --------------------------------------------------------
+
+    brandMaske.GetDimensions(maskenBreite, maskenHoehe);
+
+
+    // --------------------------------------------------------
+    // Normierte Partikelposition 0..1 in Texelkoordinaten
+    // der Brandmaske umrechnen.
+    // --------------------------------------------------------
+
+    texelPosition = int2(position.x * (float) (maskenBreite - 1), position.y * (float) (maskenHoehe - 1));
+    texelPosition = clamp(texelPosition, int2(0, 0), int2((int) maskenBreite - 1, (int) maskenHoehe - 1));
+
+
+    // --------------------------------------------------------
+    // Zeitpunkt lesen, zu dem die Brandfront diese Position
+    // erreicht.
+    // --------------------------------------------------------
+
+    brandZeit = brandMaske.Load(int3(texelPosition, 0));
+    
+    zeitSeitBrand = aktuellerProgress - brandZeit;
+
+
+    // --------------------------------------------------------
+    // Etwas Wirkung bereits unmittelbar VOR dem Eintreffen
+    // der sichtbaren Brandfront.
+    //
+    // Heiße Luft wartet schließlich nicht höflich darauf,
+    // dass der Pixel offiziell verbrannt ist. :-)
+    // --------------------------------------------------------
+    
+    aufheizBreite = 0.025;
+
+    aufheizen = smoothstep(-aufheizBreite, 0.0, zeitSeitBrand);
+
+
+    // --------------------------------------------------------
+    // Deutlich längere Abkühlzone HINTER der Brandfront.
+    // --------------------------------------------------------
+
+    abkuehlBreite = 0.18;
+    
+    abkuehlen = 1.0 - smoothstep(0.0, abkuehlBreite, zeitSeitBrand);
+
+
+    return saturate(aufheizen * abkuehlen);
+}
 
 // ------------------------------------------------------------
 // Wiedergeburt an der aktuellen Brandkante.
@@ -442,11 +795,11 @@ bool VersuchePartikelZuErzeugen(uint particleIndex, inout Particle particle)
 
         startRichtung = normalize(startRichtung * 0.55 + float2(0.0, -1.0) * 0.45);
 
-        geschwindigkeit = RandomRange(seed, 0.12, 0.22);
+        geschwindigkeit = RandomRange(seed, 0.10, 0.19);
     }
     else
     {
-        geschwindigkeit = RandomRange(seed, 0.025, 0.070);
+        geschwindigkeit = RandomRange(seed, 0.020, 0.055);
     }
 
     particle.velocity = startRichtung * geschwindigkeit;
@@ -457,7 +810,7 @@ bool VersuchePartikelZuErzeugen(uint particleIndex, inout Particle particle)
     // --------------------------------------------------------
 
     particle.age = 0.0;
-    particle.lifetime = RandomRange(seed, 1.6, 3.2);
+    particle.lifetime = RandomRange(seed, partikelMaxLebensdauer * 0.5, partikelMaxLebensdauer);
     particle.size = RandomRange(seed, 0.0012, 0.0030);
     particle.seed = seed;
 
@@ -478,9 +831,13 @@ void CSMain(uint3 dispatchThreadId : SV_DispatchThreadID)
 
     float lifeProgress;
 
-    float2 verwirbelung;
+    float2 flowRichtung;
     float2 perspektivRichtung;
-
+    float2 schwerkraft;
+    
+    float hitzeEinfluss;
+    float effektiveFlowStaerke;
+    
     float perspektivStaerke;
 
     particleIndex = dispatchThreadId.x;
@@ -500,7 +857,20 @@ void CSMain(uint3 dispatchThreadId : SV_DispatchThreadID)
 
     if (particle.lifetime <= 0.0)
     {
-        VersuchePartikelZuErzeugen(particleIndex, particle);
+    // --------------------------------------------------------
+    // Nachlaufphase:
+    //
+    // Sobald die eigentliche Transition progress = 1 erreicht,
+    // wird die Emission vollständig abgeschaltet.
+    //
+    // Bereits lebende Partikel dürfen weiter simuliert werden,
+    // tote Slots bleiben jedoch tot.
+    // --------------------------------------------------------
+
+        if (progress < 1.0)
+        {
+            VersuchePartikelZuErzeugen(particleIndex, particle);
+        }
 
         particles[particleIndex] = particle;
 
@@ -535,36 +905,46 @@ void CSMain(uint3 dispatchThreadId : SV_DispatchThreadID)
     lifeProgress = saturate(particle.age / particle.lifetime);
 
 
-    // --------------------------------------------------------
-    // 1. Lokale Verwirbelung.
-    //
-    // Kleine Beschleunigung, die sich weich über die Zeit
-    // verändert.
-    // --------------------------------------------------------
+// --------------------------------------------------------
+// 1. Räumlich kohärentes Strömungsfeld.
+//
+// Die Stärke des Feldes wird durch die lokale thermische
+// Aktivität der zeitcodierten Brandmaske moduliert.
+// --------------------------------------------------------
 
-    verwirbelung = ErmittleVerwirbelung(particle);
+    flowRichtung = ErmittleFlowField(particle.position, zeit);
 
-    particle.velocity += verwirbelung * deltaTime;
+    hitzeEinfluss = ErmittleHitzeEinfluss(particle.position, progress);
+
+    effektiveFlowStaerke = flowFieldStaerke * hitzeEinfluss;
+
+    particle.velocity += flowRichtung * effektiveFlowStaerke * deltaTime;
 
 
-    // --------------------------------------------------------
-    // 2. Perspektivischer Höhen-Drift.
-    //
-    // Je älter das Partikel, desto stärker wird der Einfluss.
-    //
-    // quadratisch:
-    //
-    // jung    -> fast 0
-    // mittel  -> merkbar
-    // alt     -> deutlich
-    // --------------------------------------------------------
+  // --------------------------------------------------------
+// 2. Projektionsmodell / Schwerkraft.
+// --------------------------------------------------------
 
-    perspektivRichtung = ErmittlePerspektivRichtung(particle.position);
+    if (schwerkraftAktiv > 0.5)
+    {
+    // Bild hängt:
+    // konstante Gravitation nach Bildschirm-unten.
 
-    perspektivStaerke = lifeProgress * lifeProgress * 0.060;
+        schwerkraft = float2(0.0, 0.055);
 
-    particle.velocity += perspektivRichtung * perspektivStaerke * deltaTime;
+        particle.velocity += schwerkraft * deltaTime;
+    }
+    else
+    {
+    // Top View:
+    // altersabhängiger perspektivischer Höhen-Drift.
 
+        perspektivRichtung = ErmittlePerspektivRichtung(particle.position);
+
+        perspektivStaerke = lifeProgress * lifeProgress * 0.060;
+
+        particle.velocity += perspektivRichtung * perspektivStaerke * deltaTime;
+    }
 
     // --------------------------------------------------------
     // Bewegung.

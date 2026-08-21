@@ -36,14 +36,9 @@ VertexOutput VSMain(uint vertexId : SV_VertexID)
         float2(2.0, 1.0)
     };
 
-    output.position =
-        float4(
-            positions[vertexId],
-            0.0,
-            1.0);
+    output.position = float4(positions[vertexId], 0.0, 1.0);
 
-    output.texCoord =
-        texCoords[vertexId];
+    output.texCoord = texCoords[vertexId];
 
     return output;
 }
@@ -56,10 +51,21 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 
     float4 gradientColor;
 
-    maskValue =
-        maskTexture.Sample(
-            sourceSampler,
-            input.texCoord).r;
+    /*
+        Bei vollständig abgeschlossenem Reveal existiert keine
+        Brandkante mehr.
+
+        Die Transition kann danach ausschließlich für den
+        Partikel-Nachlauf weiterlaufen.
+    */
+    
+    if (progress >= 1.0)
+    {
+        return float4(0.0, 0.0, 0.0, 0.0);
+    }
+
+
+    maskValue = maskTexture.Sample(sourceSampler, input.texCoord).r;
 
     /*
         frontDistance beschreibt, wie weit die Brandfront diesen Pixel
@@ -74,20 +80,16 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         > 0:
             Brandfront ist bereits ueber diesen Pixel hinweggewandert.
     */
+    
     frontDistance = maskValue - progress;
 
     /*
         Ausserhalb der aktiven Brandkante zeichnet dieser Pass ueberhaupt
         nichts. RevealShader darunter bleibt dadurch unveraendert sichtbar.
     */
-    if (frontDistance < 0.0 ||
-        frontDistance > brandkantenBreite)
+    if (frontDistance < 0.0 || frontDistance > brandkantenBreite)
     {
-        return float4(
-            0.0,
-            0.0,
-            0.0,
-            0.0);
+        return float4(0.0, 0.0, 0.0, 0.0);
     }
 
     /*
@@ -106,18 +108,9 @@ float4 PSMain(VertexOutput input) : SV_TARGET
         Direkt an der Reveal-Grenze muss deshalb GradientPosition 1.0
         gelten. Am hinteren Rand der Brandkante gilt 0.0.
     */
-    gradientPosition =
-        1.0 -
-        saturate(
-            frontDistance /
-            brandkantenBreite);
+    gradientPosition = 1.0 - saturate(frontDistance / brandkantenBreite);
 
-    gradientColor =
-        gradientTexture.Sample(
-            sourceSampler,
-            float2(
-                gradientPosition,
-                0.5));
+    gradientColor = gradientTexture.Sample(sourceSampler, float2(gradientPosition, 0.5));
 
     return gradientColor;
 }
