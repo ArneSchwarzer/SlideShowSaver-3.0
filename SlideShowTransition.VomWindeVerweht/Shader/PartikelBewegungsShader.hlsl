@@ -15,6 +15,7 @@ struct PartikelDaten
 };
 
 RWStructuredBuffer<PartikelDaten> PartikelBuffer : register(u0);
+RWStructuredBuffer<int> LebendZaehler : register(u1);
 
 Texture2D<float2> FlowField : register(t0);
 SamplerState FlowFieldSampler : register(s0);
@@ -97,6 +98,20 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     if (partikel.position.y - partikel.groesse.y * 0.5 > renderHoehe)
     {
         partikel.lebt = 0;
+    }
+
+    /*
+ * Ein Partikel erreicht diese Stelle nur dann lebend,
+ * wenn er zu Beginn dieses Dispatches noch gelebt hat.
+ *
+ * Stirbt er in diesem Frame, wird der globale Lebendzähler
+ * deshalb exakt einmal vermindert.
+ */
+    if (partikel.lebt == 0)
+    {
+        int vorherigerWert;
+
+        InterlockedAdd(LebendZaehler[0], -1, vorherigerWert);
     }
 
     PartikelBuffer[index] = partikel;

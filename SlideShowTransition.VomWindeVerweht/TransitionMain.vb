@@ -48,6 +48,7 @@ Public Class TransitionMain
     'Lifecycle
     Private transitionLaeuft As Boolean
     Private wurdeBereinigt As Boolean
+    Private frameZaehler As Integer
 
     Structure TransitionSettings_VomWindeVerweht
         Public partikelGroesse As Integer
@@ -135,7 +136,7 @@ Public Class TransitionMain
         direct3DRenderer = New D3DRenderer()
 
         direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
-                                       flowField)
+                                       newBitmapGerahmt, flowField)
 
         transitionLaeuft = True
 
@@ -144,6 +145,7 @@ Public Class TransitionMain
         RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
 
         letzteFrameZeitMS = 0.0
+        frameZaehler = 0
 
         laufzeit.Restart()
 
@@ -154,6 +156,34 @@ Public Class TransitionMain
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
         'Beendet eine gegebenenfalls noch laufende Cut-Transition.
 
+        BeendeUndBereinigeTransition()
+
+    End Sub
+
+    Private Sub TransitionIstFertig()
+
+        If Not transitionLaeuft Then
+            Exit Sub
+        End If
+
+        '
+        ' Den dynamischen D3D11Image-Frame ausdrücklich durch
+        ' das endgültige, normale WPF-Zielbild ersetzen.
+        '
+        ' Danach darf der D3DRenderer gefahrlos freigegeben werden.
+        '
+        If newBitmapGerahmt IsNot Nothing Then
+
+            RaiseEvent TransitionFrameIstFertig(
+            newBitmapGerahmt)
+
+        End If
+
+        '
+        ' Jetzt normal beenden:
+        ' Timer stoppen, D3D freigeben und dem Framework
+        ' TransitionIsRunning(False) melden.
+        '
         BeendeUndBereinigeTransition()
 
     End Sub
@@ -238,6 +268,9 @@ Public Class TransitionMain
         Dim aktuelleFrameZeitMS As Double
         Dim deltaTime As Double
 
+        Dim pruefeTransitionsende As Boolean
+        Dim anzahlLebendePartikel As Integer
+
         If Not transitionLaeuft Then
             Exit Sub
         End If
@@ -260,10 +293,23 @@ Public Class TransitionMain
         'extrem große Simulationssprünge.
         deltaTime = Math.Min(deltaTime, 0.1)
 
-        direct3DRenderer.RenderFrame(CSng(deltaTime))
+        frameZaehler += 1
+
+        '
+        ' Der GPU-Readback kann einen Pipeline-Stall verursachen.
+        ' Für das Transitionsende reicht eine Prüfung alle vier Frames.
+        '
+        pruefeTransitionsende = frameZaehler Mod 4 = 0
+
+        anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), pruefeTransitionsende)
+
+        If anzahlLebendePartikel = 0 Then
+
+            TransitionIstFertig()
+
+        End If
 
     End Sub
-
 #End Region
 
 #Region "Wind & FlowField"
@@ -319,6 +365,7 @@ Public Class TransitionMain
         laufzeit.Reset()
 
         letzteFrameZeitMS = 0.0
+        frameZaehler = 0
 
         If direct3DRenderer IsNot Nothing Then
 

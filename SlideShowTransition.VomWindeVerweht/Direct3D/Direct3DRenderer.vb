@@ -77,8 +77,8 @@ Friend Class D3DRenderer
 
         mosaikRenderer = New MosaikRenderer()
 
-        mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel, altesBild,
-                                     flowField)
+        mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel,
+                                     altesBild, neuesBild, flowField)
 
         d3dImage = New D3D11Image()
         d3dImage.WindowOwner = Direct3DRessourceHandler.ErmittleInteropFensterHandle()
@@ -144,25 +144,41 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Friend Sub RenderFrame(deltaTime As Single)
+    Friend Function RenderFrame(deltaTime As Single, pruefeTransitionsende As Boolean) As Integer
+
+        Dim anzahlLebendePartikel As Integer
 
         If wurdeBereinigt Then
-            Exit Sub
+            Return -1
         End If
 
         If Not istInitialisiert Then
-            Exit Sub
+            Return -1
         End If
 
         If d3dImage Is Nothing Then
-            Exit Sub
+            Return -1
         End If
 
         mosaikRenderer.Simuliere(deltaTime)
 
+
+        ' Erst den neuen Zustand rendern.
+        ' Wenn das letzte Partikel gerade gestorben ist,
+        ' besteht dieser Frame bereits ausschließlich
+        ' aus dem neuen Hintergrundbild.
+        '
         d3dImage.RequestRender()
 
-    End Sub
+        If Not pruefeTransitionsende Then
+            Return -1
+        End If
+
+        anzahlLebendePartikel = mosaikRenderer.GibAnzahlLebendePartikelZurueck()
+
+        Return anzahlLebendePartikel
+
+    End Function
 
     Private Sub RenderSurface(surfacePointer As IntPtr, isNewSurface As Boolean)
 

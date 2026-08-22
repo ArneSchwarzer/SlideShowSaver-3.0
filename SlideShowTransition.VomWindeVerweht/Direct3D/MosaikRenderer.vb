@@ -23,11 +23,30 @@ Friend Class MosaikRenderer
     Private partikelUnorderedAccessView As ID3D11UnorderedAccessView
 
     '---------------------------------
+    ' GPU-Lebendzähler
+    '---------------------------------
+
+    Private lebendZaehlerBuffer As ID3D11Buffer
+    Private lebendZaehlerView As ID3D11UnorderedAccessView
+
+    Private lebendZaehlerStagingBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Bildtextur
     '---------------------------------
 
     Private bildTexture As ID3D11Texture2D
     Private bildView As ID3D11ShaderResourceView
+
+    Private zielBildTexture As ID3D11Texture2D
+    Private zielBildView As ID3D11ShaderResourceView
+
+    '---------------------------------
+    ' Hintergrundbild
+    '---------------------------------
+
+    Private hintergrundVertexShader As ID3D11VertexShader
+    Private hintergrundPixelShader As ID3D11PixelShader
 
     '---------------------------------
     ' Render-Shader
@@ -94,8 +113,8 @@ Friend Class MosaikRenderer
 #Region "Initialisierung"
 
     Friend Sub Initialisiere(device As ID3D11Device, context As ID3D11DeviceContext, breite As Integer,
-                             hoehe As Integer, partikel() As PartikelDaten, bild As BitmapSource,
-                             flowField As FlowFieldDaten)
+                             hoehe As Integer, partikel() As PartikelDaten, altesBild As BitmapSource,
+                             neuesBild As BitmapSource, flowField As FlowFieldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(MosaikRenderer))
@@ -113,8 +132,12 @@ Friend Class MosaikRenderer
             Throw New ArgumentException("Es wurden keine Partikeldaten übergeben.", NameOf(partikel))
         End If
 
-        If bild Is Nothing Then
-            Throw New ArgumentNullException(NameOf(bild))
+        If altesBild Is Nothing Then
+            Throw New ArgumentNullException(NameOf(altesBild))
+        End If
+
+        If neuesBild Is Nothing Then
+            Throw New ArgumentNullException(NameOf(neuesBild))
         End If
 
         If breite <= 0 OrElse hoehe <= 0 Then
@@ -134,10 +157,14 @@ Friend Class MosaikRenderer
         partikelAnzahl = partikel.Length
 
         InitialisierePartikelBuffer(partikel)
+        InitialisiereLebendZaehler()
+        InitialisiereFlowField(flowField)
 
-        InitialisiereBildTextur(bild)
+        InitialisiereBildTextur(altesBild)
+        InitialisiereZielBildTextur(neuesBild)
 
         InitialisiereShader()
+        InitialisiereHintergrundShader()
         InitialisierePartikelBewegungsShader()
 
         InitialisiereRenderParameterBuffer()
@@ -321,6 +348,80 @@ Friend Class MosaikRenderer
 
     End Sub
 
+    Private Sub InitialisiereZielBildTextur(bild As BitmapSource)
+
+        zielBildTexture = Direct3DRessourceHandler.ErstelleTextureAusBitmapSource(renderDevice, bild)
+
+        zielBildView = renderDevice.CreateShaderResourceView(zielBildTexture)
+
+        If zielBildView Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Die ShaderResourceView des Zielbildes konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereLebendZaehler()
+
+        Dim startWert() As Integer
+        Dim stagingDescription As BufferDescription
+
+        startWert = New Integer() {partikelAnzahl}
+
+        ' GPU-Buffer:
+        ' Ein einzelner Integer, den der Compute Shader
+        ' atomar vermindern kann.
+        '
+        lebendZaehlerBuffer =
+        renderDevice.CreateBuffer(Of Integer)(
+            startWert,
+            BindFlags.UnorderedAccess,
+            ResourceUsage.Default,
+            CpuAccessFlags.None,
+            ResourceOptionFlags.BufferStructured,
+            4,
+            4)
+
+        If lebendZaehlerBuffer Is Nothing Then
+
+            Throw New InvalidOperationException("Der GPU-Lebendzähler konnte nicht erzeugt werden.")
+
+        End If
+
+        lebendZaehlerView = renderDevice.CreateUnorderedAccessView(lebendZaehlerBuffer)
+
+        If lebendZaehlerView Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Die UnorderedAccessView des GPU-Lebendzählers konnte nicht erzeugt werden.")
+
+        End If
+
+        ' Kleiner CPU-lesbarer Stagingbuffer.
+        ' Nur vier Byte werden bei Bedarf zurückgelesen.
+
+        stagingDescription = New BufferDescription()
+
+        stagingDescription.ByteWidth = 4UI
+        stagingDescription.Usage = ResourceUsage.Staging
+        stagingDescription.BindFlags = BindFlags.None
+        stagingDescription.CPUAccessFlags = CpuAccessFlags.Read
+        stagingDescription.MiscFlags = ResourceOptionFlags.BufferStructured
+        stagingDescription.StructureByteStride = 4UI
+
+        lebendZaehlerStagingBuffer = renderDevice.CreateBuffer(stagingDescription)
+
+        If lebendZaehlerStagingBuffer Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Stagingbuffer des GPU-Lebendzählers konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
     Private Sub InitialisiereShader()
 
         Dim vertexShaderCode() As Byte
@@ -342,6 +443,31 @@ Friend Class MosaikRenderer
         If pixelShader Is Nothing Then
 
             Throw New InvalidOperationException("Der Mosaik-Pixelshader konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereHintergrundShader()
+
+        Dim vertexShaderCode() As Byte
+        Dim pixelShaderCode() As Byte
+
+        vertexShaderCode = D3DRenderer.LadeShaderBytecode("HintergrundShaderVS.cso")
+        pixelShaderCode = D3DRenderer.LadeShaderBytecode("HintergrundShaderPS.cso")
+
+        hintergrundVertexShader = renderDevice.CreateVertexShader(vertexShaderCode)
+        hintergrundPixelShader = renderDevice.CreatePixelShader(pixelShaderCode)
+
+        If hintergrundVertexShader Is Nothing Then
+
+            Throw New InvalidOperationException("Der Hintergrund-Vertexshader konnte nicht erzeugt werden.")
+
+        End If
+
+        If hintergrundPixelShader Is Nothing Then
+
+            Throw New InvalidOperationException("Der Hintergrund-Pixelshader konnte nicht erzeugt werden.")
 
         End If
 
@@ -458,6 +584,7 @@ Friend Class MosaikRenderer
         renderContext.CSSetShader(partikelBewegungsShader)
         renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
         renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
+        renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
         renderContext.CSSetShaderResource(0UI, flowFieldView)
 
         renderContext.CSSetSampler(0UI, flowFieldSampler)
@@ -471,10 +598,59 @@ Friend Class MosaikRenderer
         renderContext.CSSetShaderResource(0UI, Nothing)
         renderContext.CSSetSampler(0UI, Nothing)
         renderContext.CSSetUnorderedAccessView(0UI, Nothing)
+        renderContext.CSSetUnorderedAccessView(1UI, Nothing)
         renderContext.CSSetConstantBuffer(0UI, Nothing)
         renderContext.CSSetShader(Nothing)
 
     End Sub
+
+    Friend Function GibAnzahlLebendePartikelZurueck() As Integer
+
+        Dim mappedSubresource As MappedSubresource
+        Dim result As SharpGen.Runtime.Result
+
+        Dim wurdeGemappt As Boolean
+        Dim anzahlLebendePartikel As Integer
+
+        wurdeGemappt = False
+        anzahlLebendePartikel = 0
+
+
+        ' Nur vier Byte werden von der GPU in einen
+        ' CPU-lesbaren Stagingbuffer kopiert.
+
+        renderContext.CopyResource(lebendZaehlerStagingBuffer, lebendZaehlerBuffer)
+
+        Try
+
+            result = renderContext.Map(lebendZaehlerStagingBuffer, 0UI, MapMode.Read, MapFlags.None,
+                                       mappedSubresource)
+
+            If result.Failure Then
+
+                Throw New InvalidOperationException(
+                "Der GPU-Lebendzähler konnte nicht gelesen werden. HRESULT: " &
+                result.Code.ToString())
+
+            End If
+
+            wurdeGemappt = True
+
+            anzahlLebendePartikel = Marshal.ReadInt32(mappedSubresource.DataPointer)
+
+        Finally
+
+            If wurdeGemappt Then
+
+                renderContext.Unmap(lebendZaehlerStagingBuffer, 0UI)
+
+            End If
+
+        End Try
+
+        Return anzahlLebendePartikel
+
+    End Function
 
     Private Sub AktualisiereRenderParameter()
 
@@ -500,6 +676,27 @@ Friend Class MosaikRenderer
         If sampler Is Nothing Then
             Throw New ArgumentNullException(NameOf(sampler))
         End If
+
+        '---------------------------------
+        ' Zielbild
+        '---------------------------------
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.VSSetShader(hintergrundVertexShader)
+        renderContext.PSSetShader(hintergrundPixelShader)
+        renderContext.PSSetShaderResource(0UI, zielBildView)
+        renderContext.PSSetSampler(0UI, sampler)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetSampler(0UI, Nothing)
+        renderContext.VSSetShader(Nothing)
+        renderContext.PSSetShader(Nothing)
+
+        '---------------------------------
+        ' Alte Bildpartikel darüber
+        '---------------------------------
 
         vertexAnzahl = CUInt(partikelAnzahl * 6)
 
@@ -534,6 +731,14 @@ Friend Class MosaikRenderer
 
         Direct3DRessourceHandler.GebeFrei(partikelBewegungsParameterBuffer)
         Direct3DRessourceHandler.GebeFrei(partikelBewegungsShader)
+
+        '---------------------------------
+        ' GPU-Lebendzähler
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(lebendZaehlerStagingBuffer)
+        Direct3DRessourceHandler.GebeFrei(lebendZaehlerView)
+        Direct3DRessourceHandler.GebeFrei(lebendZaehlerBuffer)
 
         '---------------------------------
         ' FlowField

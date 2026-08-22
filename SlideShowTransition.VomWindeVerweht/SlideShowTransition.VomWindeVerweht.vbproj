@@ -189,6 +189,8 @@
     <EmbeddedResource Include="Shader\MosaikShaderPS.cso" />
     <EmbeddedResource Include="Shader\MosaikShaderVS.cso" />
     <EmbeddedResource Include="Shader\PartikelBewegungsShaderCS.cso" />
+    <EmbeddedResource Include="Shader\HintergrundShaderPS.cso" />
+    <EmbeddedResource Include="Shader\HintergrundShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lang\" />
@@ -212,6 +214,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shader\HintergrundShader.hlsl" />
     <Content Include="Shader\MosaikShader.hlsl" />
     <Content Include="Shader\PartikelBewegungsShader.hlsl" />
   </ItemGroup>
