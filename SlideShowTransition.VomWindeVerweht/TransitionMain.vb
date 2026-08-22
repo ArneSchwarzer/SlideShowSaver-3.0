@@ -238,7 +238,7 @@ Public Class TransitionMain
 
         defaults = New Dictionary(Of String, String)()
 
-        defaults.Add("PartikelGroesse", "20")
+        defaults.Add("PartikelGroesse", "4")
         defaults.Add("PartikelGroesseZufall", "False")
         defaults.Add("WindStaerke", "3")
         defaults.Add("WindStaerkeZufall", "False")

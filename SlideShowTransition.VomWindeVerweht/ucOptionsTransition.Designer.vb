@@ -84,12 +84,11 @@ Partial Class ucOptionsTransition
         '
         Me.trkPartikelGroesse.AutoSize = False
         Me.trkPartikelGroesse.Location = New System.Drawing.Point(271, 184)
-        Me.trkPartikelGroesse.Maximum = 100
-        Me.trkPartikelGroesse.Minimum = 1
+        Me.trkPartikelGroesse.Maximum = 7
         Me.trkPartikelGroesse.Name = "trkPartikelGroesse"
         Me.trkPartikelGroesse.Size = New System.Drawing.Size(495, 55)
         Me.trkPartikelGroesse.TabIndex = 23
-        Me.trkPartikelGroesse.Value = 20
+        Me.trkPartikelGroesse.Value = 2
         '
         'trkWindstaerke
         '
@@ -114,11 +113,13 @@ Partial Class ucOptionsTransition
         'lblPartikelGroesse
         '
         Me.lblPartikelGroesse.AutoSize = True
-        Me.lblPartikelGroesse.Location = New System.Drawing.Point(772, 184)
+        Me.lblPartikelGroesse.Location = New System.Drawing.Point(757, 184)
+        Me.lblPartikelGroesse.MaximumSize = New System.Drawing.Size(106, 0)
+        Me.lblPartikelGroesse.MinimumSize = New System.Drawing.Size(106, 0)
         Me.lblPartikelGroesse.Name = "lblPartikelGroesse"
-        Me.lblPartikelGroesse.Size = New System.Drawing.Size(66, 41)
+        Me.lblPartikelGroesse.Size = New System.Drawing.Size(106, 41)
         Me.lblPartikelGroesse.TabIndex = 26
-        Me.lblPartikelGroesse.Text = "100"
+        Me.lblPartikelGroesse.Text = "4 px"
         Me.lblPartikelGroesse.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'lblNtrkWindstaerke
@@ -134,7 +135,7 @@ Partial Class ucOptionsTransition
         '
         Me.lblWindstaerke.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblWindstaerke.AutoSize = True
-        Me.lblWindstaerke.Location = New System.Drawing.Point(744, 338)
+        Me.lblWindstaerke.Location = New System.Drawing.Point(769, 338)
         Me.lblWindstaerke.MaximumSize = New System.Drawing.Size(94, 0)
         Me.lblWindstaerke.MinimumSize = New System.Drawing.Size(94, 0)
         Me.lblWindstaerke.Name = "lblWindstaerke"
@@ -145,7 +146,7 @@ Partial Class ucOptionsTransition
         '
         'btnDefaults
         '
-        Me.btnDefaults.Location = New System.Drawing.Point(664, 23)
+        Me.btnDefaults.Location = New System.Drawing.Point(689, 23)
         Me.btnDefaults.Name = "btnDefaults"
         Me.btnDefaults.Size = New System.Drawing.Size(174, 52)
         Me.btnDefaults.TabIndex = 55

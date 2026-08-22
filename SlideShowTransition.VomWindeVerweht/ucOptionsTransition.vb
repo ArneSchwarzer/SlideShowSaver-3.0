@@ -46,7 +46,7 @@ Public Class ucOptionsTransition
         'Überträgt aktuelleSettings auf sämtliche Controls.
 
         trkPartikelGroesse.Value = Math.Max(trkPartikelGroesse.Minimum, Math.Min(trkPartikelGroesse.Maximum,
-                                            aktuelleSettings.partikelGroesse))
+                                            ErmittleTrackBarWertAusPartikelGroesse(aktuelleSettings.partikelGroesse)))
 
         chkPartikelGroesseZufall.Checked = aktuelleSettings.partikelGroesseZufall
 
@@ -55,7 +55,7 @@ Public Class ucOptionsTransition
 
         chkWindstaerkeZufall.Checked = aktuelleSettings.windStaerkeZufall
 
-        lblPartikelGroesse.Text = aktuelleSettings.partikelGroesse.ToString()
+        lblPartikelGroesse.Text = ErmittlePartikelGroesseAusTrackBar().ToString() & " px"
 
         lblWindstaerke.Text = "Bft " & aktuelleSettings.windStaerke.ToString()
 
@@ -82,11 +82,23 @@ Public Class ucOptionsTransition
         'Windstärke von Bft 0.
         '
         'Bei zufälliger Windstärke ist die Warnung nicht nötig,
-        'da keine permanente Flaute fest vorgegeben ist.
+        'da der Zufallgenerator keine permanente Flaute auswählen wird.
 
         lblFlauteWarnung.Visible = Not chkWindstaerkeZufall.Checked AndAlso trkWindstaerke.Value = 0
 
     End Sub
+
+    Private Function ErmittleTrackBarWertAusPartikelGroesse(partikelGroesse As Integer) As Integer
+
+        Return CInt(Math.Round(Math.Log(partikelGroesse, 2)))
+
+    End Function
+
+    Private Function ErmittlePartikelGroesseAusTrackBar() As Integer
+
+        Return 1 << trkPartikelGroesse.Value
+
+    End Function
 
 #End Region
 
@@ -95,13 +107,13 @@ Public Class ucOptionsTransition
     Private Sub trkPartikelGroesse_ValueChanged(sender As Object, e As EventArgs) Handles trkPartikelGroesse.ValueChanged
         'Speichert die gewählte Partikelgröße per Direct Commit.
 
-        lblPartikelGroesse.Text = trkPartikelGroesse.Value.ToString()
+        lblPartikelGroesse.Text = ErmittlePartikelGroesseAusTrackBar().ToString() & " px"
 
         If wirdInitialisiert OrElse wurdeBereinigt Then
             Exit Sub
         End If
 
-        aktuelleSettings.partikelGroesse = trkPartikelGroesse.Value
+        aktuelleSettings.partikelGroesse = ErmittlePartikelGroesseAusTrackBar()
 
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroesse",
                         aktuelleSettings.partikelGroesse.ToString())
