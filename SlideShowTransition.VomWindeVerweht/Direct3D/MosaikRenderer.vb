@@ -623,8 +623,8 @@ Friend Class MosaikRenderer
 
         Try
 
-            result = renderContext.Map(lebendZaehlerStagingBuffer, 0UI, MapMode.Read, MapFlags.None,
-                                       mappedSubresource)
+            result = renderContext.Map(lebendZaehlerStagingBuffer, 0UI, MapMode.Read,
+                                       Vortice.Direct3D11.MapFlags.None, mappedSubresource)
 
             If result.Failure Then
 
