@@ -757,9 +757,18 @@ Friend Class MosaikRenderer
         Direct3DRessourceHandler.GebeFrei(vertexShader)
 
         '---------------------------------
-        ' Bild
+        ' Hintergrundshader
         '---------------------------------
 
+        Direct3DRessourceHandler.GebeFrei(hintergrundPixelShader)
+        Direct3DRessourceHandler.GebeFrei(hintergrundVertexShader)
+
+        '---------------------------------
+        ' Bilder
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(zielBildView)
+        Direct3DRessourceHandler.GebeFrei(zielBildTexture)
         Direct3DRessourceHandler.GebeFrei(bildView)
         Direct3DRessourceHandler.GebeFrei(bildTexture)
 
