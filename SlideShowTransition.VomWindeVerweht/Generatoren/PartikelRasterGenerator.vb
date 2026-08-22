@@ -1,6 +1,4 @@
-﻿Imports System.Drawing
-
-Public Class PartikelRasterGenerator
+﻿Public Class PartikelRasterGenerator
 
 #Region "Konstanten"
 
@@ -12,13 +10,14 @@ Public Class PartikelRasterGenerator
 
 #End Region
 
-    Public Function ErzeugePartikelRaster(bildBreite As Integer, bildHoehe As Integer, zielPartikelGroesse _
-                                          As Integer, Optional seed As Integer = 0) As PartikelDaten()
+#Region "Rastererzeugung"
 
-        Dim zufall As Random
-        Dim partikel As List(Of PartikelDaten)
-        Dim aktuelleY As Integer
-        Dim zeilenHoehe As Integer
+    Public Function ErzeugePartikelRaster(bildBreite As Integer, bildHoehe As Integer,
+                                          zielPartikelGroesse As Integer, Optional seed As Integer = 0) _
+                                          As PartikelDaten()
+
+        Dim partikelAnzahl As Integer
+        Dim partikel() As PartikelDaten
 
         If bildBreite <= 0 Then
             Throw New ArgumentOutOfRangeException(NameOf(bildBreite))
@@ -36,10 +35,55 @@ Public Class PartikelRasterGenerator
             seed = Environment.TickCount
         End If
 
+
+        ' Pass 1:
+        ' Exakte Anzahl bestimmen, ohne Partikeldaten anzulegen.
+
+        partikelAnzahl = ErmittlePartikelAnzahl(bildBreite, bildHoehe, zielPartikelGroesse, seed)
+
+        If partikelAnzahl <= 0 Then
+
+            Throw New InvalidOperationException("Das Partikelraster enthält keine Partikel.")
+
+        End If
+
+
+        ' Nur EIN endgültiges Array anlegen.
+
+        partikel = New PartikelDaten(partikelAnzahl - 1) {}
+
+
+        ' Pass 2:
+        ' Mit identischem Seed exakt dasselbe Raster noch einmal
+        ' erzeugen und unmittelbar in das Array schreiben.
+
+        BefuellePartikelRaster(partikel, bildBreite, bildHoehe, zielPartikelGroesse, seed)
+
+        Return partikel
+
+    End Function
+
+#End Region
+
+#Region "Pass 1 - Partikel zählen"
+
+    Private Function ErmittlePartikelAnzahl(bildBreite As Integer, bildHoehe As Integer,
+                                            zielPartikelGroesse As Integer, seed As Integer) As Integer
+
+        Dim zufall As Random
+
+        Dim aktuelleX As Integer
+        Dim aktuelleY As Integer
+
+        Dim breite As Integer
+        Dim zeilenHoehe As Integer
+
+        Dim anzahl As Integer
+
         zufall = New Random(seed)
-        partikel = New List(Of PartikelDaten)()
 
         aktuelleY = 0
+        anzahl = 0
 
         While aktuelleY < bildHoehe
 
@@ -49,42 +93,101 @@ Public Class PartikelRasterGenerator
                 zeilenHoehe = bildHoehe - aktuelleY
             End If
 
-            ErzeugeZeile(partikel, bildBreite, bildHoehe, aktuelleY, zeilenHoehe, zielPartikelGroesse, zufall)
+            aktuelleX = 0
+
+            While aktuelleX < bildBreite
+
+                breite = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+
+                If aktuelleX + breite > bildBreite Then
+                    breite = bildBreite - aktuelleX
+                End If
+
+                anzahl += 1
+
+                aktuelleX += breite
+
+            End While
 
             aktuelleY += zeilenHoehe
 
         End While
 
-        Return partikel.ToArray()
+        Return anzahl
 
     End Function
 
-    Private Sub ErzeugeZeile(partikel As List(Of PartikelDaten), bildBreite As Integer, bildHoehe As Integer,
-                             y As Integer, hoehe As Integer, zielPartikelGroesse As Integer, zufall As Random)
+#End Region
+
+#Region "Pass 2 - Array befüllen"
+
+    Private Sub BefuellePartikelRaster(partikel() As PartikelDaten, bildBreite As Integer, bildHoehe As Integer,
+                                       zielPartikelGroesse As Integer, seed As Integer)
+
+        Dim zufall As Random
 
         Dim aktuelleX As Integer
+        Dim aktuelleY As Integer
+
         Dim breite As Integer
-        Dim daten As PartikelDaten
+        Dim zeilenHoehe As Integer
 
-        aktuelleX = 0
+        Dim partikelIndex As Integer
 
-        While aktuelleX < bildBreite
+        zufall = New Random(seed)
 
-            breite = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+        aktuelleY = 0
+        partikelIndex = 0
 
-            If aktuelleX + breite > bildBreite Then
-                breite = bildBreite - aktuelleX
+        While aktuelleY < bildHoehe
+
+            zeilenHoehe = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+
+            If aktuelleY + zeilenHoehe > bildHoehe Then
+                zeilenHoehe = bildHoehe - aktuelleY
             End If
 
-            daten = ErzeugePartikel(aktuelleX, y, breite, hoehe, bildBreite, bildHoehe)
+            aktuelleX = 0
 
-            partikel.Add(daten)
+            While aktuelleX < bildBreite
 
-            aktuelleX += breite
+                breite = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+
+                If aktuelleX + breite > bildBreite Then
+                    breite = bildBreite - aktuelleX
+                End If
+
+                If partikelIndex >= partikel.Length Then
+
+                    Throw New InvalidOperationException(
+                        "Die berechnete Partikelanzahl stimmt nicht mit dem erzeugten Raster überein.")
+
+                End If
+
+                partikel(partikelIndex) = ErzeugePartikel(aktuelleX, aktuelleY, breite, zeilenHoehe, bildBreite,
+                                                          bildHoehe)
+
+                partikelIndex += 1
+                aktuelleX += breite
+
+            End While
+
+            aktuelleY += zeilenHoehe
 
         End While
 
+        If partikelIndex <> partikel.Length Then
+
+            Throw New InvalidOperationException(
+                "Das erzeugte Raster enthält eine unerwartete Anzahl von Partikeln.")
+
+        End If
+
     End Sub
+
+#End Region
+
+#Region "Partikeldaten"
 
     Private Function ErzeugePartikel(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
                                      bildBreite As Integer, bildHoehe As Integer) As PartikelDaten
@@ -94,7 +197,6 @@ Public Class PartikelRasterGenerator
 
         daten = New PartikelDaten()
 
-        'Position bezeichnet den Partikelmittelpunkt.
         daten.positionX = x + breite * 0.5F
         daten.positionY = y + hoehe * 0.5F
         daten.positionZ = 0.0F
@@ -155,5 +257,7 @@ Public Class PartikelRasterGenerator
         Return PartikelLOD.Grob
 
     End Function
+
+#End Region
 
 End Class

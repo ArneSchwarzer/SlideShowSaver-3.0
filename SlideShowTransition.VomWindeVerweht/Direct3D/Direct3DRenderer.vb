@@ -76,20 +76,30 @@ Friend Class D3DRenderer
         renderBreite = breite
         renderHoehe = hoehe
 
-        InitialisiereDirect3D()
-        InitialisiereSampler()
+        Try
 
-        mosaikRenderer = New MosaikRenderer()
+            InitialisiereDirect3D()
+            InitialisiereSampler()
 
-        mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel, altesBild,
-                                     neuesBild, flowField)
+            mosaikRenderer = New MosaikRenderer()
 
-        d3dImage = New D3D11Image()
-        d3dImage.WindowOwner = Direct3DRessourceHandler.ErmittleInteropFensterHandle()
-        d3dImage.OnRender = AddressOf RenderSurface
-        d3dImage.SetPixelSize(renderBreite, renderHoehe)
+            mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel,
+                                         altesBild, neuesBild, flowField)
 
-        istInitialisiert = True
+            d3dImage = New D3D11Image()
+            d3dImage.WindowOwner = Direct3DRessourceHandler.ErmittleInteropFensterHandle()
+            d3dImage.OnRender = AddressOf RenderSurface
+            d3dImage.SetPixelSize(renderBreite, renderHoehe)
+
+            istInitialisiert = True
+
+        Catch
+
+            BeendeUndBereinigeRenderer()
+
+            Throw
+
+        End Try
 
     End Sub
 

@@ -104,12 +104,6 @@ Public Class TransitionMain
         'Erzeugt direkt den finalen Ziel-Frame und meldet ihn
         'als fertiges Transitionsergebnis.
 
-        Dim sizeWPF As Windows.Size
-        Dim zielFrame As RenderTargetBitmap
-
-        Dim rasterGenerator As PartikelRasterGenerator
-        Dim testPartikel() As PartikelDaten
-
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(TransitionMain))
         End If
@@ -135,8 +129,18 @@ Public Class TransitionMain
 
         direct3DRenderer = New D3DRenderer()
 
-        direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
-                                       newBitmapGerahmt, flowField)
+        Try
+
+            direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
+                                           newBitmapGerahmt, flowField)
+
+        Catch
+
+            BeendeUndBereinigeTransition()
+
+            Throw
+
+        End Try
 
         transitionLaeuft = True
 
@@ -343,11 +347,10 @@ Public Class TransitionMain
 #Region "Bereinigung & Dispose"
 
     Private Sub BeendeUndBereinigeTransition()
-        'Setzt den Laufzustand kontrolliert zurück.
 
-        If Not transitionLaeuft Then
-            Exit Sub
-        End If
+        Dim warTransitionAktiv As Boolean
+
+        warTransitionAktiv = transitionLaeuft
 
         transitionLaeuft = False
 
@@ -386,7 +389,11 @@ Public Class TransitionMain
         aktuelleWindStaerke = 0
         aktuelleWindRichtung = 0.0F
 
-        RaiseEvent TransitionIsRunning(False)
+        If warTransitionAktiv Then
+
+            RaiseEvent TransitionIsRunning(False)
+
+        End If
 
     End Sub
 
