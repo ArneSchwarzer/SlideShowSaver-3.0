@@ -16,25 +16,32 @@ struct PartikelDaten
 
 RWStructuredBuffer<PartikelDaten> PartikelBuffer : register(u0);
 
+Texture2D<float2> FlowField : register(t0);
+SamplerState FlowFieldSampler : register(s0);
+
 cbuffer BewegungsParameter : register(b0)
 {
     float deltaTime;
-    float geschwindigkeit;
     float renderBreite;
-    float richtung;
+    float renderHoehe;
 
     uint partikelAnzahl;
 
     float padding1;
     float padding2;
     float padding3;
+    float padding4;
 };
 
 [numthreads(64, 1, 1)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     uint index;
+
     PartikelDaten partikel;
+
+    float2 flowUV;
+    float2 flowGeschwindigkeit;
 
     index = dispatchThreadID.x;
 
@@ -50,37 +57,46 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
         return;
     }
 
-    /*
-     * Erster Proof of Concept:
-     *
-     * Alle Partikel bewegen sich mit derselben konstanten
-     * Geschwindigkeit ausschließlich horizontal.
-     *
-     * richtung:
-     *  1.0 = nach rechts
-     * -1.0 = nach links
-     */
+    flowUV.x = saturate(partikel.position.x / renderBreite);
+    flowUV.y = saturate(partikel.position.y / renderHoehe);
 
-    partikel.position.x += geschwindigkeit * richtung * deltaTime;
+    flowGeschwindigkeit = FlowField.SampleLevel(FlowFieldSampler, flowUV, 0.0);
+
+    partikel.geschwindigkeit.x = flowGeschwindigkeit.x;
+    partikel.geschwindigkeit.y = flowGeschwindigkeit.y;
+    
+    partikel.position.x += partikel.geschwindigkeit.x * deltaTime;
+    partikel.position.y += partikel.geschwindigkeit.y * deltaTime;
 
     /*
-     * Ein Partikel stirbt erst dann, wenn sein vollständiges
-     * Quad den Bildschirm verlassen hat.
+     * Horizontaler Bildschirmtod.
      */
-
-    if (richtung > 0.0)
+    if (flowGeschwindigkeit.x > 0.0)
     {
         if (partikel.position.x - partikel.groesse.x * 0.5 > renderBreite)
         {
             partikel.lebt = 0;
         }
     }
-    else
+    else if (flowGeschwindigkeit.x < 0.0)
     {
         if (partikel.position.x + partikel.groesse.x * 0.5 < 0.0)
         {
             partikel.lebt = 0;
         }
+    }
+
+    /*
+     * Auch komplett oben/unten verschwundene Partikel sind tot.
+     */
+    if (partikel.position.y + partikel.groesse.y * 0.5 < 0.0)
+    {
+        partikel.lebt = 0;
+    }
+
+    if (partikel.position.y - partikel.groesse.y * 0.5 > renderHoehe)
+    {
+        partikel.lebt = 0;
     }
 
     PartikelBuffer[index] = partikel;

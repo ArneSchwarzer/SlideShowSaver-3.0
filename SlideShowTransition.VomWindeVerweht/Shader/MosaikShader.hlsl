@@ -31,10 +31,7 @@ SamplerState QuellSampler : register(s0);
 struct VSOutput
 {
     float4 position : SV_POSITION;
-
     float2 uv : TEXCOORD0;
-    float2 lokaleUV : TEXCOORD1;
-    float2 partikelGroesse : TEXCOORD2;
 };
 
 VSOutput VSMain(uint vertexID : SV_VertexID)
@@ -57,41 +54,13 @@ VSOutput VSMain(uint vertexID : SV_VertexID)
 
     partikel = PartikelBuffer[partikelIndex];
 
-    /*
-     * Tote Partikel werden vollständig außerhalb
-     * des sichtbaren Clip-Bereichs abgelegt.
-     */
-
     if (partikel.lebt == 0)
     {
-        output.position =
-            float4(
-                2.0,
-                2.0,
-                0.0,
-                1.0);
-
-        output.uv =
-            float2(
-                0.0,
-                0.0);
-
-        output.lokaleUV =
-            float2(
-                0.0,
-                0.0);
-
-        output.partikelGroesse =
-            float2(
-                1.0,
-                1.0);
+        output.position = float4(2.0, 2.0, 0.0, 1.0);
+        output.uv = float2(0.0, 0.0);
 
         return output;
     }
-
-    /*
-     * Zwei Dreiecke pro Quad.
-     */
 
     if (lokalerVertex == 0)
     {
@@ -124,104 +93,18 @@ VSOutput VSMain(uint vertexID : SV_VertexID)
         uvFaktor = float2(1.0, 1.0);
     }
 
-    pixelPosition =
-        partikel.position.xy +
-        ecke *
-        partikel.groesse;
+    pixelPosition = partikel.position.xy + ecke * partikel.groesse;
+    
+    ndcPosition.x = pixelPosition.x / renderBreite * 2.0 - 1.0;
+    ndcPosition.y = 1.0 - pixelPosition.y / renderHoehe * 2.0;
 
-    /*
-     * Pixelkoordinaten -> NDC.
-     */
-
-    ndcPosition.x =
-        pixelPosition.x /
-        renderBreite *
-        2.0 -
-        1.0;
-
-    ndcPosition.y =
-        1.0 -
-        pixelPosition.y /
-        renderHoehe *
-        2.0;
-
-    output.position =
-        float4(
-            ndcPosition,
-            0.0,
-            1.0);
-
-    output.uv =
-        lerp(
-            partikel.uvRect.xy,
-            partikel.uvRect.zw,
-            uvFaktor);
-
-    output.lokaleUV =
-        uvFaktor;
-
-    output.partikelGroesse =
-        partikel.groesse;
+    output.position = float4(ndcPosition, 0.0, 1.0);
+    output.uv = lerp(partikel.uvRect.xy, partikel.uvRect.zw, uvFaktor);
 
     return output;
 }
 
 float4 PSMain(VSOutput input) : SV_TARGET
 {
-    float4 farbe;
-
-    float2 abstandRandUV;
-    float2 abstandRandPixel;
-
-    float kleinsterRandAbstand;
-    float randBreitePixel;
-
-    farbe =
-        QuellBild.Sample(
-            QuellSampler,
-            input.uv);
-
-    /*
-     * Debug-Raster:
-     * Abstand zur Partikelkante zunächst in lokalen UVs.
-     */
-
-    abstandRandUV =
-        float2(
-            min(
-                input.lokaleUV.x,
-                1.0 - input.lokaleUV.x),
-
-            min(
-                input.lokaleUV.y,
-                1.0 - input.lokaleUV.y));
-
-    /*
-     * In echte Partikelpixel umrechnen.
-     */
-
-    abstandRandPixel =
-        abstandRandUV *
-        input.partikelGroesse;
-
-    kleinsterRandAbstand =
-        min(
-            abstandRandPixel.x,
-            abstandRandPixel.y);
-
-    randBreitePixel = 1.0;
-
-    if (kleinsterRandAbstand < randBreitePixel)
-    {
-        /*
-         * Offizielle Testfarbe.
-         */
-        return float4(
-            1.0,
-            0.5,
-            0.0,
-            1.0);
-    }
-
-    return farbe;
+    return QuellBild.Sample(QuellSampler, input.uv);
 }

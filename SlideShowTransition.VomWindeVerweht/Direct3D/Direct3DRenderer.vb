@@ -47,7 +47,7 @@ Friend Class D3DRenderer
 #Region "Initialisierung"
 
     Friend Sub Initialisiere(breite As Integer, hoehe As Integer, partikel() As PartikelDaten,
-                             altesBild As BitmapSource)
+                             altesBild As BitmapSource, flowField As FlowFieldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(D3DRenderer))
@@ -65,6 +65,10 @@ Friend Class D3DRenderer
             Throw New ArgumentNullException(NameOf(altesBild))
         End If
 
+        If flowField Is Nothing Then
+            Throw New ArgumentNullException(NameOf(flowField))
+        End If
+
         renderBreite = breite
         renderHoehe = hoehe
 
@@ -73,7 +77,8 @@ Friend Class D3DRenderer
 
         mosaikRenderer = New MosaikRenderer()
 
-        mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel, altesBild)
+        mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel, altesBild,
+                                     flowField)
 
         d3dImage = New D3D11Image()
         d3dImage.WindowOwner = Direct3DRessourceHandler.ErmittleInteropFensterHandle()
@@ -139,7 +144,7 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Friend Sub RenderFrame(deltaTime As Single, geschwindigkeit As Single, richtung As Single)
+    Friend Sub RenderFrame(deltaTime As Single)
 
         If wurdeBereinigt Then
             Exit Sub
@@ -153,7 +158,7 @@ Friend Class D3DRenderer
             Exit Sub
         End If
 
-        mosaikRenderer.Simuliere(deltaTime, geschwindigkeit, richtung)
+        mosaikRenderer.Simuliere(deltaTime)
 
         d3dImage.RequestRender()
 

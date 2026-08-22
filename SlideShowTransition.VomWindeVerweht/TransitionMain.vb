@@ -36,8 +36,14 @@ Public Class TransitionMain
 
     Private letzteFrameZeitMS As Double
 
-    Private windGeschwindigkeitTest As Single
-    Private windRichtungTest As Single
+    'FlowField
+    Private flowFieldGenerator As FlowFieldGenerator
+    Private flowField As FlowFieldDaten
+
+    Private aktuelleWindStaerke As Integer
+    Private aktuelleWindRichtung As Single
+
+    Private ReadOnly zufall As New Random()
 
     'Lifecycle
     Private transitionLaeuft As Boolean
@@ -103,7 +109,6 @@ Public Class TransitionMain
         Dim rasterGenerator As PartikelRasterGenerator
         Dim testPartikel() As PartikelDaten
 
-
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(TransitionMain))
         End If
@@ -111,26 +116,32 @@ Public Class TransitionMain
         BeendeUndBereinigeTransition()
         ReadTransitionSettingsFromRegistryOrDefaults()
 
+        aktuelleWindStaerke = ErmittleWindStaerke()
+        aktuelleWindRichtung = ErmittleWindRichtung()
+
         rasterGenerator = New PartikelRasterGenerator()
 
         testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
                                                              aktuelleSettings.partikelGroesse, 12345)
+
+        flowFieldGenerator = New FlowFieldGenerator()
+
+        flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
+                                                        aktuelleWindRichtung, 12345)
 
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
         newBitmapGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
         direct3DRenderer = New D3DRenderer()
 
-        direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt)
+        direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
+                                       flowField)
 
         transitionLaeuft = True
 
         RaiseEvent TransitionIsRunning(True)
 
         RaiseEvent TransitionFrameIstFertig(direct3DRenderer.FrameImage)
-
-        windGeschwindigkeitTest = 500.0F
-        windRichtungTest = 1.0F
 
         letzteFrameZeitMS = 0.0
 
@@ -249,9 +260,37 @@ Public Class TransitionMain
         'extrem große Simulationssprünge.
         deltaTime = Math.Min(deltaTime, 0.1)
 
-        direct3DRenderer.RenderFrame(CSng(deltaTime), windGeschwindigkeitTest, windRichtungTest)
+        direct3DRenderer.RenderFrame(CSng(deltaTime))
 
     End Sub
+
+#End Region
+
+#Region "Wind & FlowField"
+
+    Private Function ErmittleWindStaerke() As Integer
+
+        If aktuelleSettings.windStaerkeZufall Then
+
+            Return zufall.Next(1, 13)
+
+        End If
+
+        Return Math.Max(0, Math.Min(12, aktuelleSettings.windStaerke))
+
+    End Function
+
+    Private Function ErmittleWindRichtung() As Single
+
+        If zufall.Next(0, 2) = 0 Then
+
+            Return -1.0F
+
+        End If
+
+        Return 1.0F
+
+    End Function
 
 #End Region
 
@@ -293,6 +332,12 @@ Public Class TransitionMain
 
         testPartikel = Nothing
         rasterGenerator = Nothing
+
+        flowField = Nothing
+        flowFieldGenerator = Nothing
+
+        aktuelleWindStaerke = 0
+        aktuelleWindRichtung = 0.0F
 
         RaiseEvent TransitionIsRunning(False)
 

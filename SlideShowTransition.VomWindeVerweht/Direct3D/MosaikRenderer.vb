@@ -2,6 +2,7 @@
 Imports System.Windows.Media.Imaging
 Imports Vortice.Direct3D
 Imports Vortice.Direct3D11
+Imports Vortice.DXGI
 
 Friend Class MosaikRenderer
     Implements IDisposable
@@ -43,6 +44,10 @@ Friend Class MosaikRenderer
     Private partikelBewegungsShader As ID3D11ComputeShader
     Private partikelBewegungsParameterBuffer As ID3D11Buffer
 
+    Private flowFieldTexture As ID3D11Texture2D
+    Private flowFieldView As ID3D11ShaderResourceView
+    Private flowFieldSampler As ID3D11SamplerState
+
     '---------------------------------
     ' Dimensionen / Status
     '---------------------------------
@@ -70,15 +75,15 @@ Friend Class MosaikRenderer
     Private Structure PartikelBewegungsParameter
 
         Public deltaTime As Single
-        Public geschwindigkeit As Single
         Public renderBreite As Single
-        Public richtung As Single
+        Public renderHoehe As Single
 
         Public partikelAnzahl As UInteger
 
         Public padding1 As Single
         Public padding2 As Single
         Public padding3 As Single
+        Public padding4 As Single
 
     End Structure
 
@@ -89,7 +94,8 @@ Friend Class MosaikRenderer
 #Region "Initialisierung"
 
     Friend Sub Initialisiere(device As ID3D11Device, context As ID3D11DeviceContext, breite As Integer,
-                             hoehe As Integer, partikel() As PartikelDaten, bild As BitmapSource)
+                             hoehe As Integer, partikel() As PartikelDaten, bild As BitmapSource,
+                             flowField As FlowFieldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(MosaikRenderer))
@@ -113,6 +119,10 @@ Friend Class MosaikRenderer
 
         If breite <= 0 OrElse hoehe <= 0 Then
             Throw New ArgumentOutOfRangeException(NameOf(breite))
+        End If
+
+        If flowField Is Nothing Then
+            Throw New ArgumentNullException(NameOf(flowField))
         End If
 
         renderDevice = device
@@ -180,14 +190,117 @@ Friend Class MosaikRenderer
 
         End If
 
-        partikelUnorderedAccessView =
-    renderDevice.CreateUnorderedAccessView(
-        partikelBuffer)
+        partikelUnorderedAccessView = renderDevice.CreateUnorderedAccessView(partikelBuffer)
 
         If partikelUnorderedAccessView Is Nothing Then
 
             Throw New InvalidOperationException(
                 "Die UnorderedAccessView des Partikelbuffers konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereFlowField(flowField As FlowFieldDaten)
+
+        Dim textureDescription As Texture2DDescription
+        Dim initialData() As SubresourceData
+        Dim datenHandle As GCHandle
+
+        If flowField.breite <= 0 OrElse flowField.hoehe <= 0 Then
+
+            Throw New InvalidOperationException("Das FlowField besitzt ungültige Dimensionen.")
+
+        End If
+
+        If flowField.vektoren Is Nothing Then
+
+            Throw New InvalidOperationException("Das FlowField enthält keine Vektordaten.")
+
+        End If
+
+        If flowField.vektoren.Length <>
+       flowField.breite * flowField.hoehe Then
+
+            Throw New InvalidOperationException(
+            "Die Anzahl der FlowField-Vektoren entspricht nicht den FlowField-Dimensionen.")
+
+        End If
+
+        Try
+
+            datenHandle = GCHandle.Alloc(flowField.vektoren, GCHandleType.Pinned)
+
+            textureDescription =
+            New Texture2DDescription(
+                Format.R32G32_Float,
+                CUInt(flowField.breite),
+                CUInt(flowField.hoehe),
+                1UI,
+                1UI,
+                BindFlags.ShaderResource,
+                ResourceUsage.Default,
+                CpuAccessFlags.None,
+                1UI,
+                0UI,
+                ResourceOptionFlags.None)
+
+            initialData =
+            New SubresourceData() {
+                New SubresourceData(
+                    datenHandle.AddrOfPinnedObject(),
+                    CUInt(flowField.breite * 8),
+                    CUInt(flowField.breite *
+                          flowField.hoehe * 8))
+            }
+
+            flowFieldTexture = renderDevice.CreateTexture2D(textureDescription, initialData)
+
+        Finally
+
+            If datenHandle.IsAllocated Then
+                datenHandle.Free()
+            End If
+
+        End Try
+
+        If flowFieldTexture Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Die FlowField-Textur konnte nicht erzeugt werden.")
+
+        End If
+
+        flowFieldView = renderDevice.CreateShaderResourceView(flowFieldTexture)
+
+        If flowFieldView Is Nothing Then
+
+            Throw New InvalidOperationException("Die ShaderResourceView des FlowFields konnte nicht erzeugt werden.")
+
+        End If
+
+        InitialisiereFlowFieldSampler()
+
+    End Sub
+
+    Private Sub InitialisiereFlowFieldSampler()
+
+        Dim description As SamplerDescription
+
+        description = New SamplerDescription()
+
+        description.Filter = Filter.MinMagMipLinear
+        description.AddressU = TextureAddressMode.Clamp
+        description.AddressV = TextureAddressMode.Clamp
+        description.AddressW = TextureAddressMode.Clamp
+        description.MinLOD = 0.0F
+        description.MaxLOD = 0.0F
+
+        flowFieldSampler = renderDevice.CreateSamplerState(description)
+
+        If flowFieldSampler Is Nothing Then
+
+            Throw New InvalidOperationException("Der FlowField-Sampler konnte nicht erzeugt werden.")
 
         End If
 
@@ -302,14 +415,18 @@ Friend Class MosaikRenderer
 
         If partikelBewegungsParameterBuffer Is Nothing Then
 
-            Throw New InvalidOperationException(
-            "Der Partikel-Bewegungsparameterbuffer konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException("Der Partikel-Bewegungsparameterbuffer konnte nicht erzeugt " &
+                                                "werden.")
 
         End If
 
     End Sub
 
-    Friend Sub Simuliere(deltaTime As Single, geschwindigkeit As Single, richtung As Single)
+#End Region
+
+#Region "Simulation"
+
+    Friend Sub Simuliere(deltaTime As Single)
 
         Const THREADS_PRO_GRUPPE As UInteger = 64UI
 
@@ -324,46 +441,35 @@ Friend Class MosaikRenderer
             Exit Sub
         End If
 
-        If richtung = 0.0F Then
-            Exit Sub
-        End If
-
         parameter.deltaTime = deltaTime
-        parameter.geschwindigkeit = geschwindigkeit
         parameter.renderBreite = CSng(renderBreite)
-
-        If richtung >= 0.0F Then
-            parameter.richtung = 1.0F
-        Else
-            parameter.richtung = -1.0F
-        End If
-
+        parameter.renderHoehe = CSng(renderHoehe)
         parameter.partikelAnzahl = CUInt(partikelAnzahl)
 
         parameter.padding1 = 0.0F
         parameter.padding2 = 0.0F
         parameter.padding3 = 0.0F
+        parameter.padding4 = 0.0F
 
         renderContext.UpdateSubresource(parameter, partikelBewegungsParameterBuffer)
 
         anzahlThreadGruppen = (CUInt(partikelAnzahl) + THREADS_PRO_GRUPPE - 1UI) \ THREADS_PRO_GRUPPE
 
-
-        ' Wichtig:
-        ' Der Buffer darf nicht gleichzeitig als VS-SRV
-        ' und als CS-UAV gebunden sein.
-        ' Render() räumt seine VS-SRV bereits auf.
-
         renderContext.CSSetShader(partikelBewegungsShader)
         renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
         renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
+        renderContext.CSSetShaderResource(0UI, flowFieldView)
+
+        renderContext.CSSetSampler(0UI, flowFieldSampler)
 
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
+        'Alle Compute-Ressourcen wieder lösen,
+        'bevor der Partikelbuffer anschließend
+        'vom Vertexshader als SRV gelesen wird.
 
-        ' Unbedingt wieder lösen, bevor Render()
-        ' denselben Buffer als SRV bindet.
-
+        renderContext.CSSetShaderResource(0UI, Nothing)
+        renderContext.CSSetSampler(0UI, Nothing)
         renderContext.CSSetUnorderedAccessView(0UI, Nothing)
         renderContext.CSSetConstantBuffer(0UI, Nothing)
         renderContext.CSSetShader(Nothing)
@@ -428,6 +534,14 @@ Friend Class MosaikRenderer
 
         Direct3DRessourceHandler.GebeFrei(partikelBewegungsParameterBuffer)
         Direct3DRessourceHandler.GebeFrei(partikelBewegungsShader)
+
+        '---------------------------------
+        ' FlowField
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(flowFieldSampler)
+        Direct3DRessourceHandler.GebeFrei(flowFieldView)
+        Direct3DRessourceHandler.GebeFrei(flowFieldTexture)
 
         '---------------------------------
         ' Render Shader
