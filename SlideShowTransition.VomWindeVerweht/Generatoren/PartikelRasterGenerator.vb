@@ -225,7 +225,7 @@
 
         daten.lod = CInt(BestimmeLOD(mittlereGroesse))
 
-        daten.lebt = 1
+        daten.status = CInt(PartikelStatus.Ruhend)
 
         Return daten
 

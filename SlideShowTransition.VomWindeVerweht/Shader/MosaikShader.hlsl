@@ -11,7 +11,7 @@ struct PartikelDaten
     float3 rotationsGeschwindigkeit;
 
     int lod;
-    int lebt;
+    int status;
 };
 
 StructuredBuffer<PartikelDaten> PartikelBuffer : register(t0);
@@ -54,7 +54,7 @@ VSOutput VSMain(uint vertexID : SV_VertexID)
 
     partikel = PartikelBuffer[partikelIndex];
 
-    if (partikel.lebt == 0)
+    if (partikel.status == 0)
     {
         output.position = float4(2.0, 2.0, 0.0, 1.0);
         output.uv = float2(0.0, 0.0);

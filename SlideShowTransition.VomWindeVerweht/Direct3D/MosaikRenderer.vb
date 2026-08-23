@@ -99,13 +99,13 @@ Friend Class MosaikRenderer
 
         Public partikelAnzahl As UInteger
 
+        Public abloeseProgress As Single
+
         Public padding1 As Single
         Public padding2 As Single
         Public padding3 As Single
-        Public padding4 As Single
 
     End Structure
-
 #End Region
 
 #End Region
@@ -552,7 +552,7 @@ Friend Class MosaikRenderer
 
 #Region "Simulation"
 
-    Friend Sub Simuliere(deltaTime As Single)
+    Friend Sub Simuliere(deltaTime As Single, abloeseProgress As Single)
 
         Const THREADS_PRO_GRUPPE As UInteger = 64UI
 
@@ -571,11 +571,11 @@ Friend Class MosaikRenderer
         parameter.renderBreite = CSng(renderBreite)
         parameter.renderHoehe = CSng(renderHoehe)
         parameter.partikelAnzahl = CUInt(partikelAnzahl)
+        parameter.abloeseProgress = Math.Max(0.0F, Math.Min(1.0F, abloeseProgress))
 
         parameter.padding1 = 0.0F
         parameter.padding2 = 0.0F
         parameter.padding3 = 0.0F
-        parameter.padding4 = 0.0F
 
         renderContext.UpdateSubresource(parameter, partikelBewegungsParameterBuffer)
 

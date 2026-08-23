@@ -8,6 +8,14 @@ Public Enum PartikelLOD As Integer
 
 End Enum
 
+Public Enum PartikelStatus As Integer
+
+    Tot = 0
+    Ruhend = 1
+    Aktiv = 2
+
+End Enum
+
 <StructLayout(LayoutKind.Sequential)>
 Public Structure PartikelDaten
 
@@ -43,6 +51,6 @@ Public Structure PartikelDaten
 
     'LOD und Lebenszustand.
     Public lod As Integer
-    Public lebt As Integer
+    Public status As Integer
 
 End Structure

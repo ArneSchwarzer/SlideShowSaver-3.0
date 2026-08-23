@@ -30,6 +30,7 @@ Public Class TransitionMain
 
     'Zeitmanagement
     Private Const FPS As Integer = 60
+    Private Const ABLOESE_DAUER_MS As Double = 5500.0
 
     Private frameTimer As DispatcherTimer
     Private ReadOnly laufzeit As New Stopwatch()
@@ -271,6 +272,7 @@ Public Class TransitionMain
 
         Dim aktuelleFrameZeitMS As Double
         Dim deltaTime As Double
+        Dim abloeseProgress As Double
 
         Dim pruefeTransitionsende As Boolean
         Dim anzahlLebendePartikel As Integer
@@ -284,6 +286,9 @@ Public Class TransitionMain
         End If
 
         aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
+
+        abloeseProgress = aktuelleFrameZeitMS / ABLOESE_DAUER_MS
+        abloeseProgress = Math.Max(0.0, Math.Min(1.0, abloeseProgress))
 
         deltaTime = (aktuelleFrameZeitMS - letzteFrameZeitMS) / 1000.0
 
@@ -305,7 +310,8 @@ Public Class TransitionMain
         '
         pruefeTransitionsende = frameZaehler Mod 4 = 0
 
-        anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), pruefeTransitionsende)
+        anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), CSng(abloeseProgress),
+                                                             pruefeTransitionsende)
 
         If anzahlLebendePartikel = 0 Then
 
