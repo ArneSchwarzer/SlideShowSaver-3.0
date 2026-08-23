@@ -165,7 +165,7 @@
                 End If
 
                 partikel(partikelIndex) = ErzeugePartikel(aktuelleX, aktuelleY, breite, zeilenHoehe, bildBreite,
-                                                          bildHoehe)
+                                                          bildHoehe, zufall)
 
                 partikelIndex += 1
                 aktuelleX += breite
@@ -190,10 +190,12 @@
 #Region "Partikeldaten"
 
     Private Function ErzeugePartikel(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
-                                     bildBreite As Integer, bildHoehe As Integer) As PartikelDaten
+                                     bildBreite As Integer, bildHoehe As Integer, zufall As Random) As PartikelDaten
 
         Dim daten As PartikelDaten
         Dim mittlereGroesse As Single
+        Dim gewichtsZufall As Double
+        Dim groessenFaktor As Single
 
         daten = New PartikelDaten()
 
@@ -226,6 +228,30 @@
         daten.lod = CInt(BestimmeLOD(mittlereGroesse))
 
         daten.status = CInt(PartikelStatus.Ruhend)
+
+        ' Individuelles Partikelgewicht.
+        '
+        ' Zwei gemittelte Zufallswerte erzeugen eine Verteilung,
+        ' bei der mittlere Gewichte häufiger und Extremwerte
+        ' seltener auftreten.
+
+        gewichtsZufall = (zufall.NextDouble() + zufall.NextDouble()) / 2.0
+
+        ' Für V1 dominiert bewusst die individuelle Masse.
+
+        daten.gewicht = 0.3F + CSng(gewichtsZufall) * 2.2F
+
+
+        ' Die tatsächliche Partikelgröße beeinflusst das Gewicht
+        ' bereits leicht. Dadurch ist die Architektur für spätere
+        ' LOD-Mischungen vorbereitet, ohne bei feinem Sand wieder
+        ' die Individualität zu verlieren.
+
+        groessenFaktor = CSng(Math.Sqrt(mittlereGroesse / Math.Max(1.0, CDbl(zielPartikelGroesse))))
+
+        groessenFaktor = Math.Max(0.75F, Math.Min(1.35F, groessenFaktor))
+
+        daten.gewicht *= groessenFaktor
 
         Return daten
 

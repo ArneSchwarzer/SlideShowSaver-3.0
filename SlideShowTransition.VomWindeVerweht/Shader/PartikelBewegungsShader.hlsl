@@ -12,6 +12,8 @@ struct PartikelDaten
 
     int lod;
     int status;
+    
+    float gewicht;
 };
 
 RWStructuredBuffer<PartikelDaten> PartikelBuffer : register(u0);
@@ -46,15 +48,12 @@ static const int STATUS_TOT = 0;
 static const int STATUS_RUHEND = 1;
 static const int STATUS_AKTIV = 2;
 
-static const float REFERENZ_PARTIKELGROESSE = 8.0;
-
 static const float START_HAUPTWIND_ANTEIL = 0.70;
 
 /* 
  * Hilfsfunktionen
  *
- * Hash (Deterministischer Pseudo-Zufall,
- * Periodische Differenz (Gradient / HeatMap-Helper
+ * Hash (Deterministischer Pseudo-Zufall
  *
  */
 
@@ -76,24 +75,6 @@ float Hash01(uint wert)
         16777215.0;
 }
 
-float PeriodischeDifferenz(float wertA,  float wertB)
-{
-    float differenz;
-
-    differenz = wertA - wertB;
-
-    if (differenz > 0.5)
-    {
-        differenz -= 1.0;
-    }
-    else if (differenz < -0.5)
-    {
-        differenz += 1.0;
-    }
-
-    return differenz;
-}
-
 /* 
 CSMain Hauptfunktion
 */
@@ -109,8 +90,9 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     float2 zielGeschwindigkeit;
     float2 windBeschleunigung;
 
-    float partikelGroesse;
     float windEmpfindlichkeit;
+    float gewichtFaktor;
+    float startGewichtFaktor;
 
     float widerstandsFaktor;
     
@@ -234,9 +216,9 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             dueneOben = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV - float2(0.0, duenenTexelGroesse.y), 0.0);
             dueneUnten = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV + float2(0.0, duenenTexelGroesse.y), 0.0);
 
-            duenenGradient.x = PeriodischeDifferenz(dueneRechts, dueneLinks);
-            duenenGradient.y = PeriodischeDifferenz(dueneUnten,  dueneOben);
-
+            duenenGradient.x = dueneRechts - dueneLinks;
+            duenenGradient.y = dueneUnten - dueneOben;
+                        
             if (length(duenenGradient) > 0.0001)
             {
                 duenenRichtung = normalize(duenenGradient);
@@ -303,6 +285,15 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
             startGeschwindigkeit = length(zielGeschwindigkeit) * lerp(0.70, 1.45, randomGeschwindigkeit);
 
+            /*
+             * Leichte Körner reagieren beim Ablösen stärker,
+             * schwere behalten mehr Ruhe und Trägheit.
+             */
+            startGewichtFaktor = 1.0 / max(partikel.gewicht, 0.1);
+            startGewichtFaktor = clamp(startGewichtFaktor, 0.55, 2.0);
+
+            startGeschwindigkeit *= startGewichtFaktor;
+                        
             partikel.geschwindigkeit.xy = startRichtung * startGeschwindigkeit;
 
         /*
@@ -329,19 +320,19 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
      * ---------------------------------------------------------
      */
 
-    partikelGroesse = max(1.0, (partikel.groesse.x + partikel.groesse.y) * 0.5);
-
     /*
-     * Größe dient als einfacher Masse-/Trägheitsproxy.
+     * Individuelles Gewicht bestimmt die Trägheit gegenüber
+     * dem Wind.
      *
-     * 1 px  -> stärker windempfindlich
-     * 8 px  -> ungefähr Referenz
-     * groß  -> zunehmend träger
+     * gewicht < 1.0:
+     * leichte Körner folgen dem Wind schnell.
      *
-     * Clamp verhindert extreme Werte.
+     * gewicht > 1.0:
+     * schwere Körner reagieren deutlich träger.
      */
-    windEmpfindlichkeit = sqrt(REFERENZ_PARTIKELGROESSE /partikelGroesse);
-    windEmpfindlichkeit = clamp(windEmpfindlichkeit, 0.35, 2.0);
+    gewichtFaktor = 1.0 / max(partikel.gewicht, 0.1);
+
+    windEmpfindlichkeit = clamp(gewichtFaktor, 0.30, 2.5);
 
     /*
      * Permanenter kleiner aerodynamischer Unterschied.

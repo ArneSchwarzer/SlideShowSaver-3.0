@@ -9,7 +9,7 @@ Friend Class MosaikRenderer
 
 #Region "Variablendeklaration"
 
-    Private Const PARTIKEL_STRIDE As Integer = 80
+    Private Const PARTIKEL_STRIDE As Integer = 84
 
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext

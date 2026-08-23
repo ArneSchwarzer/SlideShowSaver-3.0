@@ -53,4 +53,8 @@ Public Structure PartikelDaten
     Public lod As Integer
     Public status As Integer
 
+    'Individuelle physikalische Masse des Partikels.
+    '1.0 = Referenzgewicht.
+    Public gewicht As Single
+
 End Structure

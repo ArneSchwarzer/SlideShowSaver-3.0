@@ -9,13 +9,25 @@
     Private Const FBM_PERSISTENZ As Single = 0.45F
     Private Const FBM_LAKUNARITAET As Single = 2.0F
 
-    Private Const DUENEN_FREQUENZ_MIN As Single = 3.5F
-    Private Const DUENEN_FREQUENZ_MAX As Single = 5.5F
+    Private Const DUENEN_ANZAHL_MIN As Integer = 12
+    Private Const DUENEN_ANZAHL_MAX As Integer = 22
 
-    Private Const DOMAIN_WARP_ENTLANG As Single = 0.1F
-    Private Const DOMAIN_WARP_QUER As Single = 0.07F
+    Private Const DUENEN_LAENGE_MIN As Single = 0.22F
+    Private Const DUENEN_LAENGE_MAX As Single = 0.55F
 
-    Private Const KANTEN_WELLIGKEIT As Single = 0.16F
+    Private Const DUENEN_TIEFE_MIN As Single = 0.12F
+    Private Const DUENEN_TIEFE_MAX As Single = 0.28F
+
+    Private Const RICHTUNGS_ABWEICHUNG As Single = 0.22F
+
+    Private Const WELLEN_AMPLITUDE_MIN As Single = 0.008F
+    Private Const WELLEN_AMPLITUDE_MAX As Single = 0.025F
+
+    Private Const WELLEN_FREQUENZ_MIN As Single = 1.0F
+    Private Const WELLEN_FREQUENZ_MAX As Single = 2.5F
+
+    Private Const STARTWERT_MIN As Single = 0.02F
+    Private Const STARTWERT_MAX As Single = 0.32F
 
 #End Region
 
@@ -25,24 +37,42 @@
 
 #End Region
 
+#Region "Struct und Enums"
+
+    Private Structure Duene
+
+        Public mittelpunktX As Single
+        Public mittelpunktY As Single
+
+        Public laenge As Single
+        Public tiefe As Single
+
+        Public winkel As Single
+
+        Public wellenAmplitude As Single
+        Public wellenFrequenz As Single
+        Public wellenPhase As Single
+
+        Public startWert As Single
+
+    End Structure
+
+#End Region
+
 #Region "Erzeugung"
 
-    Public Function ErzeugeDuenenFeld(renderBreite As Integer, renderHoehe As Integer, Optional seed As _
-                                      Integer = 0) As DuenenFeldDaten
+    Public Function ErzeugeDuenenFeld(renderBreite As Integer, renderHoehe As Integer, Optional seed As Integer = 0) As DuenenFeldDaten
 
         Dim daten As DuenenFeldDaten
         Dim zufall As Random
 
+        Dim duenen() As Duene
+
         Dim feldBreite As Integer
         Dim feldHoehe As Integer
 
+        Dim duenenAnzahl As Integer
         Dim historischeWindRichtung As Single
-
-        Dim cosRichtung As Single
-        Dim sinRichtung As Single
-
-        Dim duenenFrequenz As Single
-        Dim phaseOffset As Single
 
         Dim x As Integer
         Dim y As Integer
@@ -51,18 +81,6 @@
         Dim normX As Single
         Dim normY As Single
 
-        Dim entlang As Single
-        Dim quer As Single
-
-        Dim warpEntlang As Single
-        Dim warpQuer As Single
-
-        Dim entlangVerformt As Single
-        Dim querVerformt As Single
-
-        Dim kantenWelle As Single
-
-        Dim phase As Single
         Dim abloeseWert As Single
 
         If renderBreite <= 0 Then
@@ -79,8 +97,6 @@
 
         zufall = New Random(seed)
 
-        InitialisierePermutation(zufall)
-
         feldBreite = DUENENFELD_BREITE
 
         feldHoehe = Math.Max(1, CInt(Math.Round(feldBreite * renderHoehe / CDbl(renderBreite))))
@@ -91,23 +107,11 @@
         daten.hoehe = feldHoehe
         daten.werte = New Single(feldBreite * feldHoehe - 1) {}
 
-
-        ' Diese Richtung beschreibt ausdrücklich NICHT
-        ' den aktuellen Wind.
-        '
-        ' Sie repräsentiert die historische Windrichtung,
-        ' unter der die Dünen entstanden sind.
-
         historischeWindRichtung = CSng(zufall.NextDouble() * Math.PI * 2.0)
 
-        cosRichtung = CSng(Math.Cos(historischeWindRichtung))
+        duenenAnzahl = zufall.Next(DUENEN_ANZAHL_MIN, DUENEN_ANZAHL_MAX + 1)
 
-        sinRichtung = CSng(Math.Sin(historischeWindRichtung))
-
-        duenenFrequenz = DUENEN_FREQUENZ_MIN + CSng(zufall.NextDouble()) * (DUENEN_FREQUENZ_MAX -
-                                                    DUENEN_FREQUENZ_MIN)
-
-        phaseOffset = CSng(zufall.NextDouble())
+        duenen = ErzeugeDuenen(duenenAnzahl, historischeWindRichtung, zufall)
 
         For y = 0 To feldHoehe - 1
 
@@ -115,53 +119,10 @@
 
                 index = y * feldBreite + x
 
+                normX = CSng(x) / CSng(Math.Max(1, feldBreite - 1))
+                normY = CSng(y) / CSng(Math.Max(1, feldHoehe - 1))
 
-                ' Normierter Bildschirmraum mit Ursprung
-                ' in der Mitte.
-
-                normX = CSng(x) / CSng(Math.Max(1, feldBreite - 1)) - 0.5F
-                normY = CSng(y) / CSng(Math.Max(1, feldHoehe - 1)) - 0.5F
-
-
-                ' In den historischen Dünenraum drehen.
-
-                entlang = normX * cosRichtung + normY * sinRichtung
-                quer = -normX * sinRichtung + normY * cosRichtung
-
-
-                ' Sehr weicher Domain-Warp.
-                '
-                ' Dadurch bleiben die Dünenkanten lang und
-                ' glatt, statt zu Wasser-/Noise-Gekräusel
-                ' zu zerfallen.
-
-                warpEntlang = BerechneFBM(quer * 1.1F + 13.71F, entlang * 0.4F + 37.19F) * DOMAIN_WARP_ENTLANG
-                warpQuer = BerechneFBM(quer * 0.85F + 71.31F, entlang * 0.55F + 19.43F) * DOMAIN_WARP_QUER
-
-                entlangVerformt = entlang + warpEntlang
-                querVerformt = quer + warpQuer
-
-
-                ' Langgezogene, weiche Welligkeit
-                ' der eigentlichen Dünenkante.
-
-                kantenWelle = BerechneFBM(querVerformt * 1.45F + 91.17F, entlangVerformt * 0.18F + 7.53F) * KANTEN_WELLIGKEIT
-
-
-                ' Periodisches Feld:
-                '
-                ' Jede Ganzzahlgrenze ist eine neue
-                ' scharfe Dünenkante.
-
-                phase = entlangVerformt * duenenFrequenz + kantenWelle + phaseOffset
-
-
-                ' Nachkommaanteil 0..1:
-                '
-                ' 0 = unmittelbar an der Dünenkante
-                ' 1 = Ende des jeweiligen Dünenhanges
-
-                abloeseWert = phase - CSng(Math.Floor(phase))
+                abloeseWert = BerechneAbloeseWert(normX, normY, duenen)
 
                 daten.werte(index) = Begrenze01(abloeseWert)
 
@@ -170,6 +131,151 @@
         Next
 
         Return daten
+
+    End Function
+
+    Private Function ErzeugeDuenen(
+    anzahl As Integer,
+    historischeWindRichtung As Single,
+    zufall As Random) As Duene()
+
+        Dim duenen() As Duene
+
+        Dim i As Integer
+
+        duenen = New Duene(anzahl - 1) {}
+
+        For i = 0 To anzahl - 1
+
+            duenen(i).mittelpunktX = CSng(zufall.NextDouble())
+            duenen(i).mittelpunktY = CSng(zufall.NextDouble())
+
+            duenen(i).laenge = DUENEN_LAENGE_MIN + CSng(zufall.NextDouble()) * (DUENEN_LAENGE_MAX -
+                                                                                DUENEN_LAENGE_MIN)
+
+            duenen(i).tiefe = DUENEN_TIEFE_MIN + CSng(zufall.NextDouble()) * (DUENEN_TIEFE_MAX - DUENEN_TIEFE_MIN)
+
+            duenen(i).winkel = historischeWindRichtung + (CSng(zufall.NextDouble()) * 2.0F - 1.0F) *
+                               RICHTUNGS_ABWEICHUNG
+
+            duenen(i).wellenAmplitude = WELLEN_AMPLITUDE_MIN + CSng(zufall.NextDouble()) * (WELLEN_AMPLITUDE_MAX -
+                                        WELLEN_AMPLITUDE_MIN)
+
+            duenen(i).wellenFrequenz = WELLEN_FREQUENZ_MIN + CSng(zufall.NextDouble()) * (WELLEN_FREQUENZ_MAX -
+                                       WELLEN_FREQUENZ_MIN)
+
+            duenen(i).wellenPhase = CSng(zufall.NextDouble() * Math.PI * 2.0)
+
+            duenen(i).startWert = STARTWERT_MIN + CSng(zufall.NextDouble()) * (STARTWERT_MAX - STARTWERT_MIN)
+
+        Next
+
+        Return duenen
+
+    End Function
+
+    Private Function BerechneAbloeseWert(x As Single, y As Single, duenen() As Duene) As Single
+
+        Dim besterWert As Single
+        Dim duenenWert As Single
+
+        Dim i As Integer
+
+        besterWert = 1.0F
+
+        For i = 0 To duenen.Length - 1
+
+            duenenWert = BerechneDuenenWert(x, y, duenen(i))
+
+            If duenenWert < besterWert Then
+
+                besterWert = duenenWert
+
+            End If
+
+        Next
+
+        Return besterWert
+
+    End Function
+
+    Private Function BerechneDuenenWert(x As Single, y As Single, duene As Duene) As Single
+
+        Dim deltaX As Single
+        Dim deltaY As Single
+
+        Dim cosWinkel As Single
+        Dim sinWinkel As Single
+
+        Dim entlang As Single
+        Dim hang As Single
+
+        Dim normEntlang As Single
+        Dim wellenOffset As Single
+
+        Dim normHang As Single
+        Dim randAbschwaechung As Single
+
+        Dim wert As Single
+
+        deltaX = x - duene.mittelpunktX
+        deltaY = y - duene.mittelpunktY
+
+        cosWinkel = CSng(Math.Cos(duene.winkel))
+        sinWinkel = CSng(Math.Sin(duene.winkel))
+
+        ' entlang:
+        ' Position entlang der Dünenkante.
+
+        entlang = deltaX * cosWinkel + deltaY * sinWinkel
+
+        ' hang:
+        ' Position senkrecht zur Dünenkante.
+
+        hang = -deltaX * sinWinkel + deltaY * cosWinkel
+
+        normEntlang = entlang / Math.Max(duene.laenge * 0.5F, 0.0001F)
+
+        If Math.Abs(normEntlang) > 1.0F Then
+
+            Return 1.0F
+
+        End If
+
+
+        ' Nur eine sanfte, lange Welle pro Dünenzug.
+
+        wellenOffset = CSng(Math.Sin(normEntlang * Math.PI * duene.wellenFrequenz + duene.wellenPhase)) *
+                       duene.wellenAmplitude
+
+        hang -= wellenOffset
+
+
+        ' Nur die windabgewandte Hangseite gehört
+        ' zu dieser Düne.
+
+        If hang < 0.0F OrElse hang > duene.tiefe Then
+            Return 1.0F
+        End If
+
+        normHang = hang / duene.tiefe
+
+
+        ' An den Enden läuft die Düne weich aus.
+        ' Dadurch entstehen keine abgeschnittenen Rechtecke.
+
+        randAbschwaechung = normEntlang * normEntlang
+
+        normHang += randAbschwaechung * 0.35F
+
+        normHang = Begrenze01(normHang)
+
+
+        ' Jede Düne beginnt bei ihrem eigenen Startwert.
+
+        wert = duene.startWert + normHang * (1.0F - duene.startWert)
+
+        Return Begrenze01(wert)
 
     End Function
 
