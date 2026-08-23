@@ -252,7 +252,12 @@ Friend Class D3DRenderer
             Direct3DRessourceHandler.GebeFrei(renderTargetView)
             Direct3DRessourceHandler.GebeFrei(sharedTexture)
             Direct3DRessourceHandler.GebeFrei(dxgiResource)
-            Direct3DRessourceHandler.GebeFrei(surface)
+            'Direct3DRessourceHandler.GebeFrei(surface)
+
+            renderTargetView = Nothing
+            sharedTexture = Nothing
+            dxgiResource = Nothing
+            surface = Nothing
 
         End Try
 
