@@ -48,6 +48,8 @@ static const float ABLOESE_MAXIMUM = 0.85;
 
 static const float REFERENZ_PARTIKELGROESSE = 8.0;
 
+static const float START_HAUPTWIND_ANTEIL = 0.70;
+
 /* 
 Hash-Generator für Pseudo-Zufallswerte per Partikel
 */
@@ -105,6 +107,12 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     float winkel;
     float sinWinkel;
     float cosWinkel;
+    
+    float2 hauptWindVektor;
+    float2 lokalerStartVektor;
+
+    float lokaleWindStaerke;
+    float hauptWindVorzeichen;
     
     index = dispatchThreadID.x;
 
@@ -184,17 +192,41 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             sincos(winkel, sinWinkel, cosWinkel);
 
             /*
-             * Lokale FlowField-Richtung drehen.
+             * Lokalen FlowField-Vektor um den individuellen
+             * Kornwinkel drehen.
              */
             
-            startRichtung.x = zielGeschwindigkeit.x * cosWinkel - zielGeschwindigkeit.y * sinWinkel;
-            startRichtung.y = zielGeschwindigkeit.x * sinWinkel + zielGeschwindigkeit.y * cosWinkel;
+            lokalerStartVektor.x = zielGeschwindigkeit.x * cosWinkel - zielGeschwindigkeit.y * sinWinkel;
+            lokalerStartVektor.y = zielGeschwindigkeit.x * sinWinkel + zielGeschwindigkeit.y * cosWinkel;
+
+            /*
+             * Betrag des lokalen Windes erhalten.
+             */
+            
+            lokaleWindStaerke = length(zielGeschwindigkeit);
+
+            /*
+             * Globale Hauptwindrichtung.
+             */
+            
+            hauptWindVorzeichen = zielGeschwindigkeit.x >= 0.0 ? 1.0 : -1.0;
+
+            hauptWindVektor = float2(hauptWindVorzeichen * lokaleWindStaerke, 0.0);
+
+            /*
+             * Beim Ablösen dominiert zunächst der Hauptwind.
+             *
+             * Das lokale FlowField und der individuelle Kornwinkel
+             * bleiben aber deutlich erhalten.
+             */
+            
+            startRichtung = lerp(lokalerStartVektor, hauptWindVektor, START_HAUPTWIND_ANTEIL);
 
             /*
              * Individuelle Startgeschwindigkeit:
-             * 65 bis 135 Prozent der lokalen Windgeschwindigkeit.
+             * 65 bis 135 Prozent.
              */
-    
+            
             startGeschwindigkeit = lerp(0.65, 1.35, randomGeschwindigkeit);
 
             partikel.geschwindigkeit.xy = startRichtung * startGeschwindigkeit;
@@ -206,6 +238,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
              * Damit zerbrechen direkt beim Ablösen auch lokale
              * horizontale Bänder.
              */
+            
             partikel.geschwindigkeit.y += (randomVertikal * 2.0 - 1.0) * 45.0;
         }
         else
