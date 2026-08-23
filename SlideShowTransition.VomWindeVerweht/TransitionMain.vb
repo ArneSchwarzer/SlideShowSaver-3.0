@@ -46,9 +46,13 @@ Public Class TransitionMain
 
     Private ReadOnly zufall As New Random()
 
-    'Dünenfeld / Ablöse-HeatMap
-    Private duenenGenerator As DuenenGenerator
-    Private duenenFeld As DuenenFeldDaten
+    'V2/V3 Experiment: Dünenbasierte Ablösung
+    'Private duenenGenerator As DuenenGenerator
+    'Private duenenFeld As DuenenFeldDaten
+
+    'Randbasierte Ablösung
+    Private randAbloeseGenerator As RandAbloeseGenerator
+    Private randAbloeseFeld As RandAbloeseFeldDaten
 
     'Lifecycle
     Private transitionLaeuft As Boolean
@@ -131,11 +135,17 @@ Public Class TransitionMain
                                                         aktuelleWindRichtung, 12345)
 
 
-        ' Das Dünenfeld ist ausdrücklich unabhängig
-        ' vom aktuellen FlowField.
-        duenenGenerator = New DuenenGenerator()
+        'Randbasierte Ablösung.
+        '
+        'Die Ablöseseite entspricht der globalen Windrichtung:
+        '
+        ' Wind nach rechts -> Start links
+        ' Wind nach links  -> Start rechts
 
-        duenenFeld = duenenGenerator.ErzeugeDuenenFeld(clientSize.Width, clientSize.Height, 54321)
+        randAbloeseGenerator = New RandAbloeseGenerator()
+
+        randAbloeseFeld = randAbloeseGenerator.ErzeugeRandAbloeseFeld(clientSize.Width, clientSize.Height,
+                                                                      aktuelleWindRichtung, 54321)
 
         'Bitmaps
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
@@ -147,7 +157,7 @@ Public Class TransitionMain
         Try
 
             direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
-                                           newBitmapGerahmt, flowField, duenenFeld)
+                                           newBitmapGerahmt, flowField, randAbloeseFeld)
         Catch
 
             BeendeUndBereinigeTransition()
@@ -405,8 +415,8 @@ Public Class TransitionMain
         flowField = Nothing
         flowFieldGenerator = Nothing
 
-        duenenFeld = Nothing
-        duenenGenerator = Nothing
+        randAbloeseFeld = Nothing
+        randAbloeseGenerator = Nothing
 
         aktuelleWindStaerke = 0
         aktuelleWindRichtung = 0.0F

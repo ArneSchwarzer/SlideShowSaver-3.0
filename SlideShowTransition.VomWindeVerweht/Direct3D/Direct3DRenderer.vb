@@ -48,7 +48,7 @@ Friend Class D3DRenderer
 
     Friend Sub Initialisiere(breite As Integer, hoehe As Integer, partikel() As PartikelDaten,
                              altesBild As BitmapSource, neuesBild As BitmapSource, flowField As FlowFieldDaten,
-                             duenenFeld As DuenenFeldDaten)
+                             randAbloeseFeld As RandAbloeseFeldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(D3DRenderer))
@@ -74,8 +74,8 @@ Friend Class D3DRenderer
             Throw New ArgumentNullException(NameOf(flowField))
         End If
 
-        If duenenFeld Is Nothing Then
-            Throw New ArgumentNullException(NameOf(duenenFeld))
+        If randAbloeseFeld Is Nothing Then
+            Throw New ArgumentNullException(NameOf(randAbloeseFeld))
         End If
 
         renderBreite = breite
@@ -89,7 +89,7 @@ Friend Class D3DRenderer
             mosaikRenderer = New MosaikRenderer()
 
             mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel,
-                                         altesBild, neuesBild, flowField, duenenFeld)
+                                         altesBild, neuesBild, flowField, randAbloeseFeld)
 
             d3dImage = New D3D11Image()
             d3dImage.WindowOwner = Direct3DRessourceHandler.ErmittleInteropFensterHandle()

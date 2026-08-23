@@ -22,8 +22,8 @@ RWStructuredBuffer<int> LebendZaehler : register(u1);
 Texture2D<float2> FlowField : register(t0);
 SamplerState FlowFieldSampler : register(s0);
 
-Texture2D<float> DuenenFeld : register(t1);
-SamplerState DuenenFeldSampler : register(s1);
+Texture2D<float> RandAbloeseFeld : register(t1);
+SamplerState RandAbloeseFeldSampler : register(s1);
 
 cbuffer BewegungsParameter : register(b0)
 {
@@ -112,28 +112,16 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     float lokaleWindStaerke;
     float hauptWindVorzeichen;
-    
-    float duenenWert;
+        
+    float abloeseWert;
     float individuellerAbloeseOffset;
-
-    uint duenenBreite;
-    uint duenenHoehe;
-
-    float2 duenenTexelGroesse;
-
-    float dueneLinks;
-    float dueneRechts;
-    float dueneOben;
-    float dueneUnten;
-
-    float2 duenenGradient;
-    float2 duenenRichtung;
 
     float2 lokaleFlowRichtung;
     float2 individuelleRichtung;
     float2 startRichtung;
 
     float randomWinkel;
+    
     
     index = dispatchThreadID.x;
 
@@ -175,62 +163,39 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     {
     /*
      * ---------------------------------------------------------
-     * DÜNENFELD:
-     *
-     * Das Feld beschreibt ausschließlich die bereits vorhandene
-     * historische Dünengeometrie.
-     *
-     * Es ist vollständig unabhängig vom aktuellen FlowField.
+     * RANDBASIERTE ABLÖSUNG
      * ---------------------------------------------------------
+     *
+     * Das RandAbloeseFeld enthält pro Bildschirmposition
+     * den Zeitpunkt 0..1, zu dem der Wind diese Stelle
+     * erreicht.
+     *
+     * Die globale Ablöserichtung und die globale
+     * FlowField-Richtung stimmen dabei überein.
      */
 
-        duenenWert = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV, 0.0);
+        abloeseWert = RandAbloeseFeld.SampleLevel(RandAbloeseFeldSampler, flowUV, 0.0);
 
     /*
-     * Winziger individueller Unterschied:
+     * Einzelne Sandkörner lösen sich geringfügig
+     * früher oder später als ihre unmittelbaren Nachbarn.
      *
-     * Die makroskopische Dünenkante bleibt erhalten,
-     * einzelne Körner lösen sich aber geringfügig früher
-     * oder später.
+     * Dadurch bleibt die großräumige Front lesbar,
+     * bekommt aber keinen klinisch perfekten Rand.
      */
+
         individuellerAbloeseOffset = lerp(-0.025, 0.025, Hash01(index * 11 + 37));
 
-        duenenWert = saturate(duenenWert + individuellerAbloeseOffset);
+        abloeseWert = saturate(abloeseWert + individuellerAbloeseOffset);
 
-        if (abloeseProgress >= duenenWert)
+        if (abloeseProgress >= abloeseWert)
         {
             partikel.status = STATUS_AKTIV;
 
         /*
-         * -----------------------------------------------------
-         * Lokalen Gradienten des Dünenfeldes bestimmen.
-         * -----------------------------------------------------
+         * Aktuelle lokale FlowField-Richtung.
          */
 
-            DuenenFeld.GetDimensions(duenenBreite, duenenHoehe);
-
-            duenenTexelGroesse = 1.0 / float2(max(duenenBreite, 1), max(duenenHoehe, 1));
-            
-            dueneLinks =DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV - float2(duenenTexelGroesse.x, 0.0), 0.0);
-            dueneRechts = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV + float2(duenenTexelGroesse.x, 0.0), 0.0);
-            dueneOben = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV - float2(0.0, duenenTexelGroesse.y), 0.0);
-            dueneUnten = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV + float2(0.0, duenenTexelGroesse.y), 0.0);
-
-            duenenGradient.x = dueneRechts - dueneLinks;
-            duenenGradient.y = dueneUnten - dueneOben;
-                        
-            if (length(duenenGradient) > 0.0001)
-            {
-                duenenRichtung = normalize(duenenGradient);
-            }
-            else
-            {
-                duenenRichtung = float2(0.0, 0.0);
-            }
-
-        /*
-         * Aktuelle FlowField-Richtung.
-         */
             if (length(zielGeschwindigkeit) > 0.0001)
             {
                 lokaleFlowRichtung = normalize(zielGeschwindigkeit);
@@ -241,38 +206,44 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             }
 
         /*
-         * Individuelle Kornrichtung.
-         *
-         * +/- 30 Grad um die aktuelle Windrichtung.
+         * Individuelle Kornparameter.
          */
+
             randomRichtung = Hash01(index * 3 + 1);
+
             randomGeschwindigkeit = Hash01(index * 3 + 2);
+
             randomVertikal = Hash01(index * 3 + 3);
+
+        /*
+         * Individuelle aerodynamische Abweichung
+         * von +/- 30 Grad.
+         */
+
             randomWinkel = (randomRichtung * 2.0 - 1.0) * 0.523599;
 
             individuelleRichtung.x = lokaleFlowRichtung.x * cos(randomWinkel) - lokaleFlowRichtung.y * 
                                      sin(randomWinkel);
+
             individuelleRichtung.y = lokaleFlowRichtung.x * sin(randomWinkel) + lokaleFlowRichtung.y *
                                      cos(randomWinkel);
 
         /*
          * -----------------------------------------------------
-         * Startflugrichtung:
-         *
-         * 55 % Dünengefälle
-         * 35 % aktueller Wind
-         * 10 % individuelle Korngeometrie
-         *
-         * Der Dünenhang entscheidet also zunächst stark,
-         * WIE das Korn aus seiner Oberfläche herausgerissen
-         * wird.
-         *
-         * Unmittelbar danach übernimmt wieder das normale
-         * FlowField.
+         * Startflugrichtung
          * -----------------------------------------------------
+         *
+         * Das FlowField ist jetzt bewusst klar dominant.
+         *
+         * Der Nutzer soll optisch sofort lesen können:
+         *
+         * "Der Wind kommt von dort und trägt das Bild fort."
+         *
+         * Die Kornindividualität bricht die Bewegung lediglich
+         * leicht auf.
          */
 
-            startRichtung = duenenRichtung * 0.55 + lokaleFlowRichtung * 0.35 + individuelleRichtung * 0.10;
+            startRichtung = lokaleFlowRichtung * 0.80 + individuelleRichtung * 0.20;
 
             if (length(startRichtung) > 0.0001)
             {
@@ -283,30 +254,34 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
                 startRichtung = lokaleFlowRichtung;
             }
 
+        /*
+         * Individuelle Startgeschwindigkeit.
+         */
+
             startGeschwindigkeit = length(zielGeschwindigkeit) * lerp(0.70, 1.45, randomGeschwindigkeit);
 
-            /*
-             * Leichte Körner reagieren beim Ablösen stärker,
-             * schwere behalten mehr Ruhe und Trägheit.
-             */
+        /*
+         * Gewicht:
+         *
+         * leichte Körner werden kräftiger mitgerissen,
+         * schwere starten träger.
+         */
+
             startGewichtFaktor = 1.0 / max(partikel.gewicht, 0.1);
             startGewichtFaktor = clamp(startGewichtFaktor, 0.55, 2.0);
 
             startGeschwindigkeit *= startGewichtFaktor;
-                        
+
             partikel.geschwindigkeit.xy = startRichtung * startGeschwindigkeit;
 
         /*
-         * Kleiner individueller vertikaler Kick.
+         * Kleine individuelle vertikale Abweichung.
          */
+
             partikel.geschwindigkeit.y += (randomVertikal * 2.0 - 1.0) * 45.0;
         }
         else
         {
-        /*
-         * Noch nicht weit genug den Dünenhang
-         * hinab erodiert.
-         */
             PartikelBuffer[index] = partikel;
 
             return;

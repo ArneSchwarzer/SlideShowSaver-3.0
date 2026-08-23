@@ -72,12 +72,12 @@ Friend Class MosaikRenderer
     Private flowFieldSampler As ID3D11SamplerState
 
     '---------------------------------
-    ' Dünenfeld / Ablöse-HeatMap
+    ' Randbasierte Ablöse-HeatMap
     '---------------------------------
 
-    Private duenenFeldTexture As ID3D11Texture2D
-    Private duenenFeldView As ID3D11ShaderResourceView
-    Private duenenFeldSampler As ID3D11SamplerState
+    Private randAbloeseFeldTexture As ID3D11Texture2D
+    Private randAbloeseFeldView As ID3D11ShaderResourceView
+    Private randAbloeseFeldSampler As ID3D11SamplerState
 
     '---------------------------------
     ' Dimensionen / Status
@@ -126,7 +126,8 @@ Friend Class MosaikRenderer
 
     Friend Sub Initialisiere(device As ID3D11Device, context As ID3D11DeviceContext, breite As Integer,
                              hoehe As Integer, partikel() As PartikelDaten, altesBild As BitmapSource,
-                             neuesBild As BitmapSource, flowField As FlowFieldDaten, duenenFeld As DuenenFeldDaten)
+                             neuesBild As BitmapSource, flowField As FlowFieldDaten,
+                             randAbloeseFeld As RandAbloeseFeldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(MosaikRenderer))
@@ -160,8 +161,8 @@ Friend Class MosaikRenderer
             Throw New ArgumentNullException(NameOf(flowField))
         End If
 
-        If duenenFeld Is Nothing Then
-            Throw New ArgumentNullException(NameOf(duenenFeld))
+        If randAbloeseFeld Is Nothing Then
+            Throw New ArgumentNullException(NameOf(randAbloeseFeld))
         End If
 
         renderDevice = device
@@ -176,7 +177,7 @@ Friend Class MosaikRenderer
         InitialisiereLebendZaehler()
 
         InitialisiereFlowField(flowField)
-        InitialisiereDuenenFeld(duenenFeld)
+        InitialisiereRandAbloeseFeld(randAbloeseFeld)
 
         InitialisiereBildTextur(altesBild)
         InitialisiereZielBildTextur(neuesBild)
@@ -351,41 +352,41 @@ Friend Class MosaikRenderer
 
     End Sub
 
-    Private Sub InitialisiereDuenenFeld(duenenFeld As DuenenFeldDaten)
+    Private Sub InitialisiereRandAbloeseFeld(randAbloeseFeld As RandAbloeseFeldDaten)
 
         Dim textureDescription As Texture2DDescription
         Dim initialData() As SubresourceData
 
         Dim datenHandle As GCHandle
 
-        If duenenFeld.breite <= 0 OrElse duenenFeld.hoehe <= 0 Then
+        If randAbloeseFeld.breite <= 0 OrElse randAbloeseFeld.hoehe <= 0 Then
 
-            Throw New InvalidOperationException("Das Dünenfeld besitzt ungültige Dimensionen.")
-
-        End If
-
-        If duenenFeld.werte Is Nothing Then
-
-            Throw New InvalidOperationException("Das Dünenfeld enthält keine HeatMap-Daten.")
+            Throw New InvalidOperationException("Das Rand-Ablösefeld besitzt ungültige Dimensionen.")
 
         End If
 
-        If duenenFeld.werte.Length <> duenenFeld.breite * duenenFeld.hoehe Then
+        If randAbloeseFeld.werte Is Nothing Then
+
+            Throw New InvalidOperationException("Das Rand-Ablösefeld enthält keine HeatMap-Daten.")
+
+        End If
+
+        If randAbloeseFeld.werte.Length <> randAbloeseFeld.breite * randAbloeseFeld.hoehe Then
 
             Throw New InvalidOperationException(
-            "Die Anzahl der Dünenfeld-Werte entspricht nicht den Dünenfeld-Dimensionen.")
+            "Die Anzahl der Rand-Ablösefeld-Werte entspricht nicht den Feld-Dimensionen.")
 
         End If
 
         Try
 
-            datenHandle = GCHandle.Alloc(duenenFeld.werte, GCHandleType.Pinned)
+            datenHandle = GCHandle.Alloc(randAbloeseFeld.werte, GCHandleType.Pinned)
 
             textureDescription =
             New Texture2DDescription(
                 Format.R32_Float,
-                CUInt(duenenFeld.breite),
-                CUInt(duenenFeld.hoehe),
+                CUInt(randAbloeseFeld.breite),
+                CUInt(randAbloeseFeld.hoehe),
                 1UI,
                 1UI,
                 BindFlags.ShaderResource,
@@ -400,15 +401,15 @@ Friend Class MosaikRenderer
                 New SubresourceData(
                     datenHandle.AddrOfPinnedObject(),
                     CUInt(
-                        duenenFeld.breite *
+                        randAbloeseFeld.breite *
                         4),
                     CUInt(
-                        duenenFeld.breite *
-                        duenenFeld.hoehe *
+                        randAbloeseFeld.breite *
+                        randAbloeseFeld.hoehe *
                         4))
             }
 
-            duenenFeldTexture = renderDevice.CreateTexture2D(textureDescription, initialData)
+            randAbloeseFeldTexture = renderDevice.CreateTexture2D(textureDescription, initialData)
 
         Finally
 
@@ -418,26 +419,26 @@ Friend Class MosaikRenderer
 
         End Try
 
-        If duenenFeldTexture Is Nothing Then
+        If randAbloeseFeldTexture Is Nothing Then
 
-            Throw New InvalidOperationException("Die Dünenfeld-Textur konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException("Die Rand-Ablösefeld-Textur konnte nicht erzeugt werden.")
 
         End If
 
-        duenenFeldView = renderDevice.CreateShaderResourceView(duenenFeldTexture)
+        randAbloeseFeldView = renderDevice.CreateShaderResourceView(randAbloeseFeldTexture)
 
-        If duenenFeldView Is Nothing Then
+        If randAbloeseFeldView Is Nothing Then
 
             Throw New InvalidOperationException(
-            "Die ShaderResourceView des Dünenfeldes konnte nicht erzeugt werden.")
+            "Die ShaderResourceView des Rand-Ablösefeldes konnte nicht erzeugt werden.")
 
         End If
 
-        InitialisiereDuenenFeldSampler()
+        InitialisiereRandAbloeseFeldSampler()
 
     End Sub
 
-    Private Sub InitialisiereDuenenFeldSampler()
+    Private Sub InitialisiereRandAbloeseFeldSampler()
 
         Dim description As SamplerDescription
 
@@ -450,11 +451,11 @@ Friend Class MosaikRenderer
         description.MinLOD = 0.0F
         description.MaxLOD = 0.0F
 
-        duenenFeldSampler = renderDevice.CreateSamplerState(description)
+        randAbloeseFeldSampler = renderDevice.CreateSamplerState(description)
 
-        If duenenFeldSampler Is Nothing Then
+        If randAbloeseFeldSampler Is Nothing Then
 
-            Throw New InvalidOperationException("Der Dünenfeld-Sampler konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException("Der Rand-Ablösefeld-Sampler konnte nicht erzeugt werden.")
 
         End If
 
@@ -714,8 +715,8 @@ Friend Class MosaikRenderer
         renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
         renderContext.CSSetShaderResource(0UI, flowFieldView)
         renderContext.CSSetSampler(0UI, flowFieldSampler)
-        renderContext.CSSetShaderResource(1UI, duenenFeldView)
-        renderContext.CSSetSampler(1UI, duenenFeldSampler)
+        renderContext.CSSetShaderResource(1UI, randAbloeseFeldView)
+        renderContext.CSSetSampler(1UI, randAbloeseFeldSampler)
 
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
@@ -879,12 +880,12 @@ Friend Class MosaikRenderer
         Direct3DRessourceHandler.GebeFrei(flowFieldTexture)
 
         '---------------------------------
-        ' Dünenfeld
+        ' Rand-Ablösefeld
         '---------------------------------
 
-        Direct3DRessourceHandler.GebeFrei(duenenFeldSampler)
-        Direct3DRessourceHandler.GebeFrei(duenenFeldView)
-        Direct3DRessourceHandler.GebeFrei(duenenFeldTexture)
+        Direct3DRessourceHandler.GebeFrei(randAbloeseFeldSampler)
+        Direct3DRessourceHandler.GebeFrei(randAbloeseFeldView)
+        Direct3DRessourceHandler.GebeFrei(randAbloeseFeldTexture)
 
         '---------------------------------
         ' Render Shader
