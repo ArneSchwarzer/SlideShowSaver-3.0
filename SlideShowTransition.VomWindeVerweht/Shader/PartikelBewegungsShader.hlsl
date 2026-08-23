@@ -20,6 +20,9 @@ RWStructuredBuffer<int> LebendZaehler : register(u1);
 Texture2D<float2> FlowField : register(t0);
 SamplerState FlowFieldSampler : register(s0);
 
+Texture2D<float> DuenenFeld : register(t1);
+SamplerState DuenenFeldSampler : register(s1);
+
 cbuffer BewegungsParameter : register(b0)
 {
     float deltaTime;
@@ -43,16 +46,17 @@ static const int STATUS_TOT = 0;
 static const int STATUS_RUHEND = 1;
 static const int STATUS_AKTIV = 2;
 
-static const float ABLOESE_MINIMUM = 0.12;
-static const float ABLOESE_MAXIMUM = 0.85;
-
 static const float REFERENZ_PARTIKELGROESSE = 8.0;
 
 static const float START_HAUPTWIND_ANTEIL = 0.70;
 
 /* 
-Hash-Generator für Pseudo-Zufallswerte per Partikel
-*/
+ * Hilfsfunktionen
+ *
+ * Hash (Deterministischer Pseudo-Zufall,
+ * Periodische Differenz (Gradient / HeatMap-Helper
+ *
+ */
 
 uint HashUint(uint wert)
 {
@@ -72,10 +76,27 @@ float Hash01(uint wert)
         16777215.0;
 }
 
+float PeriodischeDifferenz(float wertA,  float wertB)
+{
+    float differenz;
+
+    differenz = wertA - wertB;
+
+    if (differenz > 0.5)
+    {
+        differenz -= 1.0;
+    }
+    else if (differenz < -0.5)
+    {
+        differenz += 1.0;
+    }
+
+    return differenz;
+}
+
 /* 
 CSMain Hauptfunktion
 */
-
 
 [numthreads(64, 1, 1)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -91,9 +112,6 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     float partikelGroesse;
     float windEmpfindlichkeit;
 
-    float turbulenz;
-    float abloeseSchwelle;
-
     float widerstandsFaktor;
     
     float randomRichtung;
@@ -102,7 +120,6 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     float randomWindKopplung;
 
     float startGeschwindigkeit;
-    float2 startRichtung;
 
     float winkel;
     float sinWinkel;
@@ -113,6 +130,28 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     float lokaleWindStaerke;
     float hauptWindVorzeichen;
+    
+    float duenenWert;
+    float individuellerAbloeseOffset;
+
+    uint duenenBreite;
+    uint duenenHoehe;
+
+    float2 duenenTexelGroesse;
+
+    float dueneLinks;
+    float dueneRechts;
+    float dueneOben;
+    float dueneUnten;
+
+    float2 duenenGradient;
+    float2 duenenRichtung;
+
+    float2 lokaleFlowRichtung;
+    float2 individuelleRichtung;
+    float2 startRichtung;
+
+    float randomWinkel;
     
     index = dispatchThreadID.x;
 
@@ -152,101 +191,131 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     if (partikel.status == STATUS_RUHEND)
     {
-        turbulenz = abs(zielGeschwindigkeit.y) / max(abs(zielGeschwindigkeit.x), 1.0);
-        turbulenz = saturate(turbulenz * 3.0);
+    /*
+     * ---------------------------------------------------------
+     * DÜNENFELD:
+     *
+     * Das Feld beschreibt ausschließlich die bereits vorhandene
+     * historische Dünengeometrie.
+     *
+     * Es ist vollständig unabhängig vom aktuellen FlowField.
+     * ---------------------------------------------------------
+     */
 
-        /*
-         * Zu Beginn liegt die Schwelle hoch.
-         * Mit wachsendem Progress sinkt sie kontinuierlich.
-         */
-        abloeseSchwelle = lerp(ABLOESE_MAXIMUM, ABLOESE_MINIMUM, abloeseProgress);
+        duenenWert = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV, 0.0);
 
-        /*
-         * Bei progress == 1 wird garantiert jedes noch
-         * ruhende Partikel freigegeben.
-         */
-        if (abloeseProgress >= 1.0 ||    turbulenz >= abloeseSchwelle)
+    /*
+     * Winziger individueller Unterschied:
+     *
+     * Die makroskopische Dünenkante bleibt erhalten,
+     * einzelne Körner lösen sich aber geringfügig früher
+     * oder später.
+     */
+        individuellerAbloeseOffset = lerp(-0.025, 0.025, Hash01(index * 11 + 37));
+
+        duenenWert = saturate(duenenWert + individuellerAbloeseOffset);
+
+        if (abloeseProgress >= duenenWert)
         {
-            partikel.status =        STATUS_AKTIV;
+            partikel.status = STATUS_AKTIV;
 
-            /*
-             * Jedes Korn besitzt aufgrund seiner individuellen
-             * Geometrie eine etwas andere aerodynamische Reaktion.
-             *
-             * Die Zufallswerte werden deterministisch aus dem
-             * Partikelindex erzeugt.
-             */
+        /*
+         * -----------------------------------------------------
+         * Lokalen Gradienten des Dünenfeldes bestimmen.
+         * -----------------------------------------------------
+         */
+
+            DuenenFeld.GetDimensions(duenenBreite, duenenHoehe);
+
+            duenenTexelGroesse = 1.0 / float2(max(duenenBreite, 1), max(duenenHoehe, 1));
+            
+            dueneLinks =DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV - float2(duenenTexelGroesse.x, 0.0), 0.0);
+            dueneRechts = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV + float2(duenenTexelGroesse.x, 0.0), 0.0);
+            dueneOben = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV - float2(0.0, duenenTexelGroesse.y), 0.0);
+            dueneUnten = DuenenFeld.SampleLevel(DuenenFeldSampler, flowUV + float2(0.0, duenenTexelGroesse.y), 0.0);
+
+            duenenGradient.x = PeriodischeDifferenz(dueneRechts, dueneLinks);
+            duenenGradient.y = PeriodischeDifferenz(dueneUnten,  dueneOben);
+
+            if (length(duenenGradient) > 0.0001)
+            {
+                duenenRichtung = normalize(duenenGradient);
+            }
+            else
+            {
+                duenenRichtung = float2(0.0, 0.0);
+            }
+
+        /*
+         * Aktuelle FlowField-Richtung.
+         */
+            if (length(zielGeschwindigkeit) > 0.0001)
+            {
+                lokaleFlowRichtung = normalize(zielGeschwindigkeit);
+            }
+            else
+            {
+                lokaleFlowRichtung = float2(0.0, 0.0);
+            }
+
+        /*
+         * Individuelle Kornrichtung.
+         *
+         * +/- 30 Grad um die aktuelle Windrichtung.
+         */
             randomRichtung = Hash01(index * 3 + 1);
-
             randomGeschwindigkeit = Hash01(index * 3 + 2);
-
             randomVertikal = Hash01(index * 3 + 3);
+            randomWinkel = (randomRichtung * 2.0 - 1.0) * 0.523599;
 
-            /*
-             * Kleine zufällige Winkelabweichung vom lokalen Wind.
-             *
-             * +/- 25 Grad.
-             */
-             winkel = (randomRichtung * 2.0 - 1.0) * 0.436332;
+            individuelleRichtung.x = lokaleFlowRichtung.x * cos(randomWinkel) - lokaleFlowRichtung.y * 
+                                     sin(randomWinkel);
+            individuelleRichtung.y = lokaleFlowRichtung.x * sin(randomWinkel) + lokaleFlowRichtung.y *
+                                     cos(randomWinkel);
 
-            sincos(winkel, sinWinkel, cosWinkel);
+        /*
+         * -----------------------------------------------------
+         * Startflugrichtung:
+         *
+         * 55 % Dünengefälle
+         * 35 % aktueller Wind
+         * 10 % individuelle Korngeometrie
+         *
+         * Der Dünenhang entscheidet also zunächst stark,
+         * WIE das Korn aus seiner Oberfläche herausgerissen
+         * wird.
+         *
+         * Unmittelbar danach übernimmt wieder das normale
+         * FlowField.
+         * -----------------------------------------------------
+         */
 
-            /*
-             * Lokalen FlowField-Vektor um den individuellen
-             * Kornwinkel drehen.
-             */
-            
-            lokalerStartVektor.x = zielGeschwindigkeit.x * cosWinkel - zielGeschwindigkeit.y * sinWinkel;
-            lokalerStartVektor.y = zielGeschwindigkeit.x * sinWinkel + zielGeschwindigkeit.y * cosWinkel;
+            startRichtung = duenenRichtung * 0.55 + lokaleFlowRichtung * 0.35 + individuelleRichtung * 0.10;
 
-            /*
-             * Betrag des lokalen Windes erhalten.
-             */
-            
-            lokaleWindStaerke = length(zielGeschwindigkeit);
+            if (length(startRichtung) > 0.0001)
+            {
+                startRichtung = normalize(startRichtung);
+            }
+            else
+            {
+                startRichtung = lokaleFlowRichtung;
+            }
 
-            /*
-             * Globale Hauptwindrichtung.
-             */
-            
-            hauptWindVorzeichen = zielGeschwindigkeit.x >= 0.0 ? 1.0 : -1.0;
-
-            hauptWindVektor = float2(hauptWindVorzeichen * lokaleWindStaerke, 0.0);
-
-            /*
-             * Beim Ablösen dominiert zunächst der Hauptwind.
-             *
-             * Das lokale FlowField und der individuelle Kornwinkel
-             * bleiben aber deutlich erhalten.
-             */
-            
-            startRichtung = lerp(lokalerStartVektor, hauptWindVektor, START_HAUPTWIND_ANTEIL);
-
-            /*
-             * Individuelle Startgeschwindigkeit:
-             * 65 bis 135 Prozent.
-             */
-            
-            startGeschwindigkeit = lerp(0.65, 1.35, randomGeschwindigkeit);
+            startGeschwindigkeit = length(zielGeschwindigkeit) * lerp(0.70, 1.45, randomGeschwindigkeit);
 
             partikel.geschwindigkeit.xy = startRichtung * startGeschwindigkeit;
 
-            /*
-             * Zusätzlich ein kleiner vertikaler Kick.
-             *
-             * Der darf sowohl nach oben als auch nach unten gehen.
-             * Damit zerbrechen direkt beim Ablösen auch lokale
-             * horizontale Bänder.
-             */
-            
+        /*
+         * Kleiner individueller vertikaler Kick.
+         */
             partikel.geschwindigkeit.y += (randomVertikal * 2.0 - 1.0) * 45.0;
         }
         else
         {
-            /*
-             * Ruhendes Korn:
-             * keinerlei Bewegung, keinerlei Gravitation.
-             */
+        /*
+         * Noch nicht weit genug den Dünenhang
+         * hinab erodiert.
+         */
             PartikelBuffer[index] = partikel;
 
             return;
@@ -281,7 +350,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
      * weil der Hash nur vom Index abhängt.
      */
     
-    randomWindKopplung = lerp(0.75, 1.25, Hash01(index * 7 + 17));
+    randomWindKopplung = lerp(0.65, 1.35, Hash01(index * 7 + 17));
     
     /*
      * Das FlowField ist eine Zielgeschwindigkeit.

@@ -46,6 +46,10 @@ Public Class TransitionMain
 
     Private ReadOnly zufall As New Random()
 
+    'Dünenfeld / Ablöse-HeatMap
+    Private duenenGenerator As DuenenGenerator
+    Private duenenFeld As DuenenFeldDaten
+
     'Lifecycle
     Private transitionLaeuft As Boolean
     Private wurdeBereinigt As Boolean
@@ -119,22 +123,31 @@ Public Class TransitionMain
 
         testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
                                                              aktuelleSettings.partikelGroesse, 12345)
+        'FlowField Generation
 
         flowFieldGenerator = New FlowFieldGenerator()
 
         flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
                                                         aktuelleWindRichtung, 12345)
 
+
+        ' Das Dünenfeld ist ausdrücklich unabhängig
+        ' vom aktuellen FlowField.
+        duenenGenerator = New DuenenGenerator()
+
+        duenenFeld = duenenGenerator.ErzeugeDuenenFeld(clientSize.Width, clientSize.Height, 54321)
+
+        'Bitmaps
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
         newBitmapGerahmt = ErzeugeGerahmtesBild(newImage, picBoxModeNew, clientSize)
 
+        'Renderer
         direct3DRenderer = New D3DRenderer()
 
         Try
 
             direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
-                                           newBitmapGerahmt, flowField)
-
+                                           newBitmapGerahmt, flowField, duenenFeld)
         Catch
 
             BeendeUndBereinigeTransition()
@@ -391,6 +404,9 @@ Public Class TransitionMain
 
         flowField = Nothing
         flowFieldGenerator = Nothing
+
+        duenenFeld = Nothing
+        duenenGenerator = Nothing
 
         aktuelleWindStaerke = 0
         aktuelleWindRichtung = 0.0F

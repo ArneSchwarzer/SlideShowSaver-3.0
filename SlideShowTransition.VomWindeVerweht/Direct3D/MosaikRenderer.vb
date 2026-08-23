@@ -63,9 +63,21 @@ Friend Class MosaikRenderer
     Private partikelBewegungsShader As ID3D11ComputeShader
     Private partikelBewegungsParameterBuffer As ID3D11Buffer
 
+    '---------------------------------
+    ' FlowField / Windsimulation
+    '---------------------------------
+
     Private flowFieldTexture As ID3D11Texture2D
     Private flowFieldView As ID3D11ShaderResourceView
     Private flowFieldSampler As ID3D11SamplerState
+
+    '---------------------------------
+    ' Dünenfeld / Ablöse-HeatMap
+    '---------------------------------
+
+    Private duenenFeldTexture As ID3D11Texture2D
+    Private duenenFeldView As ID3D11ShaderResourceView
+    Private duenenFeldSampler As ID3D11SamplerState
 
     '---------------------------------
     ' Dimensionen / Status
@@ -114,7 +126,7 @@ Friend Class MosaikRenderer
 
     Friend Sub Initialisiere(device As ID3D11Device, context As ID3D11DeviceContext, breite As Integer,
                              hoehe As Integer, partikel() As PartikelDaten, altesBild As BitmapSource,
-                             neuesBild As BitmapSource, flowField As FlowFieldDaten)
+                             neuesBild As BitmapSource, flowField As FlowFieldDaten, duenenFeld As DuenenFeldDaten)
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(MosaikRenderer))
@@ -148,6 +160,10 @@ Friend Class MosaikRenderer
             Throw New ArgumentNullException(NameOf(flowField))
         End If
 
+        If duenenFeld Is Nothing Then
+            Throw New ArgumentNullException(NameOf(duenenFeld))
+        End If
+
         renderDevice = device
         renderContext = context
 
@@ -158,7 +174,9 @@ Friend Class MosaikRenderer
 
         InitialisierePartikelBuffer(partikel)
         InitialisiereLebendZaehler()
+
         InitialisiereFlowField(flowField)
+        InitialisiereDuenenFeld(duenenFeld)
 
         InitialisiereBildTextur(altesBild)
         InitialisiereZielBildTextur(neuesBild)
@@ -328,6 +346,115 @@ Friend Class MosaikRenderer
         If flowFieldSampler Is Nothing Then
 
             Throw New InvalidOperationException("Der FlowField-Sampler konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereDuenenFeld(duenenFeld As DuenenFeldDaten)
+
+        Dim textureDescription As Texture2DDescription
+        Dim initialData() As SubresourceData
+
+        Dim datenHandle As GCHandle
+
+        If duenenFeld.breite <= 0 OrElse duenenFeld.hoehe <= 0 Then
+
+            Throw New InvalidOperationException("Das Dünenfeld besitzt ungültige Dimensionen.")
+
+        End If
+
+        If duenenFeld.werte Is Nothing Then
+
+            Throw New InvalidOperationException("Das Dünenfeld enthält keine HeatMap-Daten.")
+
+        End If
+
+        If duenenFeld.werte.Length <> duenenFeld.breite * duenenFeld.hoehe Then
+
+            Throw New InvalidOperationException(
+            "Die Anzahl der Dünenfeld-Werte entspricht nicht den Dünenfeld-Dimensionen.")
+
+        End If
+
+        Try
+
+            datenHandle = GCHandle.Alloc(duenenFeld.werte, GCHandleType.Pinned)
+
+            textureDescription =
+            New Texture2DDescription(
+                Format.R32_Float,
+                CUInt(duenenFeld.breite),
+                CUInt(duenenFeld.hoehe),
+                1UI,
+                1UI,
+                BindFlags.ShaderResource,
+                ResourceUsage.Default,
+                CpuAccessFlags.None,
+                1UI,
+                0UI,
+                ResourceOptionFlags.None)
+
+            initialData =
+            New SubresourceData() {
+                New SubresourceData(
+                    datenHandle.AddrOfPinnedObject(),
+                    CUInt(
+                        duenenFeld.breite *
+                        4),
+                    CUInt(
+                        duenenFeld.breite *
+                        duenenFeld.hoehe *
+                        4))
+            }
+
+            duenenFeldTexture = renderDevice.CreateTexture2D(textureDescription, initialData)
+
+        Finally
+
+            If datenHandle.IsAllocated Then
+                datenHandle.Free()
+            End If
+
+        End Try
+
+        If duenenFeldTexture Is Nothing Then
+
+            Throw New InvalidOperationException("Die Dünenfeld-Textur konnte nicht erzeugt werden.")
+
+        End If
+
+        duenenFeldView = renderDevice.CreateShaderResourceView(duenenFeldTexture)
+
+        If duenenFeldView Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Die ShaderResourceView des Dünenfeldes konnte nicht erzeugt werden.")
+
+        End If
+
+        InitialisiereDuenenFeldSampler()
+
+    End Sub
+
+    Private Sub InitialisiereDuenenFeldSampler()
+
+        Dim description As SamplerDescription
+
+        description = New SamplerDescription()
+
+        description.Filter = Filter.MinMagMipPoint
+        description.AddressU = TextureAddressMode.Clamp
+        description.AddressV = TextureAddressMode.Clamp
+        description.AddressW = TextureAddressMode.Clamp
+        description.MinLOD = 0.0F
+        description.MaxLOD = 0.0F
+
+        duenenFeldSampler = renderDevice.CreateSamplerState(description)
+
+        If duenenFeldSampler Is Nothing Then
+
+            Throw New InvalidOperationException("Der Dünenfeld-Sampler konnte nicht erzeugt werden.")
 
         End If
 
@@ -586,8 +713,9 @@ Friend Class MosaikRenderer
         renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
         renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
         renderContext.CSSetShaderResource(0UI, flowFieldView)
-
         renderContext.CSSetSampler(0UI, flowFieldSampler)
+        renderContext.CSSetShaderResource(1UI, duenenFeldView)
+        renderContext.CSSetSampler(1UI, duenenFeldSampler)
 
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
@@ -595,6 +723,8 @@ Friend Class MosaikRenderer
         'bevor der Partikelbuffer anschließend
         'vom Vertexshader als SRV gelesen wird.
 
+        renderContext.CSSetShaderResource(1UI, Nothing)
+        renderContext.CSSetSampler(1UI, Nothing)
         renderContext.CSSetShaderResource(0UI, Nothing)
         renderContext.CSSetSampler(0UI, Nothing)
         renderContext.CSSetUnorderedAccessView(0UI, Nothing)
@@ -747,6 +877,14 @@ Friend Class MosaikRenderer
         Direct3DRessourceHandler.GebeFrei(flowFieldSampler)
         Direct3DRessourceHandler.GebeFrei(flowFieldView)
         Direct3DRessourceHandler.GebeFrei(flowFieldTexture)
+
+        '---------------------------------
+        ' Dünenfeld
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(duenenFeldSampler)
+        Direct3DRessourceHandler.GebeFrei(duenenFeldView)
+        Direct3DRessourceHandler.GebeFrei(duenenFeldTexture)
 
         '---------------------------------
         ' Render Shader
