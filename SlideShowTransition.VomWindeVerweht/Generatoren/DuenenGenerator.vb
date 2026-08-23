@@ -2,7 +2,7 @@
 
 #Region "Konstanten"
 
-    Private Const DUENENFELD_BREITE As Integer = 256
+    Private Const DUENENFELD_BREITE As Integer = 1024
 
     Private Const FBM_OKTAVEN As Integer = 3
 

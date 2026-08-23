@@ -443,7 +443,7 @@ Friend Class MosaikRenderer
 
         description = New SamplerDescription()
 
-        description.Filter = Filter.MinMagMipPoint
+        description.Filter = Filter.MinMagMipLinear
         description.AddressU = TextureAddressMode.Clamp
         description.AddressV = TextureAddressMode.Clamp
         description.AddressW = TextureAddressMode.Clamp

@@ -12,6 +12,8 @@ struct PartikelDaten
 
     int lod;
     int status;
+    
+    int gewicht;
 };
 
 StructuredBuffer<PartikelDaten> PartikelBuffer : register(t0);

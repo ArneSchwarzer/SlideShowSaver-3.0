@@ -12,6 +12,7 @@ Public Class FlowFieldGenerator
     Private Const FBM_LAKUNARITAET As Single = 2.0F
 
     Private Const MIN_VORWAERTSFAKTOR As Single = 0.35F
+    Private Const MAX_HAUPTWIND_WINKEL As Single = CSng(Math.PI / 12.0)
 
 #End Region
 
@@ -45,6 +46,10 @@ Public Class FlowFieldGenerator
         Dim basisGeschwindigkeit As Single
         Dim turbulenzStaerke As Single
         Dim minimaleVorwaertsGeschwindigkeit As Single
+        Dim hauptWindWinkel As Single
+
+        Dim hauptWindX As Single
+        Dim hauptWindY As Single
 
         Dim vx As Single
         Dim vy As Single
@@ -89,13 +94,30 @@ Public Class FlowFieldGenerator
 
         minimaleVorwaertsGeschwindigkeit = basisGeschwindigkeit * MIN_VORWAERTSFAKTOR
 
+        ' Der globale Hauptwind darf leicht nach oben zeigen.
+        '
+        ' Wichtig:
+        ' Bildschirm-Y wächst nach unten.
+        ' Deshalb bedeutet negatives Y eine Bewegung nach oben.
+
+        hauptWindWinkel = CSng(zufall.NextDouble()) * MAX_HAUPTWIND_WINKEL
+
+        hauptWindX = CSng(Math.Cos(hauptWindWinkel))
+        hauptWindY = -CSng(Math.Sin(hauptWindWinkel))
+
+        ' Links-/Rechtsrichtung nur auf X anwenden.
+        '
+        If windRichtung < 0.0F Then
+
+            hauptWindX = -hauptWindX
+
+        End If
+
         For y = 0 To flowHoehe - 1
 
             For x = 0 To flowBreite - 1
 
-                index =
-                    y * flowBreite +
-                    x
+                index = y * flowBreite + x
 
                 If windStaerke = 0 Then
 
@@ -114,23 +136,24 @@ Public Class FlowFieldGenerator
                 noiseY = BerechneFBM(normX * 3.0F + 17.37F, normY * 3.0F + 41.91F)
 
 
-                ' Hauptwind + Turbulenz.
-
-                vx = basisGeschwindigkeit + noiseX * turbulenzStaerke
-                vy = noiseY * turbulenzStaerke
+                ' Hauptwind + lokale Turbulenz.
+                '
+                vx = basisGeschwindigkeit * hauptWindX + noiseX * turbulenzStaerke
+                vy = basisGeschwindigkeit * hauptWindY + noiseY * turbulenzStaerke
 
                 ' Keine geschlossenen Strudel:
+                '
+                ' Die horizontale Hauptbewegung muss immer mindestens
+                ' einen bestimmten Anteil der Basisgeschwindigkeit behalten.
 
-                ' Selbst in der stärksten lokalen Gegenströmung
-                ' bleibt immer eine positive Vorwärtskomponente.
+                If windRichtung >= 0.0F Then
 
-                vx = Math.Max(minimaleVorwaertsGeschwindigkeit, vx)
+                    vx = Math.Max(minimaleVorwaertsGeschwindigkeit, vx)
 
+                Else
 
-                ' Richtung erst ganz am Ende anwenden.
+                    vx = Math.Min(-minimaleVorwaertsGeschwindigkeit, vx)
 
-                If windRichtung < 0.0F Then
-                    vx = -vx
                 End If
 
                 daten.vektoren(index) = New Vector2(vx, vy)
