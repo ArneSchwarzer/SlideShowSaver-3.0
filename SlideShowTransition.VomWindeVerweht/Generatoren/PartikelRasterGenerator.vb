@@ -165,7 +165,7 @@
                 End If
 
                 partikel(partikelIndex) = ErzeugePartikel(aktuelleX, aktuelleY, breite, zeilenHoehe, bildBreite,
-                                                          bildHoehe, zufall)
+                                                          bildHoehe, zielPartikelGroesse, zufall)
 
                 partikelIndex += 1
                 aktuelleX += breite
@@ -190,7 +190,7 @@
 #Region "Partikeldaten"
 
     Private Function ErzeugePartikel(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
-                                     bildBreite As Integer, bildHoehe As Integer, zufall As Random) As PartikelDaten
+                                     bildBreite As Integer, bildHoehe As Integer, zielPartikelGroesse As Integer, zufall As Random) As PartikelDaten
 
         Dim daten As PartikelDaten
         Dim mittlereGroesse As Single
