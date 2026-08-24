@@ -19,6 +19,9 @@ Public Class TransitionMain
     Public Const nameTransition As String = "Vom Winde verweht"
     Private aktuelleSettings As TransitionSettings_VomWindeVerweht
 
+    Private aktuelleDauerAbrisskanteMS As Double
+    Private aktuelleSchwerkraftAktiv As Boolean
+
     'Direct3D Rendering
     Private direct3DRenderer As D3DRenderer
     Private rasterGenerator As PartikelRasterGenerator
@@ -29,10 +32,8 @@ Public Class TransitionMain
     Private testPartikel() As PartikelDaten
     Private aktuellePartikelGroesse As Integer
 
-
     'Zeitmanagement
     Private Const FPS As Integer = 60
-    Private Const ABLOESE_DAUER_MS As Double = 5500.0
 
     Private frameTimer As DispatcherTimer
     Private ReadOnly laufzeit As New Stopwatch()
@@ -44,7 +45,6 @@ Public Class TransitionMain
     Private flowField As FlowFieldDaten
 
     Private aktuelleWindStaerke As Integer
-    Private aktuelleWindRichtung As Single
 
     Private ReadOnly zufall As New Random()
 
@@ -62,10 +62,22 @@ Public Class TransitionMain
     Private frameZaehler As Integer
 
     Structure TransitionSettings_VomWindeVerweht
+
         Public partikelGroesse As Integer
         Public partikelGroesseZufall As Boolean
+
         Public windStaerke As Integer
         Public windStaerkeZufall As Boolean
+
+        Public dauerAbrisskante As Integer
+
+        '
+        ' -1 = Zufällig
+        '  0 = Aus / Top View
+        '  1 = An / Bild hängt
+        '
+        Public schwerkraftModus As Integer
+
     End Structure
 
 #End Region
@@ -122,33 +134,37 @@ Public Class TransitionMain
         ReadTransitionSettingsFromRegistryOrDefaults()
 
         aktuelleWindStaerke = ErmittleWindStaerke()
-        aktuelleWindRichtung = ErmittleWindRichtung()
-
+        aktuelleSchwerkraftAktiv = ErmittleSchwerkraftAktiv()
+        aktuelleDauerAbrisskanteMS = ErmittleDauerAbrisskanteMS()
         aktuellePartikelGroesse = ErmittlePartikelGroesse()
 
         rasterGenerator = New PartikelRasterGenerator()
 
         testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
                                                              aktuellePartikelGroesse, 12345)
-        'FlowField Generation
 
-        flowFieldGenerator = New FlowFieldGenerator()
-
-        flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
-                                                        aktuelleWindRichtung, 12345)
-
-
-        'Randbasierte Ablösung.
+        ' -------------------------------------------------------
+        ' Abrissgeometrie
+        ' -------------------------------------------------------
         '
-        'Die Ablöseseite entspricht der globalen Windrichtung:
-        '
-        ' Wind nach rechts -> Start links
-        ' Wind nach links  -> Start rechts
+        ' Der Generator legt den gemeinsamen Ursprung fest.
 
         randAbloeseGenerator = New RandAbloeseGenerator()
 
         randAbloeseFeld = randAbloeseGenerator.ErzeugeRandAbloeseFeld(clientSize.Width, clientSize.Height,
-                                                                      aktuelleWindRichtung, 54321)
+                                                                      aktuelleSchwerkraftAktiv, 54321)
+
+        ' -------------------------------------------------------
+        ' FlowField
+        ' -------------------------------------------------------
+        '
+        ' Der Hauptwind übernimmt exakt die Richtung, die aus
+        ' dem Ursprung der Abrisskante hervorgegangen ist.
+
+        flowFieldGenerator = New FlowFieldGenerator()
+
+        flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
+                                                        randAbloeseFeld.windRichtung, 12345)
 
         'Bitmaps
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
@@ -259,6 +275,10 @@ Public Class TransitionMain
 
         aktuelleSettings.windStaerkeZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                          "WindStaerkeZufall", defaults))
+        aktuelleSettings.dauerAbrisskante = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                       "DauerAbrisskante", defaults))
+        aktuelleSettings.schwerkraftModus = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                       "SchwerkraftModus", defaults))
 
     End Sub
 
@@ -273,6 +293,8 @@ Public Class TransitionMain
         defaults.Add("PartikelGroesseZufall", "False")
         defaults.Add("WindStaerke", "3")
         defaults.Add("WindStaerkeZufall", "False")
+        defaults.Add("DauerAbrisskante", "7")
+        defaults.Add("SchwerkraftModus", "-1")
 
         Return defaults
 
@@ -303,6 +325,8 @@ Public Class TransitionMain
         Dim pruefeTransitionsende As Boolean
         Dim anzahlLebendePartikel As Integer
 
+        Dim gravitation As Single
+
         If Not transitionLaeuft Then
             Exit Sub
         End If
@@ -313,7 +337,7 @@ Public Class TransitionMain
 
         aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
 
-        abloeseProgress = aktuelleFrameZeitMS / ABLOESE_DAUER_MS
+        abloeseProgress = aktuelleFrameZeitMS / aktuelleDauerAbrisskanteMS
         abloeseProgress = Math.Max(0.0, Math.Min(1.0, abloeseProgress))
 
         deltaTime = (aktuelleFrameZeitMS - letzteFrameZeitMS) / 1000.0
@@ -324,19 +348,26 @@ Public Class TransitionMain
             Exit Sub
         End If
 
+        'Schwerkraftcheck (lässt Kaffetasse fallen: Funktioniert noch ;-) 
+
+        If aktuelleSchwerkraftAktiv Then
+            gravitation = 18.0F
+        Else
+            gravitation = 0.0F
+        End If
+
         'Verhindert nach Breakpoints oder längeren Hängern
         'extrem große Simulationssprünge.
         deltaTime = Math.Min(deltaTime, 0.1)
 
         frameZaehler += 1
 
-
         ' Der GPU-Readback kann einen Pipeline-Stall verursachen.
-        ' Für das Transitionsende reicht eine Prüfung alle vier Frames.
+        ' Für das Transitionsende reicht eine Prüfung alle zwölf Frames.
 
         pruefeTransitionsende = abloeseProgress >= 1.0 AndAlso frameZaehler Mod 12 = 0
 
-        anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), CSng(abloeseProgress),
+        anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), CSng(abloeseProgress), gravitation,
                                                              pruefeTransitionsende)
 
         If anzahlLebendePartikel = 0 Then
@@ -349,7 +380,7 @@ Public Class TransitionMain
 
 #End Region
 
-#Region "Wind, Partikel & FlowField"
+#Region "Ermittle Parameter"
 
     Private Function ErmittleWindStaerke() As Integer
 
@@ -394,6 +425,36 @@ Public Class TransitionMain
         End If
 
         Return Math.Max(1, Math.Min(128, aktuelleSettings.partikelGroesse))
+
+    End Function
+
+    Private Function ErmittleSchwerkraftAktiv() As Boolean
+
+        Select Case aktuelleSettings.schwerkraftModus
+
+            Case 0
+
+                Return False
+
+            Case 1
+
+                Return True
+
+            Case Else
+
+                Return zufall.Next(0, 2) = 0
+
+        End Select
+
+    End Function
+
+    Private Function ErmittleDauerAbrisskanteMS() As Double
+
+        Dim dauerSekunden As Integer
+
+        dauerSekunden = Math.Max(5, Math.Min(30, aktuelleSettings.dauerAbrisskante))
+
+        Return CDbl(dauerSekunden) * 1000.0
 
     End Function
 
@@ -445,7 +506,6 @@ Public Class TransitionMain
         randAbloeseGenerator = Nothing
 
         aktuelleWindStaerke = 0
-        aktuelleWindRichtung = 0.0F
 
         If warTransitionAktiv Then
 

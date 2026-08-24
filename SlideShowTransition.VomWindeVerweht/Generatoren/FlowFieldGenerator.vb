@@ -12,7 +12,6 @@ Public Class FlowFieldGenerator
     Private Const FBM_LAKUNARITAET As Single = 2.0F
 
     Private Const MIN_VORWAERTSFAKTOR As Single = 0.35F
-    Private Const MAX_HAUPTWIND_WINKEL As Single = CSng(Math.PI / 6.0) 'Aufwärtsgerichtiete Komponente bis 30°
 
 #End Region
 
@@ -25,7 +24,7 @@ Public Class FlowFieldGenerator
 #Region "Erzeugung"
 
     Public Function ErzeugeFlowField(renderBreite As Integer, renderHoehe As Integer, windStaerke As Integer,
-                                     windRichtung As Single, Optional seed As Integer = 0) As FlowFieldDaten
+                                     windRichtung As Vector2, Optional seed As Integer = 0) As FlowFieldDaten
 
         Dim daten As FlowFieldDaten
         Dim zufall As Random
@@ -46,10 +45,10 @@ Public Class FlowFieldGenerator
         Dim basisGeschwindigkeit As Single
         Dim turbulenzStaerke As Single
         Dim minimaleVorwaertsGeschwindigkeit As Single
-        Dim hauptWindWinkel As Single
 
-        Dim hauptWindX As Single
-        Dim hauptWindY As Single
+        Dim geschwindigkeit As Vector2
+        Dim vorwaertsAnteil As Single
+        Dim fehlenderVorwaertsAnteil As Single
 
         Dim vx As Single
         Dim vy As Single
@@ -62,12 +61,12 @@ Public Class FlowFieldGenerator
             Throw New ArgumentOutOfRangeException(NameOf(renderHoehe))
         End If
 
-        If windStaerke < 0 OrElse windStaerke > 12 Then
-            Throw New ArgumentOutOfRangeException(NameOf(windStaerke))
+        If windStaerke > 0 AndAlso windRichtung.LengthSquared() <= 0.000001F Then
+            Throw New ArgumentOutOfRangeException(NameOf(windRichtung))
         End If
 
-        If windRichtung = 0.0F AndAlso windStaerke > 0 Then
-            Throw New ArgumentOutOfRangeException(NameOf(windRichtung))
+        If windStaerke > 0 Then
+            windRichtung = Vector2.Normalize(windRichtung)
         End If
 
         If seed = 0 Then
@@ -94,25 +93,6 @@ Public Class FlowFieldGenerator
 
         minimaleVorwaertsGeschwindigkeit = basisGeschwindigkeit * MIN_VORWAERTSFAKTOR
 
-        ' Der globale Hauptwind darf leicht nach oben zeigen.
-        '
-        ' Wichtig:
-        ' Bildschirm-Y wächst nach unten.
-        ' Deshalb bedeutet negatives Y eine Bewegung nach oben.
-
-        hauptWindWinkel = CSng(zufall.NextDouble()) * MAX_HAUPTWIND_WINKEL
-
-        hauptWindX = CSng(Math.Cos(hauptWindWinkel))
-        hauptWindY = -CSng(Math.Sin(hauptWindWinkel))
-
-        ' Links-/Rechtsrichtung nur auf X anwenden.
-        '
-        If windRichtung < 0.0F Then
-
-            hauptWindX = -hauptWindX
-
-        End If
-
         For y = 0 To flowHoehe - 1
 
             For x = 0 To flowBreite - 1
@@ -135,26 +115,30 @@ Public Class FlowFieldGenerator
                 noiseX = BerechneFBM(normX * 3.0F, normY * 3.0F)
                 noiseY = BerechneFBM(normX * 3.0F + 17.37F, normY * 3.0F + 41.91F)
 
-
                 ' Hauptwind + lokale Turbulenz.
+
+                vx = basisGeschwindigkeit * windRichtung.X + noiseX * turbulenzStaerke
+                vy = basisGeschwindigkeit * windRichtung.Y + noiseY * turbulenzStaerke
+
+                ' Keine geschlossenen Strudel.
                 '
-                vx = basisGeschwindigkeit * hauptWindX + noiseX * turbulenzStaerke
-                vy = basisGeschwindigkeit * hauptWindY + noiseY * turbulenzStaerke
+                ' Unabhängig von der globalen Windrichtung muss jeder
+                ' lokale Vektor eine Mindestkomponente in Richtung des
+                ' globalen Hauptwindes behalten.
 
-                ' Keine geschlossenen Strudel:
-                '
-                ' Die horizontale Hauptbewegung muss immer mindestens
-                ' einen bestimmten Anteil der Basisgeschwindigkeit behalten.
+                geschwindigkeit = New Vector2(vx, vy)
 
-                If windRichtung >= 0.0F Then
+                vorwaertsAnteil = Vector2.Dot(geschwindigkeit, windRichtung)
 
-                    vx = Math.Max(minimaleVorwaertsGeschwindigkeit, vx)
+                If vorwaertsAnteil < minimaleVorwaertsGeschwindigkeit Then
 
-                Else
+                    fehlenderVorwaertsAnteil = minimaleVorwaertsGeschwindigkeit - vorwaertsAnteil
 
-                    vx = Math.Min(-minimaleVorwaertsGeschwindigkeit, vx)
+                    geschwindigkeit += windRichtung * fehlenderVorwaertsAnteil
 
                 End If
+
+                daten.vektoren(index) = geschwindigkeit
 
                 daten.vektoren(index) = New Vector2(vx, vy)
 

@@ -35,14 +35,14 @@ cbuffer BewegungsParameter : register(b0)
 
     float abloeseProgress;
 
-    float padding1;
+    float gravitation;
+    
     float padding2;
     float padding3;
 };
 
 static const float WIND_KOPPLUNG = 2.5;
 static const float LUFTWIDERSTAND = 0.15;
-static const float GRAVITATION = 18.0;
 
 static const int STATUS_TOT = 0;
 static const int STATUS_RUHEND = 1;
@@ -388,8 +388,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     /*
      * Kleine konstante Gravitation.
      */
-    partikel.geschwindigkeit.y += GRAVITATION * deltaTime;
-
+    partikel.geschwindigkeit.y += gravitation * deltaTime;
     /*
      * Luftwiderstand.
      */

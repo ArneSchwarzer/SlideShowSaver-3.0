@@ -1,10 +1,13 @@
-﻿Public Class RandAbloeseGenerator
+﻿Imports System.Numerics
+
+Public Class RandAbloeseGenerator
 
 #Region "Konstanten"
 
     Private Const RANDABLOESE_MAX_BREITE As Integer = 960
 
     Private Const URSPRUNG_ABSTAND As Single = 0.12F
+    Private Const MAX_AUFWIND_WINKEL As Single = CSng(Math.PI / 6.0)
 
     Private Const FBM_OKTAVEN As Integer = 4
     Private Const FBM_PERSISTENZ As Single = 0.5F
@@ -23,17 +26,14 @@
 
 #Region "Erzeugung"
 
-    Public Function ErzeugeRandAbloeseFeld(renderBreite As Integer, renderHoehe As Integer, windRichtung As Single,
-                                           Optional seed As Integer = 0) As RandAbloeseFeldDaten
+    Public Function ErzeugeRandAbloeseFeld(renderBreite As Integer, renderHoehe As Integer,
+                                           schwerkraftAktiv As Boolean, Optional seed As Integer = 0) As RandAbloeseFeldDaten
 
         Dim daten As RandAbloeseFeldDaten
         Dim zufall As Random
 
         Dim feldBreite As Integer
         Dim feldHoehe As Integer
-
-        Dim ursprungX As Single
-        Dim ursprungY As Single
 
         Dim minimaleDistanz As Single
         Dim maximaleDistanz As Single
@@ -53,16 +53,19 @@
         Dim y As Integer
         Dim index As Integer
 
+        Dim startPunkt As Vector2
+        Dim mittelPunkt As Vector2
+        Dim windRichtung As Vector2
+
+        Dim ursprungX As Single
+        Dim ursprungY As Single
+
         If renderBreite <= 0 Then
             Throw New ArgumentOutOfRangeException(NameOf(renderBreite))
         End If
 
         If renderHoehe <= 0 Then
             Throw New ArgumentOutOfRangeException(NameOf(renderHoehe))
-        End If
-
-        If windRichtung = 0.0F Then
-            Throw New ArgumentOutOfRangeException(NameOf(windRichtung))
         End If
 
         If seed = 0 Then
@@ -83,32 +86,44 @@
 
         daten.werte = New Single(feldBreite * feldHoehe - 1) {}
 
-
         ' -------------------------------------------------------
-        ' Radialen Ursprung festlegen.
-        '
-        ' Wind nach rechts:
-        ' Ursprung links außerhalb des Bildes.
-        '
-        ' Wind nach links:
-        ' Ursprung rechts außerhalb des Bildes.
-        '
-        ' Die vertikale Position liegt zufällig entlang
-        ' der jeweiligen Bildschirmkante.
+        ' Gemeinsame Geometrie für Abrisskante und Hauptwind.
         ' -------------------------------------------------------
+        '
+        ' Der RandAbloeseGenerator bestimmt EINMAL den Ursprung.
+        '
+        ' Aus diesem Ursprung entstehen anschließend:
+        '
+        ' 1. die radiale Abrisskante
+        ' 2. die globale Hauptwindrichtung
+        '
+        ' Damit können beide niemals gegeneinander laufen.
 
-        ursprungY = CSng(zufall.NextDouble()) * CSng(feldHoehe)
 
-        If windRichtung > 0.0F Then
+        mittelPunkt = New Vector2(CSng(renderBreite) * 0.5F, CSng(renderHoehe) * 0.5F)
 
-            ursprungX = -CSng(feldBreite) * URSPRUNG_ABSTAND
+        If schwerkraftAktiv Then
+
+            startPunkt = ErzeugeStartPunktMitSchwerkraft(renderBreite, renderHoehe, zufall)
 
         Else
 
-            ursprungX = CSng(feldBreite) * (1.0F + URSPRUNG_ABSTAND)
+            startPunkt = ErzeugeStartPunktTopView(renderBreite, renderHoehe, zufall)
 
         End If
 
+        windRichtung = Vector2.Normalize(mittelPunkt - startPunkt)
+
+
+        ' Der Ablöse-Texture arbeitet mit ihren eigenen Dimensionen.
+        ' Deshalb den in Renderkoordinaten erzeugten Ursprung
+        ' auf das Ablösefeld übertragen.
+
+        ursprungX = startPunkt.X / CSng(renderBreite) * CSng(feldBreite)
+        ursprungY = startPunkt.Y / CSng(renderHoehe) * CSng(feldHoehe)
+
+        daten.startPunkt = startPunkt
+        daten.windRichtung = windRichtung
 
         ' Der Ursprung liegt außerhalb des sichtbaren Bereichs.
         '
@@ -159,6 +174,125 @@
         Next
 
         Return daten
+
+    End Function
+
+    Private Function ErzeugeStartPunktMitSchwerkraft(renderBreite As Integer, renderHoehe As Integer,
+                                                     zufall As Random) As Vector2
+
+        Dim startX As Single
+        Dim startY As Single
+
+        Dim mittelY As Single
+        Dim horizontalerAbstand As Single
+        Dim maximalerYOffset As Single
+        Dim yOffset As Single
+
+        Dim kommtVonLinks As Boolean
+
+        mittelY = CSng(renderHoehe) * 0.5F
+
+        kommtVonLinks = zufall.Next(0, 2) = 0
+
+        If kommtVonLinks Then
+
+            startX = -CSng(renderBreite) * URSPRUNG_ABSTAND
+
+        Else
+
+            startX = CSng(renderBreite) * (1.0F + URSPRUNG_ABSTAND)
+
+        End If
+
+
+        ' Der Ursprung liegt bewusst unterhalb der Bildmitte.
+        '
+        ' Dadurch zeigt der Vektor vom Ursprung zum Mittelpunkt
+        ' ausschließlich horizontal bis maximal 30° nach oben.
+
+
+        horizontalerAbstand = Math.Abs(CSng(renderBreite) * 0.5F - startX)
+
+        maximalerYOffset = horizontalerAbstand * CSng(Math.Tan(MAX_AUFWIND_WINKEL))
+
+
+        ' Natürlich nicht unter den Bildschirm hinausschießen.
+
+        maximalerYOffset = Math.Min(maximalerYOffset, CSng(renderHoehe) * 0.5F)
+
+        yOffset = CSng(zufall.NextDouble()) * maximalerYOffset
+
+        startY = mittelY + yOffset
+
+        Return New Vector2(startX, startY)
+
+    End Function
+
+    Private Function ErzeugeStartPunktTopView(renderBreite As Integer, renderHoehe As Integer, zufall As Random) _
+        As Vector2
+
+        Dim umfang As Single
+        Dim randPosition As Single
+
+        Dim startX As Single
+        Dim startY As Single
+
+        umfang = 2.0F * (CSng(renderBreite) + CSng(renderHoehe))
+
+        randPosition = CSng(zufall.NextDouble()) * umfang
+
+
+        ' Oberer Rand
+
+        If randPosition < renderBreite Then
+
+            startX = randPosition
+
+            startY = -CSng(renderHoehe) * URSPRUNG_ABSTAND
+
+            Return New Vector2(startX, startY)
+
+        End If
+
+        randPosition -= CSng(renderBreite)
+
+
+        ' Rechter Rand
+
+        If randPosition < renderHoehe Then
+
+            startX = CSng(renderBreite) * (1.0F + URSPRUNG_ABSTAND)
+
+            startY = randPosition
+
+            Return New Vector2(startX, startY)
+
+        End If
+
+        randPosition -= CSng(renderHoehe)
+
+        ' Unterer Rand
+
+        If randPosition < renderBreite Then
+
+            startX = CSng(renderBreite) - randPosition
+
+            startY = CSng(renderHoehe) * (1.0F + URSPRUNG_ABSTAND)
+
+            Return New Vector2(startX, startY)
+
+        End If
+
+        randPosition -= CSng(renderBreite)
+
+
+        ' Linker Rand
+
+        startX = -CSng(renderBreite) * URSPRUNG_ABSTAND
+
+        startY = CSng(renderHoehe) - randPosition
+
+        Return New Vector2(startX, startY)
 
     End Function
 

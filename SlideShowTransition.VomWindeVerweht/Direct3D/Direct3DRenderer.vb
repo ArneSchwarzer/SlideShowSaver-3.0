@@ -163,7 +163,8 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Friend Function RenderFrame(deltaTime As Single, abloeseProgress As Single, pruefeTransitionsende As Boolean) As Integer
+    Friend Function RenderFrame(deltaTime As Single, abloeseProgress As Single, gravitation As Single,
+                                pruefeTransitionsende As Boolean) As Integer
 
         Dim anzahlLebendePartikel As Integer
 
@@ -179,7 +180,7 @@ Friend Class D3DRenderer
             Return -1
         End If
 
-        mosaikRenderer.Simuliere(deltaTime, abloeseProgress)
+        mosaikRenderer.Simuliere(deltaTime, abloeseProgress, gravitation)
 
 
         ' Erst den neuen Zustand rendern.

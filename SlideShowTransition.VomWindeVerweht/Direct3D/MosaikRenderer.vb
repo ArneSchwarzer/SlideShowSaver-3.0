@@ -9,7 +9,13 @@ Friend Class MosaikRenderer
 
 #Region "Variablendeklaration"
 
+#Region "Konstanten"
+
     Private Const PARTIKEL_STRIDE As Integer = 84
+
+#End Region
+
+#Region "Variablen"
 
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext
@@ -89,6 +95,8 @@ Friend Class MosaikRenderer
 
     Private wurdeBereinigt As Boolean
 
+#End Region
+
 #Region "Structures"
 
     <StructLayout(LayoutKind.Sequential)>
@@ -112,12 +120,13 @@ Friend Class MosaikRenderer
         Public partikelAnzahl As UInteger
 
         Public abloeseProgress As Single
+        Public gravitation As Single
 
-        Public padding1 As Single
         Public padding2 As Single
         Public padding3 As Single
 
     End Structure
+
 #End Region
 
 #End Region
@@ -680,7 +689,7 @@ Friend Class MosaikRenderer
 
 #Region "Simulation"
 
-    Friend Sub Simuliere(deltaTime As Single, abloeseProgress As Single)
+    Friend Sub Simuliere(deltaTime As Single, abloeseProgress As Single, gravitation As Single)
 
         Const THREADS_PRO_GRUPPE As UInteger = 64UI
 
@@ -700,8 +709,8 @@ Friend Class MosaikRenderer
         parameter.renderHoehe = CSng(renderHoehe)
         parameter.partikelAnzahl = CUInt(partikelAnzahl)
         parameter.abloeseProgress = Math.Max(0.0F, Math.Min(1.0F, abloeseProgress))
+        parameter.gravitation = Math.Max(0.0F, gravitation)
 
-        parameter.padding1 = 0.0F
         parameter.padding2 = 0.0F
         parameter.padding3 = 0.0F
 
