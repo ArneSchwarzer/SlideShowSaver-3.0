@@ -20,13 +20,14 @@ Friend Class D3DRenderer
 
     Private d3dImage As D3D11Image
 
-    Private mosaikRenderer As MosaikRenderer
+    Private mosaikRenderer As MosaikRendererAPC
 
     Private renderSampler As ID3D11SamplerState
     Private sharedTexture As ID3D11Texture2D
     Private renderTargetView As ID3D11RenderTargetView
 
     Private letzterSurfacePointer As IntPtr
+    Private renderAnforderungOffen As Integer
 
     Private renderBreite As Integer
     Private renderHoehe As Integer
@@ -42,6 +43,16 @@ Friend Class D3DRenderer
 
         Get
             Return d3dImage
+        End Get
+
+    End Property
+
+    Friend ReadOnly Property KannNaechstenFrameRendern As Boolean
+
+        Get
+
+            Return Threading.Volatile.Read(renderAnforderungOffen) = 0
+
         End Get
 
     End Property
@@ -90,7 +101,7 @@ Friend Class D3DRenderer
             InitialisiereDirect3D()
             InitialisiereSampler()
 
-            mosaikRenderer = New MosaikRenderer()
+            mosaikRenderer = New MosaikRendererAPC()
 
             mosaikRenderer.Initialisiere(renderDevice, renderContext, renderBreite, renderHoehe, partikel,
                                          altesBild, neuesBild, flowField, randAbloeseFeld)
@@ -206,6 +217,10 @@ Friend Class D3DRenderer
             Return -1
         End If
 
+        If Threading.Interlocked.CompareExchange(renderAnforderungOffen, 1, 0) <> 0 Then
+            Return -1
+        End If
+
         mosaikRenderer.Simuliere(deltaTime, abloeseProgress, gravitation)
 
 
@@ -214,7 +229,17 @@ Friend Class D3DRenderer
         ' besteht dieser Frame bereits ausschließlich
         ' aus dem neuen Hintergrundbild.
         '
-        d3dImage.RequestRender()
+        Try
+
+            d3dImage.RequestRender()
+
+        Catch
+
+            Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
+
+            Throw
+
+        End Try
 
         If Not pruefeTransitionsende Then
             Return -1
@@ -323,38 +348,42 @@ Friend Class D3DRenderer
     Private Sub RenderSurface(surfacePointer As IntPtr, isNewSurface As Boolean)
 
         If surfacePointer = IntPtr.Zero Then
+            Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
             Exit Sub
         End If
 
-        ' D3D11Image kann seine zugrunde liegende Surface
-        ' austauschen, beispielsweise bei Größenänderungen
-        ' oder internen Reinitialisierungen.
-        '
-        ' Nur dann müssen SharedTexture und RTV neu erzeugt werden.
+        Try
 
-
-        If isNewSurface OrElse renderTargetView Is Nothing OrElse sharedTexture Is Nothing OrElse
+            If isNewSurface OrElse renderTargetView Is Nothing OrElse sharedTexture Is Nothing OrElse
                 letzterSurfacePointer <> surfacePointer Then
 
-            AktualisiereRenderSurface(surfacePointer)
+                AktualisiereRenderSurface(surfacePointer)
 
-        End If
+            End If
 
-        renderContext.OMSetRenderTargets(renderTargetView)
-        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+            renderContext.OMSetRenderTargets(renderTargetView)
+            renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
 
-        mosaikRenderer.Render(renderSampler)
+            mosaikRenderer.Render(renderSampler)
 
-        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+            D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
+            ' Für die D3D11Image-Interop erforderlich.
+            '
+            ' Der Test ohne Flush hat deutlich gezeigt,
+            ' dass die Shared Surface sonst nicht zuverlässig
+            ' rechtzeitig zur Präsentation fertiggestellt wird.
 
-        ' VORERST BEHALTEN.
-        '
-        ' Wir wollen zunächst ausschließlich testen,
-        ' welchen Einfluss das permanente Neuerzeugen der
-        ' Interop-Ressourcen hatte.
+            renderContext.Flush()
 
-        renderContext.Flush()
+        Finally
+
+            ' Erst wenn RenderSurface vollständig abgearbeitet wurde,
+            ' darf der nächste Simulations-/Renderframe beginnen.
+
+            Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
+
+        End Try
 
     End Sub
 
@@ -419,6 +448,8 @@ Friend Class D3DRenderer
     Private Sub BeendeUndBereinigeRenderer()
 
         istInitialisiert = False
+
+        Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
 
         If d3dImage IsNot Nothing Then
 

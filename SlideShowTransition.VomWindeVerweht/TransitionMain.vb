@@ -338,6 +338,16 @@ Public Class TransitionMain
             Exit Sub
         End If
 
+        ' Backpressure:
+        '
+        ' Solange der zuletzt angeforderte Frame noch nicht
+        ' tatsächlich durch RenderSurface() gelaufen ist,
+        ' wird kein weiterer Simulationszustand erzeugt.
+
+        If Not direct3DRenderer.KannNaechstenFrameRendern Then
+            Exit Sub
+        End If
+
         aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
 
         PruefeUndErhoeheWindStaerke(aktuelleFrameZeitMS)

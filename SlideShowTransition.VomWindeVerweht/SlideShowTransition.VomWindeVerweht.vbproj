@@ -135,6 +135,7 @@
   <ItemGroup>
     <Compile Include="Direct3D\Direct3DRenderer.vb" />
     <Compile Include="Direct3D\Direct3DResourceHandler.vb" />
+    <Compile Include="Direct3D\MosaikRendererAPC.vb" />
     <Compile Include="Direct3D\MosaikRenderer.vb" />
     <Compile Include="Direct3D\PartikelDaten.vb" />
     <Compile Include="Generatoren\DuenenFeldDaten.vb" />
@@ -195,6 +196,9 @@
     <EmbeddedResource Include="Shader\PartikelBewegungsShaderCS.cso" />
     <EmbeddedResource Include="Shader\HintergrundShaderPS.cso" />
     <EmbeddedResource Include="Shader\HintergrundShaderVS.cso" />
+    <EmbeddedResource Include="Shader\MosaikShaderAPCPS.cso" />
+    <EmbeddedResource Include="Shader\MosaikShaderAPCVS.cso" />
+    <EmbeddedResource Include="Shader\PartikelBewegungsShaderAPCCS.cso" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lang\" />
@@ -219,7 +223,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shader\HintergrundShader.hlsl" />
+    <Content Include="Shader\MosaikShaderAPC.hlsl" />
     <Content Include="Shader\MosaikShader.hlsl" />
+    <EmbeddedResource Include="Shader\PartikelBewegungsShaderAPC.hlsl" />
     <Content Include="Shader\PartikelBewegungsShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
