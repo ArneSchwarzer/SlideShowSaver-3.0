@@ -163,6 +163,28 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
+    Friend Sub AktualisiereFlowField(neuesFlowField As FlowFieldDaten)
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        If Not istInitialisiert Then
+            Exit Sub
+        End If
+
+        If mosaikRenderer Is Nothing Then
+            Exit Sub
+        End If
+
+        If neuesFlowField Is Nothing Then
+            Throw New ArgumentNullException(NameOf(neuesFlowField))
+        End If
+
+        mosaikRenderer.AktualisiereFlowField(neuesFlowField)
+
+    End Sub
+
     Friend Function RenderFrame(deltaTime As Single, abloeseProgress As Single, gravitation As Single,
                                 pruefeTransitionsende As Boolean) As Integer
 

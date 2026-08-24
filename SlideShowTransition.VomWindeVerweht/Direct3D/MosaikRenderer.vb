@@ -256,6 +256,26 @@ Friend Class MosaikRenderer
 
     End Sub
 
+    Friend Sub AktualisiereFlowField(neuesFlowField As FlowFieldDaten)
+
+        If wurdeBereinigt Then
+            Exit Sub
+        End If
+
+        If neuesFlowField Is Nothing Then
+            Throw New ArgumentNullException(NameOf(neuesFlowField))
+        End If
+
+        Direct3DRessourceHandler.GebeFrei(flowFieldView)
+        Direct3DRessourceHandler.GebeFrei(flowFieldTexture)
+
+        flowFieldView = Nothing
+        flowFieldTexture = Nothing
+
+        InitialisiereFlowField(neuesFlowField)
+
+    End Sub
+
     Private Sub InitialisiereFlowField(flowField As FlowFieldDaten)
 
         Dim textureDescription As Texture2DDescription
@@ -334,8 +354,9 @@ Friend Class MosaikRenderer
 
         End If
 
-        InitialisiereFlowFieldSampler()
-
+        If flowFieldSampler Is Nothing Then
+            InitialisiereFlowFieldSampler()
+        End If
     End Sub
 
     Private Sub InitialisiereFlowFieldSampler()

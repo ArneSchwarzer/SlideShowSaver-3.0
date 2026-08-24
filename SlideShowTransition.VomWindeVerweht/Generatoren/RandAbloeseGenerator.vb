@@ -231,66 +231,79 @@ Public Class RandAbloeseGenerator
     Private Function ErzeugeStartPunktTopView(renderBreite As Integer, renderHoehe As Integer, zufall As Random) _
         As Vector2
 
-        Dim umfang As Single
-        Dim randPosition As Single
+        Dim winkel As Double
+
+        Dim richtungX As Single
+        Dim richtungY As Single
+
+        Dim mittelX As Single
+        Dim mittelY As Single
+
+        Dim halbBreite As Single
+        Dim halbHoehe As Single
+
+        Dim faktorX As Single
+        Dim faktorY As Single
+        Dim faktorRand As Single
+
+        Dim offset As Single
 
         Dim startX As Single
         Dim startY As Single
 
-        umfang = 2.0F * (CSng(renderBreite) + CSng(renderHoehe))
 
-        randPosition = CSng(zufall.NextDouble()) * umfang
+        ' D360:
+        ' ein beliebiger Winkel auf dem vollständigen Einheitskreis.
 
+        winkel = zufall.NextDouble() * Math.PI * 2.0
 
-        ' Oberer Rand
+        richtungX = CSng(Math.Cos(winkel))
+        richtungY = CSng(Math.Sin(winkel))
 
-        If randPosition < renderBreite Then
+        mittelX = CSng(renderBreite) * 0.5F
+        mittelY = CSng(renderHoehe) * 0.5F
 
-            startX = randPosition
+        halbBreite = CSng(renderBreite) * 0.5F
+        halbHoehe = CSng(renderHoehe) * 0.5F
 
-            startY = -CSng(renderHoehe) * URSPRUNG_ABSTAND
+        ' Schnittpunkt des Strahls mit dem Bildschirmrechteck.
+        '
+        ' Für jede Achse bestimmen wir, wie weit wir in der
+        ' gewählten Richtung laufen könnten.
+        '
+        ' Der kleinere Faktor trifft zuerst auf einen Rand.
 
-            Return New Vector2(startX, startY)
+        If Math.Abs(richtungX) > 0.000001F Then
 
-        End If
+            faktorX = halbBreite / Math.Abs(richtungX)
 
-        randPosition -= CSng(renderBreite)
+        Else
 
-
-        ' Rechter Rand
-
-        If randPosition < renderHoehe Then
-
-            startX = CSng(renderBreite) * (1.0F + URSPRUNG_ABSTAND)
-
-            startY = randPosition
-
-            Return New Vector2(startX, startY)
-
-        End If
-
-        randPosition -= CSng(renderHoehe)
-
-        ' Unterer Rand
-
-        If randPosition < renderBreite Then
-
-            startX = CSng(renderBreite) - randPosition
-
-            startY = CSng(renderHoehe) * (1.0F + URSPRUNG_ABSTAND)
-
-            Return New Vector2(startX, startY)
+            faktorX = Single.MaxValue
 
         End If
 
-        randPosition -= CSng(renderBreite)
+        If Math.Abs(richtungY) > 0.000001F Then
 
+            faktorY = halbHoehe / Math.Abs(richtungY)
 
-        ' Linker Rand
+        Else
 
-        startX = -CSng(renderBreite) * URSPRUNG_ABSTAND
+            faktorY = Single.MaxValue
 
-        startY = CSng(renderHoehe) - randPosition
+        End If
+
+        faktorRand = Math.Min(faktorX, faktorY)
+
+        ' Den Ursprung wie bisher ein Stück außerhalb des
+        ' sichtbaren Bereichs platzieren.
+
+        offset = Math.Min(CSng(renderBreite), CSng(renderHoehe)) * URSPRUNG_ABSTAND
+
+        faktorRand += offset
+
+        startX = mittelX + richtungX * faktorRand
+        startY = mittelY + richtungY * faktorRand
 
         Return New Vector2(startX, startY)
 

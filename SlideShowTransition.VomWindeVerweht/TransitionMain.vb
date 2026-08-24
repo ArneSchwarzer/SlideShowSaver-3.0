@@ -45,7 +45,10 @@ Public Class TransitionMain
     Private flowField As FlowFieldDaten
 
     Private aktuelleWindStaerke As Integer
+    Private flowFieldSeed As Integer
+    Private letzteWindSteigerungsStufe As Integer
 
+    'Sonstiges
     Private ReadOnly zufall As New Random()
 
     'V2/V3 Experiment: Dünenbasierte Ablösung
@@ -160,9 +163,10 @@ Public Class TransitionMain
 
         flowFieldGenerator = New FlowFieldGenerator()
 
+        flowFieldSeed = zufall.Next(1, Integer.MaxValue)
+
         flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
-                                                        randAbloeseFeld.windRichtung,
-                                                        zufall.Next(1, Integer.MaxValue))
+                                                        randAbloeseFeld.windRichtung, flowFieldSeed)
 
         'Bitmaps
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
@@ -191,6 +195,7 @@ Public Class TransitionMain
 
         letzteFrameZeitMS = 0.0
         frameZaehler = 0
+        letzteWindSteigerungsStufe = 0
 
         laufzeit.Restart()
 
@@ -335,6 +340,8 @@ Public Class TransitionMain
 
         aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
 
+        PruefeUndErhoeheWindStaerke(aktuelleFrameZeitMS)
+
         abloeseProgress = aktuelleFrameZeitMS / aktuelleDauerAbrisskanteMS
         abloeseProgress = Math.Max(0.0, Math.Min(1.0, abloeseProgress))
 
@@ -392,6 +399,56 @@ Public Class TransitionMain
 
     End Function
 
+    Private Sub PruefeUndErhoeheWindStaerke(aktuelleFrameZeitMS As Double)
+
+        Dim aktuelleWindSteigerungsStufe As Integer
+
+        If aktuelleDauerAbrisskanteMS <= 0.0 Then
+            Exit Sub
+        End If
+
+        aktuelleWindSteigerungsStufe = CInt(Math.Floor(aktuelleFrameZeitMS / aktuelleDauerAbrisskanteMS))
+
+        If aktuelleWindSteigerungsStufe <= letzteWindSteigerungsStufe Then
+
+            Exit Sub
+
+        End If
+
+        letzteWindSteigerungsStufe = aktuelleWindSteigerungsStufe
+
+        If aktuelleWindStaerke >= 12 Then
+            Exit Sub
+        End If
+
+        aktuelleWindStaerke += 1
+
+        AktualisiereFlowField()
+
+    End Sub
+
+    Private Sub AktualisiereFlowField()
+
+        If flowFieldGenerator Is Nothing Then
+            Exit Sub
+        End If
+
+        If randAbloeseFeld Is Nothing Then
+            Exit Sub
+        End If
+
+        If direct3DRenderer Is Nothing Then
+            Exit Sub
+        End If
+
+        flowField = flowFieldGenerator.ErzeugeFlowField(CInt(oldBitmapGerahmt.PixelWidth),
+                                                        CInt(oldBitmapGerahmt.PixelHeight), aktuelleWindStaerke,
+                                                        randAbloeseFeld.windRichtung, flowFieldSeed)
+
+        direct3DRenderer.AktualisiereFlowField(flowField)
+
+    End Sub
+
     Private Function ErmittleWindRichtung() As Single
 
         If zufall.Next(0, 2) = 0 Then
@@ -432,11 +489,11 @@ Public Class TransitionMain
 
             Case "An"
 
-                Return False
+                Return True
 
             Case "Aus"
 
-                Return True
+                Return False
 
             Case Else
 
@@ -504,6 +561,8 @@ Public Class TransitionMain
         randAbloeseGenerator = Nothing
 
         aktuelleWindStaerke = 0
+        flowFieldSeed = 0
+        letzteWindSteigerungsStufe = 0
 
         If warTransitionAktiv Then
 
