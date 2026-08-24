@@ -109,6 +109,11 @@ Friend Class MosaikRendererAPC
 
     Private wurdeBereinigt As Boolean
 
+    '#################################
+    'Debug
+    '#################################
+    Private indirectArgumentStagingBuffer As ID3D11Buffer
+
 #End Region
 
 #Region "Structures"
@@ -201,6 +206,9 @@ Friend Class MosaikRendererAPC
 
         InitialisiereRenderPartikelIndexBuffer()
         InitialisiereIndirectArgumentBuffer()
+
+        'Debugging
+        InitialisiereIndirectArgumentStagingBuffer()
 
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
@@ -350,6 +358,31 @@ Friend Class MosaikRendererAPC
 
             Throw New InvalidOperationException(
             "Der APC-IndirectArgumentBuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereIndirectArgumentStagingBuffer()
+
+        Dim description As BufferDescription
+
+        description = New BufferDescription()
+
+        description.ByteWidth = 16UI
+        description.Usage = ResourceUsage.Staging
+        description.BindFlags = BindFlags.None
+        description.CPUAccessFlags = CpuAccessFlags.Read
+        description.MiscFlags = ResourceOptionFlags.None
+        description.StructureByteStride = 0UI
+
+        indirectArgumentStagingBuffer =
+        renderDevice.CreateBuffer(description)
+
+        If indirectArgumentStagingBuffer Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der APC-IndirectArgument-Stagingbuffer konnte nicht erzeugt werden.")
 
         End If
 
@@ -836,52 +869,130 @@ Friend Class MosaikRendererAPC
 
         renderContext.UpdateSubresource(parameter, partikelBewegungsParameterBuffer)
 
-        anzahlThreadGruppen = (CUInt(partikelAnzahl) + THREADS_PRO_GRUPPE - 1UI) \ THREADS_PRO_GRUPPE
+        anzahlThreadGruppen =
+        (CUInt(partikelAnzahl) +
+         THREADS_PRO_GRUPPE -
+         1UI) \ THREADS_PRO_GRUPPE
+
+        '---------------------------------
+        ' Compute Shader vorbereiten
+        '---------------------------------
 
         renderContext.CSSetShader(partikelBewegungsShader)
-        renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
-        renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
-        renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
 
+        renderContext.CSSetConstantBuffer(
+        0UI,
+        partikelBewegungsParameterBuffer)
+
+        renderContext.CSSetUnorderedAccessView(
+        0UI,
+        partikelUnorderedAccessView)
+
+        renderContext.CSSetUnorderedAccessView(
+        1UI,
+        lebendZaehlerView)
+
+        '
         ' APC:
         ' Append-Counter zu Beginn jedes Frames auf 0 setzen.
+        '
 
-        renderContext.CSSetUnorderedAccessView(2UI, renderPartikelIndexUnorderedAccessView, 0UI)
+        renderContext.CSSetUnorderedAccessView(
+        2UI,
+        renderPartikelIndexUnorderedAccessView,
+        0UI)
 
-        ' Der versteckte Append-Counter wird direkt von der GPU
-        ' in InstanceCount des DrawInstancedIndirect-Argumentbuffers
-        ' kopiert.
+        renderContext.CSSetShaderResource(
+        0UI,
+        flowFieldView)
+
+        renderContext.CSSetSampler(
+        0UI,
+        flowFieldSampler)
+
+        renderContext.CSSetShaderResource(
+        1UI,
+        randAbloeseFeldView)
+
+        renderContext.CSSetSampler(
+        1UI,
+        randAbloeseFeldSampler)
+
+        '---------------------------------
+        ' Partikelsimulation + APC-Aufbau
+        '---------------------------------
+
+        renderContext.Dispatch(
+        anzahlThreadGruppen,
+        1UI,
+        1UI)
+
+        '
+        ' Der Compute Shader ist jetzt durchgelaufen.
+        '
+        ' Erst jetzt enthält der versteckte Append-Counter
+        ' die Anzahl der tatsächlich zu rendernden Partikel.
+        '
+        ' UAV 2 zunächst lösen, bevor wir seinen Counter
+        ' in den IndirectArgumentBuffer kopieren.
+        '
+
+        renderContext.CSSetUnorderedAccessView(
+        2UI,
+        Nothing)
+
         '
         ' Byteoffset 4:
         '
-        ' [0] VertexCountPerInstance = 6
-        ' [4] InstanceCount          = APC-Counter
-        ' [8] StartVertexLocation    = 0
-        ' [12] StartInstanceLocation = 0
+        ' [0]  VertexCountPerInstance = 6
+        ' [4]  InstanceCount          = APC-Counter
+        ' [8]  StartVertexLocation    = 0
+        ' [12] StartInstanceLocation  = 0
         '
 
-        renderContext.CopyStructureCount(indirectArgumentBuffer, 4UI, renderPartikelIndexUnorderedAccessView)
+        renderContext.CopyStructureCount(
+        indirectArgumentBuffer,
+        4UI,
+        renderPartikelIndexUnorderedAccessView)
 
-        renderContext.CSSetShaderResource(0UI, flowFieldView)
-        renderContext.CSSetSampler(0UI, flowFieldSampler)
-        renderContext.CSSetShaderResource(1UI, randAbloeseFeldView)
-        renderContext.CSSetSampler(1UI, randAbloeseFeldSampler)
+        '---------------------------------
+        ' Compute-Ressourcen lösen
+        '---------------------------------
+        '
+        ' Der Partikelbuffer und der APC-Indexbuffer werden
+        ' anschließend vom Vertexshader als SRV gelesen.
+        '
 
-        renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
+        renderContext.CSSetShaderResource(
+        1UI,
+        Nothing)
 
-        'Alle Compute-Ressourcen wieder lösen,
-        'bevor der Partikelbuffer anschließend
-        'vom Vertexshader als SRV gelesen wird.
+        renderContext.CSSetSampler(
+        1UI,
+        Nothing)
 
-        renderContext.CSSetShaderResource(1UI, Nothing)
-        renderContext.CSSetSampler(1UI, Nothing)
-        renderContext.CSSetShaderResource(0UI, Nothing)
-        renderContext.CSSetSampler(0UI, Nothing)
-        renderContext.CSSetUnorderedAccessView(2UI, Nothing)
-        renderContext.CSSetUnorderedAccessView(1UI, Nothing)
-        renderContext.CSSetUnorderedAccessView(0UI, Nothing)
-        renderContext.CSSetConstantBuffer(0UI, Nothing)
-        renderContext.CSSetShader(Nothing)
+        renderContext.CSSetShaderResource(
+        0UI,
+        Nothing)
+
+        renderContext.CSSetSampler(
+        0UI,
+        Nothing)
+
+        renderContext.CSSetUnorderedAccessView(
+        1UI,
+        Nothing)
+
+        renderContext.CSSetUnorderedAccessView(
+        0UI,
+        Nothing)
+
+        renderContext.CSSetConstantBuffer(
+        0UI,
+        Nothing)
+
+        renderContext.CSSetShader(
+        Nothing)
 
     End Sub
 
@@ -1060,6 +1171,11 @@ Friend Class MosaikRendererAPC
         Direct3DRessourceHandler.GebeFrei(bildView)
         Direct3DRessourceHandler.GebeFrei(bildTexture)
 
+        '#################################
+        'Debugging
+        '#################################
+        Direct3DRessourceHandler.GebeFrei(indirectArgumentStagingBuffer)
+
         '---------------------------------
         ' APC
         '---------------------------------
@@ -1100,6 +1216,64 @@ Friend Class MosaikRendererAPC
 
     End Sub
 
+#End Region
+
+#Region "Debugging"
+    Friend Function GibAPCAnzahlZurueck() As Integer
+
+        Dim mappedSubresource As MappedSubresource
+        Dim result As SharpGen.Runtime.Result
+
+        Dim wurdeGemappt As Boolean
+        Dim anzahl As Integer
+
+        wurdeGemappt = False
+        anzahl = 0
+
+        renderContext.CopyResource(
+        indirectArgumentStagingBuffer,
+        indirectArgumentBuffer)
+
+        Try
+
+            result =
+            renderContext.Map(
+                indirectArgumentStagingBuffer,
+                0UI,
+                MapMode.Read,
+                Vortice.Direct3D11.MapFlags.None,
+                mappedSubresource)
+
+            If result.Failure Then
+
+                Throw New InvalidOperationException(
+                "Der APC-Argumentbuffer konnte nicht gelesen werden.")
+
+            End If
+
+            wurdeGemappt = True
+
+            '
+            ' Offset 4 = InstanceCount
+            '
+            anzahl =
+            Marshal.ReadInt32(
+                mappedSubresource.DataPointer,
+                4)
+
+        Finally
+
+            If wurdeGemappt Then
+                renderContext.Unmap(
+                indirectArgumentStagingBuffer,
+                0UI)
+            End If
+
+        End Try
+
+        Return anzahl
+
+    End Function
 #End Region
 
 End Class

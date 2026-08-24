@@ -385,6 +385,13 @@ Public Class TransitionMain
         anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), CSng(abloeseProgress), gravitation,
                                                              pruefeTransitionsende)
 
+        If frameZaehler Mod 60 = 0 Then
+
+            Debug.WriteLine("APC Render-Partikel: " & direct3DRenderer.GibAPCAnzahlZurueck().ToString())
+
+        End If
+
+
         If anzahlLebendePartikel = 0 Then
 
             TransitionIstFertig()

@@ -57,6 +57,16 @@ Friend Class D3DRenderer
 
     End Property
 
+    Friend Function GibAPCAnzahlZurueck() As Integer
+
+        If mosaikRenderer Is Nothing Then
+            Return -1
+        End If
+
+        Return mosaikRenderer.GibAPCAnzahlZurueck()
+
+    End Function
+
 #End Region
 
 #Region "Initialisierung"
