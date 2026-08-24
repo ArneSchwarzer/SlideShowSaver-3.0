@@ -35,8 +35,17 @@ Partial Class ucOptionsTransition
         Me.lblWindstaerke = New System.Windows.Forms.Label()
         Me.btnDefaults = New System.Windows.Forms.Button()
         Me.lblFlauteWarnung = New System.Windows.Forms.Label()
+        Me.lblDauerAbrisskante = New System.Windows.Forms.Label()
+        Me.lblNtrkDauerAbrisskante = New System.Windows.Forms.Label()
+        Me.trkDauerAbrisskante = New System.Windows.Forms.TrackBar()
+        Me.grpSchwerkraft = New System.Windows.Forms.GroupBox()
+        Me.rbSchwerkraftZufällig = New System.Windows.Forms.RadioButton()
+        Me.rbSchwerkraftAn = New System.Windows.Forms.RadioButton()
+        Me.rbSchwerkraftAus = New System.Windows.Forms.RadioButton()
         CType(Me.trkPartikelGroesse, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkWindstaerke, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkDauerAbrisskante, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.grpSchwerkraft.SuspendLayout()
         Me.SuspendLayout()
         '
         'lblTransitonName
@@ -166,10 +175,95 @@ Partial Class ucOptionsTransition
         Me.lblFlauteWarnung.TabIndex = 56
         Me.lblFlauteWarnung.Text = resources.GetString("lblFlauteWarnung.Text")
         '
+        'lblDauerAbrisskante
+        '
+        Me.lblDauerAbrisskante.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblDauerAbrisskante.AutoSize = True
+        Me.lblDauerAbrisskante.Location = New System.Drawing.Point(769, 687)
+        Me.lblDauerAbrisskante.MaximumSize = New System.Drawing.Size(94, 0)
+        Me.lblDauerAbrisskante.MinimumSize = New System.Drawing.Size(94, 0)
+        Me.lblDauerAbrisskante.Name = "lblDauerAbrisskante"
+        Me.lblDauerAbrisskante.Size = New System.Drawing.Size(94, 41)
+        Me.lblDauerAbrisskante.TabIndex = 59
+        Me.lblDauerAbrisskante.Text = "7 s"
+        Me.lblDauerAbrisskante.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'lblNtrkDauerAbrisskante
+        '
+        Me.lblNtrkDauerAbrisskante.AutoSize = True
+        Me.lblNtrkDauerAbrisskante.Location = New System.Drawing.Point(41, 687)
+        Me.lblNtrkDauerAbrisskante.MaximumSize = New System.Drawing.Size(222, 0)
+        Me.lblNtrkDauerAbrisskante.MinimumSize = New System.Drawing.Size(222, 0)
+        Me.lblNtrkDauerAbrisskante.Name = "lblNtrkDauerAbrisskante"
+        Me.lblNtrkDauerAbrisskante.Size = New System.Drawing.Size(222, 82)
+        Me.lblNtrkDauerAbrisskante.TabIndex = 58
+        Me.lblNtrkDauerAbrisskante.Text = "Dauer Abrisskante"
+        '
+        'trkDauerAbrisskante
+        '
+        Me.trkDauerAbrisskante.AutoSize = False
+        Me.trkDauerAbrisskante.Location = New System.Drawing.Point(271, 687)
+        Me.trkDauerAbrisskante.Maximum = 30
+        Me.trkDauerAbrisskante.Minimum = 5
+        Me.trkDauerAbrisskante.Name = "trkDauerAbrisskante"
+        Me.trkDauerAbrisskante.Size = New System.Drawing.Size(495, 61)
+        Me.trkDauerAbrisskante.TabIndex = 57
+        Me.trkDauerAbrisskante.TabStop = False
+        Me.trkDauerAbrisskante.Value = 7
+        '
+        'grpSchwerkraft
+        '
+        Me.grpSchwerkraft.Controls.Add(Me.rbSchwerkraftZufällig)
+        Me.grpSchwerkraft.Controls.Add(Me.rbSchwerkraftAn)
+        Me.grpSchwerkraft.Controls.Add(Me.rbSchwerkraftAus)
+        Me.grpSchwerkraft.Location = New System.Drawing.Point(41, 792)
+        Me.grpSchwerkraft.Name = "grpSchwerkraft"
+        Me.grpSchwerkraft.Size = New System.Drawing.Size(814, 112)
+        Me.grpSchwerkraft.TabIndex = 69
+        Me.grpSchwerkraft.TabStop = False
+        Me.grpSchwerkraft.Text = "Schwerkraft"
+        '
+        'rbSchwerkraftZufällig
+        '
+        Me.rbSchwerkraftZufällig.AutoSize = True
+        Me.rbSchwerkraftZufällig.Location = New System.Drawing.Point(553, 46)
+        Me.rbSchwerkraftZufällig.Name = "rbSchwerkraftZufällig"
+        Me.rbSchwerkraftZufällig.Size = New System.Drawing.Size(146, 45)
+        Me.rbSchwerkraftZufällig.TabIndex = 2
+        Me.rbSchwerkraftZufällig.TabStop = True
+        Me.rbSchwerkraftZufällig.Text = "Zufällig"
+        Me.rbSchwerkraftZufällig.UseVisualStyleBackColor = True
+        '
+        'rbSchwerkraftAn
+        '
+        Me.rbSchwerkraftAn.AutoSize = True
+        Me.rbSchwerkraftAn.Location = New System.Drawing.Point(6, 46)
+        Me.rbSchwerkraftAn.Name = "rbSchwerkraftAn"
+        Me.rbSchwerkraftAn.Size = New System.Drawing.Size(245, 45)
+        Me.rbSchwerkraftAn.TabIndex = 1
+        Me.rbSchwerkraftAn.TabStop = True
+        Me.rbSchwerkraftAn.Text = "An (Bild hängt)"
+        Me.rbSchwerkraftAn.UseVisualStyleBackColor = True
+        '
+        'rbSchwerkraftAus
+        '
+        Me.rbSchwerkraftAus.AutoSize = True
+        Me.rbSchwerkraftAus.Location = New System.Drawing.Point(276, 46)
+        Me.rbSchwerkraftAus.Name = "rbSchwerkraftAus"
+        Me.rbSchwerkraftAus.Size = New System.Drawing.Size(245, 45)
+        Me.rbSchwerkraftAus.TabIndex = 0
+        Me.rbSchwerkraftAus.TabStop = True
+        Me.rbSchwerkraftAus.Text = "Aus (Top View)"
+        Me.rbSchwerkraftAus.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.grpSchwerkraft)
+        Me.Controls.Add(Me.lblDauerAbrisskante)
+        Me.Controls.Add(Me.lblNtrkDauerAbrisskante)
+        Me.Controls.Add(Me.trkDauerAbrisskante)
         Me.Controls.Add(Me.lblFlauteWarnung)
         Me.Controls.Add(Me.btnDefaults)
         Me.Controls.Add(Me.lblWindstaerke)
@@ -188,6 +282,9 @@ Partial Class ucOptionsTransition
         Me.Size = New System.Drawing.Size(890, 1020)
         CType(Me.trkPartikelGroesse, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.trkWindstaerke, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkDauerAbrisskante, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.grpSchwerkraft.ResumeLayout(False)
+        Me.grpSchwerkraft.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -204,4 +301,11 @@ Partial Class ucOptionsTransition
     Friend WithEvents lblWindstaerke As Windows.Forms.Label
     Friend WithEvents btnDefaults As Windows.Forms.Button
     Friend WithEvents lblFlauteWarnung As Windows.Forms.Label
+    Friend WithEvents lblDauerAbrisskante As Windows.Forms.Label
+    Friend WithEvents lblNtrkDauerAbrisskante As Windows.Forms.Label
+    Friend WithEvents trkDauerAbrisskante As Windows.Forms.TrackBar
+    Friend WithEvents grpSchwerkraft As Windows.Forms.GroupBox
+    Friend WithEvents rbSchwerkraftZufällig As Windows.Forms.RadioButton
+    Friend WithEvents rbSchwerkraftAn As Windows.Forms.RadioButton
+    Friend WithEvents rbSchwerkraftAus As Windows.Forms.RadioButton
 End Class

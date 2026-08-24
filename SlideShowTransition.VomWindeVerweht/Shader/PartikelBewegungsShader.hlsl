@@ -50,6 +50,22 @@ static const int STATUS_AKTIV = 2;
 
 static const float START_HAUPTWIND_ANTEIL = 0.70;
 
+/*
+ * Breite der aktiven Ablösezone in Progress-Einheiten.
+ *
+ * Nur Partikel unmittelbar an der wandernden Abbruchkante
+ * dürfen neu in den Flug übergehen.
+ */
+static const float ABLOESE_KANTENBREITE = 0.018;
+
+/*
+ * Kleine individuelle Auflockerung der Kante.
+ *
+ * Bewusst wesentlich geringer als bisher, damit aus der
+ * Abbruchkante keine breite Erosionszone wird.
+ */
+static const float ABLOESE_ZUFALL = 0.004;
+
 /* 
  * Hilfsfunktionen
  *
@@ -177,20 +193,49 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
         abloeseWert = RandAbloeseFeld.SampleLevel(RandAbloeseFeldSampler, flowUV, 0.0);
 
     /*
-     * Einzelne Sandkörner lösen sich geringfügig
-     * früher oder später als ihre unmittelbaren Nachbarn.
+     * Sehr kleine individuelle Abweichung.
      *
-     * Dadurch bleibt die großräumige Front lesbar,
-     * bekommt aber keinen klinisch perfekten Rand.
+     * Sie verhindert eine mathematisch perfekte Schnittkante,
+     * ohne wieder eine breite Ablösezone zu erzeugen.
      */
-
-        individuellerAbloeseOffset = lerp(-0.025, 0.025, Hash01(index * 11 + 37));
+        individuellerAbloeseOffset = lerp(-ABLOESE_ZUFALL, ABLOESE_ZUFALL, Hash01(index * 11 + 37));
 
         abloeseWert = saturate(abloeseWert + individuellerAbloeseOffset);
 
-        if (abloeseProgress >= abloeseWert)
+    /*
+     * ---------------------------------------------------------
+     * ABRUCHKANTE
+     * ---------------------------------------------------------
+     *
+     * Ein ruhendes Partikel kann nur dann abheben, wenn die
+     * wandernde Ablösefront gerade seine Position erreicht.
+     *
+     * Vor der Kante:
+     *     StartBild bleibt vollständig erhalten.
+     *
+     * An der Kante:
+     *     Partikel wird herausgerissen und beginnt zu fliegen.
+     *
+     * Hinter der Kante:
+     *     Ein noch immer ruhendes Partikel gehört nicht mehr
+     *     zum StartBild und wird verworfen.
+     */
+
+        if (abloeseProgress < abloeseWert)
+        {
+            PartikelBuffer[index] = partikel;
+
+            return;
+        }
+
+        if (abloeseProgress <= abloeseWert + ABLOESE_KANTENBREITE)
         {
             partikel.status = STATUS_AKTIV;
+
+    /*
+     * Ab hier bleibt unser bestehender Code zur
+     * Initialisierung des fliegenden Partikels stehen.
+     */
 
         /*
          * Aktuelle lokale FlowField-Richtung.
@@ -282,6 +327,19 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
         }
         else
         {
+        /*
+         * Die Ablösefront ist bereits über dieses Partikel
+         * hinweggezogen.
+         *
+         * Es darf jetzt nicht länger als Teil des StartBildes
+         * dargestellt werden.
+         */
+            partikel.status = STATUS_TOT;
+
+            int vorherigerWert;
+
+            InterlockedAdd(LebendZaehler[0], -1, vorherigerWert);
+
             PartikelBuffer[index] = partikel;
 
             return;

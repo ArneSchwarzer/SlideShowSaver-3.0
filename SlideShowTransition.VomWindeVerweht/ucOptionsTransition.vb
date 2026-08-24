@@ -82,9 +82,25 @@ Public Class ucOptionsTransition
         'Windstärke von Bft 0.
         '
         'Bei zufälliger Windstärke ist die Warnung nicht nötig,
-        'da der Zufallgenerator keine permanente Flaute auswählen wird.
+        'da der Zufallgenerator keine Flaute auswählen wird.
+        If Not chkWindstaerkeZufall.Checked AndAlso trkWindstaerke.Value = 0 Then
 
-        lblFlauteWarnung.Visible = Not chkWindstaerkeZufall.Checked AndAlso trkWindstaerke.Value = 0
+            lblFlauteWarnung.Visible = True
+            grpSchwerkraft.Top = 792
+            lblNtrkDauerAbrisskante.Top = 687
+            trkDauerAbrisskante.Top = 687
+            lblDauerAbrisskante.Top = 687
+
+        Else
+
+            lblFlauteWarnung.Visible = False
+            grpSchwerkraft.Top = 579
+            lblNtrkDauerAbrisskante.Top = 474
+            trkDauerAbrisskante.Top = 474
+            lblDauerAbrisskante.Top = 474
+
+        End If
+
 
     End Sub
 
