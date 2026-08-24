@@ -29,7 +29,7 @@ Public Class TransitionMain
     Private oldBitmapGerahmt As RenderTargetBitmap
     Private newBitmapGerahmt As RenderTargetBitmap
 
-    Private testPartikel() As PartikelDaten
+    Private sandkornPartikel() As PartikelDaten
     Private aktuellePartikelGroesse As Integer
 
     'Zeitmanagement
@@ -71,12 +71,7 @@ Public Class TransitionMain
 
         Public dauerAbrisskante As Integer
 
-        '
-        ' -1 = Zufällig
-        '  0 = Aus / Top View
-        '  1 = An / Bild hängt
-        '
-        Public schwerkraftModus As Integer
+        Public schwerkraftModus As String
 
     End Structure
 
@@ -140,7 +135,7 @@ Public Class TransitionMain
 
         rasterGenerator = New PartikelRasterGenerator()
 
-        testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
+        sandkornPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
                                                              aktuellePartikelGroesse, 12345)
 
         ' -------------------------------------------------------
@@ -175,7 +170,7 @@ Public Class TransitionMain
 
         Try
 
-            direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, testPartikel, oldBitmapGerahmt,
+            direct3DRenderer.Initialisiere(clientSize.Width, clientSize.Height, sandkornPartikel, oldBitmapGerahmt,
                                            newBitmapGerahmt, flowField, randAbloeseFeld)
         Catch
 
@@ -277,8 +272,8 @@ Public Class TransitionMain
                                                                          "WindStaerkeZufall", defaults))
         aktuelleSettings.dauerAbrisskante = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                        "DauerAbrisskante", defaults))
-        aktuelleSettings.schwerkraftModus = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
-                                                                       "SchwerkraftModus", defaults))
+        aktuelleSettings.schwerkraftModus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                       "SchwerkraftModus", defaults)
 
     End Sub
 
@@ -294,7 +289,7 @@ Public Class TransitionMain
         defaults.Add("WindStaerke", "3")
         defaults.Add("WindStaerkeZufall", "False")
         defaults.Add("DauerAbrisskante", "7")
-        defaults.Add("SchwerkraftModus", "-1")
+        defaults.Add("SchwerkraftModus", "Zufällig")
 
         Return defaults
 
@@ -432,11 +427,11 @@ Public Class TransitionMain
 
         Select Case aktuelleSettings.schwerkraftModus
 
-            Case 0
+            Case "An"
 
                 Return False
 
-            Case 1
+            Case "Aus"
 
                 Return True
 
@@ -496,7 +491,7 @@ Public Class TransitionMain
         oldBitmapGerahmt = Nothing
         newBitmapGerahmt = Nothing
 
-        testPartikel = Nothing
+        sandkornPartikel = Nothing
         rasterGenerator = Nothing
 
         flowField = Nothing

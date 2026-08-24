@@ -65,10 +65,10 @@ Public Class ucOptionsTransition
         lblDauerAbrisskante.Text = aktuelleSettings.dauerAbrisskante.ToString() & " s"
 
         Select Case aktuelleSettings.schwerkraftModus
-            Case 0
-                rbSchwerkraftAus.Checked = True
-            Case 1
+            Case "An"
                 rbSchwerkraftAn.Checked = True
+            Case "Aus"
+                rbSchwerkraftAus.Checked = True
             Case Else
                 rbSchwerkraftZufällig.Checked = True
         End Select
@@ -233,15 +233,15 @@ Public Class ucOptionsTransition
 
         If rbSchwerkraftAn.Checked Then
 
-            aktuelleSettings.schwerkraftModus = 1
+            aktuelleSettings.schwerkraftModus = "An"
 
         ElseIf rbSchwerkraftAus.Checked Then
 
-            aktuelleSettings.schwerkraftModus = 0
+            aktuelleSettings.schwerkraftModus = "Aus"
 
         ElseIf rbSchwerkraftZufällig.Checked Then
 
-            aktuelleSettings.schwerkraftModus = -1
+            aktuelleSettings.schwerkraftModus = "Zufällig"
 
         Else
 
@@ -250,7 +250,7 @@ Public Class ucOptionsTransition
         End If
 
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "SchwerkraftModus",
-                        aktuelleSettings.schwerkraftModus.ToString())
+                    aktuelleSettings.schwerkraftModus)
 
     End Sub
 
@@ -275,7 +275,7 @@ Public Class ucOptionsTransition
         aktuelleSettings.windStaerke = CInt(defaults("WindStaerke"))
         aktuelleSettings.windStaerkeZufall = CBool(defaults("WindStaerkeZufall"))
         aktuelleSettings.dauerAbrisskante = CInt(defaults("DauerAbrisskante"))
-        aktuelleSettings.schwerkraftModus = CInt(defaults("SchwerkraftModus"))
+        aktuelleSettings.schwerkraftModus = defaults("SchwerkraftModus")
 
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroesse",
                         defaults("PartikelGroesse"))
