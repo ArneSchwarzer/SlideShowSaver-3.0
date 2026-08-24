@@ -23,6 +23,10 @@ Friend Class D3DRenderer
     Private mosaikRenderer As MosaikRenderer
 
     Private renderSampler As ID3D11SamplerState
+    Private sharedTexture As ID3D11Texture2D
+    Private renderTargetView As ID3D11RenderTargetView
+
+    Private letzterSurfacePointer As IntPtr
 
     Private renderBreite As Integer
     Private renderHoehe As Integer
@@ -222,22 +226,29 @@ Friend Class D3DRenderer
 
     End Function
 
-    Private Sub RenderSurface(surfacePointer As IntPtr, isNewSurface As Boolean)
+    Private Sub AktualisiereRenderSurface(
+    surfacePointer As IntPtr)
 
         Dim surface As IDXGISurface
         Dim dxgiResource As IDXGIResource
-        Dim sharedTexture As ID3D11Texture2D
-        Dim renderTargetView As ID3D11RenderTargetView
+
+        Dim neueSharedTexture As ID3D11Texture2D
+        Dim neueRenderTargetView As ID3D11RenderTargetView
+
         Dim sharedHandle As IntPtr
 
         surface = Nothing
         dxgiResource = Nothing
-        sharedTexture = Nothing
-        renderTargetView = Nothing
+
+        neueSharedTexture = Nothing
+        neueRenderTargetView = Nothing
+
         sharedHandle = IntPtr.Zero
 
         If surfacePointer = IntPtr.Zero Then
-            Exit Sub
+
+            Throw New ArgumentException("Der SurfacePointer ist ungültig.", NameOf(surfacePointer))
+
         End If
 
         Try
@@ -250,44 +261,100 @@ Friend Class D3DRenderer
 
             If sharedHandle = IntPtr.Zero Then
 
-                Throw New InvalidOperationException("Die DXGI-Resource besitzt keinen gültigen SharedHandle.")
+                Throw New InvalidOperationException(
+                "Die DXGI-Resource besitzt keinen gültigen SharedHandle.")
 
             End If
 
-            sharedTexture = renderDevice.OpenSharedResource(Of ID3D11Texture2D)(sharedHandle)
+            neueSharedTexture = renderDevice.OpenSharedResource(Of ID3D11Texture2D)(sharedHandle)
 
-            renderTargetView = renderDevice.CreateRenderTargetView(sharedTexture)
+            If neueSharedTexture Is Nothing Then
 
-            renderContext.OMSetRenderTargets(renderTargetView)
+                Throw New InvalidOperationException("Die SharedTexture konnte nicht geöffnet werden.")
 
-            renderContext.RSSetViewport(
-                New Viewport(
-                    0.0F,
-                    0.0F,
-                    CSng(renderBreite),
-                    CSng(renderHoehe),
-                    0.0F,
-                    1.0F))
+            End If
 
-            mosaikRenderer.Render(renderSampler)
+            neueRenderTargetView = renderDevice.CreateRenderTargetView(neueSharedTexture)
 
-            D3D11InteropHelper.UnbindRenderTarget(renderContext)
+            If neueRenderTargetView Is Nothing Then
 
-            renderContext.Flush()
+                Throw New InvalidOperationException("Die RenderTargetView konnte nicht erzeugt werden.")
 
-        Finally
+            End If
+
+
+            ' Erst jetzt die bisher verwendeten Ressourcen freigeben.
+            '
+            ' Falls oben etwas schiefgeht, bleibt die bisherige
+            ' RenderSurface vollständig erhalten.
 
             Direct3DRessourceHandler.GebeFrei(renderTargetView)
             Direct3DRessourceHandler.GebeFrei(sharedTexture)
-            Direct3DRessourceHandler.GebeFrei(dxgiResource)
-            'Direct3DRessourceHandler.GebeFrei(surface)
 
-            renderTargetView = Nothing
-            sharedTexture = Nothing
-            dxgiResource = Nothing
+            renderTargetView = neueRenderTargetView
+
+            sharedTexture = neueSharedTexture
+
+            letzterSurfacePointer = surfacePointer
+
+
+            ' Besitz ist jetzt an die Member übergegangen.
+
+            neueRenderTargetView = Nothing
+            neueSharedTexture = Nothing
+
+        Finally
+
+            Direct3DRessourceHandler.GebeFrei(neueRenderTargetView)
+            Direct3DRessourceHandler.GebeFrei(neueSharedTexture)
+            Direct3DRessourceHandler.GebeFrei(dxgiResource)
+
+            ' Wie bisher NICHT explizit freigeben.
+            '
+            ' Wir wissen bereits, dass das mit dieser
+            ' Interop-Kette böse enden kann.
+
             surface = Nothing
 
         End Try
+
+    End Sub
+
+    Private Sub RenderSurface(surfacePointer As IntPtr, isNewSurface As Boolean)
+
+        If surfacePointer = IntPtr.Zero Then
+            Exit Sub
+        End If
+
+        ' D3D11Image kann seine zugrunde liegende Surface
+        ' austauschen, beispielsweise bei Größenänderungen
+        ' oder internen Reinitialisierungen.
+        '
+        ' Nur dann müssen SharedTexture und RTV neu erzeugt werden.
+
+
+        If isNewSurface OrElse renderTargetView Is Nothing OrElse sharedTexture Is Nothing OrElse
+                letzterSurfacePointer <> surfacePointer Then
+
+            AktualisiereRenderSurface(surfacePointer)
+
+        End If
+
+        renderContext.OMSetRenderTargets(renderTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
+        mosaikRenderer.Render(renderSampler)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+
+        ' VORERST BEHALTEN.
+        '
+        ' Wir wollen zunächst ausschließlich testen,
+        ' welchen Einfluss das permanente Neuerzeugen der
+        ' Interop-Ressourcen hatte.
+
+        renderContext.Flush()
 
     End Sub
 
@@ -375,6 +442,14 @@ Friend Class D3DRenderer
             mosaikRenderer = Nothing
 
         End If
+
+        Direct3DRessourceHandler.GebeFrei(renderTargetView)
+        Direct3DRessourceHandler.GebeFrei(sharedTexture)
+
+        renderTargetView = Nothing
+        sharedTexture = Nothing
+
+        letzterSurfacePointer = IntPtr.Zero
 
         Direct3DRessourceHandler.GebeFrei(renderSampler)
 
