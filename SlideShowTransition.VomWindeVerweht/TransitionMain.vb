@@ -136,7 +136,8 @@ Public Class TransitionMain
         rasterGenerator = New PartikelRasterGenerator()
 
         sandkornPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
-                                                             aktuellePartikelGroesse, 12345)
+                                                             aktuellePartikelGroesse,
+                                                             zufall.Next(1, Integer.MaxValue))
 
         ' -------------------------------------------------------
         ' Abrissgeometrie
@@ -147,7 +148,8 @@ Public Class TransitionMain
         randAbloeseGenerator = New RandAbloeseGenerator()
 
         randAbloeseFeld = randAbloeseGenerator.ErzeugeRandAbloeseFeld(clientSize.Width, clientSize.Height,
-                                                                      aktuelleSchwerkraftAktiv, 54321)
+                                                                      aktuelleSchwerkraftAktiv,
+                                                                      zufall.Next(1, Integer.MaxValue))
 
         ' -------------------------------------------------------
         ' FlowField
@@ -159,7 +161,8 @@ Public Class TransitionMain
         flowFieldGenerator = New FlowFieldGenerator()
 
         flowField = flowFieldGenerator.ErzeugeFlowField(clientSize.Width, clientSize.Height, aktuelleWindStaerke,
-                                                        randAbloeseFeld.windRichtung, 12345)
+                                                        randAbloeseFeld.windRichtung,
+                                                        zufall.Next(1, Integer.MaxValue))
 
         'Bitmaps
         oldBitmapGerahmt = ErzeugeGerahmtesBild(oldImage, picBoxModeOld, clientSize)
