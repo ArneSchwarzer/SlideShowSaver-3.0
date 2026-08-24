@@ -124,7 +124,8 @@
     Private Sub BefuellePartikelRaster(partikel() As PartikelDaten, bildBreite As Integer, bildHoehe As Integer,
                                        zielPartikelGroesse As Integer, seed As Integer)
 
-        Dim zufall As Random
+        Dim rasterZufall As Random
+        Dim partikelZufall As Random
 
         Dim aktuelleX As Integer
         Dim aktuelleY As Integer
@@ -134,40 +135,61 @@
 
         Dim partikelIndex As Integer
 
-        zufall = New Random(seed)
+
+        ' WICHTIG:
+        '
+        ' Die Rastergeometrie muss exakt denselben Zufallsstrom
+        ' verwenden wie Pass 1.
+
+        rasterZufall = New Random(seed)
+
+
+        ' Alle zufälligen Partikeleigenschaften bekommen einen
+        ' vollständig unabhängigen Zufallsstrom.
+        '
+        ' Dadurch können Gewicht, Rotation usw. später beliebig
+        ' erweitert werden, ohne jemals wieder die Rastergeometrie
+        ' von Pass 1 und Pass 2 auseinanderlaufen zu lassen.
+
+        partikelZufall = New Random(seed Xor &H5F3759DF)
 
         aktuelleY = 0
         partikelIndex = 0
 
         While aktuelleY < bildHoehe
 
-            zeilenHoehe = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+            zeilenHoehe = BerechneNaechsteGroesse(zielPartikelGroesse, rasterZufall)
 
             If aktuelleY + zeilenHoehe > bildHoehe Then
+
                 zeilenHoehe = bildHoehe - aktuelleY
+
             End If
 
             aktuelleX = 0
 
             While aktuelleX < bildBreite
 
-                breite = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+                breite = BerechneNaechsteGroesse(zielPartikelGroesse, rasterZufall)
 
                 If aktuelleX + breite > bildBreite Then
+
                     breite = bildBreite - aktuelleX
+
                 End If
 
                 If partikelIndex >= partikel.Length Then
 
                     Throw New InvalidOperationException(
-                        "Die berechnete Partikelanzahl stimmt nicht mit dem erzeugten Raster überein.")
+                    "Die berechnete Partikelanzahl stimmt nicht mit dem erzeugten Raster überein.")
 
                 End If
 
                 partikel(partikelIndex) = ErzeugePartikel(aktuelleX, aktuelleY, breite, zeilenHoehe, bildBreite,
-                                                          bildHoehe, zielPartikelGroesse, zufall)
+                                                          bildHoehe, zielPartikelGroesse, partikelZufall)
 
                 partikelIndex += 1
+
                 aktuelleX += breite
 
             End While
@@ -179,7 +201,7 @@
         If partikelIndex <> partikel.Length Then
 
             Throw New InvalidOperationException(
-                "Das erzeugte Raster enthält eine unerwartete Anzahl von Partikeln.")
+            "Das erzeugte Raster enthält eine unerwartete Anzahl von Partikeln.")
 
         End If
 

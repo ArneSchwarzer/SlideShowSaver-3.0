@@ -12,7 +12,7 @@ Public Class FlowFieldGenerator
     Private Const FBM_LAKUNARITAET As Single = 2.0F
 
     Private Const MIN_VORWAERTSFAKTOR As Single = 0.35F
-    Private Const MAX_HAUPTWIND_WINKEL As Single = CSng(Math.PI / 12.0)
+    Private Const MAX_HAUPTWIND_WINKEL As Single = CSng(Math.PI / 6.0) 'Aufwärtsgerichtiete Komponente bis 30°
 
 #End Region
 
@@ -182,12 +182,12 @@ Public Class FlowFieldGenerator
         normiert = CSng(windStaerke) / 12.0F
 
 
-        ' Vorerst bewusst keine physikalische Umrechnung
-        ' von Beaufort in m/s.
+        ' Bewusst keine physikalische Beaufort-Umrechnung.
         '
-        ' Das Ergebnis sind Pixel pro Sekunde.
+        ' Schwache Winde werden deutlich langsamer dargestellt,
+        ' während hohe Beaufort-Stufen weiterhin kräftig ausfallen.
 
-        geschwindigkeit = 90.0F + 1110.0F * CSng(Math.Pow(normiert, 1.5))
+        geschwindigkeit = 45.0F + 1155.0F * CSng(Math.Pow(normiert, 1.8))
 
         Return geschwindigkeit
 
@@ -196,6 +196,7 @@ Public Class FlowFieldGenerator
     Private Function BerechneTurbulenzStaerke(windStaerke As Integer) As Single
 
         Dim normiert As Single
+        Dim turbulenz As Single
 
         If windStaerke <= 0 Then
             Return 0.0F
@@ -203,7 +204,17 @@ Public Class FlowFieldGenerator
 
         normiert = CSng(windStaerke) / 12.0F
 
-        Return 45.0F + 300.0F * normiert
+
+        ' Auch schwache Winde besitzen bereits erkennbare
+        ' lokale Verwirbelungen.
+        '
+        ' Mit wachsender Windstärke nimmt die Turbulenz weiter zu,
+        ' jedoch weniger linear als bisher.
+
+
+        turbulenz = 65.0F + 330.0F * CSng(Math.Pow(normiert, 0.7))
+
+        Return turbulenz
 
     End Function
 

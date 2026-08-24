@@ -27,6 +27,8 @@ Public Class TransitionMain
     Private newBitmapGerahmt As RenderTargetBitmap
 
     Private testPartikel() As PartikelDaten
+    Private aktuellePartikelGroesse As Integer
+
 
     'Zeitmanagement
     Private Const FPS As Integer = 60
@@ -110,8 +112,7 @@ Public Class TransitionMain
                              picBoxModeNew As PictureBoxSizeMode, clientSize As Size, Optional durationMs _
                              As Integer = 0) Implements ISlideShowTransition.RunTransition
 
-        'Erzeugt direkt den finalen Ziel-Frame und meldet ihn
-        'als fertiges Transitionsergebnis.
+        'Startet die Transition
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(TransitionMain))
@@ -123,10 +124,12 @@ Public Class TransitionMain
         aktuelleWindStaerke = ErmittleWindStaerke()
         aktuelleWindRichtung = ErmittleWindRichtung()
 
+        aktuellePartikelGroesse = ErmittlePartikelGroesse()
+
         rasterGenerator = New PartikelRasterGenerator()
 
         testPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
-                                                             aktuelleSettings.partikelGroesse, 12345)
+                                                             aktuellePartikelGroesse, 12345)
         'FlowField Generation
 
         flowFieldGenerator = New FlowFieldGenerator()
@@ -182,7 +185,7 @@ Public Class TransitionMain
     End Sub
 
     Public Sub StopTransition() Implements ISlideShowTransition.StopTransition
-        'Beendet eine gegebenenfalls noch laufende Cut-Transition.
+        'Beendet eine gegebenenfalls noch laufende Transition.
 
         BeendeUndBereinigeTransition()
 
@@ -194,7 +197,7 @@ Public Class TransitionMain
             Exit Sub
         End If
 
-        '
+
         ' Den dynamischen D3D11Image-Frame ausdrücklich durch
         ' das endgültige, normale WPF-Zielbild ersetzen.
         '
@@ -327,11 +330,11 @@ Public Class TransitionMain
 
         frameZaehler += 1
 
-        '
+
         ' Der GPU-Readback kann einen Pipeline-Stall verursachen.
         ' Für das Transitionsende reicht eine Prüfung alle vier Frames.
-        '
-        pruefeTransitionsende = frameZaehler Mod 4 = 0
+
+        pruefeTransitionsende = abloeseProgress >= 1.0 AndAlso frameZaehler Mod 12 = 0
 
         anzahlLebendePartikel = direct3DRenderer.RenderFrame(CSng(deltaTime), CSng(abloeseProgress),
                                                              pruefeTransitionsende)
@@ -343,9 +346,10 @@ Public Class TransitionMain
         End If
 
     End Sub
+
 #End Region
 
-#Region "Wind & FlowField"
+#Region "Wind, Partikel & FlowField"
 
     Private Function ErmittleWindStaerke() As Integer
 
@@ -368,6 +372,28 @@ Public Class TransitionMain
         End If
 
         Return 1.0F
+
+    End Function
+
+    Private Function ErmittlePartikelGroesse() As Integer
+
+        Dim exponent As Integer
+
+        If aktuelleSettings.partikelGroesseZufall Then
+
+            ' Die Trackbar bildet unsere LOD-Stufen 1, 2, 4, 8,
+            ' 16, 32, 64 und 128 px ab.
+            '
+            ' Zufällig wird deshalb nicht irgendein Wert zwischen
+            ' 1 und 128 gewählt, sondern exakt eine dieser Stufen.
+
+            exponent = zufall.Next(0, 8)
+
+            Return CInt(Math.Pow(2, exponent))
+
+        End If
+
+        Return Math.Max(1, Math.Min(128, aktuelleSettings.partikelGroesse))
 
     End Function
 
