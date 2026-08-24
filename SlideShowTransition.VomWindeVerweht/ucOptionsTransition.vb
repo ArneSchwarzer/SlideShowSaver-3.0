@@ -79,10 +79,11 @@ Public Class ucOptionsTransition
 
     Private Sub AktualisiereFlauteWarnung()
         'Warnt den Benutzer vor einer fest eingestellten
-        'Windstärke von Bft 0.
+        'Windstärke von Bft 0 (Flaute).
         '
         'Bei zufälliger Windstärke ist die Warnung nicht nötig,
         'da der Zufallgenerator keine Flaute auswählen wird.
+
         If Not chkWindstaerkeZufall.Checked AndAlso trkWindstaerke.Value = 0 Then
 
             lblFlauteWarnung.Visible = True
