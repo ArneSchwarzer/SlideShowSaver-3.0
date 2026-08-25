@@ -59,6 +59,8 @@ Public Class frmOptionsMain
         Me.TopMost = True
         Me.BringToFront()
 
+        Me.AcceptButton = btnOK
+
         isInputLocked = True
         optionsDialogIsActive = True
 

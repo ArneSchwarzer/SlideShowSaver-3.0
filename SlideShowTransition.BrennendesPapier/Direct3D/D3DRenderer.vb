@@ -28,7 +28,7 @@ Friend Class D3DRenderer
 
     'Renderer
     Private gradientRenderer As GradientRenderer
-    Private partikelRenderer As PartikelRenderer
+    Private partikelRenderer As PartikelRendererAPC
     Private revealRenderer As RevealRenderer
 
     'Maske
@@ -118,7 +118,7 @@ Friend Class D3DRenderer
 
         If parameter.partikelAktiv Then
 
-            partikelRenderer = New PartikelRenderer()
+            partikelRenderer = New PartikelRendererAPC()
 
             partikelRenderer.Initialisiere(renderDevice, renderContext, renderFeatureLevel, parameter.breite,
                                            parameter.hoehe, parameter.particleGradientBitmap,
