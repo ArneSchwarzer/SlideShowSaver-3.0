@@ -884,14 +884,6 @@ Public Class TransitionMain
 
         direct3DRenderer.RenderFrame(begrenzterProgress, begrenztesDeltaTime)
 
-        If frameZaehler Mod 30 = 0 Then
-
-            Debug.WriteLine(
-                "BP APC Render-Partikel: " &
-                direct3DRenderer.GibAPCAnzahlZurueck().ToString())
-
-        End If
-
     End Sub
 
 #End Region

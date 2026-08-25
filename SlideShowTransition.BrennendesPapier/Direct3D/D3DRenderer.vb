@@ -137,26 +137,6 @@ Friend Class D3DRenderer
 
         istInitialisiert = True
 
-        '###############################################
-        '# Debugging                                   #
-        '#                                             #
-        '# Kleiner Testaufruf von BlitzTexturGenerator #
-        '#                                             #
-        '# Für die geplante V 2.0                      #
-        '#                                             #
-        '# Inline-Dims sind bewusst für diese Ausnahme #
-        '# gesetzt.                                    #
-        '###############################################
-
-        'Dim generator As BlitzTexturGenerator
-        'Dim blitz As BlitzTexturDaten
-
-        'generator = New BlitzTexturGenerator()
-
-        'blitz = generator.ErzeugeBlitzTextur(512, 512, 12345)
-
-        'blitz.Bitmap.Save("BlitzTest.png", System.Drawing.Imaging.ImageFormat.Png)
-
         LogHandling.LogDebug("D3D: Initialisiere() beendet.")
 
     End Sub
@@ -416,16 +396,6 @@ Friend Class D3DRenderer
         End Using
 
         Return daten
-
-    End Function
-
-    Friend Function GibAPCAnzahlZurueck() As Integer
-
-        If partikelRenderer Is Nothing Then
-            Return -1
-        End If
-
-        Return partikelRenderer.GibAPCAnzahlZurueck()
 
     End Function
 
