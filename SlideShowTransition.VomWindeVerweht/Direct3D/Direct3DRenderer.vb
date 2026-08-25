@@ -23,8 +23,19 @@ Friend Class D3DRenderer
     Private mosaikRenderer As MosaikRendererAPC
 
     Private renderSampler As ID3D11SamplerState
+
+    '---------------------------------
+    ' WPF / D3D11Image Shared Surface
+    '---------------------------------
+
     Private sharedTexture As ID3D11Texture2D
-    Private renderTargetView As ID3D11RenderTargetView
+
+    '---------------------------------
+    ' Privater GPU-Backbuffer
+    '---------------------------------
+
+    Private backBufferTexture As ID3D11Texture2D
+    Private backBufferRenderTargetView As ID3D11RenderTargetView
 
     Private letzterSurfacePointer As IntPtr
     Private renderAnforderungOffen As Integer
@@ -56,16 +67,6 @@ Friend Class D3DRenderer
         End Get
 
     End Property
-
-    Friend Function GibAPCAnzahlZurueck() As Integer
-
-        If mosaikRenderer Is Nothing Then
-            Return -1
-        End If
-
-        Return mosaikRenderer.GibAPCAnzahlZurueck()
-
-    End Function
 
 #End Region
 
@@ -261,14 +262,18 @@ Friend Class D3DRenderer
 
     End Function
 
-    Private Sub AktualisiereRenderSurface(
-    surfacePointer As IntPtr)
+    Private Sub AktualisiereRenderSurface(surfacePointer As IntPtr)
 
         Dim surface As IDXGISurface
         Dim dxgiResource As IDXGIResource
 
         Dim neueSharedTexture As ID3D11Texture2D
-        Dim neueRenderTargetView As ID3D11RenderTargetView
+
+        Dim neueBackBufferTexture As ID3D11Texture2D
+        Dim neueBackBufferRenderTargetView As ID3D11RenderTargetView
+
+        Dim sharedDescription As Texture2DDescription
+        Dim backBufferDescription As Texture2DDescription
 
         Dim sharedHandle As IntPtr
 
@@ -276,7 +281,9 @@ Friend Class D3DRenderer
         dxgiResource = Nothing
 
         neueSharedTexture = Nothing
-        neueRenderTargetView = Nothing
+
+        neueBackBufferTexture = Nothing
+        neueBackBufferRenderTargetView = Nothing
 
         sharedHandle = IntPtr.Zero
 
@@ -287,6 +294,10 @@ Friend Class D3DRenderer
         End If
 
         Try
+
+            '---------------------------------
+            ' WPF-SharedTexture öffnen
+            '---------------------------------
 
             surface = New IDXGISurface(surfacePointer)
 
@@ -305,49 +316,89 @@ Friend Class D3DRenderer
 
             If neueSharedTexture Is Nothing Then
 
-                Throw New InvalidOperationException("Die SharedTexture konnte nicht geöffnet werden.")
+                Throw New InvalidOperationException(
+                "Die SharedTexture konnte nicht geöffnet werden.")
 
             End If
 
-            neueRenderTargetView = renderDevice.CreateRenderTargetView(neueSharedTexture)
-
-            If neueRenderTargetView Is Nothing Then
-
-                Throw New InvalidOperationException("Die RenderTargetView konnte nicht erzeugt werden.")
-
-            End If
-
-
-            ' Erst jetzt die bisher verwendeten Ressourcen freigeben.
+            '---------------------------------
+            ' Privaten Backbuffer erzeugen
+            '---------------------------------
             '
-            ' Falls oben etwas schiefgeht, bleibt die bisherige
-            ' RenderSurface vollständig erhalten.
+            ' Format, Größe und Multisampling werden von der
+            ' tatsächlichen WPF-SharedTexture übernommen.
+            '
+            ' Dadurch ist CopyResource später garantiert zwischen
+            ' kompatiblen Texturen unterwegs.
+            '
 
-            Direct3DRessourceHandler.GebeFrei(renderTargetView)
+            sharedDescription = neueSharedTexture.Description
+
+            backBufferDescription =
+            New Texture2DDescription(
+                sharedDescription.Format,
+                sharedDescription.Width,
+                sharedDescription.Height,
+                1UI,
+                1UI,
+                BindFlags.RenderTarget,
+                ResourceUsage.Default,
+                CpuAccessFlags.None,
+                sharedDescription.SampleDescription.Count,
+                sharedDescription.SampleDescription.Quality,
+                ResourceOptionFlags.None)
+
+            neueBackBufferTexture = renderDevice.CreateTexture2D(backBufferDescription)
+
+            If neueBackBufferTexture Is Nothing Then
+
+                Throw New InvalidOperationException("Der private Backbuffer konnte nicht erzeugt werden.")
+
+            End If
+
+            neueBackBufferRenderTargetView = renderDevice.CreateRenderTargetView(neueBackBufferTexture)
+
+            If neueBackBufferRenderTargetView Is Nothing Then
+
+                Throw New InvalidOperationException(
+                "Die RenderTargetView des privaten Backbuffers konnte nicht erzeugt werden.")
+
+            End If
+
+            '---------------------------------
+            ' Alte Ressourcen ersetzen
+            '---------------------------------
+            '
+            ' Erst nachdem sämtliche neuen Ressourcen erfolgreich
+            ' erzeugt wurden, geben wir den bisherigen Satz frei.
+            '
+
+            Direct3DRessourceHandler.GebeFrei(backBufferRenderTargetView)
+            Direct3DRessourceHandler.GebeFrei(backBufferTexture)
             Direct3DRessourceHandler.GebeFrei(sharedTexture)
 
-            renderTargetView = neueRenderTargetView
-
             sharedTexture = neueSharedTexture
-
+            backBufferTexture = neueBackBufferTexture
+            backBufferRenderTargetView = neueBackBufferRenderTargetView
             letzterSurfacePointer = surfacePointer
 
-
             ' Besitz ist jetzt an die Member übergegangen.
+            '
 
-            neueRenderTargetView = Nothing
             neueSharedTexture = Nothing
+
+            neueBackBufferTexture = Nothing
+            neueBackBufferRenderTargetView = Nothing
 
         Finally
 
-            Direct3DRessourceHandler.GebeFrei(neueRenderTargetView)
+            Direct3DRessourceHandler.GebeFrei(neueBackBufferRenderTargetView)
+            Direct3DRessourceHandler.GebeFrei(neueBackBufferTexture)
             Direct3DRessourceHandler.GebeFrei(neueSharedTexture)
             Direct3DRessourceHandler.GebeFrei(dxgiResource)
 
-            ' Wie bisher NICHT explizit freigeben.
-            '
-            ' Wir wissen bereits, dass das mit dieser
-            ' Interop-Kette böse enden kann.
+            ' Wie bereits erfolgreich getestet:
+            ' surface selbst NICHT über GebeFrei()/Dispose freigeben.
 
             surface = Nothing
 
@@ -358,38 +409,72 @@ Friend Class D3DRenderer
     Private Sub RenderSurface(surfacePointer As IntPtr, isNewSurface As Boolean)
 
         If surfacePointer = IntPtr.Zero Then
+
             Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
+
             Exit Sub
+
         End If
 
         Try
 
-            If isNewSurface OrElse renderTargetView Is Nothing OrElse sharedTexture Is Nothing OrElse
-                letzterSurfacePointer <> surfacePointer Then
+            If isNewSurface OrElse
+                   sharedTexture Is Nothing OrElse
+                   backBufferTexture Is Nothing OrElse
+                   backBufferRenderTargetView Is Nothing OrElse
+                   letzterSurfacePointer <> surfacePointer Then
 
                 AktualisiereRenderSurface(surfacePointer)
 
             End If
 
-            renderContext.OMSetRenderTargets(renderTargetView)
+            '---------------------------------
+            ' STILLES KÄMMERLEIN
+            '---------------------------------
+            '
+            ' Der komplette Frame wird ausschließlich in den
+            ' privaten Backbuffer gerendert.
+            '
+            ' WPF kann diese Texture niemals sehen.
+
+            renderContext.OMSetRenderTargets(backBufferRenderTargetView)
             renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
+            ' Innerhalb dieses Aufrufs:
+            '
+            ' 1. NeuesBild
+            ' 2. sämtliche sichtbaren APC-Partikel
+            '
+            ' Erst nach der Rückkehr ist unser Kunstwerk fertig.
 
             mosaikRenderer.Render(renderSampler)
 
             D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-            ' Für die D3D11Image-Interop erforderlich.
+            '---------------------------------
+            ' FERTIGEN FRAME VERÖFFENTLICHEN
+            '---------------------------------
             '
-            ' Der Test ohne Flush hat deutlich gezeigt,
-            ' dass die Shared Surface sonst nicht zuverlässig
-            ' rechtzeitig zur Präsentation fertiggestellt wird.
+            ' CopyResource ist in derselben Immediate-Context-
+            ' Command Queue hinter allen vorherigen Drawcalls.
+            '
+            ' Die SharedTexture wird deshalb erst ganz am Ende
+            ' dieses Frames verändert.
+
+            renderContext.CopyResource(sharedTexture, backBufferTexture)
+
+            ' Für unsere D3D11Image-Interop weiterhin erforderlich.
+            '
+            ' Der Test ohne Flush hat eindeutig gezeigt, dass WPF
+            ' andernfalls nicht zuverlässig den fertigen Frame sieht.
 
             renderContext.Flush()
 
         Finally
 
-            ' Erst wenn RenderSurface vollständig abgearbeitet wurde,
-            ' darf der nächste Simulations-/Renderframe beginnen.
+            ' Erst nachdem der vollständige Frame in die
+            ' SharedTexture übertragen wurde, darf der nächste
+            ' Simulations-/Renderframe beginnen.
 
             Threading.Interlocked.Exchange(renderAnforderungOffen, 0)
 
@@ -484,10 +569,22 @@ Friend Class D3DRenderer
 
         End If
 
-        Direct3DRessourceHandler.GebeFrei(renderTargetView)
+        '---------------------------------
+        ' Privater Backbuffer
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(backBufferRenderTargetView)
+        Direct3DRessourceHandler.GebeFrei(backBufferTexture)
+
+        backBufferRenderTargetView = Nothing
+        backBufferTexture = Nothing
+
+        '---------------------------------
+        ' WPF SharedTexture
+        '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(sharedTexture)
 
-        renderTargetView = Nothing
         sharedTexture = Nothing
 
         letzterSurfacePointer = IntPtr.Zero

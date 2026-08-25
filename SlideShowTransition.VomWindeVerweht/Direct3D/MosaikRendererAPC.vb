@@ -37,12 +37,6 @@ Friend Class MosaikRendererAPC
     Private renderPartikelIndexUnorderedAccessView As ID3D11UnorderedAccessView
 
     '---------------------------------
-    ' APC - Indirect Draw Arguments
-    '---------------------------------
-
-    Private indirectArgumentBuffer As ID3D11Buffer
-
-    '---------------------------------
     ' GPU-Lebendzähler
     '---------------------------------
 
@@ -108,11 +102,6 @@ Friend Class MosaikRendererAPC
     Private renderHoehe As Integer
 
     Private wurdeBereinigt As Boolean
-
-    '#################################
-    'Debug
-    '#################################
-    Private indirectArgumentStagingBuffer As ID3D11Buffer
 
 #End Region
 
@@ -205,10 +194,6 @@ Friend Class MosaikRendererAPC
         InitialisiereLebendZaehler()
 
         InitialisiereRenderPartikelIndexBuffer()
-        InitialisiereIndirectArgumentBuffer()
-
-        'Debugging
-        InitialisiereIndirectArgumentStagingBuffer()
 
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
@@ -333,56 +318,6 @@ Friend Class MosaikRendererAPC
         If renderPartikelIndexUnorderedAccessView Is Nothing Then
 
             Throw New InvalidOperationException("Die APC-Append-UAV konnte nicht erzeugt werden.")
-
-        End If
-
-    End Sub
-
-    Private Sub InitialisiereIndirectArgumentBuffer()
-
-        Dim argumente() As UInteger
-
-        argumente = New UInteger() {6UI, 0UI, 0UI, 0UI}
-
-        indirectArgumentBuffer =
-        renderDevice.CreateBuffer(
-            argumente,
-            BindFlags.None,
-            ResourceUsage.Default,
-            CpuAccessFlags.None,
-            ResourceOptionFlags.DrawIndirectArguments,
-            16,
-            0)
-
-        If indirectArgumentBuffer Is Nothing Then
-
-            Throw New InvalidOperationException(
-            "Der APC-IndirectArgumentBuffer konnte nicht erzeugt werden.")
-
-        End If
-
-    End Sub
-
-    Private Sub InitialisiereIndirectArgumentStagingBuffer()
-
-        Dim description As BufferDescription
-
-        description = New BufferDescription()
-
-        description.ByteWidth = 16UI
-        description.Usage = ResourceUsage.Staging
-        description.BindFlags = BindFlags.None
-        description.CPUAccessFlags = CpuAccessFlags.Read
-        description.MiscFlags = ResourceOptionFlags.None
-        description.StructureByteStride = 0UI
-
-        indirectArgumentStagingBuffer =
-        renderDevice.CreateBuffer(description)
-
-        If indirectArgumentStagingBuffer Is Nothing Then
-
-            Throw New InvalidOperationException(
-            "Der APC-IndirectArgument-Stagingbuffer konnte nicht erzeugt werden.")
 
         End If
 
@@ -941,20 +876,6 @@ Friend Class MosaikRendererAPC
         2UI,
         Nothing)
 
-        '
-        ' Byteoffset 4:
-        '
-        ' [0]  VertexCountPerInstance = 6
-        ' [4]  InstanceCount          = APC-Counter
-        ' [8]  StartVertexLocation    = 0
-        ' [12] StartInstanceLocation  = 0
-        '
-
-        renderContext.CopyStructureCount(
-        indirectArgumentBuffer,
-        4UI,
-        renderPartikelIndexUnorderedAccessView)
-
         '---------------------------------
         ' Compute-Ressourcen lösen
         '---------------------------------
@@ -1098,7 +1019,6 @@ Friend Class MosaikRendererAPC
         renderContext.PSSetShaderResource(0UI, bildView)
         renderContext.PSSetSampler(0UI, sampler)
 
-        renderContext.DrawInstancedIndirect(indirectArgumentBuffer, 0UI)
 
         renderContext.VSSetShaderResource(1UI, Nothing)
         renderContext.VSSetShaderResource(0UI, Nothing)
@@ -1171,16 +1091,10 @@ Friend Class MosaikRendererAPC
         Direct3DRessourceHandler.GebeFrei(bildView)
         Direct3DRessourceHandler.GebeFrei(bildTexture)
 
-        '#################################
-        'Debugging
-        '#################################
-        Direct3DRessourceHandler.GebeFrei(indirectArgumentStagingBuffer)
-
         '---------------------------------
         ' APC
         '---------------------------------
 
-        Direct3DRessourceHandler.GebeFrei(indirectArgumentBuffer)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexBuffer)
@@ -1216,64 +1130,6 @@ Friend Class MosaikRendererAPC
 
     End Sub
 
-#End Region
-
-#Region "Debugging"
-    Friend Function GibAPCAnzahlZurueck() As Integer
-
-        Dim mappedSubresource As MappedSubresource
-        Dim result As SharpGen.Runtime.Result
-
-        Dim wurdeGemappt As Boolean
-        Dim anzahl As Integer
-
-        wurdeGemappt = False
-        anzahl = 0
-
-        renderContext.CopyResource(
-        indirectArgumentStagingBuffer,
-        indirectArgumentBuffer)
-
-        Try
-
-            result =
-            renderContext.Map(
-                indirectArgumentStagingBuffer,
-                0UI,
-                MapMode.Read,
-                Vortice.Direct3D11.MapFlags.None,
-                mappedSubresource)
-
-            If result.Failure Then
-
-                Throw New InvalidOperationException(
-                "Der APC-Argumentbuffer konnte nicht gelesen werden.")
-
-            End If
-
-            wurdeGemappt = True
-
-            '
-            ' Offset 4 = InstanceCount
-            '
-            anzahl =
-            Marshal.ReadInt32(
-                mappedSubresource.DataPointer,
-                4)
-
-        Finally
-
-            If wurdeGemappt Then
-                renderContext.Unmap(
-                indirectArgumentStagingBuffer,
-                0UI)
-            End If
-
-        End Try
-
-        Return anzahl
-
-    End Function
 #End Region
 
 End Class
