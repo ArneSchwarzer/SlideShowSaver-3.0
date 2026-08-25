@@ -75,6 +75,18 @@ Friend Class PartikelRendererAPC
     '---------------------------------
     Private wurdeBereinigt As Boolean
 
+    'Debugging
+    '
+    '---------------------------------
+    ' APC - temporäre Diagnose
+    '---------------------------------
+    '
+    ' CPU-lesbare Kopie des IndirectArgumentBuffers.
+    ' Wird ausschließlich verwendet, um während der
+    ' APC-Fehlersuche InstanceCount auszulesen.
+
+    Private indirectArgumentStagingBuffer As ID3D11Buffer
+
 #End Region
 
 #Region "Structures & Enums"
@@ -139,7 +151,7 @@ Friend Class PartikelRendererAPC
                              schwerkraftAktiv As Boolean, partikelLebensdauer As Single)
 
         If wurdeBereinigt Then
-            Throw New ObjectDisposedException(NameOf(PartikelRenderer))
+            Throw New ObjectDisposedException(NameOf(PartikelRendererAPC))
         End If
 
         If device Is Nothing Then
@@ -173,6 +185,9 @@ Friend Class PartikelRendererAPC
         InitialisierePartikelBuffer()
         InitialisiereRenderPartikelIndexBuffer()
         InitialisiereIndirectArgumentBuffer()
+
+        'Debugging
+        InitialisiereIndirectArgumentStagingBuffer()
 
         InitialisierePartikelComputeShader()
         InitialisierePartikelSimulationParameterBuffer()
@@ -387,6 +402,41 @@ Friend Class PartikelRendererAPC
 
     End Sub
 
+    Private Sub InitialisiereIndirectArgumentStagingBuffer()
+
+        Dim description As BufferDescription
+
+        description = New BufferDescription()
+
+        '
+        ' DrawInstancedIndirect verwendet vier UInt32:
+        '
+        ' Offset  0: VertexCountPerInstance
+        ' Offset  4: InstanceCount
+        ' Offset  8: StartVertexLocation
+        ' Offset 12: StartInstanceLocation
+        '
+
+        description.ByteWidth = 16UI
+        description.Usage = ResourceUsage.Staging
+        description.BindFlags = BindFlags.None
+        description.CPUAccessFlags = CpuAccessFlags.Read
+        description.MiscFlags = ResourceOptionFlags.None
+        description.StructureByteStride = 0UI
+
+        indirectArgumentStagingBuffer =
+        renderDevice.CreateBuffer(
+            description)
+
+        If indirectArgumentStagingBuffer Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der APC-Diagnose-Stagingbuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
     Private Sub InitialisierePartikelSimulationParameterBuffer()
 
         Dim bufferDescription As BufferDescription
@@ -557,6 +607,78 @@ Friend Class PartikelRendererAPC
 
     End Sub
 
+    Friend Function GibAPCAnzahlZurueck() As Integer
+
+        Dim mappedSubresource As MappedSubresource
+        Dim result As SharpGen.Runtime.Result
+
+        Dim wurdeGemappt As Boolean
+        Dim anzahlRenderPartikel As Integer
+
+        wurdeGemappt = False
+        anzahlRenderPartikel = -1
+
+        If indirectArgumentBuffer Is Nothing OrElse
+       indirectArgumentStagingBuffer Is Nothing Then
+
+            Return -1
+
+        End If
+
+        '
+        ' Den vollständigen 16-Byte-IndirectArgumentBuffer
+        ' GPU -> CPU kopieren.
+        '
+
+        renderContext.CopyResource(
+        indirectArgumentStagingBuffer,
+        indirectArgumentBuffer)
+
+        Try
+
+            result =
+            renderContext.Map(
+                indirectArgumentStagingBuffer,
+                0UI,
+                MapMode.Read,
+                Vortice.Direct3D11.MapFlags.None,
+                mappedSubresource)
+
+            If result.Failure Then
+
+                Throw New InvalidOperationException(
+                "Der APC-IndirectArgumentBuffer konnte nicht gelesen werden. HRESULT: " &
+                result.Code.ToString())
+
+            End If
+
+            wurdeGemappt = True
+
+            '
+            ' InstanceCount befindet sich bei Byteoffset 4.
+            '
+
+            anzahlRenderPartikel =
+            Marshal.ReadInt32(
+                mappedSubresource.DataPointer,
+                4)
+
+        Finally
+
+            If wurdeGemappt Then
+
+                renderContext.Unmap(
+                indirectArgumentStagingBuffer,
+                0UI)
+
+            End If
+
+        End Try
+
+        Return anzahlRenderPartikel
+
+    End Function
+
     Friend Sub Render(sampler As ID3D11SamplerState)
 
         If sampler Is Nothing Then
@@ -616,6 +738,9 @@ Friend Class PartikelRendererAPC
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexBuffer)
+
+        Direct3DRessourceHandler.GebeFrei(indirectArgumentStagingBuffer)
+        indirectArgumentStagingBuffer = Nothing
 
     End Sub
 

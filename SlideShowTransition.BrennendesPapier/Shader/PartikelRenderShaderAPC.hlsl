@@ -7,8 +7,6 @@
 // - Position kommt aus StructuredBuffer<Particle>
 // - Größe kommt aus StructuredBuffer<Particle>
 // - Seitenverhältnis wird korrigiert
-// - vier Testpartikel werden gerendert
-// - noch keine laufende Simulation im Renderzyklus
 //
 // Compile Targets:
 // VSMain -> vs_5_0

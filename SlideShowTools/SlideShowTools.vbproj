@@ -171,6 +171,7 @@
   <ItemGroup>
     <Content Include="Orte\Eigene Orte.xml" />
     <Content Include="Orte\GeoNames_StadtListe_20000.xml" />
+    <Content Include="Gradienten\SlideShowGradienten.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

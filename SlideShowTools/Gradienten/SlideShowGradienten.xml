@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SlideShowGradienten Version="1">
+
+  <Gradient Name="Regenbogen">
+    <Stop Position="0.00" Color="#FF0000"/>
+    <Stop Position="0.17" Color="#FFFF00"/>
+    <Stop Position="0.33" Color="#00FF00"/>
+    <Stop Position="0.50" Color="#00FFFF"/>
+    <Stop Position="0.67" Color="#0000FF"/>
+    <Stop Position="0.83" Color="#FF00FF"/>
+    <Stop Position="1.00" Color="#FF0000"/>
+  </Gradient>
+
+  <Gradient Name="Zebra">
+    <Stop Position="0.00" Color="#000000"/>
+    <Stop Position="0.12" Color="#FFFFFF"/>
+    <Stop Position="0.25" Color="#000000"/>
+    <Stop Position="0.37" Color="#FFFFFF"/>
+    <Stop Position="0.50" Color="#000000"/>
+    <Stop Position="0.62" Color="#FFFFFF"/>
+    <Stop Position="0.75" Color="#000000"/>
+    <Stop Position="0.87" Color="#FFFFFF"/>
+    <Stop Position="1.00" Color="#000000"/>
+  </Gradient>
+
+  <Gradient Name="Joker">
+    <Stop Position="0.00" Color="#19002E"/>
+    <Stop Position="0.25" Color="#7A00BF"/>
+    <Stop Position="0.50" Color="#00D936"/>
+    <Stop Position="0.75" Color="#8CFF1A"/>
+    <Stop Position="1.00" Color="#19002E"/>
+  </Gradient>
+
+  <Gradient Name="Wakanda">
+    <Stop Position="0.00" Color="#100020"/>
+    <Stop Position="0.30" Color="#590D8C"/>
+    <Stop Position="0.55" Color="#613314"/>
+    <Stop Position="0.75" Color="#F2E6D2"/>
+    <Stop Position="1.00" Color="#100020"/>
+  </Gradient>
+
+  <Gradient Name="Weihnachten">
+    <Stop Position="0.00" Color="#002E0D"/>
+    <Stop Position="0.25" Color="#008C1F"/>
+    <Stop Position="0.50" Color="#B30505"/>
+    <Stop Position="0.70" Color="#592E12"/>
+    <Stop Position="0.85" Color="#F2F2E6"/>
+    <Stop Position="1.00" Color="#002E0D"/>
+  </Gradient>
+
+  <Gradient Name="Pastell">
+    <Stop Position="0.00" Color="#F2B8C6"/>
+    <Stop Position="0.20" Color="#F2D6A2"/>
+    <Stop Position="0.40" Color="#D9F2B8"/>
+    <Stop Position="0.60" Color="#B8E6F2"/>
+    <Stop Position="0.80" Color="#D6C2F2"/>
+    <Stop Position="1.00" Color="#F2B8C6"/>
+  </Gradient>
+
+  <Gradient Name="St. Pauli">
+  <Stop Position="0.00" Color="#1A120B"/>
+  <Stop Position="0.12" Color="#3B2415"/>
+  <Stop Position="0.28" Color="#6B4423"/>
+  <Stop Position="0.42" Color="#A66A3D"/>
+  <Stop Position="0.56" Color="#E9DCC7"/>
+  <Stop Position="0.70" Color="#FFFFFF"/>
+  <Stop Position="0.82" Color="#C7A27A"/>
+  <Stop Position="0.92" Color="#5C3920"/>
+  <Stop Position="1.00" Color="#1A120B"/>
+</Gradient>
+
+ <Gradient Name="BP - Feuer">
+  <Stop Position="0.000" Color="#120300"/>
+  <Stop Position="0.140" Color="#1E0500"/>
+  <Stop Position="0.260" Color="#320700"/>
+  <Stop Position="0.380" Color="#4A0A00"/>
+  <Stop Position="0.500" Color="#681000"/>
+  <Stop Position="0.600" Color="#861500"/>
+  <Stop Position="0.690" Color="#A91C00"/>
+  <Stop Position="0.770" Color="#CC2900"/>
+  <Stop Position="0.835" Color="#E63C00"/>
+  <Stop Position="0.885" Color="#F75A00"/>
+  <Stop Position="0.925" Color="#FF7A00"/>
+  <Stop Position="0.955" Color="#FFA51A"/>
+  <Stop Position="0.978" Color="#FFD24A"/>
+  <Stop Position="0.992" Color="#FFF0A0"/>
+  <Stop Position="1.000" Color="#FFFFFF"/>
+</Gradient>
+
+  <Gradient Name="BP - Blitze">
+    <Stop Position="0.00" Color="#050015"/>
+    <Stop Position="0.16" Color="#16005C"/>
+    <Stop Position="0.34" Color="#3A00C8"/>
+    <Stop Position="0.52" Color="#006BFF"/>
+    <Stop Position="0.70" Color="#00D9FF"/>
+    <Stop Position="0.86" Color="#B8F7FF"/>
+    <Stop Position="1.00" Color="#FFFFFF"/>
+  </Gradient>
+
+ <Gradient Name="BP - Säure">
+  <Stop Position="0.00" Color="#FFF4F1B2" />
+  <Stop Position="0.12" Color="#FFD8D66E" />
+  <Stop Position="0.28" Color="#FFAAA83C" />
+  <Stop Position="0.46" Color="#FF77782B" />
+  <Stop Position="0.66" Color="#FF51551F" />
+  <Stop Position="0.84" Color="#FF303515" />
+  <Stop Position="1.00" Color="#00303515" />
+</Gradient>
+
+  <Gradient Name="BP - Magie">
+    <Stop Position="0.00" Color="#090014"/>
+    <Stop Position="0.16" Color="#25004F"/>
+    <Stop Position="0.34" Color="#6500A8"/>
+    <Stop Position="0.52" Color="#C000D8"/>
+    <Stop Position="0.68" Color="#FF2EC4"/>
+    <Stop Position="0.82" Color="#7F7CFF"/>
+    <Stop Position="0.94" Color="#8DEBFF"/>
+    <Stop Position="1.00" Color="#FFFFFF"/>
+  </Gradient>
+
+<Gradient Name="BP - Feuer - Partikel">
+  <Stop Position="0.00" Color="#FFFFFFFF" />
+  <Stop Position="0.10" Color="#FFFFF3B0" />
+  <Stop Position="0.25" Color="#FFFFC400" />
+  <Stop Position="0.45" Color="#FFFF6A00" />
+  <Stop Position="0.65" Color="#FFD32F00" />
+  <Stop Position="0.82" Color="#FF6B2B12" />
+  <Stop Position="1.00" Color="#006B2B12" />
+</Gradient>
+
+<Gradient Name="BP - Blitze - Partikel">
+  <Stop Position="0.00" Color="#FFFFFFFF" />
+  <Stop Position="0.12" Color="#FFE8FFFF" />
+  <Stop Position="0.30" Color="#FF6FF7FF" />
+  <Stop Position="0.50" Color="#FF00A8FF" />
+  <Stop Position="0.72" Color="#FF1746C7" />
+  <Stop Position="0.88" Color="#FF081B63" />
+  <Stop Position="1.00" Color="#00081B63" />
+</Gradient>
+
+<Gradient Name="BP - Säure - Partikel">
+  <Stop Position="0.00" Color="#FFFFFFFF" />
+  <Stop Position="0.10" Color="#FFF4FFB0" />
+  <Stop Position="0.24" Color="#FFD7FF3F" />
+  <Stop Position="0.42" Color="#FF78E600" />
+  <Stop Position="0.62" Color="#FF2C9B00" />
+  <Stop Position="0.80" Color="#FF556B16" />
+  <Stop Position="1.00" Color="#00556B16" />
+</Gradient>
+
+<Gradient Name="BP - Magie - Partikel">
+  <Stop Position="0.00" Color="#FFFFFFFF" />
+  <Stop Position="0.10" Color="#FFF2E6FF" />
+  <Stop Position="0.24" Color="#FFD78CFF" />
+  <Stop Position="0.42" Color="#FFB13CFF" />
+  <Stop Position="0.62" Color="#FF7420C9" />
+  <Stop Position="0.80" Color="#FF35105E" />
+  <Stop Position="1.00" Color="#0035105E" />
+</Gradient>
+
+</SlideShowGradienten>

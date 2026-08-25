@@ -419,6 +419,16 @@ Friend Class D3DRenderer
 
     End Function
 
+    Friend Function GibAPCAnzahlZurueck() As Integer
+
+        If partikelRenderer Is Nothing Then
+            Return -1
+        End If
+
+        Return partikelRenderer.GibAPCAnzahlZurueck()
+
+    End Function
+
 #End Region
 
 #Region "Bereinigung & Dispose"
