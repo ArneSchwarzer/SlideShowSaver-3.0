@@ -614,6 +614,25 @@ Public Class TransitionMain
             Exit Sub
         End If
 
+        If direct3DRenderer Is Nothing Then
+            Exit Sub
+        End If
+
+        '---------------------------------
+        ' Backpressure
+        '---------------------------------
+        '
+        ' Solange der zuletzt angeforderte Frame noch nicht
+        ' tatsächlich durch RenderSurface() gelaufen ist,
+        ' wird kein neuer Simulationszustand erzeugt.
+        '
+        ' Dadurch bleibt deltaTime beim nächsten akzeptierten
+        ' Frame auf die tatsächlich vergangene Zeit bezogen.
+        '
+
+        If Not direct3DRenderer.KannNaechstenFrameRendern Then
+            Exit Sub
+        End If
 
         aktuelleFrameZeitMS = laufzeit.Elapsed.TotalMilliseconds
 
