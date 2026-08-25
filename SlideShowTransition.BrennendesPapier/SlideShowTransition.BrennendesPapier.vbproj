@@ -206,9 +206,9 @@
     <EmbeddedResource Include="Shader\RevealShaderVS.cso" />
     <EmbeddedResource Include="Shader\GradientenShaderPS.cso" />
     <EmbeddedResource Include="Shader\GradientenShaderVS.cso" />
-    <EmbeddedResource Include="Shader\PartikelComputeShaderCS.cso" />
-    <EmbeddedResource Include="Shader\PartikelRenderShaderPS.cso" />
-    <EmbeddedResource Include="Shader\PartikelRenderShaderVS.cso" />
+    <None Include="Shader\Historisch und Testing\PartikelComputeShaderCS.cso" />
+    <None Include="Shader\Historisch und Testing\PartikelRenderShaderPS.cso" />
+    <None Include="Shader\Historisch und Testing\PartikelRenderShaderVS.cso" />
     <EmbeddedResource Include="Shader\PartikelComputeShaderAPCCS.cso" />
     <EmbeddedResource Include="Shader\PartikelRenderShaderAPCPS.cso" />
     <EmbeddedResource Include="Shader\PartikelRenderShaderAPCVS.cso" />
@@ -243,10 +243,10 @@
   <ItemGroup>
     <Content Include="Shader\GradientenShader.hlsl" />
     <Content Include="Shader\PartikelComputeShaderAPC.hlsl" />
-    <Content Include="Shader\PartikelComputeShader.hlsl" />
+    <Content Include="Shader\Historisch und Testing\PartikelComputeShader.hlsl" />
     <Content Include="Shader\PartikelRenderShaderAPC.hlsl" />
     <Content Include="Shader\RevealShader.hlsl" />
-    <Content Include="Shader\PartikelRenderShader.hlsl" />
+    <Content Include="Shader\Historisch und Testing\PartikelRenderShader.hlsl" />
     <EmbeddedResource Include="Ressourcen\HelloWorld.png" />
     <Resource Include="Ressourcen\ProgrammierenWieBeiMuttern.png" />
     <Content Include="Shader\Historisch und Testing\OrangeToenung.hlsl" />
