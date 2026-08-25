@@ -37,6 +37,12 @@ Friend Class MosaikRendererAPC
     Private renderPartikelIndexUnorderedAccessView As ID3D11UnorderedAccessView
 
     '---------------------------------
+    ' APC - Indirect Draw Arguments
+    '---------------------------------
+
+    Private indirectArgumentBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' GPU-Lebendzähler
     '---------------------------------
 
@@ -194,6 +200,7 @@ Friend Class MosaikRendererAPC
         InitialisiereLebendZaehler()
 
         InitialisiereRenderPartikelIndexBuffer()
+        InitialisiereIndirectArgumentBuffer()
 
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
@@ -319,6 +326,34 @@ Friend Class MosaikRendererAPC
 
             Throw New InvalidOperationException("Die APC-Append-UAV konnte nicht erzeugt werden.")
 
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereIndirectArgumentBuffer()
+
+        Dim argumente() As UInteger
+
+        argumente = New UInteger() {
+        6UI,     ' VertexCountPerInstance
+        0UI,     ' InstanceCount (wird CopyStructureCount überschreiben)
+        0UI,     ' StartVertex
+        0UI      ' StartInstance
+    }
+
+        indirectArgumentBuffer =
+        renderDevice.CreateBuffer(
+            argumente,
+            BindFlags.None,
+            ResourceUsage.Default,
+            CpuAccessFlags.None,
+            ResourceOptionFlags.DrawIndirectArguments,
+            16,
+            0)
+
+        If indirectArgumentBuffer Is Nothing Then
+            Throw New InvalidOperationException(
+            "Der APC-IndirectArgumentBuffer konnte nicht erzeugt werden.")
         End If
 
     End Sub
@@ -804,65 +839,32 @@ Friend Class MosaikRendererAPC
 
         renderContext.UpdateSubresource(parameter, partikelBewegungsParameterBuffer)
 
-        anzahlThreadGruppen =
-        (CUInt(partikelAnzahl) +
-         THREADS_PRO_GRUPPE -
-         1UI) \ THREADS_PRO_GRUPPE
+        anzahlThreadGruppen = (CUInt(partikelAnzahl) + THREADS_PRO_GRUPPE - 1UI) \ THREADS_PRO_GRUPPE
 
         '---------------------------------
         ' Compute Shader vorbereiten
         '---------------------------------
 
         renderContext.CSSetShader(partikelBewegungsShader)
+        renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
+        renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
+        renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
 
-        renderContext.CSSetConstantBuffer(
-        0UI,
-        partikelBewegungsParameterBuffer)
-
-        renderContext.CSSetUnorderedAccessView(
-        0UI,
-        partikelUnorderedAccessView)
-
-        renderContext.CSSetUnorderedAccessView(
-        1UI,
-        lebendZaehlerView)
-
-        '
         ' APC:
         ' Append-Counter zu Beginn jedes Frames auf 0 setzen.
-        '
 
-        renderContext.CSSetUnorderedAccessView(
-        2UI,
-        renderPartikelIndexUnorderedAccessView,
-        0UI)
-
-        renderContext.CSSetShaderResource(
-        0UI,
-        flowFieldView)
-
-        renderContext.CSSetSampler(
-        0UI,
-        flowFieldSampler)
-
-        renderContext.CSSetShaderResource(
-        1UI,
-        randAbloeseFeldView)
-
-        renderContext.CSSetSampler(
-        1UI,
-        randAbloeseFeldSampler)
+        renderContext.CSSetUnorderedAccessView(2UI, renderPartikelIndexUnorderedAccessView, 0UI)
+        renderContext.CSSetShaderResource(0UI, flowFieldView)
+        renderContext.CSSetSampler(0UI, flowFieldSampler)
+        renderContext.CSSetShaderResource(1UI, randAbloeseFeldView)
+        renderContext.CSSetSampler(1UI, randAbloeseFeldSampler)
 
         '---------------------------------
         ' Partikelsimulation + APC-Aufbau
         '---------------------------------
 
-        renderContext.Dispatch(
-        anzahlThreadGruppen,
-        1UI,
-        1UI)
+        renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
-        '
         ' Der Compute Shader ist jetzt durchgelaufen.
         '
         ' Erst jetzt enthält der versteckte Append-Counter
@@ -870,11 +872,8 @@ Friend Class MosaikRendererAPC
         '
         ' UAV 2 zunächst lösen, bevor wir seinen Counter
         ' in den IndirectArgumentBuffer kopieren.
-        '
 
-        renderContext.CSSetUnorderedAccessView(
-        2UI,
-        Nothing)
+        renderContext.CopyStructureCount(indirectArgumentBuffer, 4UI, renderPartikelIndexUnorderedAccessView)
 
         '---------------------------------
         ' Compute-Ressourcen lösen
@@ -882,38 +881,16 @@ Friend Class MosaikRendererAPC
         '
         ' Der Partikelbuffer und der APC-Indexbuffer werden
         ' anschließend vom Vertexshader als SRV gelesen.
-        '
 
-        renderContext.CSSetShaderResource(
-        1UI,
-        Nothing)
-
-        renderContext.CSSetSampler(
-        1UI,
-        Nothing)
-
-        renderContext.CSSetShaderResource(
-        0UI,
-        Nothing)
-
-        renderContext.CSSetSampler(
-        0UI,
-        Nothing)
-
-        renderContext.CSSetUnorderedAccessView(
-        1UI,
-        Nothing)
-
-        renderContext.CSSetUnorderedAccessView(
-        0UI,
-        Nothing)
-
-        renderContext.CSSetConstantBuffer(
-        0UI,
-        Nothing)
-
-        renderContext.CSSetShader(
-        Nothing)
+        renderContext.CSSetUnorderedAccessView(2UI, Nothing)
+        renderContext.CSSetShaderResource(1UI, Nothing)
+        renderContext.CSSetSampler(1UI, Nothing)
+        renderContext.CSSetShaderResource(0UI, Nothing)
+        renderContext.CSSetSampler(0UI, Nothing)
+        renderContext.CSSetUnorderedAccessView(1UI, Nothing)
+        renderContext.CSSetUnorderedAccessView(0UI, Nothing)
+        renderContext.CSSetConstantBuffer(0UI, Nothing)
+        renderContext.CSSetShader(Nothing)
 
     End Sub
 
@@ -1019,6 +996,14 @@ Friend Class MosaikRendererAPC
         renderContext.PSSetShaderResource(0UI, bildView)
         renderContext.PSSetSampler(0UI, sampler)
 
+        ' APC:
+        '
+        ' VertexCountPerInstance = 6
+        ' InstanceCount          = Anzahl der vom Compute Shader
+        '                          in den AppendBuffer geschriebenen
+        '                          Partikel
+        '
+        renderContext.DrawInstancedIndirect(indirectArgumentBuffer, 0UI)
 
         renderContext.VSSetShaderResource(1UI, Nothing)
         renderContext.VSSetShaderResource(0UI, Nothing)
@@ -1095,6 +1080,7 @@ Friend Class MosaikRendererAPC
         ' APC
         '---------------------------------
 
+        Direct3DRessourceHandler.GebeFrei(indirectArgumentBuffer)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(renderPartikelIndexBuffer)
@@ -1107,6 +1093,7 @@ Friend Class MosaikRendererAPC
         Direct3DRessourceHandler.GebeFrei(partikelUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(partikelBuffer)
 
+        indirectArgumentBuffer = Nothing
         renderDevice = Nothing
         renderContext = Nothing
 
