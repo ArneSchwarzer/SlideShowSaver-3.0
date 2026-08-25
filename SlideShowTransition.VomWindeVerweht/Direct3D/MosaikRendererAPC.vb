@@ -37,7 +37,7 @@ Friend Class MosaikRendererAPC
     Private renderPartikelIndexUnorderedAccessView As ID3D11UnorderedAccessView
 
     '---------------------------------
-    ' APC - Indirect Draw Arguments
+    ' APC - Indirekte Renderargumente
     '---------------------------------
 
     Private indirectArgumentBuffer As ID3D11Buffer
@@ -865,22 +865,38 @@ Friend Class MosaikRendererAPC
 
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
-        ' Der Compute Shader ist jetzt durchgelaufen.
+        '---------------------------------
+        ' APC-Renderliste abschließen
+        '---------------------------------
         '
-        ' Erst jetzt enthält der versteckte Append-Counter
-        ' die Anzahl der tatsächlich zu rendernden Partikel.
+        ' Der Compute Shader hat jetzt alle darzustellenden
+        ' Partikelindizes in den AppendBuffer geschrieben.
         '
-        ' UAV 2 zunächst lösen, bevor wir seinen Counter
-        ' in den IndirectArgumentBuffer kopieren.
+        ' Zuerst wird die UAV-Bindung gelöst. Der interne
+        ' Append-Counter bleibt dabei erhalten.
+
+
+        renderContext.CSSetUnorderedAccessView(2UI, Nothing)
+
+        ' Anschließend wird der fertige Append-Counter direkt
+        ' in InstanceCount des DrawInstancedIndirect-Buffers kopiert.
+        '
+        ' Layout des Argumentbuffers:
+        '
+        ' Offset  0: VertexCountPerInstance = 6
+        ' Offset  4: InstanceCount          = APC-Counter
+        ' Offset  8: StartVertexLocation    = 0
+        ' Offset 12: StartInstanceLocation  = 0
+        '
 
         renderContext.CopyStructureCount(indirectArgumentBuffer, 4UI, renderPartikelIndexUnorderedAccessView)
 
         '---------------------------------
-        ' Compute-Ressourcen lösen
+        ' Übrige Compute-Ressourcen lösen
         '---------------------------------
         '
-        ' Der Partikelbuffer und der APC-Indexbuffer werden
-        ' anschließend vom Vertexshader als SRV gelesen.
+        ' Partikelbuffer und APC-Indexbuffer werden anschließend
+        ' vom Vertexshader als ShaderResources gelesen.
 
         renderContext.CSSetUnorderedAccessView(2UI, Nothing)
         renderContext.CSSetShaderResource(1UI, Nothing)
@@ -966,8 +982,11 @@ Friend Class MosaikRendererAPC
         End If
 
         '---------------------------------
-        ' Zielbild
+        ' Vollflächiger Hintergrundpass
         '---------------------------------
+        '
+        ' NeuesBild bildet die unterste Ebene des fertigen Frames.
+
 
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.VSSetShader(hintergrundVertexShader)
@@ -983,9 +1002,12 @@ Friend Class MosaikRendererAPC
         renderContext.PSSetShader(Nothing)
 
         '---------------------------------
-        ' Alte Bildpartikel darüber
-        ' APC: nur noch Render-Partikel
+        ' Sichtbare StartBild-Partikel
         '---------------------------------
+        '
+        ' APC rendert ausschließlich die Partikelindizes,
+        ' die der Compute Shader im aktuellen Frame in den
+        ' RenderPartikelIndexBuffer geschrieben hat.
 
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.VSSetShader(vertexShader)

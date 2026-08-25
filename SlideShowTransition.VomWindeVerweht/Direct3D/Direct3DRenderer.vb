@@ -335,18 +335,18 @@ Friend Class D3DRenderer
             sharedDescription = neueSharedTexture.Description
 
             backBufferDescription =
-            New Texture2DDescription(
-                sharedDescription.Format,
-                sharedDescription.Width,
-                sharedDescription.Height,
-                1UI,
-                1UI,
-                BindFlags.RenderTarget,
-                ResourceUsage.Default,
-                CpuAccessFlags.None,
-                sharedDescription.SampleDescription.Count,
-                sharedDescription.SampleDescription.Quality,
-                ResourceOptionFlags.None)
+                New Texture2DDescription(
+                    sharedDescription.Format,
+                    sharedDescription.Width,
+                    sharedDescription.Height,
+                    sharedDescription.MipLevels,
+                    sharedDescription.ArraySize,
+                    BindFlags.RenderTarget,
+                    ResourceUsage.Default,
+                    CpuAccessFlags.None,
+                    sharedDescription.SampleDescription.Count,
+                    sharedDescription.SampleDescription.Quality,
+                    ResourceOptionFlags.None)
 
             neueBackBufferTexture = renderDevice.CreateTexture2D(backBufferDescription)
 
@@ -458,8 +458,13 @@ Friend Class D3DRenderer
             ' CopyResource ist in derselben Immediate-Context-
             ' Command Queue hinter allen vorherigen Drawcalls.
             '
-            ' Die SharedTexture wird deshalb erst ganz am Ende
-            ' dieses Frames verändert.
+            ' Die SharedTexture wird während des eigentlichen
+            ' Frameaufbaus überhaupt nicht beschrieben.
+            '
+            ' Erst nachdem Hintergrund- und Partikelpass vollständig
+            ' in die private BackbufferTexture eingereiht wurden,
+            ' wird der fertige Frame als ein zusammenhängender
+            ' CopyResource-Schritt in die SharedTexture übertragen.
 
             renderContext.CopyResource(sharedTexture, backBufferTexture)
 
