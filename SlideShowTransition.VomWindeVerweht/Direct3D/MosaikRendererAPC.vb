@@ -211,6 +211,8 @@ Friend Class MosaikRendererAPC
         apcMittel = InitialisiereAPCRenderGruppe()
         apcGrob = InitialisiereAPCRenderGruppe()
 
+        InitialisiereAPCRenderListen(partikel)
+
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
 
@@ -365,6 +367,105 @@ Friend Class MosaikRendererAPC
         Return gruppe
 
     End Function
+
+    Private Sub InitialisiereAPCRenderListen(partikel() As PartikelDaten)
+
+        Dim feinIndices As List(Of UInteger)
+        Dim mittelIndices As List(Of UInteger)
+        Dim grobIndices As List(Of UInteger)
+
+        Dim index As Integer
+
+        feinIndices = New List(Of UInteger)()
+        mittelIndices = New List(Of UInteger)()
+        grobIndices = New List(Of UInteger)()
+
+        '---------------------------------
+        ' Initiale APC-LOD-Listen
+        '---------------------------------
+        '
+        ' Vor dem ersten Simulationsframe sind sämtliche
+        ' Partikel noch Bestandteil des StartBildes.
+        '
+        ' Ihre LOD-Zuordnung ist bereits beim Erzeugen des
+        ' Partikelrasters vollständig bekannt.
+        '
+        ' Deshalb werden die drei APC-Renderlisten einmalig
+        ' direkt aus den CPU-Partikeldaten aufgebaut.
+        '
+        ' Der erste sichtbare Frame ist damit bereits vollständig
+        ' definiert, bevor RequestRender() überhaupt stattfinden kann.
+
+        For index = 0 To partikel.Length - 1
+
+            Select Case CType(partikel(index).lod, PartikelLOD)
+
+                Case PartikelLOD.Fein
+
+                    feinIndices.Add(CUInt(index))
+
+                Case PartikelLOD.Mittel
+
+                    mittelIndices.Add(CUInt(index))
+
+                Case PartikelLOD.Grob
+
+                    grobIndices.Add(CUInt(index))
+
+                Case Else
+
+                    Throw New InvalidOperationException("Partikel " & index.ToString() &
+                                                        " besitzt eine ungültige LOD-Zuordnung.")
+
+            End Select
+
+        Next
+
+        BefuelleInitialeAPCRenderGruppe(apcFein, feinIndices)
+        BefuelleInitialeAPCRenderGruppe(apcMittel, mittelIndices)
+        BefuelleInitialeAPCRenderGruppe(apcGrob, grobIndices)
+
+    End Sub
+
+    Private Sub BefuelleInitialeAPCRenderGruppe(gruppe As APCRenderGruppe, indices As List(Of UInteger))
+
+        Dim indexDaten() As UInteger
+        Dim argumente() As UInteger
+
+        If gruppe Is Nothing Then
+            Throw New ArgumentNullException(NameOf(gruppe))
+        End If
+
+        If indices Is Nothing Then
+            Throw New ArgumentNullException(NameOf(indices))
+        End If
+
+        '---------------------------------
+        ' Indexdaten
+        '---------------------------------
+
+        If indices.Count > 0 Then
+
+            indexDaten = indices.ToArray()
+
+            renderContext.UpdateSubresource(indexDaten, gruppe.indexBuffer)
+
+        End If
+
+        '---------------------------------
+        ' DrawInstancedIndirect-Argumente
+        '---------------------------------
+        '
+        ' VertexCountPerInstance = 6
+        ' InstanceCount          = Anzahl dieser LOD-Gruppe
+        ' StartVertexLocation    = 0
+        ' StartInstanceLocation  = 0
+
+        argumente = New UInteger() {6UI, CUInt(indices.Count), 0UI, 0UI}
+
+        renderContext.UpdateSubresource(argumente, gruppe.indirectArgumentBuffer)
+
+    End Sub
 
     Friend Sub AktualisiereFlowField(neuesFlowField As FlowFieldDaten)
 
