@@ -132,7 +132,7 @@ Public Class ucOptionsTransition
 
 #Region "Direct Commit"
 
-    Private Sub trkPartikelGroesse_ValueChanged(sender As Object, e As EventArgs) Handles trkPartikelGroesse.ValueChanged
+    Private Sub trkPartikelGroesse_ValueChanged(sender As Object, e As EventArgs)
         'Speichert die gewählte Partikelgröße per Direct Commit.
 
         lblPartikelGroesse.Text = ErmittlePartikelGroesseAusTrackBar().ToString() & " px"
@@ -149,7 +149,7 @@ Public Class ucOptionsTransition
     End Sub
 
     Private Sub chkPartikelGroesseZufall_CheckedChanged(sender As Object, e As EventArgs) _
-        Handles chkPartikelGroesseZufall.CheckedChanged
+
         'Speichert den Zufallsmodus für die Partikelgröße
         'per Direct Commit.
 
@@ -166,7 +166,7 @@ Public Class ucOptionsTransition
 
     End Sub
 
-    Private Sub chkMixedPartikel_CheckedChanged(sender As Object, e As EventArgs) Handles chkMixedPartikel.CheckedChanged
+    Private Sub chkMixedPartikel_CheckedChanged(sender As Object, e As EventArgs)
 
         'Speichert den Mixed-Partikel-Modus per Direct Commit.
         '
