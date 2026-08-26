@@ -5,9 +5,7 @@
     Private Const REGIONEN_MIN As Integer = 8
     Private Const REGIONEN_MAX As Integer = 14
 
-    Private Const GROESSE_FEIN As Integer = 4
-    Private Const GROESSE_MITTEL As Integer = 16
-    Private Const GROESSE_GROB As Integer = 64
+    Private Shared ReadOnly PARTIKEL_GROESSEN() As Integer = {1, 2, 4, 8, 16, 32, 64, 128}
 
 #End Region
 
@@ -44,7 +42,7 @@
             Dim gefundeneGroesse As Integer
 
             kleinsterAbstand = Single.MaxValue
-            gefundeneGroesse = GROESSE_FEIN
+            gefundeneGroesse = 1
 
             For index = 0 To regionen.Length - 1
 
@@ -105,7 +103,7 @@
             regionen(index).x = CSng(zufall.NextDouble() * bildBreite)
             regionen(index).y = CSng(zufall.NextDouble() * bildHoehe)
 
-            WaehleLOD(regionen(index), zufall)
+            WaehlePartikelGroesse(regionen(index), zufall)
 
         Next
 
@@ -113,33 +111,29 @@
 
     End Function
 
-    Private Sub WaehleLOD(ByRef region As PartikelRegion, zufall As Random)
+    Private Sub WaehlePartikelGroesse(ByRef region As PartikelRegion, zufall As Random)
 
         Dim auswahl As Integer
 
-        auswahl = zufall.Next(0, 3)
+        auswahl = zufall.Next(0, PARTIKEL_GROESSEN.Length)
 
-        Select Case auswahl
+        region.partikelGroesse = PARTIKEL_GROESSEN(auswahl)
 
-            Case 0
+        If region.partikelGroesse <= 8 Then
 
-                region.lod = PartikelLOD.Fein
-                region.partikelGroesse = GROESSE_FEIN
+            region.lod = PartikelLOD.Fein
 
-            Case 1
+        ElseIf region.partikelGroesse <= 32 Then
 
-                region.lod = PartikelLOD.Mittel
-                region.partikelGroesse = GROESSE_MITTEL
+            region.lod = PartikelLOD.Mittel
 
-            Case Else
+        Else
 
-                region.lod = PartikelLOD.Grob
-                region.partikelGroesse = GROESSE_GROB
+            region.lod = PartikelLOD.Grob
 
-        End Select
+        End If
 
     End Sub
-
 #End Region
 
 End Class

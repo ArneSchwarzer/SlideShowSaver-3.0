@@ -36,11 +36,22 @@
             seed = Environment.TickCount
         End If
 
+        ' Mixed Particles verwenden ein eigenes quadratisches Subraster.
+        '
+        ' Dadurch bestimmt jede Region sowohl Breite als auch Höhe
+        ' ihrer Partikel. Der normale zeilenbasierte Rasterpfad bleibt
+        ' vollständig unverändert.
+
+        If regionFeld IsNot Nothing Then
+
+            Return ErzeugeMixedPartikelRaster(bildBreite, bildHoehe, seed, regionFeld)
+
+        End If
 
         ' Pass 1:
         ' Exakte Anzahl bestimmen, ohne Partikeldaten anzulegen.
 
-        partikelAnzahl = ErmittlePartikelAnzahl(bildBreite, bildHoehe, zielPartikelGroesse, seed, regionFeld)
+        partikelAnzahl = ErmittlePartikelAnzahl(bildBreite, bildHoehe, zielPartikelGroesse, seed)
 
         If partikelAnzahl <= 0 Then
 
@@ -58,9 +69,128 @@
         ' Mit identischem Seed exakt dasselbe Raster noch einmal
         ' erzeugen und unmittelbar in das Array schreiben.
 
-        BefuellePartikelRaster(partikel, bildBreite, bildHoehe, zielPartikelGroesse, seed, regionFeld)
+        BefuellePartikelRaster(partikel, bildBreite, bildHoehe, zielPartikelGroesse, seed)
 
         Return partikel
+
+    End Function
+
+#End Region
+
+#Region "Mixed-Partikel-Subraster"
+
+    Private Function ErzeugeMixedPartikelRaster(bildBreite As Integer, bildHoehe As Integer, seed As Integer,
+                                                regionFeld As PartikelRegionGenerator.PartikelRegionFeld) _
+                                                As PartikelDaten()
+
+        Dim partikelListe As List(Of PartikelDaten)
+        Dim partikelZufall As Random
+
+        partikelListe = New List(Of PartikelDaten)()
+
+        partikelZufall = New Random(seed Xor &H5F3759DF)
+
+        ErzeugeMixedSubraster(partikelListe, 0, 0, bildBreite, bildHoehe, bildBreite, bildHoehe, regionFeld,
+                              partikelZufall)
+
+        If partikelListe.Count <= 0 Then
+
+            Throw New InvalidOperationException("Das Mixed-Partikelraster enthält keine Partikel.")
+
+        End If
+
+        Return partikelListe.ToArray()
+
+    End Function
+
+    Private Sub ErzeugeMixedSubraster(partikelListe As List(Of PartikelDaten), x As Integer, y As Integer,
+                                      breite As Integer, hoehe As Integer, bildBreite As Integer, bildHoehe As Integer,
+                                      regionFeld As PartikelRegionGenerator.PartikelRegionFeld,
+                                      partikelZufall As Random)
+
+        Dim zielGroesse As Integer
+        Dim aktuelleX As Integer
+        Dim aktuelleY As Integer
+
+        Dim zellenBreite As Integer
+        Dim zellenHoehe As Integer
+
+        Dim zellenMitteX As Single
+        Dim zellenMitteY As Single
+
+        Dim lokaleZielGroesse As Integer
+
+        zielGroesse = ErmittleKleinstePartikelGroesse(x, y, breite, hoehe, regionFeld)
+
+        aktuelleY = y
+
+        While aktuelleY < y + hoehe
+
+            zellenHoehe = Math.Min(zielGroesse, y + hoehe - aktuelleY)
+
+            aktuelleX = x
+
+            While aktuelleX < x + breite
+
+                zellenBreite = Math.Min(zielGroesse, x + breite - aktuelleX)
+
+                zellenMitteX = aktuelleX + zellenBreite * 0.5F
+                zellenMitteY = aktuelleY + zellenHoehe * 0.5F
+
+                lokaleZielGroesse = regionFeld.ErmittlePartikelGroesse(zellenMitteX, zellenMitteY)
+
+                If lokaleZielGroesse < zielGroesse AndAlso zellenBreite > 1 AndAlso zellenHoehe > 1 Then
+
+                    ErzeugeMixedSubraster(partikelListe, aktuelleX, aktuelleY, zellenBreite, zellenHoehe, bildBreite,
+                                          bildHoehe, regionFeld, partikelZufall)
+
+                Else
+
+                    partikelListe.Add(ErzeugePartikel(aktuelleX, aktuelleY, zellenBreite, zellenHoehe, bildBreite,
+                                                      bildHoehe, zielGroesse, partikelZufall))
+
+                End If
+
+                aktuelleX += zellenBreite
+
+            End While
+
+            aktuelleY += zellenHoehe
+
+        End While
+
+    End Sub
+
+    Private Function ErmittleKleinstePartikelGroesse(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
+                                                     regionFeld As PartikelRegionGenerator.PartikelRegionFeld) _
+                                                     As Integer
+
+        Dim groesseObenLinks As Integer
+        Dim groesseObenRechts As Integer
+        Dim groesseUntenLinks As Integer
+        Dim groesseUntenRechts As Integer
+        Dim groesseMitte As Integer
+
+        Dim rechts As Single
+        Dim unten As Single
+        Dim mitteX As Single
+        Dim mitteY As Single
+
+        rechts = x + breite - 1
+        unten = y + hoehe - 1
+
+        mitteX = x + breite * 0.5F
+        mitteY = y + hoehe * 0.5F
+
+        groesseObenLinks = regionFeld.ErmittlePartikelGroesse(x, y)
+        groesseObenRechts = regionFeld.ErmittlePartikelGroesse(rechts, y)
+        groesseUntenLinks = regionFeld.ErmittlePartikelGroesse(x, unten)
+        groesseUntenRechts = regionFeld.ErmittlePartikelGroesse(rechts, unten)
+
+        groesseMitte = regionFeld.ErmittlePartikelGroesse(mitteX, mitteY)
+
+        Return Math.Min(groesseMitte, Math.Min(Math.Min(groesseObenLinks, groesseObenRechts), Math.Min(
+                    groesseUntenLinks, groesseUntenRechts)))
 
     End Function
 
@@ -69,8 +199,7 @@
 #Region "Pass 1 - Partikel zählen"
 
     Private Function ErmittlePartikelAnzahl(bildBreite As Integer, bildHoehe As Integer, zielPartikelGroesse As Integer,
-                                            seed As Integer, regionFeld As PartikelRegionGenerator.PartikelRegionFeld) _
-                                                As Integer
+                                            seed As Integer) As Integer
         Dim zufall As Random
 
         Dim aktuelleX As Integer
@@ -90,7 +219,7 @@
 
         While aktuelleY < bildHoehe
 
-            aktuelleZielGroesse = ErmittleZielPartikelGroesse(0, aktuelleY, zielPartikelGroesse, regionFeld)
+            aktuelleZielGroesse = zielPartikelGroesse
 
             zeilenHoehe = BerechneNaechsteGroesse(aktuelleZielGroesse, zufall)
 
@@ -102,7 +231,7 @@
 
             While aktuelleX < bildBreite
 
-                aktuelleZielGroesse = ErmittleZielPartikelGroesse(aktuelleX, aktuelleY, zielPartikelGroesse, regionFeld)
+                aktuelleZielGroesse = zielPartikelGroesse
 
                 breite = BerechneNaechsteGroesse(aktuelleZielGroesse, zufall)
 
@@ -129,8 +258,7 @@
 #Region "Pass 2 - Array befüllen"
 
     Private Sub BefuellePartikelRaster(partikel() As PartikelDaten, bildBreite As Integer, bildHoehe As Integer,
-                                       zielPartikelGroesse As Integer, seed As Integer,
-                                       regionFeld As PartikelRegionGenerator.PartikelRegionFeld)
+                                       zielPartikelGroesse As Integer, seed As Integer)
 
         Dim rasterZufall As Random
         Dim partikelZufall As Random
@@ -167,7 +295,7 @@
 
         While aktuelleY < bildHoehe
 
-            aktuelleZielGroesse = ErmittleZielPartikelGroesse(0, aktuelleY, zielPartikelGroesse, regionFeld)
+            aktuelleZielGroesse = zielPartikelGroesse
 
             zeilenHoehe = BerechneNaechsteGroesse(aktuelleZielGroesse, rasterZufall)
 
@@ -181,7 +309,7 @@
 
             While aktuelleX < bildBreite
 
-                aktuelleZielGroesse = ErmittleZielPartikelGroesse(aktuelleX, aktuelleY, zielPartikelGroesse, regionFeld)
+                aktuelleZielGroesse = zielPartikelGroesse
 
                 breite = BerechneNaechsteGroesse(aktuelleZielGroesse, rasterZufall)
 
@@ -289,19 +417,6 @@
         daten.gewicht *= groessenFaktor
 
         Return daten
-
-    End Function
-
-    Private Function ErmittleZielPartikelGroesse(x As Integer, y As Integer, normalePartikelGroesse As Integer,
-                                                 regionFeld As PartikelRegionGenerator.PartikelRegionFeld) As Integer
-
-        If regionFeld Is Nothing Then
-
-            Return normalePartikelGroesse
-
-        End If
-
-        Return regionFeld.ErmittlePartikelGroesse(CSng(x), CSng(y))
 
     End Function
 
