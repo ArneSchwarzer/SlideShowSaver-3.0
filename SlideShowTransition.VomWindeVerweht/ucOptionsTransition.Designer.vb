@@ -42,6 +42,7 @@ Partial Class ucOptionsTransition
         Me.rbSchwerkraftZufällig = New System.Windows.Forms.RadioButton()
         Me.rbSchwerkraftAn = New System.Windows.Forms.RadioButton()
         Me.rbSchwerkraftAus = New System.Windows.Forms.RadioButton()
+        Me.chkMixedParticles = New System.Windows.Forms.CheckBox()
         CType(Me.trkPartikelGroesse, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkWindstaerke, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkDauerAbrisskante, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -256,10 +257,21 @@ Partial Class ucOptionsTransition
         Me.rbSchwerkraftAus.Text = "Aus (Top View)"
         Me.rbSchwerkraftAus.UseVisualStyleBackColor = True
         '
+        'chkMixedParticles
+        '
+        Me.chkMixedParticles.AutoSize = True
+        Me.chkMixedParticles.Location = New System.Drawing.Point(438, 240)
+        Me.chkMixedParticles.Name = "chkMixedParticles"
+        Me.chkMixedParticles.Size = New System.Drawing.Size(294, 45)
+        Me.chkMixedParticles.TabIndex = 70
+        Me.chkMixedParticles.Text = "Gemischte Partikel"
+        Me.chkMixedParticles.UseVisualStyleBackColor = True
+        '
         'ucOptionsTransition
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Controls.Add(Me.chkMixedParticles)
         Me.Controls.Add(Me.grpSchwerkraft)
         Me.Controls.Add(Me.lblDauerAbrisskante)
         Me.Controls.Add(Me.lblNtrkDauerAbrisskante)
@@ -308,4 +320,5 @@ Partial Class ucOptionsTransition
     Friend WithEvents rbSchwerkraftZufällig As Windows.Forms.RadioButton
     Friend WithEvents rbSchwerkraftAn As Windows.Forms.RadioButton
     Friend WithEvents rbSchwerkraftAus As Windows.Forms.RadioButton
+    Friend WithEvents chkMixedParticles As Windows.Forms.CheckBox
 End Class
