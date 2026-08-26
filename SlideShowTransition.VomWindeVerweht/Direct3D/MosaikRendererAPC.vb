@@ -211,8 +211,6 @@ Friend Class MosaikRendererAPC
         apcMittel = InitialisiereAPCRenderGruppe()
         apcGrob = InitialisiereAPCRenderGruppe()
 
-        InitialisiereAPCRenderListen(partikel)
-
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
 
@@ -227,6 +225,16 @@ Friend Class MosaikRendererAPC
         InitialisierePartikelBewegungsParameterBuffer()
 
         AktualisiereRenderParameter()
+
+        '---------------------------------
+        ' Initialer APC-Build
+        '---------------------------------
+        '
+        ' Der erste sichtbare Frame darf erst angefordert werden,
+        ' nachdem die drei LOD-Renderlisten vollständig auf der GPU
+        ' aufgebaut wurden.
+
+        InitialisiereAPCRenderListen()
 
     End Sub
 
@@ -367,105 +375,6 @@ Friend Class MosaikRendererAPC
         Return gruppe
 
     End Function
-
-    Private Sub InitialisiereAPCRenderListen(partikel() As PartikelDaten)
-
-        Dim feinIndices As List(Of UInteger)
-        Dim mittelIndices As List(Of UInteger)
-        Dim grobIndices As List(Of UInteger)
-
-        Dim index As Integer
-
-        feinIndices = New List(Of UInteger)()
-        mittelIndices = New List(Of UInteger)()
-        grobIndices = New List(Of UInteger)()
-
-        '---------------------------------
-        ' Initiale APC-LOD-Listen
-        '---------------------------------
-        '
-        ' Vor dem ersten Simulationsframe sind sämtliche
-        ' Partikel noch Bestandteil des StartBildes.
-        '
-        ' Ihre LOD-Zuordnung ist bereits beim Erzeugen des
-        ' Partikelrasters vollständig bekannt.
-        '
-        ' Deshalb werden die drei APC-Renderlisten einmalig
-        ' direkt aus den CPU-Partikeldaten aufgebaut.
-        '
-        ' Der erste sichtbare Frame ist damit bereits vollständig
-        ' definiert, bevor RequestRender() überhaupt stattfinden kann.
-
-        For index = 0 To partikel.Length - 1
-
-            Select Case CType(partikel(index).lod, PartikelLOD)
-
-                Case PartikelLOD.Fein
-
-                    feinIndices.Add(CUInt(index))
-
-                Case PartikelLOD.Mittel
-
-                    mittelIndices.Add(CUInt(index))
-
-                Case PartikelLOD.Grob
-
-                    grobIndices.Add(CUInt(index))
-
-                Case Else
-
-                    Throw New InvalidOperationException("Partikel " & index.ToString() &
-                                                        " besitzt eine ungültige LOD-Zuordnung.")
-
-            End Select
-
-        Next
-
-        BefuelleInitialeAPCRenderGruppe(apcFein, feinIndices)
-        BefuelleInitialeAPCRenderGruppe(apcMittel, mittelIndices)
-        BefuelleInitialeAPCRenderGruppe(apcGrob, grobIndices)
-
-    End Sub
-
-    Private Sub BefuelleInitialeAPCRenderGruppe(gruppe As APCRenderGruppe, indices As List(Of UInteger))
-
-        Dim indexDaten() As UInteger
-        Dim argumente() As UInteger
-
-        If gruppe Is Nothing Then
-            Throw New ArgumentNullException(NameOf(gruppe))
-        End If
-
-        If indices Is Nothing Then
-            Throw New ArgumentNullException(NameOf(indices))
-        End If
-
-        '---------------------------------
-        ' Indexdaten
-        '---------------------------------
-
-        If indices.Count > 0 Then
-
-            indexDaten = indices.ToArray()
-
-            renderContext.UpdateSubresource(indexDaten, gruppe.indexBuffer)
-
-        End If
-
-        '---------------------------------
-        ' DrawInstancedIndirect-Argumente
-        '---------------------------------
-        '
-        ' VertexCountPerInstance = 6
-        ' InstanceCount          = Anzahl dieser LOD-Gruppe
-        ' StartVertexLocation    = 0
-        ' StartInstanceLocation  = 0
-
-        argumente = New UInteger() {6UI, CUInt(indices.Count), 0UI, 0UI}
-
-        renderContext.UpdateSubresource(argumente, gruppe.indirectArgumentBuffer)
-
-    End Sub
 
     Friend Sub AktualisiereFlowField(neuesFlowField As FlowFieldDaten)
 
@@ -941,26 +850,28 @@ Friend Class MosaikRendererAPC
 
     End Sub
 
+    Friend Sub InitialisiereAPCRenderListen()
+
+        BaueAPCRenderListenAuf(0.0F, 0.0F, 0.0F)
+
+    End Sub
+
 #End Region
 
 #Region "Simulation"
 
-    Friend Sub Simuliere(deltaTime As Single, abloeseProgress As Single, gravitation As Single)
+    Private Sub BaueAPCRenderListenAuf(deltaTime As Single, abloeseProgress As Single, gravitation As Single)
 
         Const THREADS_PRO_GRUPPE As UInteger = 64UI
 
         Dim parameter As PartikelBewegungsParameter
         Dim anzahlThreadGruppen As UInteger
 
-        If deltaTime <= 0.0F Then
-            Exit Sub
-        End If
-
         If partikelAnzahl <= 0 Then
             Exit Sub
         End If
 
-        parameter.deltaTime = deltaTime
+        parameter.deltaTime = Math.Max(0.0F, deltaTime)
         parameter.renderBreite = CSng(renderBreite)
         parameter.renderHoehe = CSng(renderHoehe)
         parameter.partikelAnzahl = CUInt(partikelAnzahl)
@@ -980,8 +891,10 @@ Friend Class MosaikRendererAPC
 
         renderContext.CSSetShader(partikelBewegungsShader)
         renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
+
         renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
         renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
+
         '---------------------------------
         ' APC-LOD-Listen zurücksetzen
         '---------------------------------
@@ -992,11 +905,12 @@ Friend Class MosaikRendererAPC
 
         renderContext.CSSetShaderResource(0UI, flowFieldView)
         renderContext.CSSetSampler(0UI, flowFieldSampler)
+
         renderContext.CSSetShaderResource(1UI, randAbloeseFeldView)
         renderContext.CSSetSampler(1UI, randAbloeseFeldSampler)
 
         '---------------------------------
-        ' Partikelsimulation + APC-Aufbau
+        ' Partikelzustand + APC-Aufbau
         '---------------------------------
 
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
@@ -1017,14 +931,31 @@ Friend Class MosaikRendererAPC
         renderContext.CopyStructureCount(apcMittel.indirectArgumentBuffer, 4UI, apcMittel.indexUnorderedAccessView)
         renderContext.CopyStructureCount(apcGrob.indirectArgumentBuffer, 4UI, apcGrob.indexUnorderedAccessView)
 
+        '---------------------------------
+        ' Compute Pipeline aufräumen
+        '---------------------------------
+
         renderContext.CSSetShaderResource(1UI, Nothing)
         renderContext.CSSetSampler(1UI, Nothing)
+
         renderContext.CSSetShaderResource(0UI, Nothing)
         renderContext.CSSetSampler(0UI, Nothing)
+
         renderContext.CSSetUnorderedAccessView(1UI, Nothing)
         renderContext.CSSetUnorderedAccessView(0UI, Nothing)
+
         renderContext.CSSetConstantBuffer(0UI, Nothing)
         renderContext.CSSetShader(Nothing)
+
+    End Sub
+
+    Friend Sub Simuliere(deltaTime As Single, abloeseProgress As Single, gravitation As Single)
+
+        If deltaTime <= 0.0F Then
+            Exit Sub
+        End If
+
+        BaueAPCRenderListenAuf(deltaTime, abloeseProgress, gravitation)
 
     End Sub
 
