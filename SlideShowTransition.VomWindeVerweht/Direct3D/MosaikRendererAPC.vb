@@ -29,18 +29,12 @@ Friend Class MosaikRendererAPC
     Private partikelUnorderedAccessView As ID3D11UnorderedAccessView
 
     '---------------------------------
-    ' APC - Render-Partikelindizes
+    ' APC - LOD-Rendergruppen
     '---------------------------------
 
-    Private renderPartikelIndexBuffer As ID3D11Buffer
-    Private renderPartikelIndexView As ID3D11ShaderResourceView
-    Private renderPartikelIndexUnorderedAccessView As ID3D11UnorderedAccessView
-
-    '---------------------------------
-    ' APC - Indirekte Renderargumente
-    '---------------------------------
-
-    Private indirectArgumentBuffer As ID3D11Buffer
+    Private apcFein As APCRenderGruppe
+    Private apcMittel As APCRenderGruppe
+    Private apcGrob As APCRenderGruppe
 
     '---------------------------------
     ' GPU-Lebendzähler
@@ -72,8 +66,12 @@ Friend Class MosaikRendererAPC
     ' Render-Shader
     '---------------------------------
 
-    Private vertexShader As ID3D11VertexShader
+    Private vertexShaderFein As ID3D11VertexShader
+    Private vertexShaderMittel As ID3D11VertexShader
+    Private vertexShaderGrob As ID3D11VertexShader
+
     Private pixelShader As ID3D11PixelShader
+
     Private renderParameterBuffer As ID3D11Buffer
 
     '---------------------------------
@@ -112,6 +110,16 @@ Friend Class MosaikRendererAPC
 #End Region
 
 #Region "Structures"
+
+    Private Class APCRenderGruppe
+
+        Public indexBuffer As ID3D11Buffer
+        Public indexView As ID3D11ShaderResourceView
+        Public indexUnorderedAccessView As ID3D11UnorderedAccessView
+
+        Public indirectArgumentBuffer As ID3D11Buffer
+
+    End Class
 
     <StructLayout(LayoutKind.Sequential)>
     Private Structure RenderParameter
@@ -199,8 +207,9 @@ Friend Class MosaikRendererAPC
         InitialisierePartikelBuffer(partikel)
         InitialisiereLebendZaehler()
 
-        InitialisiereRenderPartikelIndexBuffer()
-        InitialisiereIndirectArgumentBuffer()
+        apcFein = InitialisiereAPCRenderGruppe()
+        apcMittel = InitialisiereAPCRenderGruppe()
+        apcGrob = InitialisiereAPCRenderGruppe()
 
         InitialisiereFlowField(flowField)
         InitialisiereRandAbloeseFeld(randAbloeseFeld)
@@ -273,10 +282,20 @@ Friend Class MosaikRendererAPC
 
     End Sub
 
-    Private Sub InitialisiereRenderPartikelIndexBuffer()
+    Private Function InitialisiereAPCRenderGruppe() As APCRenderGruppe
+
+        Dim gruppe As APCRenderGruppe
 
         Dim description As BufferDescription
         Dim viewDescription As UnorderedAccessViewDescription
+
+        Dim argumente() As UInteger
+
+        gruppe = New APCRenderGruppe()
+
+        '---------------------------------
+        ' APC-Indexbuffer
+        '---------------------------------
 
         description = New BufferDescription()
 
@@ -287,61 +306,46 @@ Friend Class MosaikRendererAPC
         description.MiscFlags = ResourceOptionFlags.BufferStructured
         description.StructureByteStride = 4UI
 
-        renderPartikelIndexBuffer = renderDevice.CreateBuffer(description)
+        gruppe.indexBuffer = renderDevice.CreateBuffer(description)
 
-        If renderPartikelIndexBuffer Is Nothing Then
+        If gruppe.indexBuffer Is Nothing Then
 
-            Throw New InvalidOperationException(
-            "Der APC-RenderPartikelIndexBuffer konnte nicht erzeugt werden.")
-
-        End If
-
-        renderPartikelIndexView = renderDevice.CreateShaderResourceView(renderPartikelIndexBuffer)
-
-        If renderPartikelIndexView Is Nothing Then
-
-            Throw New InvalidOperationException(
-            "Die ShaderResourceView des APC-RenderPartikelIndexBuffers konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException("Der APC-LOD-Indexbuffer konnte nicht erzeugt werden.")
 
         End If
 
+        gruppe.indexView = renderDevice.CreateShaderResourceView(gruppe.indexBuffer)
 
-        ' Entscheidend:
-        '
-        ' Der Buffer bekommt einen versteckten GPU-Counter.
-        ' AppendStructuredBuffer.Append() erhöht diesen automatisch.
+        If gruppe.indexView Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Die ShaderResourceView des APC-LOD-Indexbuffers konnte nicht erzeugt werden.")
+
+        End If
 
         viewDescription =
         New UnorderedAccessViewDescription(
-            renderPartikelIndexBuffer,
+            gruppe.indexBuffer,
             Format.Unknown,
             0UI,
             CUInt(partikelAnzahl),
             BufferUnorderedAccessViewFlags.Append)
 
-        renderPartikelIndexUnorderedAccessView = renderDevice.CreateUnorderedAccessView(renderPartikelIndexBuffer,
-                                                                                        viewDescription)
+        gruppe.indexUnorderedAccessView = renderDevice.CreateUnorderedAccessView(gruppe.indexBuffer, viewDescription)
 
-        If renderPartikelIndexUnorderedAccessView Is Nothing Then
+        If gruppe.indexUnorderedAccessView Is Nothing Then
 
-            Throw New InvalidOperationException("Die APC-Append-UAV konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException("Die Append-UAV der APC-LOD-Gruppe konnte nicht erzeugt werden.")
 
         End If
 
-    End Sub
+        '---------------------------------
+        ' IndirectArgumentBuffer
+        '---------------------------------
 
-    Private Sub InitialisiereIndirectArgumentBuffer()
+        argumente = New UInteger() {6UI, 0UI, 0UI, 0UI}
 
-        Dim argumente() As UInteger
-
-        argumente = New UInteger() {
-        6UI,     ' VertexCountPerInstance
-        0UI,     ' InstanceCount (wird CopyStructureCount überschreiben)
-        0UI,     ' StartVertex
-        0UI      ' StartInstance
-    }
-
-        indirectArgumentBuffer =
+        gruppe.indirectArgumentBuffer =
         renderDevice.CreateBuffer(
             argumente,
             BindFlags.None,
@@ -351,12 +355,16 @@ Friend Class MosaikRendererAPC
             16,
             0)
 
-        If indirectArgumentBuffer Is Nothing Then
+        If gruppe.indirectArgumentBuffer Is Nothing Then
+
             Throw New InvalidOperationException(
-            "Der APC-IndirectArgumentBuffer konnte nicht erzeugt werden.")
+            "Der IndirectArgumentBuffer der APC-LOD-Gruppe konnte nicht erzeugt werden.")
+
         End If
 
-    End Sub
+        Return gruppe
+
+    End Function
 
     Friend Sub AktualisiereFlowField(neuesFlowField As FlowFieldDaten)
 
@@ -684,25 +692,49 @@ Friend Class MosaikRendererAPC
 
     Private Sub InitialisiereShader()
 
-        Dim vertexShaderCode() As Byte
+        Dim vertexShaderFeinCode() As Byte
+        Dim vertexShaderMittelCode() As Byte
+        Dim vertexShaderGrobCode() As Byte
+
         Dim pixelShaderCode() As Byte
 
-        vertexShaderCode = D3DRenderer.LadeShaderBytecode("MosaikShaderAPCVS.cso")
-        pixelShaderCode = D3DRenderer.LadeShaderBytecode("MosaikShaderAPCPS.cso")
+        vertexShaderFeinCode = D3DRenderer.LadeShaderBytecode("MosaikVertexShaderFeinVS.cso")
+        vertexShaderMittelCode = D3DRenderer.LadeShaderBytecode("MosaikVertexShaderMittelVS.cso")
+        vertexShaderGrobCode = D3DRenderer.LadeShaderBytecode("MosaikVertexShaderGrobVS.cso")
 
-        vertexShader = renderDevice.CreateVertexShader(vertexShaderCode)
+        pixelShaderCode = D3DRenderer.LadeShaderBytecode("MosaikPixelShaderPS.cso")
+
+        vertexShaderFein = renderDevice.CreateVertexShader(vertexShaderFeinCode)
+        vertexShaderMittel = renderDevice.CreateVertexShader(vertexShaderMittelCode)
+        vertexShaderGrob = renderDevice.CreateVertexShader(vertexShaderGrobCode)
 
         pixelShader = renderDevice.CreatePixelShader(pixelShaderCode)
 
-        If vertexShader Is Nothing Then
+        If vertexShaderFein Is Nothing Then
 
-            Throw New InvalidOperationException("Der Mosaik-Vertexshader konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException(
+            "Der Mosaik-Vertexshader Fein konnte nicht erzeugt werden.")
+
+        End If
+
+        If vertexShaderMittel Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Mosaik-Vertexshader Mittel konnte nicht erzeugt werden.")
+
+        End If
+
+        If vertexShaderGrob Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Mosaik-Vertexshader Grob konnte nicht erzeugt werden.")
 
         End If
 
         If pixelShader Is Nothing Then
 
-            Throw New InvalidOperationException("Der Mosaik-Pixelshader konnte nicht erzeugt werden.")
+            Throw New InvalidOperationException(
+            "Der Mosaik-Pixelshader konnte nicht erzeugt werden.")
 
         End If
 
@@ -849,11 +881,14 @@ Friend Class MosaikRendererAPC
         renderContext.CSSetConstantBuffer(0UI, partikelBewegungsParameterBuffer)
         renderContext.CSSetUnorderedAccessView(0UI, partikelUnorderedAccessView)
         renderContext.CSSetUnorderedAccessView(1UI, lebendZaehlerView)
+        '---------------------------------
+        ' APC-LOD-Listen zurücksetzen
+        '---------------------------------
 
-        ' APC:
-        ' Append-Counter zu Beginn jedes Frames auf 0 setzen.
+        renderContext.CSSetUnorderedAccessView(2UI, apcFein.indexUnorderedAccessView, 0UI)
+        renderContext.CSSetUnorderedAccessView(3UI, apcMittel.indexUnorderedAccessView, 0UI)
+        renderContext.CSSetUnorderedAccessView(4UI, apcGrob.indexUnorderedAccessView, 0UI)
 
-        renderContext.CSSetUnorderedAccessView(2UI, renderPartikelIndexUnorderedAccessView, 0UI)
         renderContext.CSSetShaderResource(0UI, flowFieldView)
         renderContext.CSSetSampler(0UI, flowFieldSampler)
         renderContext.CSSetShaderResource(1UI, randAbloeseFeldView)
@@ -866,39 +901,21 @@ Friend Class MosaikRendererAPC
         renderContext.Dispatch(anzahlThreadGruppen, 1UI, 1UI)
 
         '---------------------------------
-        ' APC-Renderliste abschließen
+        ' APC-LOD-Listen abschließen
         '---------------------------------
-        '
-        ' Der Compute Shader hat jetzt alle darzustellenden
-        ' Partikelindizes in den AppendBuffer geschrieben.
-        '
-        ' Zuerst wird die UAV-Bindung gelöst. Der interne
-        ' Append-Counter bleibt dabei erhalten.
 
-
+        renderContext.CSSetUnorderedAccessView(4UI, Nothing)
+        renderContext.CSSetUnorderedAccessView(3UI, Nothing)
         renderContext.CSSetUnorderedAccessView(2UI, Nothing)
 
-        ' Anschließend wird der fertige Append-Counter direkt
-        ' in InstanceCount des DrawInstancedIndirect-Buffers kopiert.
-        '
-        ' Layout des Argumentbuffers:
-        '
-        ' Offset  0: VertexCountPerInstance = 6
-        ' Offset  4: InstanceCount          = APC-Counter
-        ' Offset  8: StartVertexLocation    = 0
-        ' Offset 12: StartInstanceLocation  = 0
-        '
-
-        renderContext.CopyStructureCount(indirectArgumentBuffer, 4UI, renderPartikelIndexUnorderedAccessView)
-
         '---------------------------------
-        ' Übrige Compute-Ressourcen lösen
+        ' InstanceCounts übernehmen
         '---------------------------------
-        '
-        ' Partikelbuffer und APC-Indexbuffer werden anschließend
-        ' vom Vertexshader als ShaderResources gelesen.
 
-        renderContext.CSSetUnorderedAccessView(2UI, Nothing)
+        renderContext.CopyStructureCount(apcFein.indirectArgumentBuffer, 4UI, apcFein.indexUnorderedAccessView)
+        renderContext.CopyStructureCount(apcMittel.indirectArgumentBuffer, 4UI, apcMittel.indexUnorderedAccessView)
+        renderContext.CopyStructureCount(apcGrob.indirectArgumentBuffer, 4UI, apcGrob.indexUnorderedAccessView)
+
         renderContext.CSSetShaderResource(1UI, Nothing)
         renderContext.CSSetSampler(1UI, Nothing)
         renderContext.CSSetShaderResource(0UI, Nothing)
@@ -1010,22 +1027,15 @@ Friend Class MosaikRendererAPC
         ' RenderPartikelIndexBuffer geschrieben hat.
 
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
-        renderContext.VSSetShader(vertexShader)
         renderContext.VSSetShaderResource(0UI, partikelView)
-        renderContext.VSSetShaderResource(1UI, renderPartikelIndexView)
         renderContext.VSSetConstantBuffer(0UI, renderParameterBuffer)
         renderContext.PSSetShader(pixelShader)
         renderContext.PSSetShaderResource(0UI, bildView)
         renderContext.PSSetSampler(0UI, sampler)
 
-        ' APC:
-        '
-        ' VertexCountPerInstance = 6
-        ' InstanceCount          = Anzahl der vom Compute Shader
-        '                          in den AppendBuffer geschriebenen
-        '                          Partikel
-        '
-        renderContext.DrawInstancedIndirect(indirectArgumentBuffer, 0UI)
+        RendereLODGruppe(vertexShaderFein, apcFein)
+        RendereLODGruppe(vertexShaderMittel, apcMittel)
+        RendereLODGruppe(vertexShaderGrob, apcGrob)
 
         renderContext.VSSetShaderResource(1UI, Nothing)
         renderContext.VSSetShaderResource(0UI, Nothing)
@@ -1034,6 +1044,25 @@ Friend Class MosaikRendererAPC
         renderContext.PSSetSampler(0UI, Nothing)
         renderContext.VSSetShader(Nothing)
         renderContext.PSSetShader(Nothing)
+
+    End Sub
+
+    Private Sub RendereLODGruppe(shader As ID3D11VertexShader, gruppe As APCRenderGruppe)
+
+        If shader Is Nothing Then
+            Exit Sub
+        End If
+
+        If gruppe Is Nothing Then
+            Exit Sub
+        End If
+
+        renderContext.VSSetShader(shader)
+        renderContext.VSSetShaderResource(1UI, gruppe.indexView)
+
+        renderContext.DrawInstancedIndirect(gruppe.indirectArgumentBuffer, 0UI)
+
+        renderContext.VSSetShaderResource(1UI, Nothing)
 
     End Sub
 
@@ -1080,7 +1109,9 @@ Friend Class MosaikRendererAPC
 
         Direct3DRessourceHandler.GebeFrei(renderParameterBuffer)
         Direct3DRessourceHandler.GebeFrei(pixelShader)
-        Direct3DRessourceHandler.GebeFrei(vertexShader)
+        Direct3DRessourceHandler.GebeFrei(vertexShaderGrob)
+        Direct3DRessourceHandler.GebeFrei(vertexShaderMittel)
+        Direct3DRessourceHandler.GebeFrei(vertexShaderFein)
 
         '---------------------------------
         ' Hintergrundshader
@@ -1102,10 +1133,9 @@ Friend Class MosaikRendererAPC
         ' APC
         '---------------------------------
 
-        Direct3DRessourceHandler.GebeFrei(indirectArgumentBuffer)
-        Direct3DRessourceHandler.GebeFrei(renderPartikelIndexView)
-        Direct3DRessourceHandler.GebeFrei(renderPartikelIndexUnorderedAccessView)
-        Direct3DRessourceHandler.GebeFrei(renderPartikelIndexBuffer)
+        BeendeUndBereinigeAPCRenderGruppe(apcGrob)
+        BeendeUndBereinigeAPCRenderGruppe(apcMittel)
+        BeendeUndBereinigeAPCRenderGruppe(apcFein)
 
         '---------------------------------
         ' Partikel
@@ -1115,13 +1145,27 @@ Friend Class MosaikRendererAPC
         Direct3DRessourceHandler.GebeFrei(partikelUnorderedAccessView)
         Direct3DRessourceHandler.GebeFrei(partikelBuffer)
 
-        indirectArgumentBuffer = Nothing
         renderDevice = Nothing
         renderContext = Nothing
 
         partikelAnzahl = 0
         renderBreite = 0
         renderHoehe = 0
+
+    End Sub
+
+    Private Sub BeendeUndBereinigeAPCRenderGruppe(ByRef gruppe As APCRenderGruppe)
+
+        If gruppe Is Nothing Then
+            Exit Sub
+        End If
+
+        Direct3DRessourceHandler.GebeFrei(gruppe.indirectArgumentBuffer)
+        Direct3DRessourceHandler.GebeFrei(gruppe.indexView)
+        Direct3DRessourceHandler.GebeFrei(gruppe.indexUnorderedAccessView)
+        Direct3DRessourceHandler.GebeFrei(gruppe.indexBuffer)
+
+        gruppe = Nothing
 
     End Sub
 

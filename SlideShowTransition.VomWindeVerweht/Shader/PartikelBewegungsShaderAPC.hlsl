@@ -18,8 +18,9 @@ struct PartikelDaten
 
 RWStructuredBuffer<PartikelDaten> PartikelBuffer : register(u0);
 RWStructuredBuffer<int> LebendZaehler : register(u1);
-AppendStructuredBuffer<uint> RenderPartikelIndices : register(u2);
-
+AppendStructuredBuffer<uint> RenderPartikelIndicesFein : register(u2);
+AppendStructuredBuffer<uint> RenderPartikelIndicesMittel : register(u3);
+AppendStructuredBuffer<uint> RenderPartikelIndicesGrob : register(u4);
 Texture2D<float2> FlowField : register(t0);
 SamplerState FlowFieldSampler : register(s0);
 
@@ -90,6 +91,22 @@ float Hash01(uint wert)
     return
         (HashUint(wert) & 0x00FFFFFF) /
         16777215.0;
+}
+
+void FuegePartikelZurRenderListeHinzu(uint index, int lod)
+{
+    if (lod == 0)
+    {
+        RenderPartikelIndicesFein.Append(index);
+    }
+    else if (lod == 1)
+    {
+        RenderPartikelIndicesMittel.Append(index);
+    }
+    else
+    {
+        RenderPartikelIndicesGrob.Append(index);
+    }
 }
 
 /* 
@@ -229,7 +246,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
          * Ruhend, aber sichtbar:
          * Das Partikel gehört weiterhin zum StartBild.
          */
-            RenderPartikelIndices.Append(index);
+            FuegePartikelZurRenderListeHinzu(index, partikel.lod);
 
             return;
         }
@@ -409,6 +426,34 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     /*
      * ---------------------------------------------------------
+     * Eigenrotation integrieren.
+     * ---------------------------------------------------------
+     *
+     * LOD Fein:
+     *     Keine Rotation.
+     *
+     * LOD Mittel:
+     *     Nur Rotation um die Z-Achse.
+     *
+     * LOD Grob:
+     *     Vollständige XYZ-Rotation.
+     *
+     * Ruhende Partikel gelangen nicht bis hierher.
+     * Sie werden weiter oben bereits in die APC-Renderliste
+     * geschrieben und verlassen den Compute Shader.
+     */
+
+    if (partikel.lod == 1)
+    {
+        partikel.rotation.z += partikel.rotationsGeschwindigkeit.z * deltaTime;
+    }
+    else if (partikel.lod == 2)
+    {
+        partikel.rotation += partikel.rotationsGeschwindigkeit * deltaTime;
+    }
+    
+    /*
+     * ---------------------------------------------------------
      * Bildschirmtod.
      * ---------------------------------------------------------
      */
@@ -447,10 +492,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
     {
         int vorherigerWert;
 
-        InterlockedAdd(
-        LebendZaehler[0],
-        -1,
-        vorherigerWert);
+        InterlockedAdd(LebendZaehler[0], -1, vorherigerWert);
     }
     else
     {
@@ -458,7 +500,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
      * Nur tatsächlich noch darzustellende Partikel
      * landen im APC-Renderindexbuffer.
      */
-        RenderPartikelIndices.Append(index);
+        FuegePartikelZurRenderListeHinzu(index, partikel.lod);
     }
 
     PartikelBuffer[index] = partikel;

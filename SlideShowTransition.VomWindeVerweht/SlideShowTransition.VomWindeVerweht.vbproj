@@ -136,7 +136,7 @@
     <Compile Include="Direct3D\Direct3DRenderer.vb" />
     <Compile Include="Direct3D\Direct3DResourceHandler.vb" />
     <Compile Include="Direct3D\MosaikRendererAPC.vb" />
-    <Compile Include="Direct3D\MosaikRenderer.vb" />
+    <Compile Include="Direct3D\Historisch &amp; Testing\MosaikRenderer.vb" />
     <Compile Include="Direct3D\PartikelDaten.vb" />
     <Compile Include="Generatoren\DuenenFeldDaten.vb" />
     <Compile Include="Generatoren\DuenenGenerator.vb" />
@@ -192,14 +192,18 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Shader\MosaikShaderPS.cso" />
-    <EmbeddedResource Include="Shader\MosaikShaderVS.cso" />
-    <EmbeddedResource Include="Shader\PartikelBewegungsShaderCS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\MosaikShaderPS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\MosaikShaderVS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\PartikelBewegungsShaderCS.cso" />
     <EmbeddedResource Include="Shader\HintergrundShaderPS.cso" />
     <EmbeddedResource Include="Shader\HintergrundShaderVS.cso" />
-    <EmbeddedResource Include="Shader\MosaikShaderAPCPS.cso" />
-    <EmbeddedResource Include="Shader\MosaikShaderAPCVS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\MosaikShaderAPCPS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\MosaikShaderAPCVS.cso" />
     <EmbeddedResource Include="Shader\PartikelBewegungsShaderAPCCS.cso" />
+    <EmbeddedResource Include="Shader\MosaikPixelShaderPS.cso" />
+    <EmbeddedResource Include="Shader\MosaikVertexShaderFeinVS.cso" />
+    <EmbeddedResource Include="Shader\MosaikVertexShaderGrobVS.cso" />
+    <EmbeddedResource Include="Shader\MosaikVertexShaderMittelVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lang\" />
@@ -224,10 +228,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shader\HintergrundShader.hlsl" />
-    <Content Include="Shader\MosaikShaderAPC.hlsl" />
-    <Content Include="Shader\MosaikShader.hlsl" />
+    <Content Include="Shader\Historisch &amp; Testing\MosaikShaderAPC.hlsl" />
+    <Content Include="Shader\Historisch &amp; Testing\MosaikShader.hlsl" />
+    <Content Include="Shader\MosaikPixelShader.hlsl" />
+    <Content Include="Shader\MosaikShaderCommon.hlsli" />
+    <Content Include="Shader\MosaikVertexShaderFein.hlsl" />
+    <Content Include="Shader\MosaikVertexShaderGrob.hlsl" />
+    <Content Include="Shader\MosaikVertexShaderMittel.hlsl" />
     <EmbeddedResource Include="Shader\PartikelBewegungsShaderAPC.hlsl" />
-    <Content Include="Shader\PartikelBewegungsShader.hlsl" />
+    <Content Include="Shader\Historisch &amp; Testing\PartikelBewegungsShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets" Condition="Exists('..\packages\TqkLibrary.Wpf.Interop.DirectX.1.1.21\build\TqkLibrary.Wpf.Interop.DirectX.targets')" />

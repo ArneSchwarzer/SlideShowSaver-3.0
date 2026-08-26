@@ -584,6 +584,12 @@
         Dim gewichtsZufall As Double
         Dim groessenFaktor As Single
 
+        Dim rotationsRichtung As Single
+
+        Dim rotationsGeschwindigkeitX As Single
+        Dim rotationsGeschwindigkeitY As Single
+        Dim rotationsGeschwindigkeitZ As Single
+
         daten = New PartikelDaten()
 
         daten.positionX = x + breite * 0.5F
@@ -613,6 +619,56 @@
         mittlereGroesse = (breite + hoehe) * 0.5F
 
         daten.lod = CInt(BestimmeLOD(mittlereGroesse))
+
+        '---------------------------------
+        ' Rotationsgeschwindigkeit
+        '---------------------------------
+        '
+        ' Ruhende Partikel starten vollständig ungedreht.
+        '
+        ' Erst nach dem Ablösen integriert der Compute Shader
+        ' die hier festgelegten Winkelgeschwindigkeiten.
+        '
+        ' Fein:   keine Rotation        
+        ' Mittel: einfache Rotation um die Z-Achse
+        ' Grob:   vollständige XYZ-Rotation
+
+        Select Case CType(daten.lod, PartikelLOD)
+
+            Case PartikelLOD.Fein
+
+                daten.rotationsGeschwindigkeitX = 0.0F
+                daten.rotationsGeschwindigkeitY = 0.0F
+                daten.rotationsGeschwindigkeitZ = 0.0F
+
+            Case PartikelLOD.Mittel
+
+                rotationsRichtung = If(zufall.Next(0, 2) = 0, -1.0F, 1.0F)
+
+                ' ca. 45° bis 150° pro Sekunde
+
+                rotationsGeschwindigkeitZ = rotationsRichtung * CSng(0.8 + zufall.NextDouble() * 1.8)
+
+                daten.rotationsGeschwindigkeitX = 0.0F
+                daten.rotationsGeschwindigkeitY = 0.0F
+                daten.rotationsGeschwindigkeitZ = rotationsGeschwindigkeitZ
+
+            Case PartikelLOD.Grob
+
+                ' Grobe Partikel dürfen räumlich taumeln.
+                '
+                ' Die drei Achsen werden bewusst unabhängig
+                ' voneinander gewürfelt.
+
+                rotationsGeschwindigkeitX = CSng(-2.0 + zufall.NextDouble() * 4.0)
+                rotationsGeschwindigkeitY = CSng(-2.0 + zufall.NextDouble() * 4.0)
+                rotationsGeschwindigkeitZ = CSng(-1.5 + zufall.NextDouble() * 3.0)
+
+                daten.rotationsGeschwindigkeitX = rotationsGeschwindigkeitX
+                daten.rotationsGeschwindigkeitY = rotationsGeschwindigkeitY
+                daten.rotationsGeschwindigkeitZ = rotationsGeschwindigkeitZ
+
+        End Select
 
         daten.status = CInt(PartikelStatus.Ruhend)
 
