@@ -31,18 +31,20 @@
 
         End Sub
 
-        Public Function ErmittlePartikelGroesse(x As Single, y As Single) As Integer
+        Public Function ErmittleRegionIndex(x As Single, y As Single) As Integer
 
             Dim index As Integer
+
             Dim abstandX As Single
             Dim abstandY As Single
             Dim abstandQuadrat As Single
 
             Dim kleinsterAbstand As Single
-            Dim gefundeneGroesse As Integer
+            Dim gefundenerIndex As Integer
 
             kleinsterAbstand = Single.MaxValue
-            gefundeneGroesse = 1
+
+            gefundenerIndex = 0
 
             For index = 0 To regionen.Length - 1
 
@@ -55,13 +57,35 @@
 
                     kleinsterAbstand = abstandQuadrat
 
-                    gefundeneGroesse = regionen(index).partikelGroesse
+                    gefundenerIndex = index
 
                 End If
 
             Next
 
-            Return gefundeneGroesse
+            Return gefundenerIndex
+
+        End Function
+
+        Public Function ErmittlePartikelGroesse(x As Single, y As Single) As Integer
+
+            Dim regionIndex As Integer
+
+            regionIndex = ErmittleRegionIndex(x, y)
+
+            Return regionen(regionIndex).partikelGroesse
+
+        End Function
+
+        Public Function ErmittlePartikelGroesseFuerRegion(regionIndex As Integer) As Integer
+
+            If regionIndex < 0 OrElse regionIndex >= regionen.Length Then
+
+                Throw New ArgumentOutOfRangeException(NameOf(regionIndex))
+
+            End If
+
+            Return regionen(regionIndex).partikelGroesse
 
         End Function
 

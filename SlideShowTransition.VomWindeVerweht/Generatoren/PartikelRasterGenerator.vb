@@ -7,6 +7,7 @@
 
     Private Const LOD_FEIN_MAX As Integer = 8
     Private Const LOD_MITTEL_MAX As Integer = 32
+    Private Const MIXED_MAX_ZELLENGROESSE As Integer = 128
 
 #End Region
 
@@ -86,12 +87,49 @@
         Dim partikelListe As List(Of PartikelDaten)
         Dim partikelZufall As Random
 
+        Dim aktuelleX As Integer
+        Dim aktuelleY As Integer
+
+        Dim zellenBreite As Integer
+        Dim zellenHoehe As Integer
+
         partikelListe = New List(Of PartikelDaten)()
 
         partikelZufall = New Random(seed Xor &H5F3759DF)
 
-        ErzeugeMixedSubraster(partikelListe, 0, 0, bildBreite, bildHoehe, bildBreite, bildHoehe, regionFeld,
-                              partikelZufall)
+        '---------------------------------
+        ' 128er-Makroraster
+        '---------------------------------
+        '
+        ' Jede Makrozelle wird anschließend unabhängig
+        ' hierarchisch unterteilt.
+        '
+        ' Dadurch kann eine kleine Region nicht mehr die
+        ' Partikelgröße des gesamten Bildes bestimmen.
+        '
+
+        aktuelleY = 0
+
+        While aktuelleY < bildHoehe
+
+            zellenHoehe = Math.Min(MIXED_MAX_ZELLENGROESSE, bildHoehe - aktuelleY)
+
+            aktuelleX = 0
+
+            While aktuelleX < bildBreite
+
+                zellenBreite = Math.Min(MIXED_MAX_ZELLENGROESSE, bildBreite - aktuelleX)
+
+                ErzeugeMixedSubraster(partikelListe, aktuelleX, aktuelleY, zellenBreite, zellenHoehe, bildBreite,
+                                      bildHoehe, regionFeld, partikelZufall, -1)
+
+                aktuelleX += zellenBreite
+
+            End While
+
+            aktuelleY += zellenHoehe
+
+        End While
 
         If partikelListe.Count <= 0 Then
 
@@ -103,94 +141,280 @@
 
     End Function
 
+
     Private Sub ErzeugeMixedSubraster(partikelListe As List(Of PartikelDaten), x As Integer, y As Integer,
                                       breite As Integer, hoehe As Integer, bildBreite As Integer, bildHoehe As Integer,
                                       regionFeld As PartikelRegionGenerator.PartikelRegionFeld,
-                                      partikelZufall As Random)
+                                      partikelZufall As Random, bekannterRegionIndex As Integer)
 
+        Dim regionIndex As Integer
         Dim zielGroesse As Integer
-        Dim aktuelleX As Integer
-        Dim aktuelleY As Integer
 
-        Dim zellenBreite As Integer
-        Dim zellenHoehe As Integer
+        Dim istEinheitlicheRegion As Boolean
 
-        Dim zellenMitteX As Single
-        Dim zellenMitteY As Single
+        regionIndex = bekannterRegionIndex
 
-        Dim lokaleZielGroesse As Integer
+        '---------------------------------
+        ' Region der aktuellen Zelle prüfen
+        '---------------------------------
+        '
+        ' Wenn der Elternknoten bereits eindeutig derselben
+        ' Region zugeordnet wurde, muss diese relativ teure
+        ' Prüfung nicht erneut ausgeführt werden.
+        '
+        ' Das ist insbesondere für 1-px-Regionen wichtig:
+        ' Nach einmal bestätigter Region kann der Baum bis
+        ' auf 1 px heruntergeteilt werden, ohne für jeden
+        ' Knoten erneut Voronoi-Abstände zu berechnen.
+        '
 
-        zielGroesse = ErmittleKleinstePartikelGroesse(x, y, breite, hoehe, regionFeld)
+        If regionIndex >= 0 Then
 
-        aktuelleY = y
+            istEinheitlicheRegion = True
 
-        While aktuelleY < y + hoehe
+        Else
 
-            zellenHoehe = Math.Min(zielGroesse, y + hoehe - aktuelleY)
+            istEinheitlicheRegion = ErmittleEinheitlicheRegion(x, y, breite, hoehe, regionFeld, regionIndex)
 
-            aktuelleX = x
+        End If
 
-            While aktuelleX < x + breite
+        If istEinheitlicheRegion Then
 
-                zellenBreite = Math.Min(zielGroesse, x + breite - aktuelleX)
+            zielGroesse = regionFeld.ErmittlePartikelGroesseFuerRegion(regionIndex)
 
-                zellenMitteX = aktuelleX + zellenBreite * 0.5F
-                zellenMitteY = aktuelleY + zellenHoehe * 0.5F
+            '---------------------------------
+            ' Zielgröße erreicht
+            '---------------------------------
 
-                lokaleZielGroesse = regionFeld.ErmittlePartikelGroesse(zellenMitteX, zellenMitteY)
+            If breite <= zielGroesse AndAlso
+               hoehe <= zielGroesse Then
 
-                If lokaleZielGroesse < zielGroesse AndAlso zellenBreite > 1 AndAlso zellenHoehe > 1 Then
+                partikelListe.Add(ErzeugePartikel(x, y, breite, hoehe, bildBreite, bildHoehe, zielGroesse,
+                                                  partikelZufall))
 
-                    ErzeugeMixedSubraster(partikelListe, aktuelleX, aktuelleY, zellenBreite, zellenHoehe, bildBreite,
-                                          bildHoehe, regionFeld, partikelZufall)
+                Return
 
-                Else
+            End If
 
-                    partikelListe.Add(ErzeugePartikel(aktuelleX, aktuelleY, zellenBreite, zellenHoehe, bildBreite,
-                                                      bildHoehe, zielGroesse, partikelZufall))
+        End If
 
-                End If
+        '---------------------------------
+        ' Absolute Untergrenze
+        '---------------------------------
+        '
+        ' Eine 1x1-Zelle kann nicht weiter geteilt werden.
+        '
+        ' Falls die Region wegen einer Grenzsituation noch
+        ' nicht eindeutig war, bestimmt nun dieser Pixel selbst
+        ' seine Region.
+        '
 
-                aktuelleX += zellenBreite
+        If breite <= 1 AndAlso hoehe <= 1 Then
 
-            End While
+            If regionIndex < 0 Then
 
-            aktuelleY += zellenHoehe
+                regionIndex = regionFeld.ErmittleRegionIndex(CSng(x), CSng(y))
 
-        End While
+            End If
+
+            zielGroesse = regionFeld.ErmittlePartikelGroesseFuerRegion(regionIndex)
+
+            partikelListe.Add(ErzeugePartikel(x, y, breite, hoehe, bildBreite, bildHoehe, zielGroesse,
+                                              partikelZufall))
+
+            Return
+
+        End If
+
+        '---------------------------------
+        ' Zelle weiter unterteilen
+        '---------------------------------
+        '
+        ' Zwei Gründe können hierher führen:
+        '
+        ' 1. Die Zelle überschreitet die Zielgröße ihrer Region.
+        '
+        ' 2. Die Zelle überdeckt mehrere Regionen.
+        '
+        ' Nur im ersten Fall darf der bekannte RegionIndex an
+        ' die Kinder weitergereicht werden.
+        '
+
+        If istEinheitlicheRegion Then
+
+            TeileMixedZelle(partikelListe, x, y, breite, hoehe, bildBreite, bildHoehe, regionFeld, partikelZufall,
+                            regionIndex)
+
+        Else
+
+            TeileMixedZelle(partikelListe, x, y, breite, hoehe, bildBreite, bildHoehe, regionFeld, partikelZufall, -1)
+
+        End If
 
     End Sub
 
-    Private Function ErmittleKleinstePartikelGroesse(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
-                                                     regionFeld As PartikelRegionGenerator.PartikelRegionFeld) _
-                                                     As Integer
 
-        Dim groesseObenLinks As Integer
-        Dim groesseObenRechts As Integer
-        Dim groesseUntenLinks As Integer
-        Dim groesseUntenRechts As Integer
-        Dim groesseMitte As Integer
+    Private Sub TeileMixedZelle(partikelListe As List(Of PartikelDaten), x As Integer, y As Integer, breite As Integer,
+                                hoehe As Integer, bildBreite As Integer, bildHoehe As Integer,
+                                regionFeld As PartikelRegionGenerator.PartikelRegionFeld, partikelZufall As Random,
+                                bekannterRegionIndex As Integer)
 
+        Dim breiteLinks As Integer
+        Dim breiteRechts As Integer
+
+        Dim hoeheOben As Integer
+        Dim hoeheUnten As Integer
+
+        '---------------------------------
+        ' Beide Dimensionen teilbar
+        '---------------------------------
+
+        If breite > 1 AndAlso hoehe > 1 Then
+
+            breiteLinks = breite \ 2
+            breiteRechts = breite - breiteLinks
+            hoeheOben = hoehe \ 2
+            hoeheUnten = hoehe - hoeheOben
+
+            ErzeugeMixedSubraster(partikelListe, x, y, breiteLinks, hoeheOben, bildBreite, bildHoehe, regionFeld,
+                                  partikelZufall, bekannterRegionIndex)
+
+            ErzeugeMixedSubraster(partikelListe, x + breiteLinks, y, breiteRechts, hoeheOben, bildBreite, bildHoehe,
+                                  regionFeld, partikelZufall, bekannterRegionIndex)
+
+            ErzeugeMixedSubraster(partikelListe, x, y + hoeheOben, breiteLinks, hoeheUnten, bildBreite, bildHoehe,
+                                  regionFeld, partikelZufall, bekannterRegionIndex)
+
+            ErzeugeMixedSubraster(partikelListe, x + breiteLinks, y + hoeheOben, breiteRechts, hoeheUnten, bildBreite,
+                                  bildHoehe, regionFeld, partikelZufall, bekannterRegionIndex)
+
+            Return
+
+        End If
+
+        '---------------------------------
+        ' Nur horizontal teilbar
+        '---------------------------------
+
+        If breite > 1 Then
+
+            breiteLinks = breite \ 2
+
+            breiteRechts = breite - breiteLinks
+
+            ErzeugeMixedSubraster(partikelListe, x, y, breiteLinks, hoehe, bildBreite, bildHoehe, regionFeld,
+                                  partikelZufall, bekannterRegionIndex)
+
+            ErzeugeMixedSubraster(partikelListe, x + breiteLinks, y, breiteRechts, hoehe, bildBreite, bildHoehe,
+                                  regionFeld, partikelZufall, bekannterRegionIndex)
+
+            Return
+
+        End If
+
+        '---------------------------------
+        ' Nur vertikal teilbar
+        '---------------------------------
+
+        hoeheOben = hoehe \ 2
+
+        hoeheUnten = hoehe - hoeheOben
+
+        ErzeugeMixedSubraster(partikelListe, x, y, breite, hoeheOben, bildBreite, bildHoehe, regionFeld,
+                              partikelZufall, bekannterRegionIndex)
+
+        ErzeugeMixedSubraster(partikelListe, x, y + hoeheOben, breite, hoeheUnten, bildBreite, bildHoehe,
+                              regionFeld, partikelZufall, bekannterRegionIndex)
+
+    End Sub
+
+
+    Private Function ErmittleEinheitlicheRegion(x As Integer, y As Integer, breite As Integer, hoehe As Integer,
+                                                regionFeld As PartikelRegionGenerator.PartikelRegionFeld,
+                                                ByRef regionIndex As Integer) As Boolean
+
+        Dim links As Single
         Dim rechts As Single
+        Dim oben As Single
         Dim unten As Single
+
         Dim mitteX As Single
         Dim mitteY As Single
 
-        rechts = x + breite - 1
-        unten = y + hoehe - 1
+        Dim pruefRegionIndex As Integer
 
-        mitteX = x + breite * 0.5F
-        mitteY = y + hoehe * 0.5F
+        links = CSng(x)
+        rechts = CSng(x + breite - 1)
+        oben = CSng(y)
+        unten = CSng(y + hoehe - 1)
 
-        groesseObenLinks = regionFeld.ErmittlePartikelGroesse(x, y)
-        groesseObenRechts = regionFeld.ErmittlePartikelGroesse(rechts, y)
-        groesseUntenLinks = regionFeld.ErmittlePartikelGroesse(x, unten)
-        groesseUntenRechts = regionFeld.ErmittlePartikelGroesse(rechts, unten)
+        mitteX = links + (rechts - links) * 0.5F
+        mitteY = oben + (unten - oben) * 0.5F
 
-        groesseMitte = regionFeld.ErmittlePartikelGroesse(mitteX, mitteY)
+        '---------------------------------
+        ' Mittelpunkt bestimmt Referenzregion
+        '---------------------------------
 
-        Return Math.Min(groesseMitte, Math.Min(Math.Min(groesseObenLinks, groesseObenRechts), Math.Min(
-                    groesseUntenLinks, groesseUntenRechts)))
+        regionIndex = regionFeld.ErmittleRegionIndex(mitteX, mitteY)
+
+        '---------------------------------
+        ' Vier Ecken prüfen
+        '---------------------------------
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(links, oben)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(rechts, oben)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(links, unten)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(rechts, unten)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+
+        '---------------------------------
+        ' Vier Kantenmittelpunkte prüfen
+        '---------------------------------
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(mitteX, oben)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(mitteX, unten)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(links, mitteY)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        pruefRegionIndex = regionFeld.ErmittleRegionIndex(rechts, mitteY)
+
+        If pruefRegionIndex <> regionIndex Then
+            Return False
+        End If
+
+        Return True
 
     End Function
 
