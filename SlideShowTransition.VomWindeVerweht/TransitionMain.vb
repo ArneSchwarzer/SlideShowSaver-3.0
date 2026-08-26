@@ -26,6 +26,9 @@ Public Class TransitionMain
     Private direct3DRenderer As D3DRenderer
     Private rasterGenerator As PartikelRasterGenerator
 
+    Private partikelRegionGenerator As PartikelRegionGenerator
+    Private partikelRegionFeld As PartikelRegionGenerator.PartikelRegionFeld
+
     Private oldBitmapGerahmt As RenderTargetBitmap
     Private newBitmapGerahmt As RenderTargetBitmap
 
@@ -68,6 +71,7 @@ Public Class TransitionMain
 
         Public partikelGroesse As Integer
         Public partikelGroesseZufall As Boolean
+        Public mixedPartikel As Boolean
 
         Public windStaerke As Integer
         Public windStaerkeZufall As Boolean
@@ -136,11 +140,30 @@ Public Class TransitionMain
         aktuelleDauerAbrisskanteMS = ErmittleDauerAbrisskanteMS()
         aktuellePartikelGroesse = ErmittlePartikelGroesse()
 
+        ' -------------------------------------------------------
+        ' Mixed-Partikel-Regionen
+        ' -------------------------------------------------------
+
+        partikelRegionFeld = Nothing
+
+        If aktuelleSettings.mixedPartikel Then
+
+            partikelRegionGenerator = New PartikelRegionGenerator()
+
+            partikelRegionFeld = partikelRegionGenerator.ErzeugeRegionFeld(clientSize.Width, clientSize.Height,
+                                                                           zufall.Next(1, Integer.MaxValue))
+
+        End If
+
+        ' -------------------------------------------------------
+        ' Partikelraster
+        ' -------------------------------------------------------
+
         rasterGenerator = New PartikelRasterGenerator()
 
         sandkornPartikel = rasterGenerator.ErzeugePartikelRaster(clientSize.Width, clientSize.Height,
-                                                             aktuellePartikelGroesse,
-                                                             zufall.Next(1, Integer.MaxValue))
+                                                                 aktuellePartikelGroesse, zufall.Next(1,
+                                                                 Integer.MaxValue), partikelRegionFeld)
 
         ' -------------------------------------------------------
         ' Abrissgeometrie
@@ -282,6 +305,8 @@ Public Class TransitionMain
                                                                        "DauerAbrisskante", defaults))
         aktuelleSettings.schwerkraftModus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                        "SchwerkraftModus", defaults)
+        aktuelleSettings.mixedPartikel = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                     "MixedPartikel", defaults))
 
     End Sub
 
@@ -294,6 +319,7 @@ Public Class TransitionMain
 
         defaults.Add("PartikelGroesse", "4")
         defaults.Add("PartikelGroesseZufall", "False")
+        defaults.Add("MixedPartikel", "False")
         defaults.Add("WindStaerke", "3")
         defaults.Add("WindStaerkeZufall", "False")
         defaults.Add("DauerAbrisskante", "7")

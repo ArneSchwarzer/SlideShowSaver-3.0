@@ -12,9 +12,10 @@
 
 #Region "Rastererzeugung"
 
-    Public Function ErzeugePartikelRaster(bildBreite As Integer, bildHoehe As Integer,
-                                          zielPartikelGroesse As Integer, Optional seed As Integer = 0) _
-                                          As PartikelDaten()
+    Public Function ErzeugePartikelRaster(bildBreite As Integer, bildHoehe As Integer, zielPartikelGroesse As Integer,
+                                          Optional seed As Integer = 0,
+                                          Optional regionFeld As PartikelRegionGenerator.PartikelRegionFeld = Nothing) _
+                                            As PartikelDaten()
 
         Dim partikelAnzahl As Integer
         Dim partikel() As PartikelDaten
@@ -39,7 +40,7 @@
         ' Pass 1:
         ' Exakte Anzahl bestimmen, ohne Partikeldaten anzulegen.
 
-        partikelAnzahl = ErmittlePartikelAnzahl(bildBreite, bildHoehe, zielPartikelGroesse, seed)
+        partikelAnzahl = ErmittlePartikelAnzahl(bildBreite, bildHoehe, zielPartikelGroesse, seed, regionFeld)
 
         If partikelAnzahl <= 0 Then
 
@@ -57,7 +58,7 @@
         ' Mit identischem Seed exakt dasselbe Raster noch einmal
         ' erzeugen und unmittelbar in das Array schreiben.
 
-        BefuellePartikelRaster(partikel, bildBreite, bildHoehe, zielPartikelGroesse, seed)
+        BefuellePartikelRaster(partikel, bildBreite, bildHoehe, zielPartikelGroesse, seed, regionFeld)
 
         Return partikel
 
@@ -67,9 +68,9 @@
 
 #Region "Pass 1 - Partikel zählen"
 
-    Private Function ErmittlePartikelAnzahl(bildBreite As Integer, bildHoehe As Integer,
-                                            zielPartikelGroesse As Integer, seed As Integer) As Integer
-
+    Private Function ErmittlePartikelAnzahl(bildBreite As Integer, bildHoehe As Integer, zielPartikelGroesse As Integer,
+                                            seed As Integer, regionFeld As PartikelRegionGenerator.PartikelRegionFeld) _
+                                                As Integer
         Dim zufall As Random
 
         Dim aktuelleX As Integer
@@ -80,6 +81,8 @@
 
         Dim anzahl As Integer
 
+        Dim aktuelleZielGroesse As Integer
+
         zufall = New Random(seed)
 
         aktuelleY = 0
@@ -87,7 +90,9 @@
 
         While aktuelleY < bildHoehe
 
-            zeilenHoehe = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+            aktuelleZielGroesse = ErmittleZielPartikelGroesse(0, aktuelleY, zielPartikelGroesse, regionFeld)
+
+            zeilenHoehe = BerechneNaechsteGroesse(aktuelleZielGroesse, zufall)
 
             If aktuelleY + zeilenHoehe > bildHoehe Then
                 zeilenHoehe = bildHoehe - aktuelleY
@@ -97,7 +102,9 @@
 
             While aktuelleX < bildBreite
 
-                breite = BerechneNaechsteGroesse(zielPartikelGroesse, zufall)
+                aktuelleZielGroesse = ErmittleZielPartikelGroesse(aktuelleX, aktuelleY, zielPartikelGroesse, regionFeld)
+
+                breite = BerechneNaechsteGroesse(aktuelleZielGroesse, zufall)
 
                 If aktuelleX + breite > bildBreite Then
                     breite = bildBreite - aktuelleX
@@ -122,7 +129,8 @@
 #Region "Pass 2 - Array befüllen"
 
     Private Sub BefuellePartikelRaster(partikel() As PartikelDaten, bildBreite As Integer, bildHoehe As Integer,
-                                       zielPartikelGroesse As Integer, seed As Integer)
+                                       zielPartikelGroesse As Integer, seed As Integer,
+                                       regionFeld As PartikelRegionGenerator.PartikelRegionFeld)
 
         Dim rasterZufall As Random
         Dim partikelZufall As Random
@@ -135,6 +143,7 @@
 
         Dim partikelIndex As Integer
 
+        Dim aktuelleZielGroesse As Integer
 
         ' WICHTIG:
         '
@@ -158,7 +167,9 @@
 
         While aktuelleY < bildHoehe
 
-            zeilenHoehe = BerechneNaechsteGroesse(zielPartikelGroesse, rasterZufall)
+            aktuelleZielGroesse = ErmittleZielPartikelGroesse(0, aktuelleY, zielPartikelGroesse, regionFeld)
+
+            zeilenHoehe = BerechneNaechsteGroesse(aktuelleZielGroesse, rasterZufall)
 
             If aktuelleY + zeilenHoehe > bildHoehe Then
 
@@ -170,7 +181,9 @@
 
             While aktuelleX < bildBreite
 
-                breite = BerechneNaechsteGroesse(zielPartikelGroesse, rasterZufall)
+                aktuelleZielGroesse = ErmittleZielPartikelGroesse(aktuelleX, aktuelleY, zielPartikelGroesse, regionFeld)
+
+                breite = BerechneNaechsteGroesse(aktuelleZielGroesse, rasterZufall)
 
                 If aktuelleX + breite > bildBreite Then
 
@@ -186,7 +199,7 @@
                 End If
 
                 partikel(partikelIndex) = ErzeugePartikel(aktuelleX, aktuelleY, breite, zeilenHoehe, bildBreite,
-                                                          bildHoehe, zielPartikelGroesse, partikelZufall)
+                                                          bildHoehe, aktuelleZielGroesse, partikelZufall)
 
                 partikelIndex += 1
 
@@ -276,6 +289,19 @@
         daten.gewicht *= groessenFaktor
 
         Return daten
+
+    End Function
+
+    Private Function ErmittleZielPartikelGroesse(x As Integer, y As Integer, normalePartikelGroesse As Integer,
+                                                 regionFeld As PartikelRegionGenerator.PartikelRegionFeld) As Integer
+
+        If regionFeld Is Nothing Then
+
+            Return normalePartikelGroesse
+
+        End If
+
+        Return regionFeld.ErmittlePartikelGroesse(CSng(x), CSng(y))
 
     End Function
 

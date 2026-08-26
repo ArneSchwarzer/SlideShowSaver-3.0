@@ -143,6 +143,7 @@
     <Compile Include="Generatoren\FlowFieldDaten.vb" />
     <Compile Include="Generatoren\FlowFieldGenerator.vb" />
     <Compile Include="Generatoren\PartikelRasterGenerator.vb" />
+    <Compile Include="Generatoren\PartikelRegionenGenerator.vb" />
     <Compile Include="Generatoren\RandAbloeseFeldDaten.vb" />
     <Compile Include="Generatoren\RandAbloeseGenerator.vb" />
     <Compile Include="TransitionMain.vb" />
