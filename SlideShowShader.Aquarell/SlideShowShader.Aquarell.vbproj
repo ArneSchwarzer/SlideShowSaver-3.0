@@ -112,6 +112,8 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Direct3D\D3DRenderer.vb" />
+    <Compile Include="Direct3D\Direct3DRessourceHandler.vb" />
     <Compile Include="ShaderMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -158,6 +160,8 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Shader\AquarellCopyShaderPS.cso" />
+    <EmbeddedResource Include="Shader\AquarellCopyShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowInterfaces\SlideShowInterfaces.vbproj">
@@ -176,6 +180,9 @@
       <Project>{d184f981-fec8-4eac-8c57-62257125c4c2}</Project>
       <Name>SlideShowTools</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shader\AquarellCopyShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\PolySharp.1.10.0\build\PolySharp.targets" Condition="Exists('..\packages\PolySharp.1.10.0\build\PolySharp.targets')" />

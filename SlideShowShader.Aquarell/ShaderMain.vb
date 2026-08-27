@@ -17,15 +17,7 @@ Public Class ShaderMain
 
     Public Const nameShader As String = "Aquarell"
 
-    Private aktuelleSettings As ShaderSettings_Aquarell
-
     Private wurdeBereinigt As Boolean
-
-    Public Structure ShaderSettings_Aquarell
-
-        Public Property glaettungsAlgorithmus As String 'nur für interne Testzwecke während V 0.1
-
-    End Structure
 
     Public Enum ShaderModus
 
@@ -39,8 +31,7 @@ Public Class ShaderMain
 
 #Region "Eigenschaften"
 
-    Public ReadOnly Property ShaderName As String _
-        Implements ISlideShowShader.ShaderName
+    Public ReadOnly Property ShaderName As String Implements ISlideShowShader.ShaderName
 
         Get
 
@@ -50,8 +41,7 @@ Public Class ShaderMain
 
     End Property
 
-    Public ReadOnly Property ShaderKurzBeschreibung As String _
-        Implements ISlideShowShader.ShaderKurzBeschreibung
+    Public ReadOnly Property ShaderKurzBeschreibung As String Implements ISlideShowShader.ShaderKurzBeschreibung
 
         Get
 
@@ -61,8 +51,7 @@ Public Class ShaderMain
 
     End Property
 
-    Public ReadOnly Property ShaderVersion As Version _
-        Implements ISlideShowShader.ShaderVersion
+    Public ReadOnly Property ShaderVersion As Version Implements ISlideShowShader.ShaderVersion
 
         Get
 
@@ -78,7 +67,12 @@ Public Class ShaderMain
 
     Public Function RunShader(baseImage As Image, Optional imagePath As String = "",
                               Optional clientSize As Size = Nothing) As Image Implements ISlideShowShader.RunShader
-        'Versieht das Quellbild mit einem Aquarell-Effekt
+
+        Dim renderer As D3DRenderer
+        Dim ergebnis As Bitmap
+
+        renderer = Nothing
+        ergebnis = Nothing
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(ShaderMain))
@@ -88,13 +82,26 @@ Public Class ShaderMain
             Throw New ArgumentNullException(NameOf(baseImage))
         End If
 
-        ReadShaderSettingsFromRegistryOrDefaults()
+        Try
 
-        StoreSettings(nameShader, aktuelleSettings)
+            renderer = New D3DRenderer()
 
-        'TODO: Code für Aquarell-Simulation erstellen
+            renderer.Initialisiere(baseImage)
 
-        Return baseImage
+            ergebnis = renderer.RenderTestbild()
+
+            Return ergebnis
+
+        Finally
+
+            If renderer IsNot Nothing Then
+
+                renderer.Dispose()
+                renderer = Nothing
+
+            End If
+
+        End Try
 
     End Function
 
@@ -110,10 +117,6 @@ Public Class ShaderMain
             Throw New ObjectDisposedException(NameOf(ShaderMain))
         End If
 
-        ReadShaderSettingsFromRegistryOrDefaults()
-
-        StoreSettings(nameShader, aktuelleSettings)
-
         Return New ucOptionsShader()
 
     End Function
@@ -122,8 +125,7 @@ Public Class ShaderMain
 
 #Region "Settings und Defaultwerte"
 
-    Friend Shared Function GetShaderDefaultSettings() _
-        As Dictionary(Of String, String)
+    Friend Shared Function GetShaderDefaultSettings() As Dictionary(Of String, String)
         'Liefert die Default-Werte des Shaders.
 
         Dim defaults As New Dictionary(Of String, String)
@@ -141,9 +143,6 @@ Public Class ShaderMain
         Dim defaults As Dictionary(Of String, String)
 
         defaults = GetShaderDefaultSettings()
-
-        aktuelleSettings.glaettungsAlgorithmus = ReadFromRegOrDefaults(SLIDESHOWSHADER_AQUARELL_FULLPATH &
-                                                                       "Glättungsalgorithmus", defaults)
 
     End Sub
 
