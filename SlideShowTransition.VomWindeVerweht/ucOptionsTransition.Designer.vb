@@ -39,13 +39,13 @@ Partial Class ucOptionsTransition
         Me.rbSchwerkraftAn = New System.Windows.Forms.RadioButton()
         Me.rbSchwerkraftAus = New System.Windows.Forms.RadioButton()
         Me.grbPartikelgröße = New System.Windows.Forms.GroupBox()
+        Me.rbZufallsPGroessenModus = New System.Windows.Forms.RadioButton()
+        Me.rbGemischtePartikel = New System.Windows.Forms.RadioButton()
+        Me.rbZufallsFestePGroesse = New System.Windows.Forms.RadioButton()
         Me.rbManuellePGroesse = New System.Windows.Forms.RadioButton()
         Me.lblPartikelGroesse = New System.Windows.Forms.Label()
         Me.lblNtrkParikelGroesse = New System.Windows.Forms.Label()
         Me.trkPartikelGroesse = New System.Windows.Forms.TrackBar()
-        Me.rbZufallsFestePGroesse = New System.Windows.Forms.RadioButton()
-        Me.rbGemischtePartikel = New System.Windows.Forms.RadioButton()
-        Me.rbZufallsPGroessenModus = New System.Windows.Forms.RadioButton()
         CType(Me.trkWindstaerke, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkDauerAbrisskante, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.grpSchwerkraft.SuspendLayout()
@@ -222,19 +222,52 @@ Partial Class ucOptionsTransition
         '
         'grbPartikelgröße
         '
-        Me.grbPartikelgröße.Controls.Add(Me.rbZufallsPGroessenModus)
-        Me.grbPartikelgröße.Controls.Add(Me.rbGemischtePartikel)
-        Me.grbPartikelgröße.Controls.Add(Me.rbZufallsFestePGroesse)
         Me.grbPartikelgröße.Controls.Add(Me.lblPartikelGroesse)
         Me.grbPartikelgröße.Controls.Add(Me.lblNtrkParikelGroesse)
         Me.grbPartikelgröße.Controls.Add(Me.trkPartikelGroesse)
+        Me.grbPartikelgröße.Controls.Add(Me.rbZufallsPGroessenModus)
+        Me.grbPartikelgröße.Controls.Add(Me.rbGemischtePartikel)
+        Me.grbPartikelgröße.Controls.Add(Me.rbZufallsFestePGroesse)
         Me.grbPartikelgröße.Controls.Add(Me.rbManuellePGroesse)
         Me.grbPartikelgröße.Location = New System.Drawing.Point(41, 81)
         Me.grbPartikelgröße.Name = "grbPartikelgröße"
-        Me.grbPartikelgröße.Size = New System.Drawing.Size(814, 239)
+        Me.grbPartikelgröße.Size = New System.Drawing.Size(814, 243)
         Me.grbPartikelgröße.TabIndex = 70
         Me.grbPartikelgröße.TabStop = False
         Me.grbPartikelgröße.Text = "Partikelgröße"
+        '
+        'rbZufallsPGroessenModus
+        '
+        Me.rbZufallsPGroessenModus.AutoSize = True
+        Me.rbZufallsPGroessenModus.Location = New System.Drawing.Point(376, 98)
+        Me.rbZufallsPGroessenModus.Name = "rbZufallsPGroessenModus"
+        Me.rbZufallsPGroessenModus.Size = New System.Drawing.Size(370, 45)
+        Me.rbZufallsPGroessenModus.TabIndex = 32
+        Me.rbZufallsPGroessenModus.TabStop = True
+        Me.rbZufallsPGroessenModus.Text = "Zufälliger Größenmodus"
+        Me.rbZufallsPGroessenModus.UseVisualStyleBackColor = True
+        '
+        'rbGemischtePartikel
+        '
+        Me.rbGemischtePartikel.AutoSize = True
+        Me.rbGemischtePartikel.Location = New System.Drawing.Point(23, 98)
+        Me.rbGemischtePartikel.Name = "rbGemischtePartikel"
+        Me.rbGemischtePartikel.Size = New System.Drawing.Size(295, 45)
+        Me.rbGemischtePartikel.TabIndex = 31
+        Me.rbGemischtePartikel.TabStop = True
+        Me.rbGemischtePartikel.Text = "Gemischte Größen"
+        Me.rbGemischtePartikel.UseVisualStyleBackColor = True
+        '
+        'rbZufallsFestePGroesse
+        '
+        Me.rbZufallsFestePGroesse.AutoSize = True
+        Me.rbZufallsFestePGroesse.Location = New System.Drawing.Point(376, 47)
+        Me.rbZufallsFestePGroesse.Name = "rbZufallsFestePGroesse"
+        Me.rbZufallsFestePGroesse.Size = New System.Drawing.Size(323, 45)
+        Me.rbZufallsFestePGroesse.TabIndex = 30
+        Me.rbZufallsFestePGroesse.TabStop = True
+        Me.rbZufallsFestePGroesse.Text = "Zufällige feste Größe"
+        Me.rbZufallsFestePGroesse.UseVisualStyleBackColor = True
         '
         'rbManuellePGroesse
         '
@@ -250,66 +283,33 @@ Partial Class ucOptionsTransition
         'lblPartikelGroesse
         '
         Me.lblPartikelGroesse.AutoSize = True
-        Me.lblPartikelGroesse.Location = New System.Drawing.Point(715, 163)
+        Me.lblPartikelGroesse.Location = New System.Drawing.Point(709, 161)
         Me.lblPartikelGroesse.MaximumSize = New System.Drawing.Size(106, 0)
         Me.lblPartikelGroesse.MinimumSize = New System.Drawing.Size(106, 0)
         Me.lblPartikelGroesse.Name = "lblPartikelGroesse"
         Me.lblPartikelGroesse.Size = New System.Drawing.Size(106, 41)
-        Me.lblPartikelGroesse.TabIndex = 29
+        Me.lblPartikelGroesse.TabIndex = 76
         Me.lblPartikelGroesse.Text = "4 px"
         Me.lblPartikelGroesse.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'lblNtrkParikelGroesse
         '
         Me.lblNtrkParikelGroesse.AutoSize = True
-        Me.lblNtrkParikelGroesse.Location = New System.Drawing.Point(-1, 163)
+        Me.lblNtrkParikelGroesse.Location = New System.Drawing.Point(6, 161)
         Me.lblNtrkParikelGroesse.Name = "lblNtrkParikelGroesse"
         Me.lblNtrkParikelGroesse.Size = New System.Drawing.Size(192, 41)
-        Me.lblNtrkParikelGroesse.TabIndex = 28
+        Me.lblNtrkParikelGroesse.TabIndex = 75
         Me.lblNtrkParikelGroesse.Text = "Partikelgröße"
         '
         'trkPartikelGroesse
         '
         Me.trkPartikelGroesse.AutoSize = False
-        Me.trkPartikelGroesse.Location = New System.Drawing.Point(229, 163)
+        Me.trkPartikelGroesse.Location = New System.Drawing.Point(223, 161)
         Me.trkPartikelGroesse.Maximum = 7
         Me.trkPartikelGroesse.Name = "trkPartikelGroesse"
         Me.trkPartikelGroesse.Size = New System.Drawing.Size(495, 55)
-        Me.trkPartikelGroesse.TabIndex = 27
+        Me.trkPartikelGroesse.TabIndex = 74
         Me.trkPartikelGroesse.Value = 2
-        '
-        'rbZufallsFestePGroesse
-        '
-        Me.rbZufallsFestePGroesse.AutoSize = True
-        Me.rbZufallsFestePGroesse.Location = New System.Drawing.Point(376, 47)
-        Me.rbZufallsFestePGroesse.Name = "rbZufallsFestePGroesse"
-        Me.rbZufallsFestePGroesse.Size = New System.Drawing.Size(323, 45)
-        Me.rbZufallsFestePGroesse.TabIndex = 30
-        Me.rbZufallsFestePGroesse.TabStop = True
-        Me.rbZufallsFestePGroesse.Text = "Zufällige feste Größe"
-        Me.rbZufallsFestePGroesse.UseVisualStyleBackColor = True
-        '
-        'rbGemischtePartikel
-        '
-        Me.rbGemischtePartikel.AutoSize = True
-        Me.rbGemischtePartikel.Location = New System.Drawing.Point(23, 98)
-        Me.rbGemischtePartikel.Name = "rbGemischtePartikel"
-        Me.rbGemischtePartikel.Size = New System.Drawing.Size(295, 45)
-        Me.rbGemischtePartikel.TabIndex = 31
-        Me.rbGemischtePartikel.TabStop = True
-        Me.rbGemischtePartikel.Text = "Gemischte Größen"
-        Me.rbGemischtePartikel.UseVisualStyleBackColor = True
-        '
-        'rbZufallsPGroessenModus
-        '
-        Me.rbZufallsPGroessenModus.AutoSize = True
-        Me.rbZufallsPGroessenModus.Location = New System.Drawing.Point(376, 98)
-        Me.rbZufallsPGroessenModus.Name = "rbZufallsPGroessenModus"
-        Me.rbZufallsPGroessenModus.Size = New System.Drawing.Size(370, 45)
-        Me.rbZufallsPGroessenModus.TabIndex = 32
-        Me.rbZufallsPGroessenModus.TabStop = True
-        Me.rbZufallsPGroessenModus.Text = "Zufälliger Größenmodus"
-        Me.rbZufallsPGroessenModus.UseVisualStyleBackColor = True
         '
         'ucOptionsTransition
         '
@@ -362,8 +362,8 @@ Partial Class ucOptionsTransition
     Friend WithEvents rbZufallsPGroessenModus As Windows.Forms.RadioButton
     Friend WithEvents rbGemischtePartikel As Windows.Forms.RadioButton
     Friend WithEvents rbZufallsFestePGroesse As Windows.Forms.RadioButton
+    Friend WithEvents rbManuellePGroesse As Windows.Forms.RadioButton
     Friend WithEvents lblPartikelGroesse As Windows.Forms.Label
     Friend WithEvents lblNtrkParikelGroesse As Windows.Forms.Label
     Friend WithEvents trkPartikelGroesse As Windows.Forms.TrackBar
-    Friend WithEvents rbManuellePGroesse As Windows.Forms.RadioButton
 End Class

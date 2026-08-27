@@ -21,6 +21,7 @@ Public Class TransitionMain
 
     Private aktuelleDauerAbrisskanteMS As Double
     Private aktuelleSchwerkraftAktiv As Boolean
+    Private aktuellerPartikelGroessenModus As String
 
     'Direct3D Rendering
     Private direct3DRenderer As D3DRenderer
@@ -70,8 +71,7 @@ Public Class TransitionMain
     Structure TransitionSettings_VomWindeVerweht
 
         Public partikelGroesse As Integer
-        Public partikelGroesseZufall As Boolean
-        Public mixedPartikel As Boolean
+        Public partikelGroessenModus As String
 
         Public windStaerke As Integer
         Public windStaerkeZufall As Boolean
@@ -138,15 +138,13 @@ Public Class TransitionMain
         aktuelleWindStaerke = ErmittleWindStaerke()
         aktuelleSchwerkraftAktiv = ErmittleSchwerkraftAktiv()
         aktuelleDauerAbrisskanteMS = ErmittleDauerAbrisskanteMS()
-        aktuellePartikelGroesse = ErmittlePartikelGroesse()
 
-        ' -------------------------------------------------------
-        ' Mixed-Partikel-Regionen
-        ' -------------------------------------------------------
+        aktuellerPartikelGroessenModus = ErmittlePartikelGroessenModus()
+        aktuellePartikelGroesse = ErmittlePartikelGroesse(aktuellerPartikelGroessenModus)
 
         partikelRegionFeld = Nothing
 
-        If aktuelleSettings.mixedPartikel Then
+        If aktuellerPartikelGroessenModus = "Gemischt" Then
 
             partikelRegionGenerator = New PartikelRegionGenerator()
 
@@ -293,8 +291,8 @@ Public Class TransitionMain
         aktuelleSettings.partikelGroesse = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                       "PartikelGroesse", defaults))
 
-        aktuelleSettings.partikelGroesseZufall = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
-                                                                             "PartikelGroesseZufall", defaults))
+        aktuelleSettings.partikelGroessenModus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
+                                                                       "PartikelGroessenModus", defaults)
 
         aktuelleSettings.windStaerke = CInt(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                   "WindStaerke", defaults))
@@ -305,8 +303,7 @@ Public Class TransitionMain
                                                                        "DauerAbrisskante", defaults))
         aktuelleSettings.schwerkraftModus = ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
                                                                        "SchwerkraftModus", defaults)
-        aktuelleSettings.mixedPartikel = CBool(ReadFromRegOrDefaults(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH &
-                                                                     "MixedPartikel", defaults))
+
 
     End Sub
 
@@ -318,8 +315,7 @@ Public Class TransitionMain
         defaults = New Dictionary(Of String, String)()
 
         defaults.Add("PartikelGroesse", "4")
-        defaults.Add("PartikelGroesseZufall", "False")
-        defaults.Add("MixedPartikel", "False")
+        defaults.Add("PartikelGroessenModus", "Manuell")
         defaults.Add("WindStaerke", "3")
         defaults.Add("WindStaerkeZufall", "False")
         defaults.Add("DauerAbrisskante", "7")
@@ -497,21 +493,60 @@ Public Class TransitionMain
 
     End Function
 
-    Private Function ErmittlePartikelGroesse() As Integer
+    Private Function ErmittlePartikelGroessenModus() As String
+
+        Select Case aktuelleSettings.partikelGroessenModus
+
+            Case "Manuell"
+
+                Return "Manuell"
+
+            Case "Zufällig"
+
+                Return "Zufällig"
+
+            Case "Gemischt"
+
+                Return "Gemischt"
+
+            Case "Zufallsmodus"
+
+                Select Case zufall.Next(0, 3)
+
+                    Case 0
+                        Return "Manuell"
+
+                    Case 1
+                        Return "Zufällig"
+
+                    Case Else
+                        Return "Gemischt"
+
+                End Select
+
+            Case Else
+
+                Return "Manuell"
+
+        End Select
+
+    End Function
+
+    Private Function ErmittlePartikelGroesse(partikelGroessenModus As String) As Integer
 
         Dim exponent As Integer
 
-        If aktuelleSettings.partikelGroesseZufall Then
+        If partikelGroessenModus = "Zufällig" Then
 
-            ' Die Trackbar bildet unsere LOD-Stufen 1, 2, 4, 8,
-            ' 16, 32, 64 und 128 px ab.
+            ' Die Trackbar bildet die Größenstufen
+            ' 1, 2, 4, 8, 16, 32, 64 und 128 px ab.
             '
-            ' Zufällig wird deshalb nicht irgendein Wert zwischen
-            ' 1 und 128 gewählt, sondern exakt eine dieser Stufen.
+            ' Deshalb wird ausschließlich aus diesen
+            ' tatsächlich unterstützten Stufen gewählt.
 
             exponent = zufall.Next(0, 8)
 
-            Return CInt(Math.Pow(2, exponent))
+            Return 1 << exponent
 
         End If
 
@@ -589,6 +624,11 @@ Public Class TransitionMain
 
         sandkornPartikel = Nothing
         rasterGenerator = Nothing
+
+        aktuellerPartikelGroessenModus = Nothing
+
+        partikelRegionFeld = Nothing
+        partikelRegionGenerator = Nothing
 
         flowField = Nothing
         flowFieldGenerator = Nothing

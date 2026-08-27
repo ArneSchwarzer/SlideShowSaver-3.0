@@ -47,17 +47,39 @@ Public Class ucOptionsTransition
 
         trkPartikelGroesse.Value = Math.Max(trkPartikelGroesse.Minimum, Math.Min(trkPartikelGroesse.Maximum,
                                             ErmittleTrackBarWertAusPartikelGroesse(aktuelleSettings.partikelGroesse)))
-        chkPartikelGroesseZufall.Checked = aktuelleSettings.partikelGroesseZufall
-        chkMixedPartikel.Checked = aktuelleSettings.mixedPartikel
+
+        Select Case aktuelleSettings.partikelGroessenModus
+
+            Case "Zufällig"
+
+                rbZufallsFestePGroesse.Checked = True
+
+            Case "Gemischt"
+
+                rbGemischtePartikel.Checked = True
+
+            Case "Zufallsmodus"
+
+                rbZufallsPGroessenModus.Checked = True
+
+            Case Else
+
+                rbManuellePGroesse.Checked = True
+
+        End Select
+
         lblPartikelGroesse.Text = ErmittlePartikelGroesseAusTrackBar().ToString() & " px"
 
         trkWindstaerke.Value = Math.Max(trkWindstaerke.Minimum, Math.Min(trkWindstaerke.Maximum,
                                         aktuelleSettings.windStaerke))
+
         chkWindstaerkeZufall.Checked = aktuelleSettings.windStaerkeZufall
+
         lblWindstaerke.Text = "Bft " & aktuelleSettings.windStaerke.ToString()
 
         trkDauerAbrisskante.Value = Math.Max(trkDauerAbrisskante.Minimum, Math.Min(trkDauerAbrisskante.Maximum,
                                              aktuelleSettings.dauerAbrisskante))
+
         lblDauerAbrisskante.Text = aktuelleSettings.dauerAbrisskante.ToString() & " s"
 
         Select Case aktuelleSettings.schwerkraftModus
@@ -77,9 +99,9 @@ Public Class ucOptionsTransition
         'Aktualisiert sämtliche Controls, deren Zustand von
         'anderen Einstellungen abhängt.
 
-        trkPartikelGroesse.Enabled = Not chkMixedPartikel.Checked AndAlso Not chkPartikelGroesseZufall.Checked
-        lblPartikelGroesse.Enabled = trkPartikelGroesse.Enabled
-        chkPartikelGroesseZufall.Enabled = Not chkMixedPartikel.Checked
+        trkPartikelGroesse.Enabled = rbManuellePGroesse.Checked
+        lblPartikelGroesse.Enabled = rbManuellePGroesse.Checked
+        lblNtrkParikelGroesse.Enabled = rbManuellePGroesse.Checked
 
         trkWindstaerke.Enabled = Not chkWindstaerkeZufall.Checked
         lblWindstaerke.Enabled = Not chkWindstaerkeZufall.Checked
@@ -148,30 +170,11 @@ Public Class ucOptionsTransition
 
     End Sub
 
-    Private Sub chkPartikelGroesseZufall_CheckedChanged(sender As Object, e As EventArgs) _
-
-        'Speichert den Zufallsmodus für die Partikelgröße
-        'per Direct Commit.
-
-        AktualisiereAbhaengigeControls()
-
-        If wirdInitialisiert OrElse wurdeBereinigt Then
-            Exit Sub
-        End If
-
-        aktuelleSettings.partikelGroesseZufall = chkPartikelGroesseZufall.Checked
-
-        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroesseZufall",
-                        aktuelleSettings.partikelGroesseZufall.ToString())
-
-    End Sub
-
-    Private Sub chkMixedPartikel_CheckedChanged(sender As Object, e As EventArgs)
-
-        'Speichert den Mixed-Partikel-Modus per Direct Commit.
-        '
-        'Bei aktivem Mixed-Partikel-Modus werden die
-        'Partikelgrößen später durch das Regionenfeld bestimmt.
+    Private Sub PartikelGroessenModus_CheckedChanged(sender As Object, e As EventArgs) _
+    Handles rbManuellePGroesse.CheckedChanged,
+            rbZufallsFestePGroesse.CheckedChanged,
+            rbGemischtePartikel.CheckedChanged,
+            rbZufallsPGroessenModus.CheckedChanged
 
         AktualisiereAbhaengigeControls()
 
@@ -179,10 +182,30 @@ Public Class ucOptionsTransition
             Exit Sub
         End If
 
-        aktuelleSettings.mixedPartikel = chkMixedPartikel.Checked
+        If rbManuellePGroesse.Checked Then
 
-        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "MixedPartikel",
-                        aktuelleSettings.mixedPartikel.ToString())
+            aktuelleSettings.partikelGroessenModus = "Manuell"
+
+        ElseIf rbZufallsFestePGroesse.Checked Then
+
+            aktuelleSettings.partikelGroessenModus = "Zufällig"
+
+        ElseIf rbGemischtePartikel.Checked Then
+
+            aktuelleSettings.partikelGroessenModus = "Gemischt"
+
+        ElseIf rbZufallsPGroessenModus.Checked Then
+
+            aktuelleSettings.partikelGroessenModus = "Zufallsmodus"
+
+        Else
+
+            Exit Sub
+
+        End If
+
+        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroessenModus",
+                        aktuelleSettings.partikelGroessenModus)
 
     End Sub
 
@@ -288,8 +311,7 @@ Public Class ucOptionsTransition
         defaults = GetTransitionDefaultSettings()
 
         aktuelleSettings.partikelGroesse = CInt(defaults("PartikelGroesse"))
-        aktuelleSettings.partikelGroesseZufall = CBool(defaults("PartikelGroesseZufall"))
-        aktuelleSettings.mixedPartikel = CBool(defaults("MixedPartikel"))
+        aktuelleSettings.partikelGroessenModus = defaults("PartikelGroessenModus")
         aktuelleSettings.windStaerke = CInt(defaults("WindStaerke"))
         aktuelleSettings.windStaerkeZufall = CBool(defaults("WindStaerkeZufall"))
         aktuelleSettings.dauerAbrisskante = CInt(defaults("DauerAbrisskante"))
@@ -298,9 +320,8 @@ Public Class ucOptionsTransition
 
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroesse",
                         defaults("PartikelGroesse"))
-        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroesseZufall",
-                        defaults("PartikelGroesseZufall"))
-        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "MixedPartikel", defaults("MixedPartikel"))
+        WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "PartikelGroessenModus",
+                        defaults("PartikelGroessenModus"))
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "WindStaerke", defaults("WindStaerke"))
         WriteToRegistry(SLIDESHOWTRANSITION_VOMWINDEVERWEHT_FULLPATH & "WindStaerkeZufall",
                         defaults("WindStaerkeZufall"))
