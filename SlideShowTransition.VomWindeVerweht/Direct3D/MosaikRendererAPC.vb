@@ -19,6 +19,8 @@ Friend Class MosaikRendererAPC
 
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext
+    Private depthStencilStateAus As ID3D11DepthStencilState
+    Private depthStencilStatePartikel As ID3D11DepthStencilState
 
     '---------------------------------
     ' Partikeldaten
@@ -220,6 +222,8 @@ Friend Class MosaikRendererAPC
         InitialisiereShader()
         InitialisiereHintergrundShader()
         InitialisierePartikelBewegungsShader()
+
+        InitialisiereDepthStencilStates()
 
         InitialisiereRenderParameterBuffer()
         InitialisierePartikelBewegungsParameterBuffer()
@@ -792,6 +796,44 @@ Friend Class MosaikRendererAPC
 
     End Sub
 
+    Private Sub InitialisiereDepthStencilStates()
+
+        Dim descriptionAus As DepthStencilDescription
+        Dim descriptionPartikel As DepthStencilDescription
+
+        '---------------------------------
+        ' Hintergrund:
+        ' kein Depth-Test, keine Depth-Writes
+        '---------------------------------
+
+        descriptionAus = New DepthStencilDescription(False, DepthWriteMask.Zero, ComparisonFunction.Always)
+
+        depthStencilStateAus = renderDevice.CreateDepthStencilState(descriptionAus)
+
+        If depthStencilStateAus Is Nothing Then
+
+            Throw New InvalidOperationException("Der deaktivierte DepthStencilState konnte nicht erzeugt werden.")
+
+        End If
+
+        '---------------------------------
+        ' Partikel:
+        ' normaler Z-Test + Z-Schreiben
+        '---------------------------------
+
+        descriptionPartikel = New DepthStencilDescription(True, DepthWriteMask.All, ComparisonFunction.LessEqual)
+
+        depthStencilStatePartikel = renderDevice.CreateDepthStencilState(descriptionPartikel)
+
+        If depthStencilStatePartikel Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der Partikel-DepthStencilState konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
     Private Sub InitialisiereRenderParameterBuffer()
 
         Dim description As BufferDescription
@@ -1036,7 +1078,7 @@ Friend Class MosaikRendererAPC
         '
         ' NeuesBild bildet die unterste Ebene des fertigen Frames.
 
-
+        renderContext.OMSetDepthStencilState(depthStencilStateAus, 0UI)
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.VSSetShader(hintergrundVertexShader)
         renderContext.PSSetShader(hintergrundPixelShader)
@@ -1058,6 +1100,7 @@ Friend Class MosaikRendererAPC
         ' die der Compute Shader im aktuellen Frame in den
         ' RenderPartikelIndexBuffer geschrieben hat.
 
+        renderContext.OMSetDepthStencilState(depthStencilStatePartikel, 0UI)
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.VSSetShaderResource(0UI, partikelView)
         renderContext.VSSetConstantBuffer(0UI, renderParameterBuffer)
@@ -1076,6 +1119,7 @@ Friend Class MosaikRendererAPC
         renderContext.PSSetSampler(0UI, Nothing)
         renderContext.VSSetShader(Nothing)
         renderContext.PSSetShader(Nothing)
+        renderContext.OMSetDepthStencilState(Nothing, 0UI)
 
     End Sub
 
@@ -1144,6 +1188,9 @@ Friend Class MosaikRendererAPC
         Direct3DRessourceHandler.GebeFrei(vertexShaderGrob)
         Direct3DRessourceHandler.GebeFrei(vertexShaderMittel)
         Direct3DRessourceHandler.GebeFrei(vertexShaderFein)
+
+        Direct3DRessourceHandler.GebeFrei(depthStencilStatePartikel)
+        Direct3DRessourceHandler.GebeFrei(depthStencilStateAus)
 
         '---------------------------------
         ' Hintergrundshader

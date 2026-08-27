@@ -1,5 +1,6 @@
 #include "MosaikShaderCommon.hlsli"
 
+
 StructuredBuffer<PartikelDaten> PartikelBuffer : register(t0);
 StructuredBuffer<uint> RenderPartikelIndices : register(t1);
 
@@ -29,6 +30,8 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 
     float sinRotation;
     float cosRotation;
+    
+    float tiefe;
 
     partikelIndex = RenderPartikelIndices[instanceID];
 
@@ -51,8 +54,10 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
     pixelPosition = partikel.position.xy + lokalePosition;
 
     ndcPosition = PixelZuNDC(pixelPosition, renderBreite, renderHoehe);
+    
+    tiefe = ErmittlePartikelBasisTiefe(partikelIndex);
 
-    output.position = float4(ndcPosition, 0.0, 1.0);
+    output.position = float4(ndcPosition, tiefe, 1.0);
 
     output.uv = lerp(partikel.uvRect.xy, partikel.uvRect.zw, uvFaktor);
 

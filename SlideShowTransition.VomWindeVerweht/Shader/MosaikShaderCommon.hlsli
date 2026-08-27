@@ -65,3 +65,25 @@ float2 PixelZuNDC(float2 pixelPosition, float renderBreite, float renderHoehe)
 
     return ndcPosition;
 }
+
+float ErmittlePartikelBasisTiefe(uint partikelIndex)
+{
+    /*
+     * Stabile kleine Tiefenstaffelung.
+     *
+     * 0.45 ... 0.55
+     *
+     * Gleicher Partikelindex ergibt in jedem Frame
+     * exakt dieselbe Z-Ebene.
+     */
+
+    uint hashWert;
+
+    float faktor;
+
+    hashWert = partikelIndex * 1664525u + 1013904223u;
+
+    faktor = (hashWert & 0xFFFFu) / 65535.0;
+
+    return lerp(0.45, 0.55, faktor);
+}

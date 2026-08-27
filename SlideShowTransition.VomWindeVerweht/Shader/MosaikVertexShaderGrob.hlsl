@@ -1,5 +1,6 @@
 #include "MosaikShaderCommon.hlsli"
 
+
 StructuredBuffer<PartikelDaten> PartikelBuffer : register(t0);
 StructuredBuffer<uint> RenderPartikelIndices : register(t1);
 
@@ -37,6 +38,10 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 
     float sinZ;
     float cosZ;
+    
+    float basisTiefe;
+    float lokaleTiefe;
+    float tiefe;
 
     float kameraAbstand;
     float perspektivFaktor;
@@ -96,12 +101,25 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
     kameraAbstand = max(renderBreite, renderHoehe) * 1.2;
 
     perspektivFaktor = kameraAbstand / max(kameraAbstand - lokalePosition.z, kameraAbstand * 0.1);
+    
+    basisTiefe = ErmittlePartikelBasisTiefe(partikelIndex);
+
+    /*
+     * Positive lokale Z-Werte liegen durch unsere
+     * Perspektivdefinition näher an der Kamera.
+     *
+     * Deshalb muss der Depth-Wert kleiner werden.
+     */
+
+    lokaleTiefe = lokalePosition.z / kameraAbstand;
+
+    tiefe = saturate(basisTiefe - lokaleTiefe * 0.35);
 
     pixelPosition = partikel.position.xy + lokalePosition.xy * perspektivFaktor;
 
     ndcPosition = PixelZuNDC(pixelPosition, renderBreite, renderHoehe);
 
-    output.position = float4(ndcPosition, 0.0, 1.0);
+    output.position = float4(ndcPosition, tiefe, 1.0);
 
     output.uv = lerp(partikel.uvRect.xy, partikel.uvRect.zw, uvFaktor);
 

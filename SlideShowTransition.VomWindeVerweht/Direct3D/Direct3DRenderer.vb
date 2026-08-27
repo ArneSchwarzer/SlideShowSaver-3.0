@@ -37,6 +37,9 @@ Friend Class D3DRenderer
     Private backBufferTexture As ID3D11Texture2D
     Private backBufferRenderTargetView As ID3D11RenderTargetView
 
+    Private depthTexture As ID3D11Texture2D
+    Private depthStencilView As ID3D11DepthStencilView
+
     Private letzterSurfacePointer As IntPtr
     Private renderAnforderungOffen As Integer
 
@@ -275,6 +278,11 @@ Friend Class D3DRenderer
         Dim sharedDescription As Texture2DDescription
         Dim backBufferDescription As Texture2DDescription
 
+        Dim neueDepthTexture As ID3D11Texture2D
+        Dim neueDepthStencilView As ID3D11DepthStencilView
+
+        Dim depthDescription As Texture2DDescription
+
         Dim sharedHandle As IntPtr
 
         surface = Nothing
@@ -284,6 +292,42 @@ Friend Class D3DRenderer
 
         neueBackBufferTexture = Nothing
         neueBackBufferRenderTargetView = Nothing
+
+        neueDepthTexture = Nothing
+        neueDepthStencilView = Nothing
+
+        '---------------------------------
+        ' Privaten Depthbuffer erzeugen
+        '---------------------------------
+
+        depthDescription = New Texture2DDescription(
+            Format.D32_Float,
+            sharedDescription.Width,
+            sharedDescription.Height,
+            1UI,
+            1UI,
+            BindFlags.DepthStencil,
+            ResourceUsage.Default,
+            CpuAccessFlags.None,
+            sharedDescription.SampleDescription.Count,
+            sharedDescription.SampleDescription.Quality,
+            ResourceOptionFlags.None)
+
+        neueDepthTexture = renderDevice.CreateTexture2D(depthDescription)
+
+        If neueDepthTexture Is Nothing Then
+
+            Throw New InvalidOperationException("Der private Depthbuffer konnte nicht erzeugt werden.")
+
+        End If
+
+        neueDepthStencilView = renderDevice.CreateDepthStencilView(neueDepthTexture)
+
+        If neueDepthStencilView Is Nothing Then
+
+            Throw New InvalidOperationException("Die DepthStencilView konnte nicht erzeugt werden.")
+
+        End If
 
         sharedHandle = IntPtr.Zero
 
@@ -372,7 +416,8 @@ Friend Class D3DRenderer
             ' Erst nachdem sämtliche neuen Ressourcen erfolgreich
             ' erzeugt wurden, geben wir den bisherigen Satz frei.
             '
-
+            Direct3DRessourceHandler.GebeFrei(depthStencilView)
+            Direct3DRessourceHandler.GebeFrei(depthTexture)
             Direct3DRessourceHandler.GebeFrei(backBufferRenderTargetView)
             Direct3DRessourceHandler.GebeFrei(backBufferTexture)
             Direct3DRessourceHandler.GebeFrei(sharedTexture)
@@ -381,9 +426,14 @@ Friend Class D3DRenderer
             backBufferTexture = neueBackBufferTexture
             backBufferRenderTargetView = neueBackBufferRenderTargetView
             letzterSurfacePointer = surfacePointer
+            depthTexture = neueDepthTexture
+            depthStencilView = neueDepthStencilView
 
             ' Besitz ist jetzt an die Member übergegangen.
             '
+
+            neueDepthTexture = Nothing
+            neueDepthStencilView = Nothing
 
             neueSharedTexture = Nothing
 
@@ -392,6 +442,8 @@ Friend Class D3DRenderer
 
         Finally
 
+            Direct3DRessourceHandler.GebeFrei(neueDepthStencilView)
+            Direct3DRessourceHandler.GebeFrei(neueDepthTexture)
             Direct3DRessourceHandler.GebeFrei(neueBackBufferRenderTargetView)
             Direct3DRessourceHandler.GebeFrei(neueBackBufferTexture)
             Direct3DRessourceHandler.GebeFrei(neueSharedTexture)
@@ -437,7 +489,8 @@ Friend Class D3DRenderer
             '
             ' WPF kann diese Texture niemals sehen.
 
-            renderContext.OMSetRenderTargets(backBufferRenderTargetView)
+            renderContext.OMSetRenderTargets(backBufferRenderTargetView, depthStencilView)
+            renderContext.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth, 1.0F, 0)
             renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
 
             ' Innerhalb dieses Aufrufs:
@@ -577,6 +630,11 @@ Friend Class D3DRenderer
         '---------------------------------
         ' Privater Backbuffer
         '---------------------------------
+        Direct3DRessourceHandler.GebeFrei(depthStencilView)
+        Direct3DRessourceHandler.GebeFrei(depthTexture)
+
+        depthStencilView = Nothing
+        depthTexture = Nothing
 
         Direct3DRessourceHandler.GebeFrei(backBufferRenderTargetView)
         Direct3DRessourceHandler.GebeFrei(backBufferTexture)

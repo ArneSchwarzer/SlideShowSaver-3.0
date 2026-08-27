@@ -25,7 +25,10 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 
     float2 pixelPosition;
     float2 ndcPosition;
+    
+    float tiefe;
 
+    
     partikelIndex = RenderPartikelIndices[instanceID];
 
     partikel = PartikelBuffer[partikelIndex];
@@ -35,9 +38,11 @@ VSOutput VSMain(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
     pixelPosition = partikel.position.xy + ecke * partikel.groesse;
 
     ndcPosition = PixelZuNDC(pixelPosition, renderBreite, renderHoehe);
+    
+    tiefe = ErmittlePartikelBasisTiefe(partikelIndex);
 
-    output.position = float4(ndcPosition, 0.0, 1.0);
-
+    output.position = float4(ndcPosition, tiefe, 1.0);
+    
     output.uv = lerp(partikel.uvRect.xy, partikel.uvRect.zw, uvFaktor);
 
     return output;
