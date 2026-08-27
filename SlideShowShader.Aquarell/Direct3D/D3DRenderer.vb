@@ -53,6 +53,13 @@ Friend Class D3DRenderer
     Private copyVertexShader As ID3D11VertexShader
     Private copyPixelShader As ID3D11PixelShader
 
+    '---------------------------------
+    ' Bilateral-Shader
+    '---------------------------------
+
+    Private bilateralVertexShader As ID3D11VertexShader
+    Private bilateralPixelShader As ID3D11PixelShader
+
     Private renderSampler As ID3D11SamplerState
 
     '---------------------------------
@@ -175,14 +182,23 @@ Friend Class D3DRenderer
 
     Private Sub InitialisiereShader()
 
-        Dim vertexShaderCode() As Byte
-        Dim pixelShaderCode() As Byte
+        Dim copyVertexShaderCode() As Byte
+        Dim copyPixelShaderCode() As Byte
 
-        vertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
-        pixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
+        Dim bilateralVertexShaderCode() As Byte
+        Dim bilateralPixelShaderCode() As Byte
 
-        copyVertexShader = renderDevice.CreateVertexShader(vertexShaderCode)
-        copyPixelShader = renderDevice.CreatePixelShader(pixelShaderCode)
+        copyVertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
+        copyPixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
+
+        bilateralVertexShaderCode = LadeShaderBytecode("BilateralShaderVS.cso")
+        bilateralPixelShaderCode = LadeShaderBytecode("BilateralShaderPS.cso")
+
+        copyVertexShader = renderDevice.CreateVertexShader(copyVertexShaderCode)
+        copyPixelShader = renderDevice.CreatePixelShader(copyPixelShaderCode)
+
+        bilateralVertexShader = renderDevice.CreateVertexShader(bilateralVertexShaderCode)
+        bilateralPixelShader = renderDevice.CreatePixelShader(bilateralPixelShaderCode)
 
         If copyVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-VertexShader konnte nicht erzeugt werden.")
@@ -190,6 +206,14 @@ Friend Class D3DRenderer
 
         If copyPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If bilateralVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der Bilateral-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If bilateralPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der Bilateral-PixelShader konnte nicht erzeugt werden.")
         End If
 
     End Sub
@@ -290,6 +314,24 @@ Friend Class D3DRenderer
 
         renderContext.Draw(3UI, 0UI)
 
+        ' ============================================================
+        ' PASS 2: Bilateral oben rechts
+        ' ============================================================
+
+        renderContext.RSSetViewport(
+    New Viewport(
+        CSng(quadrantBreite),
+        0.0F,
+        CSng(quadrantBreite),
+        CSng(quadrantHoehe),
+        0.0F,
+        1.0F))
+
+        renderContext.VSSetShader(bilateralVertexShader)
+        renderContext.PSSetShader(bilateralPixelShader)
+
+        renderContext.Draw(3UI, 0UI)
+
         ' SRV wieder lösen.
         '
         ' Das wird später bei Multipass besonders wichtig, weil dieselbe
@@ -298,6 +340,7 @@ Friend Class D3DRenderer
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
 
         ' ============================================================
         ' READBACK
@@ -535,6 +578,9 @@ Friend Class D3DRenderer
 
         Direct3DRessourceHandler.GebeFrei(copyPixelShader)
         Direct3DRessourceHandler.GebeFrei(copyVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(bilateralPixelShader)
+        Direct3DRessourceHandler.GebeFrei(bilateralVertexShader)
 
         '---------------------------------
         ' Context

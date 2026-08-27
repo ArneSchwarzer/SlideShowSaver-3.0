@@ -64,10 +64,10 @@ SamplerState sourceSampler : register(s0);
 //     stärkere Vermischung über Farbgrenzen hinweg.
 // ============================================================================
 
-static const int radius = 4;
+static const int radius = 12;
 
-static const float sigmaSpatial = 3.0;
-static const float sigmaRange = 0.10;
+static const float sigmaSpatial = 8.0;
+static const float sigmaRange = 0.32;
 
 
 // ============================================================================

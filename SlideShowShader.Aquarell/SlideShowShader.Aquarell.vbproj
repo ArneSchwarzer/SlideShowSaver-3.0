@@ -183,6 +183,8 @@
     <EmbeddedResource Include="Shader\AquarellCopyShaderVS.cso" />
     <EmbeddedResource Include="Shader\BilateralShaderPS.cso" />
     <EmbeddedResource Include="Shader\BilateralShaderVS.cso" />
+    <EmbeddedResource Include="Shader\KuwaharaShaderPS.cso" />
+    <EmbeddedResource Include="Shader\KuwaharaShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -209,6 +211,7 @@
   <ItemGroup>
     <Content Include="Shader\AquarellCopyShader.hlsl" />
     <Content Include="Shader\BilateralShader.hlsl" />
+    <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\PolySharp.1.10.0\build\PolySharp.targets" Condition="Exists('..\packages\PolySharp.1.10.0\build\PolySharp.targets')" />
