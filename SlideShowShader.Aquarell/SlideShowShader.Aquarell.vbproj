@@ -185,6 +185,8 @@
     <EmbeddedResource Include="Shader\BilateralShaderVS.cso" />
     <EmbeddedResource Include="Shader\KuwaharaShaderPS.cso" />
     <EmbeddedResource Include="Shader\KuwaharaShaderVS.cso" />
+    <EmbeddedResource Include="Shader\AniKuwaharaShaderPS.cso" />
+    <EmbeddedResource Include="Shader\AniKuwaharaShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -209,6 +211,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shader\AniKuwaharaShader.hlsl" />
     <Content Include="Shader\AquarellCopyShader.hlsl" />
     <Content Include="Shader\BilateralShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />

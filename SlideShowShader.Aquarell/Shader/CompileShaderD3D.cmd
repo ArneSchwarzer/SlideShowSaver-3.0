@@ -12,6 +12,9 @@ del /Q BilateralShaderPS.cso 2>nul
 del /Q KuwaharaShaderVS.cso 2>nul
 del /Q KuwaharaShaderPS.cso 2>nul
 
+del /Q AniKuwaharaShaderVS.cso 2>nul
+del /Q AniKuwaharaShaderPS.cso 2>nul
+
 "%FXC%" /T vs_5_0 /E VSMain /Fo AquarellCopyShaderVS.cso AquarellCopyShader.hlsl
 if errorlevel 1 goto error
 
@@ -28,6 +31,12 @@ if errorlevel 1 goto error
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo KuwaharaShaderPS.cso KuwaharaShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo AniKuwaharaShaderVS.cso AniKuwaharaShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo AniKuwaharaShaderPS.cso AniKuwaharaShader.hlsl
 if errorlevel 1 goto error
 
 

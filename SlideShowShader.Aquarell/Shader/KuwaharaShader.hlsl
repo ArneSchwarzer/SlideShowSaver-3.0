@@ -80,7 +80,7 @@ SamplerState sourceSampler : register(s0);
 //     - mehr fotografische Struktur bleibt erhalten
 // ============================================================================
 
-static const int radius = 6;
+static const int radius = 32;
 
 
 // ============================================================================

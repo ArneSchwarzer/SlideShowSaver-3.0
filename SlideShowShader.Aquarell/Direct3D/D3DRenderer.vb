@@ -357,6 +357,8 @@ Friend Class D3DRenderer
         renderContext.VSSetShader(bilateralVertexShader)
         renderContext.PSSetShader(bilateralPixelShader)
 
+        renderContext.Draw(3UI, 0UI)
+
         ' ============================================================
         ' PASS 3: Kuwahara unten links
         ' ============================================================
