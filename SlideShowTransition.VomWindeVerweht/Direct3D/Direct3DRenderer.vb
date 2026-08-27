@@ -296,39 +296,6 @@ Friend Class D3DRenderer
         neueDepthTexture = Nothing
         neueDepthStencilView = Nothing
 
-        '---------------------------------
-        ' Privaten Depthbuffer erzeugen
-        '---------------------------------
-
-        depthDescription = New Texture2DDescription(
-            Format.D32_Float,
-            sharedDescription.Width,
-            sharedDescription.Height,
-            1UI,
-            1UI,
-            BindFlags.DepthStencil,
-            ResourceUsage.Default,
-            CpuAccessFlags.None,
-            sharedDescription.SampleDescription.Count,
-            sharedDescription.SampleDescription.Quality,
-            ResourceOptionFlags.None)
-
-        neueDepthTexture = renderDevice.CreateTexture2D(depthDescription)
-
-        If neueDepthTexture Is Nothing Then
-
-            Throw New InvalidOperationException("Der private Depthbuffer konnte nicht erzeugt werden.")
-
-        End If
-
-        neueDepthStencilView = renderDevice.CreateDepthStencilView(neueDepthTexture)
-
-        If neueDepthStencilView Is Nothing Then
-
-            Throw New InvalidOperationException("Die DepthStencilView konnte nicht erzeugt werden.")
-
-        End If
-
         sharedHandle = IntPtr.Zero
 
         If surfacePointer = IntPtr.Zero Then
@@ -406,6 +373,39 @@ Friend Class D3DRenderer
 
                 Throw New InvalidOperationException(
                 "Die RenderTargetView des privaten Backbuffers konnte nicht erzeugt werden.")
+
+            End If
+
+            '---------------------------------
+            ' Privaten Depthbuffer erzeugen
+            '---------------------------------
+
+            depthDescription = New Texture2DDescription(
+            Format.D32_Float,
+            sharedDescription.Width,
+            sharedDescription.Height,
+            1UI,
+            1UI,
+            BindFlags.DepthStencil,
+            ResourceUsage.Default,
+            CpuAccessFlags.None,
+            sharedDescription.SampleDescription.Count,
+            sharedDescription.SampleDescription.Quality,
+            ResourceOptionFlags.None)
+
+            neueDepthTexture = renderDevice.CreateTexture2D(depthDescription)
+
+            If neueDepthTexture Is Nothing Then
+
+                Throw New InvalidOperationException("Der private Depthbuffer konnte nicht erzeugt werden.")
+
+            End If
+
+            neueDepthStencilView = renderDevice.CreateDepthStencilView(neueDepthTexture)
+
+            If neueDepthStencilView Is Nothing Then
+
+                Throw New InvalidOperationException("Die DepthStencilView konnte nicht erzeugt werden.")
 
             End If
 
