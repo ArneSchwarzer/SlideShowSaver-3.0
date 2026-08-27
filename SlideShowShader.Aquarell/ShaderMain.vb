@@ -141,7 +141,6 @@ Public Class ShaderMain
         'oder verwendet die definierten Defaultwerte.
 
         Dim defaults As Dictionary(Of String, String)
-        Dim modusString As String
 
         defaults = GetShaderDefaultSettings()
 
