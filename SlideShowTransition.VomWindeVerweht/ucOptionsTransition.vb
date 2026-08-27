@@ -154,7 +154,7 @@ Public Class ucOptionsTransition
 
 #Region "Direct Commit"
 
-    Private Sub trkPartikelGroesse_ValueChanged(sender As Object, e As EventArgs)
+    Private Sub trkPartikelGroesse_ValueChanged(sender As Object, e As EventArgs) Handles trkPartikelGroesse.ValueChanged
         'Speichert die gewählte Partikelgröße per Direct Commit.
 
         lblPartikelGroesse.Text = ErmittlePartikelGroesseAusTrackBar().ToString() & " px"
