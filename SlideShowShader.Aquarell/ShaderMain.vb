@@ -19,8 +19,6 @@ Public Class ShaderMain
 
     Private aktuelleSettings As ShaderSettings_Aquarell
 
-    Private ReadOnly rnd As New Random()
-
     Private wurdeBereinigt As Boolean
 
     Public Structure ShaderSettings_Aquarell
@@ -68,7 +66,7 @@ Public Class ShaderMain
 
         Get
 
-            Return New Version(1, 0, 0, 0)
+            Return New Version(0, 1, 0, 0)
 
         End Get
 
