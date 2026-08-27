@@ -4,6 +4,7 @@ Imports System.Runtime.InteropServices
 
 Imports SharpGen.Runtime
 
+Imports SlideShowDirect3DInterop
 Imports SlideShowLogging
 Imports SlideShowLogging.LogHandling
 
@@ -67,12 +68,6 @@ Friend Class D3DRenderer
 
     Private wurdeBereinigt As Boolean
     Private istInitialisiert As Boolean
-
-#End Region
-
-#Region "Delegaten"
-
-    Private Delegate Sub ClearRenderTargetViewDelegate(renderTargetView As ID3D11RenderTargetView, ByRef color As Color4)
 
 #End Region
 
@@ -235,8 +230,6 @@ Friend Class D3DRenderer
 
         Dim ergebnis As Bitmap
 
-        Dim clearRenderTargetView As ClearRenderTargetViewDelegate
-
         ergebnis = Nothing
 
         If wurdeBereinigt Then
@@ -273,9 +266,7 @@ Friend Class D3DRenderer
 
         clearColor = New Color4(0.0F, 0.0F, 0.0F, 1.0F)
 
-        clearRenderTargetView = AddressOf renderContext.ClearRenderTargetView
-
-        clearRenderTargetView(renderTargetView, clearColor)
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, renderTargetView, 0.0F, 0.0F, 0.0F, 1.0F)
 
         ' Privates RenderTarget aktivieren.
 
@@ -306,7 +297,7 @@ Friend Class D3DRenderer
         ' bleiben darf.
 
         renderContext.PSSetShaderResource(0UI, Nothing)
-        renderContext.OMSetRenderTargets(CType(Nothing, ID3D11RenderTargetView))
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
         ' ============================================================
         ' READBACK

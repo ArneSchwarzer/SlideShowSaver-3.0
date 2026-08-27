@@ -6,11 +6,21 @@ set FXC=C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\fxc.exe
 del /Q AquarellCopyShaderVS.cso 2>nul
 del /Q AquarellCopyShaderPS.cso 2>nul
 
+del /Q BilateralShaderVS.cso 2>nul
+del /Q BilateralShaderPS.cso 2>nul
+
 "%FXC%" /T vs_5_0 /E VSMain /Fo AquarellCopyShaderVS.cso AquarellCopyShader.hlsl
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo AquarellCopyShaderPS.cso AquarellCopyShader.hlsl
 if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo BilateralShaderVS.cso BilateralShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo BilateralShaderPS.cso BilateralShader.hlsl
+if errorlevel 1 goto error
+
 
 echo.
 echo Direct3D-Shader erfolgreich kompiliert.

@@ -167,6 +167,13 @@ echo ===========================================================================
 echo.
 
 call :ExportPlugin ^
+    "%ROOT%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.dll" ^
+    "%ROOT%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.pdb" ^
+    "%TARGET_SHADER%\Aquarell.ssss" ^
+    "%TARGET_SHADER%\Aquarell.pdb"
+if errorlevel 1 goto :Error
+
+call :ExportPlugin ^
     "%ROOT%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.dll" ^
     "%ROOT%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.pdb" ^
     "%TARGET_SHADER%\Invertieren.ssss" ^

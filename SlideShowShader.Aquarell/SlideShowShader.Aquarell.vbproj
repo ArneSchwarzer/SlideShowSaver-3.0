@@ -50,6 +50,25 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>SlideShowShader.Aquarell.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>SlideShowShader.Aquarell.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Bcl.HashCode, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.HashCode.1.1.1\lib\net461\Microsoft.Bcl.HashCode.dll</HintPath>
@@ -162,8 +181,14 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Shader\AquarellCopyShaderPS.cso" />
     <EmbeddedResource Include="Shader\AquarellCopyShaderVS.cso" />
+    <EmbeddedResource Include="Shader\BilateralShaderPS.cso" />
+    <EmbeddedResource Include="Shader\BilateralShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
+      <Project>{4dbf1ca5-9372-4957-aa53-e910e9098695}</Project>
+      <Name>SlideShowDirect3DInterop</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SlideShowInterfaces\SlideShowInterfaces.vbproj">
       <Project>{7f07849f-94c6-4f94-9713-6d5fd4cc76ac}</Project>
       <Name>SlideShowInterfaces</Name>
@@ -183,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shader\AquarellCopyShader.hlsl" />
+    <Content Include="Shader\BilateralShader.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\PolySharp.1.10.0\build\PolySharp.targets" Condition="Exists('..\packages\PolySharp.1.10.0\build\PolySharp.targets')" />
