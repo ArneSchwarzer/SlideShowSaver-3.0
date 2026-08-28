@@ -18,6 +18,8 @@ Friend Class D3DRenderer
 
 #Region "Variablendeklaration"
 
+#Region "Variablen"
+
     '---------------------------------
     ' D3D11-Grundsystem
     '---------------------------------
@@ -61,6 +63,20 @@ Friend Class D3DRenderer
     Private kuwaharaPixelShader As ID3D11PixelShader
 
     '---------------------------------
+    ' Pigment-Initializer
+    '---------------------------------
+
+    Private pigmentInitializerVertexShader As ID3D11VertexShader
+    Private pigmentInitializerPixelShader As ID3D11PixelShader
+
+    '---------------------------------
+    ' Wasser-Initializer
+    '---------------------------------
+
+    Private waterInitializerVertexShader As ID3D11VertexShader
+    Private waterInitializerPixelShader As ID3D11PixelShader
+
+    '---------------------------------
     ' Texturen für Simulation
     '---------------------------------
     Private sourceWaterTexture As ID3D11Texture2D
@@ -102,6 +118,9 @@ Friend Class D3DRenderer
 
     Private wurdeBereinigt As Boolean
     Private istInitialisiert As Boolean
+
+
+#End Region
 
 #End Region
 
@@ -280,17 +299,35 @@ Friend Class D3DRenderer
         Dim kuwaharaVertexShaderCode() As Byte
         Dim kuwaharaPixelShaderCode() As Byte
 
+        Dim pigmentInitializerVertexShaderCode() As Byte
+        Dim pigmentInitializerPixelShaderCode() As Byte
+
+        Dim waterInitializerVertexShaderCode() As Byte
+        Dim waterInitializerPixelShaderCode() As Byte
+
         copyVertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
         copyPixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
 
         kuwaharaVertexShaderCode = LadeShaderBytecode("KuwaharaShaderVS.cso")
         kuwaharaPixelShaderCode = LadeShaderBytecode("KuwaharaShaderPS.cso")
 
+        pigmentInitializerVertexShaderCode = LadeShaderBytecode("PigmentInitializerShaderVS.cso")
+        pigmentInitializerPixelShaderCode = LadeShaderBytecode("PigmentInitializerShaderPS.cso")
+
+        waterInitializerVertexShaderCode = LadeShaderBytecode("WaterInitializerShaderVS.cso")
+        waterInitializerPixelShaderCode = LadeShaderBytecode("WaterInitializerShaderPS.cso")
+
         copyVertexShader = renderDevice.CreateVertexShader(copyVertexShaderCode)
         copyPixelShader = renderDevice.CreatePixelShader(copyPixelShaderCode)
 
         kuwaharaVertexShader = renderDevice.CreateVertexShader(kuwaharaVertexShaderCode)
         kuwaharaPixelShader = renderDevice.CreatePixelShader(kuwaharaPixelShaderCode)
+
+        pigmentInitializerVertexShader = renderDevice.CreateVertexShader(pigmentInitializerVertexShaderCode)
+        pigmentInitializerPixelShader = renderDevice.CreatePixelShader(pigmentInitializerPixelShaderCode)
+
+        waterInitializerVertexShader = renderDevice.CreateVertexShader(waterInitializerVertexShaderCode)
+        waterInitializerPixelShader = renderDevice.CreatePixelShader(waterInitializerPixelShaderCode)
 
         If copyVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-VertexShader konnte nicht erzeugt werden.")
@@ -306,6 +343,22 @@ Friend Class D3DRenderer
 
         If kuwaharaPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der Kuwahara-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentInitializerVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentInitializer-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentInitializerPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentInitializer-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If waterInitializerVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der WaterInitializer-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If waterInitializerPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der WaterInitializer-PixelShader konnte nicht erzeugt werden.")
         End If
 
     End Sub
@@ -357,7 +410,7 @@ Friend Class D3DRenderer
         End If
 
         ' ============================================================
-        ' PASS Initialisierung: Classic Kuwahara, volle Auflösung
+        ' PASS II Initialisierung: Classic Kuwahara, volle Auflösung
         ' ============================================================
 
         renderContext.OMSetRenderTargets(kuwaharaTargetView)
@@ -374,9 +427,56 @@ Friend Class D3DRenderer
         renderContext.PSSetShaderResource(0UI, Nothing)
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
+        ' ============================================================
+        ' PASS III Initialisierung: Pigmente initialisieren
+        ' ============================================================
+        '
+        ' Das fertige Kuwahara-Bild wird als Ausgangsfarbverteilung
+        ' in die mobile Pigment-Texture geschrieben.
+        '
+        ' RGB = farbige Pigmentmasse
+        ' A   = Pigmentmenge
+        '
+        ' Für V0.1 startet die Pigmentmenge überall mit 1.0.
+        ' ============================================================
+
+        renderContext.OMSetRenderTargets(sourcePigmentTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.VSSetShader(pigmentInitializerVertexShader)
+        renderContext.PSSetShader(pigmentInitializerPixelShader)
+        renderContext.PSSetShaderResource(0UI, kuwaharaView)
+        renderContext.PSSetSampler(0UI, renderSampler)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
         ' ============================================================
-        ' TEST V0.1
+        ' PASS IV Initialisierung: Wasser initialisieren
+        ' ============================================================
+        '
+        ' Das Wasserfeld erhält zunächst nur eine leicht ungleichmäßige
+        ' Ausgangsverteilung.
+        '
+        ' Noch kein Fluss.
+        ' Noch keine Verdunstung.
+        ' Noch keine Pigmentbewegung.
+        ' ============================================================
+
+        renderContext.OMSetRenderTargets(sourceWaterTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.VSSetShader(waterInitializerVertexShader)
+        renderContext.PSSetShader(waterInitializerPixelShader)
+
+        renderContext.Draw(3UI, 0UI)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+        ' ============================================================
+        ' TEST V0.2 
+        ' ============================================================
+        ' Pass I Testing: Copy-Pass Originalbild
         ' ============================================================
         '
         ' Das vollständige RenderTarget besitzt weiterhin exakt die
@@ -390,7 +490,6 @@ Friend Class D3DRenderer
         '
         ' Das ist bereits exakt die Geometrie, die wir später für die
         ' vier Vergleichsfelder benötigen.
-        '
         ' ============================================================
 
         quadrantBreite = Math.Max(1, renderBreite \ 2)
@@ -425,11 +524,13 @@ Friend Class D3DRenderer
         renderContext.Draw(3UI, 0UI)
 
         ' ============================================================
-        ' PASS 2: Kuwahara unten links
+        ' PASS II Testing: Kuwahara unten links
         '
         ' Erzeugt ist er ja bereits, daher nur per Copy-Shader in die
         ' linke untere Ecke platzieren
         ' ============================================================
+        renderContext.RSSetViewport(New Viewport(0.0F, CSng(quadrantHoehe), CSng(quadrantBreite),
+                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
 
         renderContext.VSSetShader(copyVertexShader)
         renderContext.PSSetShader(copyPixelShader)
@@ -437,15 +538,34 @@ Friend Class D3DRenderer
 
         renderContext.Draw(3UI, 0UI)
 
+        ' ============================================================
+        ' Pass III Testing: Pigment Initialisierung unten rechts
+        ' ============================================================
+        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
+                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
+        renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        ' ============================================================
+        ' Pass IV Testing: Water Initialisierung oben rechts
+        ' ============================================================
+        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), 0.0F, CSng(quadrantBreite),
+                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
+        renderContext.PSSetShaderResource(0UI, sourceWaterView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        ' ============================================================
         ' SRV wieder lösen.
         '
         ' Das wird später bei Multipass besonders wichtig, weil dieselbe
         ' Texture niemals gleichzeitig als Input und Output gebunden
         ' bleiben darf.
+        ' ============================================================
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
-
 
         ' ============================================================
         ' READBACK
@@ -686,6 +806,12 @@ Friend Class D3DRenderer
 
         Direct3DRessourceHandler.GebeFrei(kuwaharaPixelShader)
         Direct3DRessourceHandler.GebeFrei(kuwaharaVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pigmentInitializerPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pigmentInitializerVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(waterInitializerPixelShader)
+        Direct3DRessourceHandler.GebeFrei(waterInitializerVertexShader)
 
         '---------------------------------
         ' Context
