@@ -53,15 +53,26 @@ float CalculateWaterVariation(float2 uv)
 
 float PSMain(VertexOutput input) : SV_TARGET
 {
-    float baseWater;
-    float variation;
+    const int cellSize = 128;
+
+    int2 pixelPosition;
+    int2 cellPosition;
+
     float water;
 
-    baseWater = 0.20;
+    pixelPosition = int2(input.position.xy);
 
-    variation = CalculateWaterVariation(input.texCoord);
+    cellPosition =
+        pixelPosition / cellSize;
 
-    water = baseWater * lerp(0.70, 1.30, variation);
+    if (((cellPosition.x + cellPosition.y) & 1) == 0)
+    {
+        water = 0.10;
+    }
+    else
+    {
+        water = 0.30;
+    }
 
     return water;
 }
