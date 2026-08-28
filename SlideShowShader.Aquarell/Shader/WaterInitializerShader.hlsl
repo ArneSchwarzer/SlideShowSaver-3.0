@@ -53,7 +53,7 @@ float CalculateWaterVariation(float2 uv)
 
 float PSMain(VertexOutput input) : SV_TARGET
 {
-    const int cellSize = 128;
+    const int cellSize = 32;
 
     int2 pixelPosition;
     int2 cellPosition;

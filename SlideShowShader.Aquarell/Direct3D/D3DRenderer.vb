@@ -21,7 +21,7 @@ Friend Class D3DRenderer
 #Region "Konstanten"
 
     Const TEST_VISKOSITAET As Single = 1.0F
-    Const TEST_ITERATIONEN As Integer = 256
+    Const TEST_ITERATIONEN As Integer = 4096
 
 #End Region
 
