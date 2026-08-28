@@ -70,7 +70,7 @@ SamplerState sourceSampler : register(s0);
 //
 // ============================================================================
 
-static const int radius = 16;
+static const int radius = 96;
 
 static const float alpha = 1.0;
 static const float q = 8.0;

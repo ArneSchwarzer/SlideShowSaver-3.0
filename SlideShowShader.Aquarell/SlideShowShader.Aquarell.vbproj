@@ -216,6 +216,9 @@
     <Content Include="Shader\BilateralShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Shader\Historisch &amp; Testing\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\PolySharp.1.10.0\build\PolySharp.targets" Condition="Exists('..\packages\PolySharp.1.10.0\build\PolySharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
