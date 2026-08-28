@@ -61,7 +61,7 @@ Friend Class D3DRenderer
     Private kuwaharaPixelShader As ID3D11PixelShader
 
     '---------------------------------
-    ' Testuren für Simulation
+    ' Texturen für Simulation
     '---------------------------------
     Private sourceWaterTexture As ID3D11Texture2D
     Private sourceWaterView As ID3D11ShaderResourceView
@@ -191,11 +191,76 @@ Friend Class D3DRenderer
 
         sourceView = renderDevice.CreateShaderResourceView(sourceTexture)
 
+        kuwaharaTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            Format.B8G8R8A8_UNorm)
+
+        kuwaharaView = renderDevice.CreateShaderResourceView(kuwaharaTexture)
+        kuwaharaTargetView = renderDevice.CreateRenderTargetView(kuwaharaTexture)
+
+        sourceWaterTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            Format.R16_Float)
+
+        sourceWaterView = renderDevice.CreateShaderResourceView(sourceWaterTexture)
+        sourceWaterTargetView = renderDevice.CreateRenderTargetView(sourceWaterTexture)
+
+        targetWaterTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            Format.R16_Float)
+
+        targetWaterView = renderDevice.CreateShaderResourceView(targetWaterTexture)
+        targetWaterTargetView = renderDevice.CreateRenderTargetView(targetWaterTexture)
+
+        sourcePigmentTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            Format.R16G16B16A16_Float)
+
+        sourcePigmentView = renderDevice.CreateShaderResourceView(sourcePigmentTexture)
+        sourcePigmentTargetView = renderDevice.CreateRenderTargetView(sourcePigmentTexture)
+
+        targetPigmentTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            Format.R16G16B16A16_Float)
+
+        targetPigmentView = renderDevice.CreateShaderResourceView(targetPigmentTexture)
+        targetPigmentTargetView = renderDevice.CreateRenderTargetView(targetPigmentTexture)
+
         renderTargetTexture = Direct3DRessourceHandler.ErstelleRenderTargetTexture(renderDevice, renderBreite, renderHoehe)
 
         renderTargetView = renderDevice.CreateRenderTargetView(renderTargetTexture)
 
         stagingTexture = Direct3DRessourceHandler.ErstelleStagingTexture(renderDevice, renderBreite, renderHoehe)
+
+        If kuwaharaView Is Nothing Then
+            Throw New InvalidOperationException("Der Kuwahara-View konnte nicht erzeugt werden.")
+        End If
+
+        If sourceWaterView Is Nothing Then
+            Throw New InvalidOperationException("Der SourceWater-View konnte nicht erzeugt werden.")
+        End If
+
+        If targetWaterView Is Nothing Then
+            Throw New InvalidOperationException("Der TargetWater-View konnte nicht erzeugt werden.")
+        End If
+
+        If sourcePigmentView Is Nothing Then
+            Throw New InvalidOperationException("Der SourcePigment-View konnte nicht erzeugt werden.")
+        End If
+
+        If targetPigmentView Is Nothing Then
+            Throw New InvalidOperationException("Der TargetPigment-View konnte nicht erzeugt werden.")
+        End If
 
         If sourceView Is Nothing Then
             Throw New InvalidOperationException("Die Source-SRV konnte nicht erzeugt werden.")
@@ -291,9 +356,27 @@ Friend Class D3DRenderer
             Throw New InvalidOperationException("Der D3DRenderer wurde noch nicht initialisiert.")
         End If
 
+        ' ============================================================
+        ' PASS Initialisierung: Classic Kuwahara, volle Auflösung
+        ' ============================================================
+
+        renderContext.OMSetRenderTargets(kuwaharaTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+        renderContext.VSSetShader(kuwaharaVertexShader)
+        renderContext.PSSetShader(kuwaharaPixelShader)
+        renderContext.PSSetShaderResource(0UI, sourceView)
+        renderContext.PSSetSampler(0UI, renderSampler)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
 
         ' ============================================================
-        ' TEST V0.1a
+        ' TEST V0.1
         ' ============================================================
         '
         ' Das vollständige RenderTarget besitzt weiterhin exakt die
@@ -343,19 +426,14 @@ Friend Class D3DRenderer
 
         ' ============================================================
         ' PASS 2: Kuwahara unten links
+        '
+        ' Erzeugt ist er ja bereits, daher nur per Copy-Shader in die
+        ' linke untere Ecke platzieren
         ' ============================================================
 
-        renderContext.RSSetViewport(
-            New Viewport(
-                0.0F,
-                CSng(quadrantHoehe),
-                CSng(quadrantBreite),
-                CSng(quadrantHoehe),
-                0.0F,
-                1.0F))
-
-        renderContext.VSSetShader(kuwaharaVertexShader)
-        renderContext.PSSetShader(kuwaharaPixelShader)
+        renderContext.VSSetShader(copyVertexShader)
+        renderContext.PSSetShader(copyPixelShader)
+        renderContext.PSSetShaderResource(0UI, kuwaharaView)
 
         renderContext.Draw(3UI, 0UI)
 

@@ -165,11 +165,19 @@ Friend NotInheritable Class Direct3DRessourceHandler
         Dim textureDescription As Texture2DDescription
         Dim texture As ID3D11Texture2D
 
-        texture = Nothing
+        If breite <= 0 Then
+            Throw New ArgumentOutOfRangeException(NameOf(breite))
+        End If
+
+        If hoehe <= 0 Then
+            Throw New ArgumentOutOfRangeException(NameOf(hoehe))
+        End If
 
         If renderDevice Is Nothing Then
             Throw New ArgumentNullException(NameOf(renderDevice))
         End If
+
+        texture = Nothing
 
         textureDescription =
         New Texture2DDescription(

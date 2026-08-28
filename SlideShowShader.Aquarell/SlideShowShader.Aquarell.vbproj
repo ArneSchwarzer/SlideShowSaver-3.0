@@ -187,6 +187,10 @@
     <EmbeddedResource Include="Shader\KuwaharaShaderVS.cso" />
     <None Include="Shader\Historisch &amp; Testing\AniKuwaharaShaderPS.cso" />
     <None Include="Shader\Historisch &amp; Testing\AniKuwaharaShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PigmentInitializerShaderPS.cso" />
+    <EmbeddedResource Include="Shader\PigmentInitializerShaderVS.cso" />
+    <EmbeddedResource Include="Shader\WaterInitializerShaderPS.cso" />
+    <EmbeddedResource Include="Shader\WaterInitializerShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -214,6 +218,8 @@
     <Content Include="Shader\Historisch &amp; Testing\AniKuwaharaShader.hlsl" />
     <Content Include="Shader\AquarellCopyShader.hlsl" />
     <Content Include="Shader\Historisch &amp; Testing\BilateralShader.hlsl" />
+    <Content Include="Shader\PigmentInitializerShader.hlsl" />
+    <Content Include="Shader\WaterInitializerShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />
   </ItemGroup>
   <ItemGroup />
