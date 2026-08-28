@@ -61,6 +61,29 @@ Friend Class D3DRenderer
     Private kuwaharaPixelShader As ID3D11PixelShader
 
     '---------------------------------
+    ' Testuren für Simulation
+    '---------------------------------
+    Private sourceWaterTexture As ID3D11Texture2D
+    Private sourceWaterView As ID3D11ShaderResourceView
+    Private sourceWaterTargetView As ID3D11RenderTargetView
+
+    Private targetWaterTexture As ID3D11Texture2D
+    Private targetWaterView As ID3D11ShaderResourceView
+    Private targetWaterTargetView As ID3D11RenderTargetView
+
+    Private sourcePigmentTexture As ID3D11Texture2D
+    Private sourcePigmentView As ID3D11ShaderResourceView
+    Private sourcePigmentTargetView As ID3D11RenderTargetView
+
+    Private targetPigmentTexture As ID3D11Texture2D
+    Private targetPigmentView As ID3D11ShaderResourceView
+    Private targetPigmentTargetView As ID3D11RenderTargetView
+
+    Private kuwaharaTexture As ID3D11Texture2D
+    Private kuwaharaView As ID3D11ShaderResourceView
+    Private kuwaharaTargetView As ID3D11RenderTargetView
+
+    '---------------------------------
     'Shader allgemein
     '---------------------------------
 

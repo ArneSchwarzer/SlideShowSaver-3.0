@@ -159,6 +159,42 @@ Friend NotInheritable Class Direct3DRessourceHandler
 
     End Function
 
+    Friend Shared Function ErstelleSimulationsTexture(renderDevice As ID3D11Device, breite As Integer,
+                                                      hoehe As Integer, format As Format) As ID3D11Texture2D
+
+        Dim textureDescription As Texture2DDescription
+        Dim texture As ID3D11Texture2D
+
+        texture = Nothing
+
+        If renderDevice Is Nothing Then
+            Throw New ArgumentNullException(NameOf(renderDevice))
+        End If
+
+        textureDescription =
+        New Texture2DDescription(
+            format,
+            CUInt(breite),
+            CUInt(hoehe),
+            1UI,
+            1UI,
+            BindFlags.ShaderResource Or BindFlags.RenderTarget,
+            ResourceUsage.Default,
+            CpuAccessFlags.None,
+            1UI,
+            0UI,
+            ResourceOptionFlags.None)
+
+        texture = renderDevice.CreateTexture2D(textureDescription)
+
+        If texture Is Nothing Then
+            Throw New InvalidOperationException("Die D3D11-Simulations-Texture konnte nicht erzeugt werden.")
+        End If
+
+        Return texture
+
+    End Function
+
     Friend Shared Function ErstelleStagingTexture(renderDevice As ID3D11Device,
                                                   breite As Integer,
                                                   hoehe As Integer) As ID3D11Texture2D
