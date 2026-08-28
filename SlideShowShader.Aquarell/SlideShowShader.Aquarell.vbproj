@@ -181,12 +181,12 @@
     <None Include="packages.config" />
     <EmbeddedResource Include="Shader\AquarellCopyShaderPS.cso" />
     <EmbeddedResource Include="Shader\AquarellCopyShaderVS.cso" />
-    <EmbeddedResource Include="Shader\BilateralShaderPS.cso" />
-    <EmbeddedResource Include="Shader\BilateralShaderVS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\BilateralShaderPS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\BilateralShaderVS.cso" />
     <EmbeddedResource Include="Shader\KuwaharaShaderPS.cso" />
     <EmbeddedResource Include="Shader\KuwaharaShaderVS.cso" />
-    <EmbeddedResource Include="Shader\AniKuwaharaShaderPS.cso" />
-    <EmbeddedResource Include="Shader\AniKuwaharaShaderVS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\AniKuwaharaShaderPS.cso" />
+    <None Include="Shader\Historisch &amp; Testing\AniKuwaharaShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -211,14 +211,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Shader\AniKuwaharaShader.hlsl" />
+    <Content Include="Shader\Historisch &amp; Testing\AniKuwaharaShader.hlsl" />
     <Content Include="Shader\AquarellCopyShader.hlsl" />
-    <Content Include="Shader\BilateralShader.hlsl" />
+    <Content Include="Shader\Historisch &amp; Testing\BilateralShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Shader\Historisch &amp; Testing\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Import Project="..\packages\PolySharp.1.10.0\build\PolySharp.targets" Condition="Exists('..\packages\PolySharp.1.10.0\build\PolySharp.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

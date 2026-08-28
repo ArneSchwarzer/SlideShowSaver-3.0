@@ -54,25 +54,11 @@ Friend Class D3DRenderer
     Private copyPixelShader As ID3D11PixelShader
 
     '---------------------------------
-    ' Bilateral-Shader
-    '---------------------------------
-
-    Private bilateralVertexShader As ID3D11VertexShader
-    Private bilateralPixelShader As ID3D11PixelShader
-
-    '---------------------------------
     ' Kuwahara-Shader
     '---------------------------------
 
     Private kuwaharaVertexShader As ID3D11VertexShader
     Private kuwaharaPixelShader As ID3D11PixelShader
-
-    '---------------------------------
-    ' Anisotropischer Kuwahara-Shader
-    '---------------------------------
-
-    Private aniKuwaharaVertexShader As ID3D11VertexShader
-    Private aniKuwaharaPixelShader As ID3D11PixelShader
 
     '---------------------------------
     'Shader allgemein
@@ -203,38 +189,20 @@ Friend Class D3DRenderer
         Dim copyVertexShaderCode() As Byte
         Dim copyPixelShaderCode() As Byte
 
-        Dim bilateralVertexShaderCode() As Byte
-        Dim bilateralPixelShaderCode() As Byte
-
         Dim kuwaharaVertexShaderCode() As Byte
         Dim kuwaharaPixelShaderCode() As Byte
-
-        Dim aniKuwaharaVertexShaderCode() As Byte
-        Dim aniKuwaharaPixelShaderCode() As Byte
 
         copyVertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
         copyPixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
 
-        bilateralVertexShaderCode = LadeShaderBytecode("BilateralShaderVS.cso")
-        bilateralPixelShaderCode = LadeShaderBytecode("BilateralShaderPS.cso")
-
         kuwaharaVertexShaderCode = LadeShaderBytecode("KuwaharaShaderVS.cso")
         kuwaharaPixelShaderCode = LadeShaderBytecode("KuwaharaShaderPS.cso")
-
-        aniKuwaharaVertexShaderCode = LadeShaderBytecode("AniKuwaharaShaderVS.cso")
-        aniKuwaharaPixelShaderCode = LadeShaderBytecode("AniKuwaharaShaderPS.cso")
 
         copyVertexShader = renderDevice.CreateVertexShader(copyVertexShaderCode)
         copyPixelShader = renderDevice.CreatePixelShader(copyPixelShaderCode)
 
-        bilateralVertexShader = renderDevice.CreateVertexShader(bilateralVertexShaderCode)
-        bilateralPixelShader = renderDevice.CreatePixelShader(bilateralPixelShaderCode)
-
         kuwaharaVertexShader = renderDevice.CreateVertexShader(kuwaharaVertexShaderCode)
         kuwaharaPixelShader = renderDevice.CreatePixelShader(kuwaharaPixelShaderCode)
-
-        aniKuwaharaVertexShader = renderDevice.CreateVertexShader(aniKuwaharaVertexShaderCode)
-        aniKuwaharaPixelShader = renderDevice.CreatePixelShader(aniKuwaharaPixelShaderCode)
 
         If copyVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-VertexShader konnte nicht erzeugt werden.")
@@ -244,28 +212,12 @@ Friend Class D3DRenderer
             Throw New InvalidOperationException("Der Copy-PixelShader konnte nicht erzeugt werden.")
         End If
 
-        If bilateralVertexShader Is Nothing Then
-            Throw New InvalidOperationException("Der Bilateral-VertexShader konnte nicht erzeugt werden.")
-        End If
-
-        If bilateralPixelShader Is Nothing Then
-            Throw New InvalidOperationException("Der Bilateral-PixelShader konnte nicht erzeugt werden.")
-        End If
-
         If kuwaharaVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Kuwahara-VertexShader konnte nicht erzeugt werden.")
         End If
 
         If kuwaharaPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der Kuwahara-PixelShader konnte nicht erzeugt werden.")
-        End If
-
-        If aniKuwaharaVertexShader Is Nothing Then
-            Throw New InvalidOperationException("Der anisotropische Kuwahara-VertexShader konnte nicht erzeugt werden.")
-        End If
-
-        If aniKuwaharaPixelShader Is Nothing Then
-            Throw New InvalidOperationException("Der anisotropische Kuwahara-PixelShader konnte nicht erzeugt werden.")
         End If
 
     End Sub
@@ -367,57 +319,20 @@ Friend Class D3DRenderer
         renderContext.Draw(3UI, 0UI)
 
         ' ============================================================
-        ' PASS 2: Bilateral oben rechts
+        ' PASS 2: Kuwahara unten links
         ' ============================================================
 
         renderContext.RSSetViewport(
-    New Viewport(
-        CSng(quadrantBreite),
-        0.0F,
-        CSng(quadrantBreite),
-        CSng(quadrantHoehe),
-        0.0F,
-        1.0F))
-
-        renderContext.VSSetShader(bilateralVertexShader)
-        renderContext.PSSetShader(bilateralPixelShader)
-
-        renderContext.Draw(3UI, 0UI)
-
-        ' ============================================================
-        ' PASS 3: Kuwahara unten links
-        ' ============================================================
-
-        renderContext.RSSetViewport(
-    New Viewport(
-        0.0F,
-        CSng(quadrantHoehe),
-        CSng(quadrantBreite),
-        CSng(quadrantHoehe),
-        0.0F,
-        1.0F))
+            New Viewport(
+                0.0F,
+                CSng(quadrantHoehe),
+                CSng(quadrantBreite),
+                CSng(quadrantHoehe),
+                0.0F,
+                1.0F))
 
         renderContext.VSSetShader(kuwaharaVertexShader)
         renderContext.PSSetShader(kuwaharaPixelShader)
-
-
-        renderContext.Draw(3UI, 0UI)
-
-        ' ============================================================
-        ' PASS 4: Anisotropischer Kuwahara unten rechts
-        ' ============================================================
-
-        renderContext.RSSetViewport(
-    New Viewport(
-        CSng(quadrantBreite),
-        CSng(quadrantHoehe),
-        CSng(quadrantBreite),
-        CSng(quadrantHoehe),
-        0.0F,
-        1.0F))
-
-        renderContext.VSSetShader(aniKuwaharaVertexShader)
-        renderContext.PSSetShader(aniKuwaharaPixelShader)
 
         renderContext.Draw(3UI, 0UI)
 
@@ -668,14 +583,8 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(copyPixelShader)
         Direct3DRessourceHandler.GebeFrei(copyVertexShader)
 
-        Direct3DRessourceHandler.GebeFrei(bilateralPixelShader)
-        Direct3DRessourceHandler.GebeFrei(bilateralVertexShader)
-
         Direct3DRessourceHandler.GebeFrei(kuwaharaPixelShader)
         Direct3DRessourceHandler.GebeFrei(kuwaharaVertexShader)
-
-        Direct3DRessourceHandler.GebeFrei(aniKuwaharaPixelShader)
-        Direct3DRessourceHandler.GebeFrei(aniKuwaharaVertexShader)
 
         '---------------------------------
         ' Context

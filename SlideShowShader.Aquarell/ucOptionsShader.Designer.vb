@@ -182,6 +182,7 @@ Partial Class ucOptionsShader
         '
         'trkIterationen
         '
+        Me.trkIterationen.LargeChange = 10
         Me.trkIterationen.Location = New System.Drawing.Point(188, 43)
         Me.trkIterationen.Maximum = 100
         Me.trkIterationen.Minimum = 10
@@ -223,6 +224,7 @@ Partial Class ucOptionsShader
         '
         'trkFluessigkeitMenge
         '
+        Me.trkFluessigkeitMenge.LargeChange = 10
         Me.trkFluessigkeitMenge.Location = New System.Drawing.Point(184, 217)
         Me.trkFluessigkeitMenge.Maximum = 100
         Me.trkFluessigkeitMenge.Name = "trkFluessigkeitMenge"
@@ -255,6 +257,7 @@ Partial Class ucOptionsShader
         'trkPigmentbeweglichkeit
         '
         Me.trkPigmentbeweglichkeit.AutoSize = False
+        Me.trkPigmentbeweglichkeit.LargeChange = 10
         Me.trkPigmentbeweglichkeit.Location = New System.Drawing.Point(211, 110)
         Me.trkPigmentbeweglichkeit.Maximum = 100
         Me.trkPigmentbeweglichkeit.Name = "trkPigmentbeweglichkeit"
@@ -288,6 +291,7 @@ Partial Class ucOptionsShader
         'trkKuwaharaRadius
         '
         Me.trkKuwaharaRadius.AutoSize = False
+        Me.trkKuwaharaRadius.LargeChange = 4
         Me.trkKuwaharaRadius.Location = New System.Drawing.Point(211, 19)
         Me.trkKuwaharaRadius.Maximum = 48
         Me.trkKuwaharaRadius.Minimum = 16
