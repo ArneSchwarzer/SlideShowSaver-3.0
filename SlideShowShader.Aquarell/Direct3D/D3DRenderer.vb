@@ -577,6 +577,8 @@ Friend Class D3DRenderer
             Throw New InvalidOperationException("Der D3DRenderer wurde noch nicht initialisiert.")
         End If
 
+#Region "Initialisierung der Shader"
+
         ' ============================================================
         ' PASS II Initialisierung: Classic Kuwahara, volle Auflösung
         ' ============================================================
@@ -640,6 +642,8 @@ Friend Class D3DRenderer
         renderContext.Draw(3UI, 0UI)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+#End Region
 
         ' ============================================================
         ' TEST V0.2 
@@ -706,14 +710,14 @@ Friend Class D3DRenderer
 
         renderContext.Draw(3UI, 0UI)
 
-        ' ============================================================
-        ' Pass III Testing: Pigment Initialisierung unten rechts
-        ' ============================================================
-        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
-                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
-        renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+        '' ============================================================
+        '' Pass III Testing: Pigment Initialisierung unten rechts
+        '' ============================================================
+        'renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
+        '                                         CSng(quadrantHoehe), 0.0F, 1.0F))
+        'renderContext.PSSetShaderResource(0UI, sourcePigmentView)
 
-        renderContext.Draw(3UI, 0UI)
+        'renderContext.Draw(3UI, 0UI)
 
         ' ============================================================
         ' Pass IV Testing: Water Initialisierung oben rechts
@@ -724,12 +728,40 @@ Friend Class D3DRenderer
 
         renderContext.Draw(3UI, 0UI)
 
+        'Vor Beginn der Simulation noch einmal SRV lösen
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
         ' ============================================================
         ' PASS V: Wasserfluss-Simulation mit konstanten Iterationen &
         '         Viskosität
         ' ============================================================
 
         SimuliereWasser(TEST_VISKOSITAET, TEST_ITERATIONEN)
+
+        ' ============================================================
+        ' PASS V Testing:
+        ' Wasser nach Flow unten rechts
+        ' ============================================================
+        '
+        ' SimuliereWasser() hat am Ende die WaterFlow-Shader bewusst
+        ' wieder gelöst.
+        '
+        ' Für die reine Darstellung des aktuellen Wasserzustands
+        ' schalten wir deshalb wieder auf unseren Copy-Shader um.
+        ' ============================================================
+
+        renderContext.OMSetRenderTargets(renderTargetView)
+        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
+                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+        renderContext.VSSetShader(copyVertexShader)
+        renderContext.PSSetShader(copyPixelShader)
+        renderContext.PSSetShaderResource(0UI, sourceWaterView)
+        renderContext.PSSetSampler(0UI, renderSampler)
+
+        renderContext.Draw(3UI, 0UI)
 
         ' ============================================================
         ' SRV wieder lösen.
