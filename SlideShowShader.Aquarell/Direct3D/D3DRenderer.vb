@@ -18,6 +18,13 @@ Friend Class D3DRenderer
 
 #Region "Variablendeklaration"
 
+#Region "Konstanten"
+
+    Const TEST_VISKOSITAET As Single = 1.0F
+    Const TEST_ITERATIONEN As Integer = 1
+
+#End Region
+
 #Region "Variablen"
 
     '---------------------------------
@@ -77,6 +84,15 @@ Friend Class D3DRenderer
     Private waterInitializerPixelShader As ID3D11PixelShader
 
     '---------------------------------
+    ' Wasserfluss
+    '---------------------------------
+
+    Private waterFlowVertexShader As ID3D11VertexShader
+    Private waterFlowPixelShader As ID3D11PixelShader
+
+    Private waterFlowConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Texturen für Simulation
     '---------------------------------
     Private sourceWaterTexture As ID3D11Texture2D
@@ -122,6 +138,21 @@ Friend Class D3DRenderer
 
 #End Region
 
+#Region "Stuctures & Enums"
+
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure WaterFlowConstants
+
+        Public viscosity As Single
+
+        Public reserve1 As Single
+        Public reserve2 As Single
+        Public reserve3 As Single
+
+    End Structure
+
+#End Region
+
 #End Region
 
 #Region "Initialisierung"
@@ -152,6 +183,7 @@ Friend Class D3DRenderer
         InitialisiereTexturen(baseImage)
         InitialisiereShader()
         InitialisiereSampler()
+        InitialisiereWaterFlowConstantBuffer()
 
         istInitialisiert = True
 
@@ -305,6 +337,9 @@ Friend Class D3DRenderer
         Dim waterInitializerVertexShaderCode() As Byte
         Dim waterInitializerPixelShaderCode() As Byte
 
+        Dim waterFlowVertexShaderCode() As Byte
+        Dim waterFlowPixelShaderCode() As Byte
+
         copyVertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
         copyPixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
 
@@ -317,6 +352,9 @@ Friend Class D3DRenderer
         waterInitializerVertexShaderCode = LadeShaderBytecode("WaterInitializerShaderVS.cso")
         waterInitializerPixelShaderCode = LadeShaderBytecode("WaterInitializerShaderPS.cso")
 
+        waterFlowVertexShaderCode = LadeShaderBytecode("WaterFlowShaderVS.cso")
+        waterFlowPixelShaderCode = LadeShaderBytecode("WaterFlowShaderPS.cso")
+
         copyVertexShader = renderDevice.CreateVertexShader(copyVertexShaderCode)
         copyPixelShader = renderDevice.CreatePixelShader(copyPixelShaderCode)
 
@@ -328,6 +366,9 @@ Friend Class D3DRenderer
 
         waterInitializerVertexShader = renderDevice.CreateVertexShader(waterInitializerVertexShaderCode)
         waterInitializerPixelShader = renderDevice.CreatePixelShader(waterInitializerPixelShaderCode)
+
+        waterFlowVertexShader = renderDevice.CreateVertexShader(waterFlowVertexShaderCode)
+        waterFlowPixelShader = renderDevice.CreatePixelShader(waterFlowPixelShaderCode)
 
         If copyVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-VertexShader konnte nicht erzeugt werden.")
@@ -361,6 +402,14 @@ Friend Class D3DRenderer
             Throw New InvalidOperationException("Der WaterInitializer-PixelShader konnte nicht erzeugt werden.")
         End If
 
+        If waterFlowVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der WaterFlow-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If waterFlowPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der WaterFlow-PixelShader konnte nicht erzeugt werden.")
+        End If
+
     End Sub
 
     Private Sub InitialisiereSampler()
@@ -383,6 +432,125 @@ Friend Class D3DRenderer
         If renderSampler Is Nothing Then
             Throw New InvalidOperationException("Der D3D11-Sampler konnte nicht erzeugt werden.")
         End If
+
+    End Sub
+
+    Private Sub InitialisiereWaterFlowConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+        bufferGroesse = Marshal.SizeOf(GetType(WaterFlowConstants))
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("WaterFlowConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+        bufferDescription = New BufferDescription()
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        waterFlowConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If waterFlowConstantBuffer Is Nothing Then
+            Throw New InvalidOperationException("Der WaterFlow-ConstantBuffer konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+#End Region
+
+#Region "Simulation"
+
+    Private Sub SimuliereWasser(viskositaet As Single, iterationen As Integer)
+
+        Dim parameter As WaterFlowConstants
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+        Dim i As Integer
+
+        If iterationen <= 0 Then
+            Exit Sub
+        End If
+
+        parameter.viscosity = Math.Max(0.0001F, viskositaet)
+
+        parameter.reserve1 = 0.0F
+        parameter.reserve2 = 0.0F
+        parameter.reserve3 = 0.0F
+
+        renderContext.UpdateSubresource(parameter, waterFlowConstantBuffer)
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.OMSetBlendState(Nothing)
+        renderContext.VSSetShader(waterFlowVertexShader)
+        renderContext.PSSetShader(waterFlowPixelShader)
+        renderContext.PSSetConstantBuffer(0UI, waterFlowConstantBuffer)
+
+        For i = 0 To iterationen - 1
+
+            '---------------------------------------------------------
+            ' Aktueller Wasserzustand:
+            '
+            ' sourceWaterView
+            '
+            ' Neuer Wasserzustand:
+            '
+            ' targetWaterTargetView
+            '---------------------------------------------------------
+
+            renderContext.OMSetRenderTargets(targetWaterTargetView)
+            renderContext.PSSetShaderResource(0UI, sourceWaterView)
+
+            renderContext.Draw(3UI, 0UI)
+
+            '---------------------------------------------------------
+            ' Ganz wichtig:
+            '
+            ' Die Texture darf beim nächsten Durchlauf nicht noch als
+            ' ShaderResource gebunden sein, wenn sie ihre Rolle als
+            ' RenderTarget übernimmt.
+            '---------------------------------------------------------
+
+            renderContext.PSSetShaderResource(0UI, Nothing)
+            D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+            '---------------------------------------------------------
+            ' Ping-Pong:
+            '
+            ' KEINE Texture kopieren.
+            '
+            ' Nur die Rollen vertauschen.
+            '---------------------------------------------------------
+
+            tempTexture = sourceWaterTexture
+            sourceWaterTexture = targetWaterTexture
+            targetWaterTexture = tempTexture
+
+            tempView = sourceWaterView
+            sourceWaterView = targetWaterView
+            targetWaterView = tempView
+
+            tempTargetView = sourceWaterTargetView
+            sourceWaterTargetView = targetWaterTargetView
+            targetWaterTargetView = tempTargetView
+
+        Next
+
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+        renderContext.PSSetShader(Nothing)
+        renderContext.VSSetShader(Nothing)
 
     End Sub
 
@@ -555,6 +723,13 @@ Friend Class D3DRenderer
         renderContext.PSSetShaderResource(0UI, sourceWaterView)
 
         renderContext.Draw(3UI, 0UI)
+
+        ' ============================================================
+        ' PASS V: Wasserfluss-Simulation mit konstanten Iterationen &
+        '         Viskosität
+        ' ============================================================
+
+        SimuliereWasser(TEST_VISKOSITAET, TEST_ITERATIONEN)
 
         ' ============================================================
         ' SRV wieder lösen.
@@ -760,9 +935,7 @@ Friend Class D3DRenderer
         renderBreite = 0
         renderHoehe = 0
 
-        '
         ' Alle Bindings entfernen, bevor Ressourcen freigegeben werden.
-        '
 
         If renderContext IsNot Nothing Then
 
@@ -774,25 +947,21 @@ Friend Class D3DRenderer
         '---------------------------------
         ' Sampler
         '---------------------------------
-
         Direct3DRessourceHandler.GebeFrei(renderSampler)
 
         '---------------------------------
         ' Shader Resource Views
         '---------------------------------
-
         Direct3DRessourceHandler.GebeFrei(sourceView)
 
         '---------------------------------
         ' RenderTargetView
         '---------------------------------
-
         Direct3DRessourceHandler.GebeFrei(renderTargetView)
 
         '---------------------------------
         ' Texturen
         '---------------------------------
-
         Direct3DRessourceHandler.GebeFrei(stagingTexture)
         Direct3DRessourceHandler.GebeFrei(renderTargetTexture)
         Direct3DRessourceHandler.GebeFrei(sourceTexture)
@@ -800,7 +969,6 @@ Friend Class D3DRenderer
         '---------------------------------
         ' Shader
         '---------------------------------
-
         Direct3DRessourceHandler.GebeFrei(copyPixelShader)
         Direct3DRessourceHandler.GebeFrei(copyVertexShader)
 
@@ -814,9 +982,15 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(waterInitializerVertexShader)
 
         '---------------------------------
+        ' Simulation
+        ' --------------------------------
+        Direct3DRessourceHandler.GebeFrei(waterFlowConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(waterFlowPixelShader)
+        Direct3DRessourceHandler.GebeFrei(waterFlowVertexShader)
+
+        '---------------------------------
         ' Context
         '---------------------------------
-
         If renderContext IsNot Nothing Then
 
             renderContext.ClearState()
