@@ -32,7 +32,7 @@ Partial Class ucOptionsShader
         Me.btnDefaults = New System.Windows.Forms.Button()
         Me.lblNtrkIterationen = New System.Windows.Forms.Label()
         Me.lblIterationen = New System.Windows.Forms.Label()
-        Me.TrackBar1 = New System.Windows.Forms.TrackBar()
+        Me.trkIterationen = New System.Windows.Forms.TrackBar()
         Me.trkViskositaet = New System.Windows.Forms.TrackBar()
         Me.lblViskositaet = New System.Windows.Forms.Label()
         Me.lblNtrkViskositaet = New System.Windows.Forms.Label()
@@ -45,11 +45,13 @@ Partial Class ucOptionsShader
         Me.trkKuwaharaRadius = New System.Windows.Forms.TrackBar()
         Me.lblKuwaharaRadius = New System.Windows.Forms.Label()
         Me.lblNtrkKuwaharaRadius = New System.Windows.Forms.Label()
+        Me.lblNlblEinordnung = New System.Windows.Forms.Label()
+        Me.lblEinordnung = New System.Windows.Forms.Label()
         Me.tcAquarell.SuspendLayout()
         Me.tpPinselPigmente.SuspendLayout()
         Me.tpFluessigkeit.SuspendLayout()
         Me.tpSimulation.SuspendLayout()
-        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.trkIterationen, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkViskositaet, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkFluessigkeitMenge, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.trkPigmentbeweglichkeit, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -107,6 +109,8 @@ Partial Class ucOptionsShader
         '
         'tpFluessigkeit
         '
+        Me.tpFluessigkeit.Controls.Add(Me.lblEinordnung)
+        Me.tpFluessigkeit.Controls.Add(Me.lblNlblEinordnung)
         Me.tpFluessigkeit.Controls.Add(Me.trkFluessigkeitMenge)
         Me.tpFluessigkeit.Controls.Add(Me.lblFluessigkeitMenge)
         Me.tpFluessigkeit.Controls.Add(Me.lblNtrkFluessigkeitMenge)
@@ -133,7 +137,7 @@ Partial Class ucOptionsShader
         '
         'tpSimulation
         '
-        Me.tpSimulation.Controls.Add(Me.TrackBar1)
+        Me.tpSimulation.Controls.Add(Me.trkIterationen)
         Me.tpSimulation.Controls.Add(Me.lblIterationen)
         Me.tpSimulation.Controls.Add(Me.lblNtrkIterationen)
         Me.tpSimulation.Location = New System.Drawing.Point(10, 59)
@@ -176,15 +180,15 @@ Partial Class ucOptionsShader
         Me.lblIterationen.Text = "20"
         Me.lblIterationen.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'TrackBar1
+        'trkIterationen
         '
-        Me.TrackBar1.Location = New System.Drawing.Point(188, 43)
-        Me.TrackBar1.Maximum = 100
-        Me.TrackBar1.Minimum = 10
-        Me.TrackBar1.Name = "TrackBar1"
-        Me.TrackBar1.Size = New System.Drawing.Size(512, 101)
-        Me.TrackBar1.TabIndex = 2
-        Me.TrackBar1.Value = 20
+        Me.trkIterationen.Location = New System.Drawing.Point(188, 43)
+        Me.trkIterationen.Maximum = 100
+        Me.trkIterationen.Minimum = 10
+        Me.trkIterationen.Name = "trkIterationen"
+        Me.trkIterationen.Size = New System.Drawing.Size(512, 101)
+        Me.trkIterationen.TabIndex = 2
+        Me.trkIterationen.Value = 20
         '
         'trkViskositaet
         '
@@ -202,11 +206,11 @@ Partial Class ucOptionsShader
         '
         Me.lblViskositaet.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblViskositaet.AutoSize = True
-        Me.lblViskositaet.Location = New System.Drawing.Point(177, 68)
+        Me.lblViskositaet.Location = New System.Drawing.Point(193, 68)
         Me.lblViskositaet.Name = "lblViskositaet"
-        Me.lblViskositaet.Size = New System.Drawing.Size(608, 41)
+        Me.lblViskositaet.Size = New System.Drawing.Size(125, 41)
         Me.lblViskositaet.TabIndex = 4
-        Me.lblViskositaet.Text = "1 mPa/s (entspricht ca. Wasser - oder Kaffee)"
+        Me.lblViskositaet.Text = "1 mPa٠s"
         '
         'lblNtrkViskositaet
         '
@@ -219,9 +223,8 @@ Partial Class ucOptionsShader
         '
         'trkFluessigkeitMenge
         '
-        Me.trkFluessigkeitMenge.Location = New System.Drawing.Point(184, 149)
+        Me.trkFluessigkeitMenge.Location = New System.Drawing.Point(184, 217)
         Me.trkFluessigkeitMenge.Maximum = 100
-        Me.trkFluessigkeitMenge.Minimum = 1
         Me.trkFluessigkeitMenge.Name = "trkFluessigkeitMenge"
         Me.trkFluessigkeitMenge.Size = New System.Drawing.Size(428, 101)
         Me.trkFluessigkeitMenge.TabIndex = 8
@@ -231,7 +234,7 @@ Partial Class ucOptionsShader
         '
         Me.lblFluessigkeitMenge.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblFluessigkeitMenge.AutoSize = True
-        Me.lblFluessigkeitMenge.Location = New System.Drawing.Point(604, 149)
+        Me.lblFluessigkeitMenge.Location = New System.Drawing.Point(604, 217)
         Me.lblFluessigkeitMenge.MaximumSize = New System.Drawing.Size(175, 0)
         Me.lblFluessigkeitMenge.MinimumSize = New System.Drawing.Size(175, 0)
         Me.lblFluessigkeitMenge.Name = "lblFluessigkeitMenge"
@@ -243,7 +246,7 @@ Partial Class ucOptionsShader
         'lblNtrkFluessigkeitMenge
         '
         Me.lblNtrkFluessigkeitMenge.AutoSize = True
-        Me.lblNtrkFluessigkeitMenge.Location = New System.Drawing.Point(15, 149)
+        Me.lblNtrkFluessigkeitMenge.Location = New System.Drawing.Point(15, 217)
         Me.lblNtrkFluessigkeitMenge.Name = "lblNtrkFluessigkeitMenge"
         Me.lblNtrkFluessigkeitMenge.Size = New System.Drawing.Size(112, 41)
         Me.lblNtrkFluessigkeitMenge.TabIndex = 6
@@ -254,7 +257,6 @@ Partial Class ucOptionsShader
         Me.trkPigmentbeweglichkeit.AutoSize = False
         Me.trkPigmentbeweglichkeit.Location = New System.Drawing.Point(211, 110)
         Me.trkPigmentbeweglichkeit.Maximum = 100
-        Me.trkPigmentbeweglichkeit.Minimum = 1
         Me.trkPigmentbeweglichkeit.Name = "trkPigmentbeweglichkeit"
         Me.trkPigmentbeweglichkeit.Size = New System.Drawing.Size(483, 59)
         Me.trkPigmentbeweglichkeit.TabIndex = 5
@@ -316,6 +318,25 @@ Partial Class ucOptionsShader
         Me.lblNtrkKuwaharaRadius.TabIndex = 6
         Me.lblNtrkKuwaharaRadius.Text = "Pinselbreite"
         '
+        'lblNlblEinordnung
+        '
+        Me.lblNlblEinordnung.AutoSize = True
+        Me.lblNlblEinordnung.Location = New System.Drawing.Point(15, 122)
+        Me.lblNlblEinordnung.Name = "lblNlblEinordnung"
+        Me.lblNlblEinordnung.Size = New System.Drawing.Size(172, 41)
+        Me.lblNlblEinordnung.TabIndex = 9
+        Me.lblNlblEinordnung.Text = "Einordnung"
+        '
+        'lblEinordnung
+        '
+        Me.lblEinordnung.AutoSize = True
+        Me.lblEinordnung.Location = New System.Drawing.Point(193, 122)
+        Me.lblEinordnung.MaximumSize = New System.Drawing.Size(560, 0)
+        Me.lblEinordnung.Name = "lblEinordnung"
+        Me.lblEinordnung.Size = New System.Drawing.Size(553, 82)
+        Me.lblEinordnung.TabIndex = 10
+        Me.lblEinordnung.Text = "Aceton 0,3 | Chloroform 0,55 | Wasser 1 | Öl ~60 | Honig ~5.000 mPa·s"
+        '
         'ucOptionsShader
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(17.0!, 41.0!)
@@ -335,7 +356,7 @@ Partial Class ucOptionsShader
         Me.tpFluessigkeit.PerformLayout()
         Me.tpSimulation.ResumeLayout(False)
         Me.tpSimulation.PerformLayout()
-        CType(Me.TrackBar1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.trkIterationen, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.trkViskositaet, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.trkFluessigkeitMenge, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.trkPigmentbeweglichkeit, System.ComponentModel.ISupportInitialize).EndInit()
@@ -355,7 +376,7 @@ Partial Class ucOptionsShader
     Friend WithEvents btnDefaults As Windows.Forms.Button
     Friend WithEvents lblIterationen As Windows.Forms.Label
     Friend WithEvents lblNtrkIterationen As Windows.Forms.Label
-    Friend WithEvents TrackBar1 As Windows.Forms.TrackBar
+    Friend WithEvents trkIterationen As Windows.Forms.TrackBar
     Friend WithEvents trkViskositaet As Windows.Forms.TrackBar
     Friend WithEvents lblViskositaet As Windows.Forms.Label
     Friend WithEvents lblNtrkViskositaet As Windows.Forms.Label
@@ -368,4 +389,6 @@ Partial Class ucOptionsShader
     Friend WithEvents trkPigmentbeweglichkeit As Windows.Forms.TrackBar
     Friend WithEvents lblPigmentbeweglichkeit As Windows.Forms.Label
     Friend WithEvents lblNPigmentbeweglichkeit As Windows.Forms.Label
+    Friend WithEvents lblNlblEinordnung As Windows.Forms.Label
+    Friend WithEvents lblEinordnung As Windows.Forms.Label
 End Class
