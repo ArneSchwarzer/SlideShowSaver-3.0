@@ -191,6 +191,8 @@
     <EmbeddedResource Include="Shader\PigmentInitializerShaderVS.cso" />
     <EmbeddedResource Include="Shader\WaterInitializerShaderPS.cso" />
     <EmbeddedResource Include="Shader\WaterInitializerShaderVS.cso" />
+    <EmbeddedResource Include="Shader\WaterFlowShaderPS.cso" />
+    <EmbeddedResource Include="Shader\WaterFlowShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -219,6 +221,7 @@
     <Content Include="Shader\AquarellCopyShader.hlsl" />
     <Content Include="Shader\Historisch &amp; Testing\BilateralShader.hlsl" />
     <Content Include="Shader\PigmentInitializerShader.hlsl" />
+    <Content Include="Shader\WaterFlowShader.hlsl" />
     <Content Include="Shader\WaterInitializerShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />
   </ItemGroup>
