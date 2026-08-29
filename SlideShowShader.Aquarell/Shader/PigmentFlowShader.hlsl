@@ -1,142 +1,112 @@
 // ============================================================================
 // PigmentFlowShader.hlsl
-// ============================================================================
 //
-// SlideShowSaver 3.0
-// Shader: Aquarell
+// Transportiert Pigmente entlang des aktuellen Wassergefälles.
 //
-// Aufgabe:
+// Ziel dieses Passes:
+// - Pigmente sollen nicht einfach diffus geglättet werden.
+// - Die WaterMap / Wassertextur bestimmt die bevorzugte Transportrichtung.
+// - Pigment wird aus höher gelegenen Wasserbereichen in niedrigere Bereiche
+//   gezogen.
+// - Noch KEINE Ablagerung.
+// - Noch KEINE Verdunstung.
+// - Noch KEINE Papierstruktur.
+// - Noch KEINE physikalisch exakte Massenerhaltung.
 //
-// Transportiert die bereits initialisierten Pigmente entsprechend dem
-// lokalen Wassergefälle.
-//
-// Dies ist bewusst KEINE vollständige physikalische Pigmentsimulation.
-//
-// Für diesen ersten Proof-of-Concept interessiert ausschließlich:
-//
-//      "Folgen die Pigmente sichtbar dem sich bewegenden Wasser?"
-//
-// Noch NICHT enthalten:
-//
-//      - Pigmentablagerung
-//      - Papierabsorption
-//      - Pigmentgrößen
-//      - Granulation
-//      - Verdunstung
-//      - Kantenablagerung
-//      - echte Farbmischung
-//
-// Pigmentdarstellung:
-//
-//      RGB = Pigmentfarbe * Pigmentmenge
-//      A   = Pigmentmenge
-//
-// Die RGB-Werte sind also bereits mit der Pigmentmenge vormultipliziert.
-//
+// Dieser Shader ist bewusst eine optisch orientierte Approximation.
 // ============================================================================
 
 
-Texture2D<float4> sourcePigment : register(t0);
-Texture2D<float> sourceWater : register(t1);
-
-
 // ============================================================================
-// VERTEX OUTPUT
+// Constant Buffer
 // ============================================================================
 
-struct VertexOutput
+cbuffer PigmentFlowConstants : register(b0)
 {
-    float4 position : SV_POSITION;
+    float pigmentTransportStrength;
+
+    // Padding für 16-Byte-Ausrichtung des Constant Buffers.
+    float3 paddingPigmentFlow;
 };
 
 
 // ============================================================================
-// FULLSCREEN TRIANGLE
+// Shader Resources
 // ============================================================================
 
-VertexOutput VSMain(uint vertexId : SV_VertexID)
+// Aktueller Pigmentzustand.
+Texture2D<float4> sourcePigment : register(t0);
+
+// Aktueller Wasserzustand.
+Texture2D<float> sourceWater : register(t1);
+
+
+// ============================================================================
+// Sampler
+// ============================================================================
+
+SamplerState pointSampler : register(s0);
+
+
+// ============================================================================
+// Hilfsfunktionen
+// ============================================================================
+
+float ReadWater(int2 pixelPosition, uint2 textureSize)
 {
-    VertexOutput output;
+    pixelPosition.x = clamp(pixelPosition.x, 0, int(textureSize.x) - 1);
+    pixelPosition.y = clamp(pixelPosition.y, 0, int(textureSize.y) - 1);
 
-    float2 positions[3] =
-    {
-        float2(-1.0, -1.0),
-        float2(-1.0, 3.0),
-        float2(3.0, -1.0)
-    };
+    return sourceWater.Load(int3(pixelPosition, 0));
+}
 
-    output.position = float4(positions[vertexId], 0.0, 1.0);
 
-    return output;
+float4 ReadPigment(int2 pixelPosition, uint2 textureSize)
+{
+    pixelPosition.x = clamp(pixelPosition.x, 0, int(textureSize.x) - 1);
+    pixelPosition.y = clamp(pixelPosition.y, 0, int(textureSize.y) - 1);
+
+    return sourcePigment.Load(int3(pixelPosition, 0));
 }
 
 
 // ============================================================================
-// WASSER LESEN
+// Pixel Shader
 // ============================================================================
 
-float ReadWater(int2 pixelPosition,
-                int2 textureSize)
-{
-    int2 clampedPosition;
-
-    clampedPosition =
-        clamp(pixelPosition,
-              int2(0, 0),
-              textureSize - int2(1, 1));
-
-    return sourceWater.Load(int3(clampedPosition, 0));
-}
-
-
-// ============================================================================
-// PIGMENT LESEN
-// ============================================================================
-
-float4 ReadPigment(int2 pixelPosition,
-                   int2 textureSize)
-{
-    int2 clampedPosition;
-
-    clampedPosition =
-        clamp(pixelPosition,
-              int2(0, 0),
-              textureSize - int2(1, 1));
-
-    return sourcePigment.Load(int3(clampedPosition, 0));
-}
-
-
-// ============================================================================
-// PIXEL SHADER
-// ============================================================================
-
-float4 PSMain(VertexOutput input) : SV_TARGET
+float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 {
     uint textureWidth;
     uint textureHeight;
 
-    int2 textureSize;
+    uint pigmentWidth;
+    uint pigmentHeight;
+
+    uint2 textureSize;
     int2 pixelPosition;
 
+    float waterCenter;
     float waterNorth;
     float waterEast;
     float waterSouth;
     float waterWest;
 
-    float2 waterGradient;
-    float gradientLength;
-    float2 flowDirection;
+    float flowNorth;
+    float flowEast;
+    float flowSouth;
+    float flowWest;
 
-    float transportStrength;
-    float transportDistance;
-
-    float2 sourceOffset;
-    int2 sourcePosition;
+    float totalIncomingFlow;
+    float transportAmount;
 
     float4 pigmentCenter;
-    float4 pigmentTransported;
-    float4 pigmentNew;
+    float4 pigmentNorth;
+    float4 pigmentEast;
+    float4 pigmentSouth;
+    float4 pigmentWest;
+
+    float4 incomingPigment;
+    float4 resultPigment;
 
 
     // ------------------------------------------------------------------------
@@ -144,189 +114,270 @@ float4 PSMain(VertexOutput input) : SV_TARGET
     // ------------------------------------------------------------------------
 
     sourceWater.GetDimensions(textureWidth, textureHeight);
+    sourcePigment.GetDimensions(pigmentWidth, pigmentHeight);
 
-    textureSize = int2(textureWidth, textureHeight);
-
-    pixelPosition = int2(input.position.xy);
-
-
-    // ------------------------------------------------------------------------
-    // Aktuelles Pigment lesen.
-    // ------------------------------------------------------------------------
-
-    pigmentCenter =
-        ReadPigment(pixelPosition,
-                    textureSize);
+    textureSize = uint2(
+        min(textureWidth, pigmentWidth),
+        min(textureHeight, pigmentHeight)
+    );
 
 
     // ------------------------------------------------------------------------
-    // Lokales Wassergefälle bestimmen.
+    // Aktuelle Pixelposition.
+    // ------------------------------------------------------------------------
+
+    pixelPosition = int2(position.xy);
+
+
+    // ------------------------------------------------------------------------
+    // Aktuellen Wasserstand lesen.
+    // ------------------------------------------------------------------------
+
+    waterCenter = ReadWater(pixelPosition, textureSize);
+
+
+    // ------------------------------------------------------------------------
+    // Nachbarn lesen.
     //
-    // Wir verwenden absichtlich dieselbe räumliche Größenordnung wie unser
-    // inzwischen kalibrierter WaterFlowShader.
-    //
-    // Dadurch "sieht" der Pigmenttransport ungefähr dieselben Wasserstrukturen
-    // wie der eigentliche Wasserpass.
+    // Die gleiche räumliche Distanz wie beim WaterFlowShader verwenden.
+    // Damit arbeiten Wassertransport und Pigmenttransport auf derselben
+    // räumlichen Skala.
     // ------------------------------------------------------------------------
 
     const int flowDistance = 8;
 
-    waterNorth =
-        ReadWater(pixelPosition +
-                  int2(0, -flowDistance),
-                  textureSize);
+    waterNorth = ReadWater(
+        pixelPosition + int2(0, -flowDistance),
+        textureSize
+    );
 
-    waterEast =
-        ReadWater(pixelPosition +
-                  int2(flowDistance, 0),
-                  textureSize);
+    waterEast = ReadWater(
+        pixelPosition + int2(flowDistance, 0),
+        textureSize
+    );
 
-    waterSouth =
-        ReadWater(pixelPosition +
-                  int2(0, flowDistance),
-                  textureSize);
+    waterSouth = ReadWater(
+        pixelPosition + int2(0, flowDistance),
+        textureSize
+    );
 
-    waterWest =
-        ReadWater(pixelPosition +
-                  int2(-flowDistance, 0),
-                  textureSize);
-
-
-    // ------------------------------------------------------------------------
-    // Gradient:
-    //
-    // positive X-Richtung:
-    //      Osten besitzt mehr Wasser als Westen
-    //
-    // positive Y-Richtung:
-    //      Süden besitzt mehr Wasser als Norden
-    //
-    // Wasser soll von hohen zu niedrigen Bereichen fließen.
-    // Deshalb verwenden wir anschließend -gradient.
-    // ------------------------------------------------------------------------
-
-    waterGradient =
-        float2(waterEast - waterWest,
-               waterSouth - waterNorth);
-
-
-    gradientLength =
-        length(waterGradient);
+    waterWest = ReadWater(
+        pixelPosition + int2(-flowDistance, 0),
+        textureSize
+    );
 
 
     // ------------------------------------------------------------------------
-    // In vollständig ebenem Wasser gibt es keine sinnvolle Flussrichtung.
-    //
-    // Ohne diesen Schutz würde normalize(float2(0,0)) numerisch unnötig
-    // problematisch.
+    // Pigmente lesen.
     // ------------------------------------------------------------------------
 
-    if (gradientLength < 0.000001)
+    pigmentCenter = ReadPigment(
+        pixelPosition,
+        textureSize
+    );
+
+    pigmentNorth = ReadPigment(
+        pixelPosition + int2(0, -flowDistance),
+        textureSize
+    );
+
+    pigmentEast = ReadPigment(
+        pixelPosition + int2(flowDistance, 0),
+        textureSize
+    );
+
+    pigmentSouth = ReadPigment(
+        pixelPosition + int2(0, flowDistance),
+        textureSize
+    );
+
+    pigmentWest = ReadPigment(
+        pixelPosition + int2(-flowDistance, 0),
+        textureSize
+    );
+
+
+    // ------------------------------------------------------------------------
+    // Wassergefälle bestimmen.
+    //
+    // Pull-Modell:
+    //
+    // Das aktuelle Pixel erhält Pigment aus einem Nachbarpixel dann,
+    // wenn dort mehr Wasser vorhanden ist als am aktuellen Pixel.
+    //
+    // Ein höherer Wasserstand beim Nachbarn bedeutet:
+    //
+    //      Nachbar -> aktuelles Pixel
+    //
+    // ------------------------------------------------------------------------
+
+    flowNorth = max(
+        0.0F,
+        waterNorth - waterCenter
+    );
+
+    flowEast = max(
+        0.0F,
+        waterEast - waterCenter
+    );
+
+    flowSouth = max(
+        0.0F,
+        waterSouth - waterCenter
+    );
+
+    flowWest = max(
+        0.0F,
+        waterWest - waterCenter
+    );
+
+
+    // ------------------------------------------------------------------------
+    // Gesamtes hereinkommendes Wassergefälle.
+    // ------------------------------------------------------------------------
+
+    totalIncomingFlow =
+        flowNorth +
+        flowEast +
+        flowSouth +
+        flowWest;
+
+
+    // ------------------------------------------------------------------------
+    // Standard:
+    // Pigment bleibt zunächst unverändert.
+    // ------------------------------------------------------------------------
+
+    resultPigment = pigmentCenter;
+
+
+    // ------------------------------------------------------------------------
+    // Pigment aus den höher gelegenen Wasserbereichen übernehmen.
+    //
+    // Die Nachbarpigmente werden entsprechend der Wassergradienten gewichtet.
+    // ------------------------------------------------------------------------
+
+    if (totalIncomingFlow > 0.00001F)
     {
-        return pigmentCenter;
+        incomingPigment =
+            pigmentNorth * flowNorth +
+            pigmentEast * flowEast +
+            pigmentSouth * flowSouth +
+            pigmentWest * flowWest;
+
+        incomingPigment /= totalIncomingFlow;
+
+
+        // --------------------------------------------------------------------
+        // Optische Transportstärke.
+        //
+        // pigmentTransportStrength ist bewusst KEINE physikalische Größe.
+        //
+        // Sie bestimmt lediglich, wie deutlich das Wassergefälle innerhalb
+        // eines Iterationsschrittes Pigment verschiebt.
+        //
+        // Beispielwerte für Tests:
+        //
+        //      2.0  = schwach
+        //      4.0  = moderat
+        //      8.0  = kräftig
+        //     16.0  = sehr kräftig
+        //
+        // --------------------------------------------------------------------
+
+        transportAmount = saturate(
+            totalIncomingFlow *
+            pigmentTransportStrength
+        );
+
+
+        // --------------------------------------------------------------------
+        // Pigment in Richtung des wassergetriebenen Nachbarmixes bewegen.
+        // --------------------------------------------------------------------
+
+        resultPigment = lerp(
+            pigmentCenter,
+            incomingPigment,
+            transportAmount
+        );
     }
 
 
-    flowDirection =
-        -waterGradient / gradientLength;
+    // ------------------------------------------------------------------------
+    // Ergebnis zurückgeben.
+    // ------------------------------------------------------------------------
+
+    return resultPigment;
+}
+
+// ============================================================================
+// PigmentFlowVertexShader.hlsl
+//
+// Minimaler Fullscreen-Vertex-Shader für den PigmentFlow-Pass.
+//
+// Er erzeugt aus einem 3-Vertex-Drawcall ein Fullscreen-Dreieck.
+// Dadurch benötigen wir weder VertexBuffer noch InputLayout.
+//
+// Erwarteter Drawcall:
+//
+//     renderContext.Draw(3UI, 0UI)
+//
+// ============================================================================
+
+
+struct VS_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 texCoord : TEXCOORD0;
+};
+
+
+VS_OUTPUT VSMain(uint vertexId : SV_VertexID)
+{
+    VS_OUTPUT output;
+
+    float2 position;
+    float2 texCoord;
 
 
     // ------------------------------------------------------------------------
-    // TRANSPORTSTÄRKE
-    // ------------------------------------------------------------------------
+    // Fullscreen-Dreieck erzeugen.
     //
-    // Noch KEIN Benutzerparameter.
+    // Vertex 0 = (-1, -1)
+    // Vertex 1 = (-1,  3)
+    // Vertex 2 = ( 3, -1)
     //
-    // Wir wollen heute Nacht lediglich sehen, ob Pigmente tatsächlich
-    // schwimmen.
-    //
-    // Die Stärke hängt vom Wassergefälle ab:
-    //
-    //      kleines Gefälle -> wenig Bewegung
-    //      großes Gefälle  -> mehr Bewegung
-    //
-    // Für unseren PoC wird der Effekt absichtlich deutlich sichtbar gehalten.
+    // Das Dreieck überdeckt damit vollständig den Viewport.
     // ------------------------------------------------------------------------
 
-    const float maximumTransportStrength = 0.65;
-    const float gradientAmplification = 4.0;
-
-    transportStrength =
-        saturate(gradientLength * gradientAmplification);
-
-    transportStrength *=
-        maximumTransportStrength;
+    position = float2(
+        (vertexId == 2) ? 3.0F : -1.0F,
+        (vertexId == 1) ? 3.0F : -1.0F
+    );
 
 
     // ------------------------------------------------------------------------
-    // TRANSPORTDISTANZ
-    // ------------------------------------------------------------------------
+    // Texturkoordinaten passend zum Fullscreen-Dreieck.
     //
-    // Wir bewegen Pigment nicht gleich um ganze flowDistance Pixel.
+    // Für PigmentFlowShader.hlsl momentan nicht zwingend erforderlich,
+    // da der Pixelshader über SV_POSITION arbeitet.
     //
-    // Der Wassergradient wird zwar über 8 Pixel gemessen, das Pigment soll
-    // innerhalb EINER Iteration aber nur einen kleinen Schritt zurücklegen.
-    //
-    // Über unsere 16 Iterationen akkumuliert sich daraus eine deutlich
-    // sichtbare Bewegung.
+    // Wir geben sie trotzdem sauber aus, falls wir sie später benötigen.
     // ------------------------------------------------------------------------
 
-    const float maximumTransportDistance = 3.0;
-
-    transportDistance =
-        maximumTransportDistance *
-        saturate(gradientLength * gradientAmplification);
-
-
-    // ------------------------------------------------------------------------
-    // PULL-ADVEKTION
-    // ------------------------------------------------------------------------
-    //
-    // Wir berechnen das Pigment, das am aktuellen Zielpixel ankommen soll.
-    //
-    // Wenn das Wasser beispielsweise nach rechts fließt, fragen wir:
-    //
-    //      "Welches Pigment befand sich etwas links von mir?"
-    //
-    // Deshalb wird entgegen der Flussrichtung gelesen.
-    // ------------------------------------------------------------------------
-
-    sourceOffset =
-        -flowDirection *
-        transportDistance;
+    texCoord = float2(
+        (vertexId == 2) ? 2.0F : 0.0F,
+        (vertexId == 1) ? -1.0F : 1.0F
+    );
 
 
-    sourcePosition =
-        pixelPosition +
-        int2(round(sourceOffset));
+    output.position = float4(
+        position,
+        0.0F,
+        1.0F
+    );
 
+    output.texCoord = texCoord;
 
-    pigmentTransported =
-        ReadPigment(sourcePosition,
-                    textureSize);
-
-
-    // ------------------------------------------------------------------------
-    // Aktuelles und transportiertes Pigment mischen.
-    //
-    // Da sowohl RGB als auch A gemeinsam interpoliert werden, bleibt unsere
-    // vormultiplizierte Pigmentdarstellung konsistent.
-    // ------------------------------------------------------------------------
-
-    pigmentNew =
-        lerp(pigmentCenter,
-             pigmentTransported,
-             transportStrength);
-
-
-    // ------------------------------------------------------------------------
-    // Numerischer Sicherheitsgurt.
-    // ------------------------------------------------------------------------
-
-    pigmentNew =
-        max(pigmentNew,
-            float4(0.0, 0.0, 0.0, 0.0));
-
-
-    return pigmentNew;
+    return output;
 }

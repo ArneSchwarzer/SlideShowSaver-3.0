@@ -20,8 +20,10 @@ Friend Class D3DRenderer
 
 #Region "Konstanten"
 
-    Const TEST_VISKOSITAET As Single = 5000.0F
+    Const TEST_VISKOSITAET As Single = 1.0F
     Const TEST_ITERATIONEN As Integer = 16
+
+    Private Const TEST_PIGMENT_TRANSPORT_STRENGTH As Single = 16.0F
 
 #End Region
 
@@ -82,6 +84,8 @@ Friend Class D3DRenderer
 
     Private pigmentFlowVertexShader As ID3D11VertexShader
     Private pigmentFlowPixelShader As ID3D11PixelShader
+
+    Private pigmentFlowConstantBuffer As ID3D11Buffer
 
     '---------------------------------
     ' Wasser-Initializer
@@ -158,6 +162,15 @@ Friend Class D3DRenderer
 
     End Structure
 
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure PigmentFlowConstants
+        Public pigmentTransportStrength As Single
+
+        Public padding1 As Single
+        Public padding2 As Single
+        Public padding3 As Single
+    End Structure
+
 #End Region
 
 #End Region
@@ -191,6 +204,7 @@ Friend Class D3DRenderer
         InitialisiereShader()
         InitialisiereSampler()
         InitialisiereWaterFlowConstantBuffer()
+        InitialisierePigmentFlowConstantBuffer()
 
         istInitialisiert = True
 
@@ -490,6 +504,24 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub InitialisierePigmentFlowConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+
+
+        bufferDescription = New BufferDescription() With {
+        .ByteWidth = Marshal.SizeOf(GetType(PigmentFlowConstants)),
+        .Usage = ResourceUsage.Default,
+        .BindFlags = BindFlags.ConstantBuffer,
+        .CPUAccessFlags = CpuAccessFlags.None,
+        .MiscFlags = ResourceOptionFlags.None,
+        .StructureByteStride = 0
+    }
+
+        pigmentFlowConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+    End Sub
+
 #End Region
 
 #Region "Simulation"
@@ -651,6 +683,8 @@ Friend Class D3DRenderer
 
         Dim ergebnis As Bitmap
 
+        Dim constants As PigmentFlowConstants
+
         ergebnis = Nothing
 
         If wurdeBereinigt Then
@@ -693,6 +727,7 @@ Friend Class D3DRenderer
         '
         ' Für V0.1 startet die Pigmentmenge überall mit 1.0.
         ' ============================================================
+        constants.pigmentTransportStrength = TEST_PIGMENT_TRANSPORT_STRENGTH
 
         renderContext.OMSetRenderTargets(sourcePigmentTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
@@ -707,24 +742,35 @@ Friend Class D3DRenderer
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
         ' ============================================================
-        ' PASS IV Initialisierung: Wasser initialisieren
+        ' PASS IV Initialisierung: Wasser aus Kuwahara erzeugen
         ' ============================================================
         '
-        ' Das Wasserfeld erhält zunächst nur eine leicht ungleichmäßige
-        ' Ausgangsverteilung.
+        ' Das bereits vereinfachte Kuwahara-Bild dient nun als Grundlage
+        ' für die WaterMap.
         '
-        ' Noch kein Fluss.
-        ' Noch keine Verdunstung.
-        ' Noch keine Pigmentbewegung.
+        ' Große homogene Farbflächen bleiben weitgehend ruhig.
+        '
+        ' Deutliche Kuwahara-Farbgrenzen erzeugen leichte Senken im
+        ' Wasserfeld. Damit ersetzen wir für den aktuellen PoC bewusst
+        ' einen Teil der noch nicht vorhandenen Pigmentablagerungs- und
+        ' Verdunstungsphysik.
         ' ============================================================
 
         renderContext.OMSetRenderTargets(sourceWaterTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
         renderContext.VSSetShader(waterInitializerVertexShader)
         renderContext.PSSetShader(waterInitializerPixelShader)
+        renderContext.PSSetShaderResource(0UI, kuwaharaView)
 
         renderContext.Draw(3UI, 0UI)
 
+        ' Kuwahara-SRV unbedingt wieder lösen.
+        '
+        ' Für den WaterInitializer selbst wäre das anschließende Ping-Pong
+        ' zwar noch kein Konflikt, aber wir verlassen jeden Pass weiterhin
+        ' mit sauberer D3D-Pipeline.
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
 #End Region
@@ -809,6 +855,8 @@ Friend Class D3DRenderer
         renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), 0.0F, CSng(quadrantBreite),
                                                  CSng(quadrantHoehe), 0.0F, 1.0F))
         renderContext.PSSetShaderResource(0UI, sourceWaterView)
+        renderContext.UpdateSubresource(constants, pigmentFlowConstantBuffer)
+        renderContext.PSSetConstantBuffer(0UI, pigmentFlowConstantBuffer)
 
         renderContext.Draw(3UI, 0UI)
 
@@ -1137,6 +1185,7 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(waterFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(waterFlowVertexShader)
 
+        Direct3DRessourceHandler.GebeFrei(pigmentFlowConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pigmentFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentFlowVertexShader)
 
