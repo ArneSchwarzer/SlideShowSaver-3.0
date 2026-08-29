@@ -45,7 +45,7 @@ Public Class ShaderMain
 
         Get
 
-            Return "Wir kippen einen Becher Wasser über das Papier und schauen, was passiert."
+            Return "Panta rhei!"
 
         End Get
 

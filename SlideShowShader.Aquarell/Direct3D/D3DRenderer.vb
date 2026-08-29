@@ -20,8 +20,8 @@ Friend Class D3DRenderer
 
 #Region "Konstanten"
 
-    Const TEST_VISKOSITAET As Single = 1.0F
-    Const TEST_ITERATIONEN As Integer = 4096
+    Const TEST_VISKOSITAET As Single = 5000.0F
+    Const TEST_ITERATIONEN As Integer = 16
 
 #End Region
 

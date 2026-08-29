@@ -31,7 +31,7 @@
 //
 // Die Viskosität beeinflusst k:
 //
-//      hohe Viskosität   -> langsamer Ausgleich
+//      hohe Viskosität     -> langsamer Ausgleich
 //      niedrige Viskosität -> schneller Ausgleich
 //
 // Ziel dieses ersten Proof-of-Concepts ist ausschließlich:
@@ -138,10 +138,13 @@ float ReadWater(int2 pixelPosition, int2 textureSize)
 {
     int2 clampedPosition;
 
-    clampedPosition = clamp(pixelPosition, int2(0, 0), textureSize - int2(1, 1));
-    
+    clampedPosition = clamp(pixelPosition,
+                            int2(0, 0),
+                            textureSize - int2(1, 1));
+
     return sourceWater.Load(int3(clampedPosition, 0));
- }
+}
+
 
 // ============================================================================
 // VISKOSITÄT -> DIFFUSIONSSTÄRKE
@@ -154,13 +157,32 @@ float ReadWater(int2 pixelPosition, int2 textureSize)
 // wäre für unseren großen Parameterbereich ungeeignet.
 //
 // Bei Honig würde praktisch keinerlei Bewegung mehr stattfinden, während
-// Werte unter 1 sehr schnell sehr dominant würden.
+// sehr niedrige Viskositäten unverhältnismäßig dominant würden.
 //
-// Deshalb komprimieren wir den Bereich:
+// Deshalb verwenden wir eine komprimierte Fluiditätsfunktion:
 //
-//      fluidity = 1 / (1 + sqrt(viscosity))
+//      fluidity = 2 / (1 + sqrt(viscosity))
 //
-// Anschließend begrenzen wir den maximalen Schritt mit maxDiffusion.
+// Damit gilt insbesondere:
+//
+//      viscosity = 1.0 mPa·s
+//
+//      fluidity = 1.0
+//
+// Wasser bildet also unseren gut verständlichen Referenzpunkt.
+//
+// Dünnflüssigere Medien dürfen ausdrücklich fluidity > 1 erreichen.
+// Aceton wird damit NICHT künstlich auf Wasser-Niveau gekappt.
+//
+// Die eigentliche Diffusionsstärke ergibt sich anschließend aus:
+//
+//      diffusionStrength = baseDiffusion * fluidity
+//
+// Erst ganz am Ende begrenzen wir den absoluten Simulationsschritt auf
+// maxDiffusion.
+//
+// Dadurch bleibt unser Viskositätsbereich differenziert, ohne numerisch
+// unvernünftige Diffusionsschritte zuzulassen.
 //
 // Dieser Zusammenhang ist eine künstlerisch/technische Approximation und
 // keine physikalisch vollständige Beschreibung realer Fluidmechanik.
@@ -170,16 +192,95 @@ float ReadWater(int2 pixelPosition, int2 textureSize)
 float CalculateDiffusionStrength(float currentViscosity)
 {
     const float maxDiffusion = 0.45;
+    const float lowViscosityMaxDiffusion = 0.85;
+    const float waterViscosity = 1.0;
+    const float minimumViscosity = 0.1;
+    const float lowViscosityCurve = 1.7;
 
     float safeViscosity;
     float fluidity;
     float diffusionStrength;
 
-    safeViscosity = max(currentViscosity, 0.0001);
+    float waterDiffusionStrength;
+    float lowViscosityPosition;
+    float lowViscosityFactor;
 
-    fluidity = 1.0 / (1.0 + sqrt(safeViscosity));
 
-    diffusionStrength = maxDiffusion * fluidity;
+    safeViscosity = max(currentViscosity, minimumViscosity);
+
+
+    // ------------------------------------------------------------------------
+    // Wasser und dickere Flüssigkeiten:
+    //
+    // Hier behalten wir unsere bisherige, bereits getestete Kurve vollständig
+    // bei.
+    // ------------------------------------------------------------------------
+
+    if (safeViscosity >= waterViscosity)
+    {
+        fluidity = 1.0 / (1.0 + sqrt(safeViscosity));
+
+        diffusionStrength = maxDiffusion * fluidity;
+
+        return diffusionStrength;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // Dünnflüssiger als Wasser:
+    //
+    // Der physikalische Zusammenhang wird hier bewusst verlassen.
+    //
+    // Ziel ist nicht die korrekte Simulation realer Flüssigkeiten, sondern
+    // eine deutlich sichtbare gestalterische Abstufung zwischen beispielsweise
+    // 0.1, 0.3 und 1.0 mPa·s.
+    //
+    // Wasser bei 1.0 mPa·s bleibt dabei exakt an derselben Stelle der alten
+    // Kurve.
+    // ------------------------------------------------------------------------
+
+    waterDiffusionStrength =
+        maxDiffusion * (1.0 / (1.0 + sqrt(waterViscosity)));
+
+
+    // ------------------------------------------------------------------------
+    // Logarithmische Position innerhalb des Bereichs:
+    //
+    //      0.1 mPa·s -> 0.0
+    //      1.0 mPa·s -> 1.0
+    //
+    // Dadurch passt die Berechnung zur ebenfalls logarithmischen
+    // Wahrnehmung unseres großen Viskositätsbereichs.
+    // ------------------------------------------------------------------------
+
+    lowViscosityPosition =
+        log10(safeViscosity / minimumViscosity) /
+        log10(waterViscosity / minimumViscosity);
+
+    lowViscosityPosition = saturate(lowViscosityPosition);
+
+
+    // ------------------------------------------------------------------------
+    // Bereich zusätzlich auseinanderziehen.
+    //
+    // Durch den Exponenten > 1 bleibt die Diffusionsstärke bei sehr dünnen
+    // Flüssigkeiten länger hoch und fällt erst in Richtung Wasser deutlich ab.
+    // ------------------------------------------------------------------------
+
+    lowViscosityFactor =
+        pow(lowViscosityPosition, lowViscosityCurve);
+
+
+    // ------------------------------------------------------------------------
+    // Zwischen unserem bewusst starken "sehr dünnflüssig"-Wert und dem
+    // bisherigen Wasserwert interpolieren.
+    // ------------------------------------------------------------------------
+
+    diffusionStrength =
+        lerp(lowViscosityMaxDiffusion,
+             waterDiffusionStrength,
+             lowViscosityFactor);
+
 
     return diffusionStrength;
 }
@@ -234,17 +335,23 @@ float PSMain(VertexOutput input) : SV_TARGET
     // ------------------------------------------------------------------------
 
     waterCenter = ReadWater(pixelPosition, textureSize);
-    waterNorth =  ReadWater(pixelPosition + int2(0, -1), textureSize);
-    waterEast =   ReadWater(pixelPosition + int2(1, 0), textureSize);
-    waterSouth =  ReadWater(pixelPosition + int2(0, 1), textureSize);
-    waterWest =   ReadWater(pixelPosition + int2(-1, 0), textureSize);
 
+    const int flowDistance = 8;
+
+    waterNorth = ReadWater(pixelPosition + int2(0, -flowDistance), textureSize);
+    waterEast = ReadWater(pixelPosition + int2(flowDistance, 0), textureSize);
+    waterSouth = ReadWater(pixelPosition + int2(0, flowDistance), textureSize);
+    waterWest = ReadWater(pixelPosition + int2(-flowDistance, 0), textureSize);
 
     // ------------------------------------------------------------------------
     // Einfacher Mittelwert der vier Nachbarn.
     // ------------------------------------------------------------------------
 
-    neighborAverage = (waterNorth + waterEast + waterSouth + waterWest) * 0.25;
+    neighborAverage =
+        (waterNorth +
+         waterEast +
+         waterSouth +
+         waterWest) * 0.25;
 
 
     // ------------------------------------------------------------------------
@@ -278,7 +385,9 @@ float PSMain(VertexOutput input) : SV_TARGET
     // unsere sourceWater/targetWater-Ping-Pong-Architektur.
     // ------------------------------------------------------------------------
 
-    waterNew = waterCenter + diffusionStrength * (neighborAverage - waterCenter);
+    waterNew =
+        waterCenter +
+        diffusionStrength * (neighborAverage - waterCenter);
 
 
     // ------------------------------------------------------------------------
@@ -297,6 +406,6 @@ float PSMain(VertexOutput input) : SV_TARGET
     // ------------------------------------------------------------------------
 
     waterNew = max(waterNew, 0.0);
-    
+
     return waterNew;
 }
