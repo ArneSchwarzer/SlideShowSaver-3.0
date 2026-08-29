@@ -1,19 +1,31 @@
 // ============================================================================
 // PigmentFlowShader.hlsl
 //
-// Transportiert Pigmente entlang des aktuellen Wassergefälles.
+// Transportiert Pigmentmasse entlang des Wassergefälles.
 //
-// Ziel dieses Passes:
-// - Pigmente sollen nicht einfach diffus geglättet werden.
-// - Die WaterMap / Wassertextur bestimmt die bevorzugte Transportrichtung.
-// - Pigment wird aus höher gelegenen Wasserbereichen in niedrigere Bereiche
-//   gezogen.
-// - Noch KEINE Ablagerung.
-// - Noch KEINE Verdunstung.
-// - Noch KEINE Papierstruktur.
-// - Noch KEINE physikalisch exakte Massenerhaltung.
+// Datenmodell:
 //
-// Dieser Shader ist bewusst eine optisch orientierte Approximation.
+//      RGB = premultiplizierte Pigmentfarbe
+//      A   = Pigmentmenge / Deckung
+//
+// WICHTIG:
+//
+// Pigment wird nicht nur von Nachbarn hereingezogen.
+// Das aktuelle Pixel verliert zugleich Pigment entsprechend seines
+// eigenen Wasserabflusses.
+//
+// Dadurch entstehen erstmals tatsächlich dünner pigmentierte Bereiche,
+// in denen später die Hintergrund-/Papierfarbe durchscheinen kann.
+//
+// Noch NICHT enthalten:
+//
+// - Pigmentablagerung
+// - Verdunstung
+// - Papierabsorption
+// - Granulation
+// - echte physikalische Massenerhaltung
+//
+// Der Shader bleibt bewusst eine optische Approximation.
 // ============================================================================
 
 
@@ -25,7 +37,6 @@ cbuffer PigmentFlowConstants : register(b0)
 {
     float pigmentTransportStrength;
 
-    // Padding für 16-Byte-Ausrichtung des Constant Buffers.
     float3 paddingPigmentFlow;
 };
 
@@ -34,10 +45,8 @@ cbuffer PigmentFlowConstants : register(b0)
 // Shader Resources
 // ============================================================================
 
-// Aktueller Pigmentzustand.
 Texture2D<float4> sourcePigment : register(t0);
 
-// Aktueller Wasserzustand.
 Texture2D<float> sourceWater : register(t1);
 
 
@@ -76,50 +85,63 @@ float4 ReadPigment(int2 pixelPosition, uint2 textureSize)
 
 float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 {
-    uint textureWidth;
-    uint textureHeight;
+    uint waterWidth;
+    uint waterHeight;
 
     uint pigmentWidth;
     uint pigmentHeight;
 
     uint2 textureSize;
+
     int2 pixelPosition;
 
     float waterCenter;
+
     float waterNorth;
     float waterEast;
     float waterSouth;
     float waterWest;
 
-    float flowNorth;
-    float flowEast;
-    float flowSouth;
-    float flowWest;
+    float incomingNorth;
+    float incomingEast;
+    float incomingSouth;
+    float incomingWest;
+
+    float outgoingNorth;
+    float outgoingEast;
+    float outgoingSouth;
+    float outgoingWest;
 
     float totalIncomingFlow;
-    float transportAmount;
+    float totalOutgoingFlow;
+
+    float incomingTransport;
+    float outgoingTransport;
 
     float4 pigmentCenter;
+
     float4 pigmentNorth;
     float4 pigmentEast;
     float4 pigmentSouth;
     float4 pigmentWest;
 
     float4 incomingPigment;
+
+    float4 remainingPigment;
     float4 resultPigment;
+
+    float resultAmount;
 
 
     // ------------------------------------------------------------------------
     // Texturgröße bestimmen.
     // ------------------------------------------------------------------------
 
-    sourceWater.GetDimensions(textureWidth, textureHeight);
+    sourceWater.GetDimensions(waterWidth, waterHeight);
+
     sourcePigment.GetDimensions(pigmentWidth, pigmentHeight);
 
-    textureSize = uint2(
-        min(textureWidth, pigmentWidth),
-        min(textureHeight, pigmentHeight)
-    );
+    textureSize = uint2(min(waterWidth, pigmentWidth), min(waterHeight, pigmentHeight));
 
 
     // ------------------------------------------------------------------------
@@ -130,200 +152,140 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 
 
     // ------------------------------------------------------------------------
-    // Aktuellen Wasserstand lesen.
-    // ------------------------------------------------------------------------
-
-    waterCenter = ReadWater(pixelPosition, textureSize);
-
-
-    // ------------------------------------------------------------------------
-    // Nachbarn lesen.
+    // Gleiche Transportdistanz wie bisher.
     //
-    // Die gleiche räumliche Distanz wie beim WaterFlowShader verwenden.
-    // Damit arbeiten Wassertransport und Pigmenttransport auf derselben
-    // räumlichen Skala.
+    // Naturkonstante Nr. 392 des SSS-Frameworks. ;-)
     // ------------------------------------------------------------------------
 
     const int flowDistance = 8;
 
-    waterNorth = ReadWater(
-        pixelPosition + int2(0, -flowDistance),
-        textureSize
-    );
 
-    waterEast = ReadWater(
-        pixelPosition + int2(flowDistance, 0),
-        textureSize
-    );
+    // ------------------------------------------------------------------------
+    // Wasser lesen.
+    // ------------------------------------------------------------------------
 
-    waterSouth = ReadWater(
-        pixelPosition + int2(0, flowDistance),
-        textureSize
-    );
+    waterCenter = ReadWater(pixelPosition, textureSize);
 
-    waterWest = ReadWater(
-        pixelPosition + int2(-flowDistance, 0),
-        textureSize
-    );
-
-
+    waterNorth =  ReadWater(pixelPosition + int2(0, -flowDistance), textureSize);
+    waterEast =   ReadWater(pixelPosition + int2(flowDistance, 0), textureSize);
+    waterSouth =  ReadWater(pixelPosition + int2(0, flowDistance), textureSize);
+    waterWest =   ReadWater(pixelPosition + int2(-flowDistance, 0), textureSize);
+    
     // ------------------------------------------------------------------------
     // Pigmente lesen.
     // ------------------------------------------------------------------------
 
-    pigmentCenter = ReadPigment(
-        pixelPosition,
-        textureSize
-    );
+    pigmentCenter = ReadPigment(pixelPosition, textureSize);
 
-    pigmentNorth = ReadPigment(
-        pixelPosition + int2(0, -flowDistance),
-        textureSize
-    );
-
-    pigmentEast = ReadPigment(
-        pixelPosition + int2(flowDistance, 0),
-        textureSize
-    );
-
-    pigmentSouth = ReadPigment(
-        pixelPosition + int2(0, flowDistance),
-        textureSize
-    );
-
-    pigmentWest = ReadPigment(
-        pixelPosition + int2(-flowDistance, 0),
-        textureSize
-    );
-
+    pigmentNorth =  ReadPigment(pixelPosition + int2(0, -flowDistance), textureSize);
+    pigmentEast =   ReadPigment(pixelPosition + int2(flowDistance, 0), textureSize);
+    pigmentSouth =  ReadPigment(pixelPosition + int2(0, flowDistance), textureSize);
+    pigmentWest =   ReadPigment(pixelPosition + int2(-flowDistance, 0), textureSize);
 
     // ------------------------------------------------------------------------
-    // Wassergefälle bestimmen.
+    // HEREINKOMMENDER Transport.
     //
-    // Pull-Modell:
+    // Nachbar besitzt höheren Wasserstand:
     //
-    // Das aktuelle Pixel erhält Pigment aus einem Nachbarpixel dann,
-    // wenn dort mehr Wasser vorhanden ist als am aktuellen Pixel.
+    //      Nachbar -> Center
+    // ------------------------------------------------------------------------
+
+    incomingNorth = max(0.0F, waterNorth - waterCenter);
+    incomingEast =  max(0.0F, waterEast -  waterCenter);
+    incomingSouth = max(0.0F, waterSouth - waterCenter);
+    incomingWest =  max(0.0F, waterWest - waterCenter);
+
+    totalIncomingFlow = incomingNorth + incomingEast + incomingSouth + incomingWest;
+    
+    // ------------------------------------------------------------------------
+    // ABFLIESSENDER Transport.
     //
-    // Ein höherer Wasserstand beim Nachbarn bedeutet:
+    // Center besitzt höheren Wasserstand:
     //
-    //      Nachbar -> aktuelles Pixel
+    //      Center -> Nachbar
     //
+    // GENAU DAS fehlte bislang.
     // ------------------------------------------------------------------------
 
-    flowNorth = max(
-        0.0F,
-        waterNorth - waterCenter
-    );
+    outgoingNorth = max(0.0F, waterCenter - waterNorth);
+    outgoingEast =  max(0.0F, waterCenter -  waterEast);
+    outgoingSouth = max(0.0F, waterCenter - waterSouth);
+    outgoingWest =  max(0.0F, waterCenter - waterWest);
 
-    flowEast = max(
-        0.0F,
-        waterEast - waterCenter
-    );
-
-    flowSouth = max(
-        0.0F,
-        waterSouth - waterCenter
-    );
-
-    flowWest = max(
-        0.0F,
-        waterWest - waterCenter
-    );
-
-
+    totalOutgoingFlow = outgoingNorth + outgoingEast + outgoingSouth + outgoingWest;
+    
     // ------------------------------------------------------------------------
-    // Gesamtes hereinkommendes Wassergefälle.
-    // ------------------------------------------------------------------------
-
-    totalIncomingFlow =
-        flowNorth +
-        flowEast +
-        flowSouth +
-        flowWest;
-
-
-    // ------------------------------------------------------------------------
-    // Standard:
-    // Pigment bleibt zunächst unverändert.
-    // ------------------------------------------------------------------------
-
-    resultPigment = pigmentCenter;
-
-
-    // ------------------------------------------------------------------------
-    // Pigment aus den höher gelegenen Wasserbereichen übernehmen.
+    // Transportstärken bestimmen.
     //
-    // Die Nachbarpigmente werden entsprechend der Wassergradienten gewichtet.
+    // Beide Werte bewusst saturieren:
+    //
+    // Wir wollen niemals mehr als die gesamte vorhandene Pigmentmasse
+    // innerhalb EINER Iteration wegtransportieren.
     // ------------------------------------------------------------------------
 
+    incomingTransport = saturate(totalIncomingFlow * pigmentTransportStrength);
+    outgoingTransport = saturate(totalOutgoingFlow * pigmentTransportStrength);
+    
+    // ------------------------------------------------------------------------
+    // Eigenes Pigment reduzieren.
+    //
+    // Weil RGB premultipliziert vorliegt, dürfen RGB und Alpha gemeinsam
+    // skaliert werden.
+    // ------------------------------------------------------------------------
+
+    remainingPigment = pigmentCenter * (1.0F - outgoingTransport);
+
+    // ------------------------------------------------------------------------
+    // Hereinkommendes Pigment bestimmen.
+    // ------------------------------------------------------------------------
+
+    incomingPigment = float4(0.0F, 0.0F, 0.0F, 0.0F);
+    
     if (totalIncomingFlow > 0.00001F)
     {
-        incomingPigment =
-            pigmentNorth * flowNorth +
-            pigmentEast * flowEast +
-            pigmentSouth * flowSouth +
-            pigmentWest * flowWest;
+        incomingPigment = pigmentNorth * incomingNorth + pigmentEast * incomingEast + pigmentSouth * incomingSouth +
+                          pigmentWest * incomingWest;
 
         incomingPigment /= totalIncomingFlow;
-
-
-        // --------------------------------------------------------------------
-        // Optische Transportstärke.
-        //
-        // pigmentTransportStrength ist bewusst KEINE physikalische Größe.
-        //
-        // Sie bestimmt lediglich, wie deutlich das Wassergefälle innerhalb
-        // eines Iterationsschrittes Pigment verschiebt.
-        //
-        // Beispielwerte für Tests:
-        //
-        //      2.0  = schwach
-        //      4.0  = moderat
-        //      8.0  = kräftig
-        //     16.0  = sehr kräftig
-        //
-        // --------------------------------------------------------------------
-
-        transportAmount = saturate(
-            totalIncomingFlow *
-            pigmentTransportStrength
-        );
-
-
-        // --------------------------------------------------------------------
-        // Pigment in Richtung des wassergetriebenen Nachbarmixes bewegen.
-        // --------------------------------------------------------------------
-
-        resultPigment = lerp(
-            pigmentCenter,
-            incomingPigment,
-            transportAmount
-        );
+        incomingPigment *= incomingTransport;
     }
-
-
+    
     // ------------------------------------------------------------------------
-    // Ergebnis zurückgeben.
+    // Verbleibendes + hereinkommendes Pigment.
     // ------------------------------------------------------------------------
+
+    resultPigment = remainingPigment + incomingPigment;
+    
+    // ------------------------------------------------------------------------
+    // Pigmentmenge begrenzen.
+    //
+    // Für V0.x erlauben wir maximal vollständige Deckung.
+    //
+    // Falls wir später echte Pigmentakkumulation darstellen wollen,
+    // können wir dieses Clamp bewusst wieder entfernen bzw. erweitern.
+    // ------------------------------------------------------------------------
+
+    resultAmount = saturate(resultPigment.a);
+    
+    // ------------------------------------------------------------------------
+    // Premultiplizierte Farbe konsistent halten.
+    //
+    // Normalerweise sollte resultPigment.rgb bereits zur Pigmentmenge passen.
+    //
+    // Wegen unserer vereinfachten, nicht exakt massenerhaltenden Approximation
+    // verhindern wir hier jedoch RGB-Werte oberhalb der Pigmentmenge.
+    // ------------------------------------------------------------------------
+
+    resultPigment.rgb = min(resultPigment.rgb, resultAmount.xxx);
+
+    resultPigment.a = resultAmount;
 
     return resultPigment;
 }
 
 // ============================================================================
-// PigmentFlowVertexShader.hlsl
-//
-// Minimaler Fullscreen-Vertex-Shader für den PigmentFlow-Pass.
-//
-// Er erzeugt aus einem 3-Vertex-Drawcall ein Fullscreen-Dreieck.
-// Dadurch benötigen wir weder VertexBuffer noch InputLayout.
-//
-// Erwarteter Drawcall:
-//
-//     renderContext.Draw(3UI, 0UI)
-//
+// Fullscreen Vertex Shader
 // ============================================================================
-
 
 struct VS_OUTPUT
 {
@@ -332,52 +294,23 @@ struct VS_OUTPUT
 };
 
 
-VS_OUTPUT VSMain(uint vertexId : SV_VertexID)
+VS_OUTPUT VSMain(
+    uint vertexId : SV_VertexID)
 {
     VS_OUTPUT output;
 
-    float2 position;
+    float2 shaderPosition;
     float2 texCoord;
 
 
-    // ------------------------------------------------------------------------
-    // Fullscreen-Dreieck erzeugen.
-    //
-    // Vertex 0 = (-1, -1)
-    // Vertex 1 = (-1,  3)
-    // Vertex 2 = ( 3, -1)
-    //
-    // Das Dreieck überdeckt damit vollständig den Viewport.
-    // ------------------------------------------------------------------------
+    shaderPosition = float2((vertexId == 2) ? 3.0F : -1.0F, (vertexId == 1) ? 3.0F : -1.0F);
 
-    position = float2(
-        (vertexId == 2) ? 3.0F : -1.0F,
-        (vertexId == 1) ? 3.0F : -1.0F
-    );
-
-
-    // ------------------------------------------------------------------------
-    // Texturkoordinaten passend zum Fullscreen-Dreieck.
-    //
-    // Für PigmentFlowShader.hlsl momentan nicht zwingend erforderlich,
-    // da der Pixelshader über SV_POSITION arbeitet.
-    //
-    // Wir geben sie trotzdem sauber aus, falls wir sie später benötigen.
-    // ------------------------------------------------------------------------
-
-    texCoord = float2(
-        (vertexId == 2) ? 2.0F : 0.0F,
-        (vertexId == 1) ? -1.0F : 1.0F
-    );
-
-
-    output.position = float4(
-        position,
-        0.0F,
-        1.0F
-    );
+    texCoord = float2((vertexId == 2) ? 2.0F : 0.0F, (vertexId == 1) ? -1.0F : 1.0F);
+    
+    output.position = float4(shaderPosition, 0.0F, 1.0F);
 
     output.texCoord = texCoord;
+
 
     return output;
 }

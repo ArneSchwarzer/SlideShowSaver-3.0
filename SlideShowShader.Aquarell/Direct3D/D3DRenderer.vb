@@ -88,6 +88,15 @@ Friend Class D3DRenderer
     Private pigmentFlowConstantBuffer As ID3D11Buffer
 
     '---------------------------------
+    ' Pigmentdarstellung
+    '---------------------------------
+
+    Private pigmentDisplayVertexShader As ID3D11VertexShader
+    Private pigmentDisplayPixelShader As ID3D11PixelShader
+
+    Private pigmentDisplayConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Wasser-Initializer
     '---------------------------------
 
@@ -171,6 +180,16 @@ Friend Class D3DRenderer
         Public padding3 As Single
     End Structure
 
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure PigmentDisplayConstants
+
+        Public backgroundRed As Single
+        Public backgroundGreen As Single
+        Public backgroundBlue As Single
+        Public backgroundAlpha As Single
+
+    End Structure
+
 #End Region
 
 #End Region
@@ -205,6 +224,7 @@ Friend Class D3DRenderer
         InitialisiereSampler()
         InitialisiereWaterFlowConstantBuffer()
         InitialisierePigmentFlowConstantBuffer()
+        InitialisierePigmentDisplayConstantBuffer()
 
         istInitialisiert = True
 
@@ -364,6 +384,9 @@ Friend Class D3DRenderer
         Dim waterFlowVertexShaderCode() As Byte
         Dim waterFlowPixelShaderCode() As Byte
 
+        Dim pigmentDisplayVertexShaderCode() As Byte
+        Dim pigmentDisplayPixelShaderCode() As Byte
+
         copyVertexShaderCode = LadeShaderBytecode("AquarellCopyShaderVS.cso")
         copyPixelShaderCode = LadeShaderBytecode("AquarellCopyShaderPS.cso")
 
@@ -382,6 +405,9 @@ Friend Class D3DRenderer
         waterFlowVertexShaderCode = LadeShaderBytecode("WaterFlowShaderVS.cso")
         waterFlowPixelShaderCode = LadeShaderBytecode("WaterFlowShaderPS.cso")
 
+        pigmentDisplayVertexShaderCode = LadeShaderBytecode("PigmentDisplayShaderVS.cso")
+        pigmentDisplayPixelShaderCode = LadeShaderBytecode("PigmentDisplayShaderPS.cso")
+
         copyVertexShader = renderDevice.CreateVertexShader(copyVertexShaderCode)
         copyPixelShader = renderDevice.CreatePixelShader(copyPixelShaderCode)
 
@@ -399,6 +425,9 @@ Friend Class D3DRenderer
 
         waterFlowVertexShader = renderDevice.CreateVertexShader(waterFlowVertexShaderCode)
         waterFlowPixelShader = renderDevice.CreatePixelShader(waterFlowPixelShaderCode)
+
+        pigmentDisplayVertexShader = renderDevice.CreateVertexShader(pigmentDisplayVertexShaderCode)
+        pigmentDisplayPixelShader = renderDevice.CreatePixelShader(pigmentDisplayPixelShaderCode)
 
         If copyVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der Copy-VertexShader konnte nicht erzeugt werden.")
@@ -430,6 +459,14 @@ Friend Class D3DRenderer
 
         If pigmentFlowPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der PigmentFlow-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentDisplayVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentDisplay-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentDisplayPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentDisplay-PixelShader konnte nicht erzeugt werden.")
         End If
 
         If waterInitializerVertexShader Is Nothing Then
@@ -522,6 +559,42 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub InitialisierePigmentDisplayConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+        bufferGroesse = Marshal.SizeOf(GetType(PigmentDisplayConstants))
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException(
+                "PigmentDisplayConstants besitzt eine unerwartete Größe. " &
+                "Erwartet: 16 Byte, tatsächlich: " &
+                bufferGroesse.ToString() &
+                " Byte.")
+
+        End If
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        pigmentDisplayConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If pigmentDisplayConstantBuffer Is Nothing Then
+
+            Throw New InvalidOperationException("Der PigmentDisplay-ConstantBuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
 #End Region
 
 #Region "Simulation"
@@ -529,7 +602,8 @@ Friend Class D3DRenderer
     Private Sub SimuliereWasserUndPigmente(viskositaet As Single,
                                       iterationen As Integer)
 
-        Dim parameter As WaterFlowConstants
+        Dim waterFlowParameter As WaterFlowConstants
+        Dim pigmentFlowParameter As PigmentFlowConstants
 
         Dim tempTexture As ID3D11Texture2D
         Dim tempView As ID3D11ShaderResourceView
@@ -541,27 +615,21 @@ Friend Class D3DRenderer
             Exit Sub
         End If
 
-        parameter.viscosity = Math.Max(0.0001F, viskositaet)
+        waterFlowParameter.viscosity = Math.Max(0.0001F, viskositaet)
+        waterFlowParameter.reserve1 = 0.0F
+        waterFlowParameter.reserve2 = 0.0F
+        waterFlowParameter.reserve3 = 0.0F
 
-        parameter.reserve1 = 0.0F
-        parameter.reserve2 = 0.0F
-        parameter.reserve3 = 0.0F
+        pigmentFlowParameter.pigmentTransportStrength = TEST_PIGMENT_TRANSPORT_STRENGTH
+        pigmentFlowParameter.padding1 = 0.0F
+        pigmentFlowParameter.padding2 = 0.0F
+        pigmentFlowParameter.padding3 = 0.0F
 
-        renderContext.UpdateSubresource(parameter, waterFlowConstantBuffer)
-
+        renderContext.UpdateSubresource(waterFlowParameter, waterFlowConstantBuffer)
+        renderContext.UpdateSubresource(pigmentFlowParameter, pigmentFlowConstantBuffer)
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
-
-        renderContext.RSSetViewport(
-        New Viewport(
-            0.0F,
-            0.0F,
-            CSng(renderBreite),
-            CSng(renderHoehe),
-            0.0F,
-            1.0F))
-
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
         renderContext.OMSetBlendState(Nothing)
-
 
         For i = 0 To iterationen - 1
 
@@ -603,7 +671,7 @@ Friend Class D3DRenderer
             renderContext.OMSetRenderTargets(targetPigmentTargetView)
             renderContext.VSSetShader(pigmentFlowVertexShader)
             renderContext.PSSetShader(pigmentFlowPixelShader)
-            renderContext.PSSetConstantBuffer(0UI, Nothing)
+            renderContext.PSSetConstantBuffer(0UI, pigmentFlowConstantBuffer)
             renderContext.PSSetShaderResource(0UI, sourcePigmentView)
             renderContext.PSSetShaderResource(1UI, sourceWaterView)
 
@@ -674,6 +742,22 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
+    Private Sub AktualisierePigmentDisplayConstantBuffer()
+
+        Dim hintergrundFarbe As System.Drawing.Color
+        Dim pigmentDisplayParameter As PigmentDisplayConstants
+
+        hintergrundFarbe = SlideShowTools.SharedDataHandling.HintergrundFarbeSaver
+
+        pigmentDisplayParameter.backgroundRed = hintergrundFarbe.R / 255.0F
+        pigmentDisplayParameter.backgroundGreen = hintergrundFarbe.G / 255.0F
+        pigmentDisplayParameter.backgroundBlue = hintergrundFarbe.B / 255.0F
+        pigmentDisplayParameter.backgroundAlpha = 1.0F
+
+        renderContext.UpdateSubresource(pigmentDisplayParameter, pigmentDisplayConstantBuffer)
+
+    End Sub
+
     Friend Function RenderTestbild() As Bitmap
 
         Dim clearColor As Color4
@@ -683,7 +767,6 @@ Friend Class D3DRenderer
 
         Dim ergebnis As Bitmap
 
-        Dim constants As PigmentFlowConstants
 
         ergebnis = Nothing
 
@@ -727,8 +810,6 @@ Friend Class D3DRenderer
         '
         ' Für V0.1 startet die Pigmentmenge überall mit 1.0.
         ' ============================================================
-        constants.pigmentTransportStrength = TEST_PIGMENT_TRANSPORT_STRENGTH
-
         renderContext.OMSetRenderTargets(sourcePigmentTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
         renderContext.VSSetShader(pigmentInitializerVertexShader)
@@ -855,8 +936,6 @@ Friend Class D3DRenderer
         renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), 0.0F, CSng(quadrantBreite),
                                                  CSng(quadrantHoehe), 0.0F, 1.0F))
         renderContext.PSSetShaderResource(0UI, sourceWaterView)
-        renderContext.UpdateSubresource(constants, pigmentFlowConstantBuffer)
-        renderContext.PSSetConstantBuffer(0UI, pigmentFlowConstantBuffer)
 
         renderContext.Draw(3UI, 0UI)
 
@@ -872,19 +951,32 @@ Friend Class D3DRenderer
         SimuliereWasserUndPigmente(TEST_VISKOSITAET, TEST_ITERATIONEN)
 
         ' ============================================================
-        ' PASS V Testing:
-        ' Pigmente nach Wassertransport unten rechts
+        ' PASS VI Testing:
+        ' Pigmente nach Wassertransport unten rechts darstellen
         ' ============================================================
+        '
+        ' WICHTIG:
+        '
+        ' sourcePigmentView enthält den INTERNEN Simulationszustand:
+        '
+        ' RGB = premultiplizierte Pigmentfarbe
+        ' A   = Pigmentmenge
+        '
+        ' Der PigmentDisplayShader komponiert daraus ein vollständig
+        ' opakes Bild über HintergrundFarbeSaver.
+        ' ============================================================
+
+        AktualisierePigmentDisplayConstantBuffer()
 
         renderContext.OMSetRenderTargets(renderTargetView)
         renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
                                                  CSng(quadrantHoehe), 0.0F, 1.0F))
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
-        renderContext.VSSetShader(copyVertexShader)
-        renderContext.PSSetShader(copyPixelShader)
+        renderContext.VSSetShader(pigmentDisplayVertexShader)
+        renderContext.PSSetShader(pigmentDisplayPixelShader)
+        renderContext.PSSetConstantBuffer(0UI, pigmentDisplayConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePigmentView)
-        renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 
@@ -897,6 +989,8 @@ Friend Class D3DRenderer
         ' ============================================================
 
         renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
         ' ============================================================
@@ -1188,6 +1282,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pigmentFlowConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pigmentFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentFlowVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pigmentDisplayConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(pigmentDisplayPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pigmentDisplayVertexShader)
 
         '---------------------------------
         ' Context
