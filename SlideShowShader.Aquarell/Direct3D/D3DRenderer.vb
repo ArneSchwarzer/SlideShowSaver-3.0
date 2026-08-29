@@ -77,6 +77,13 @@ Friend Class D3DRenderer
     Private pigmentInitializerPixelShader As ID3D11PixelShader
 
     '---------------------------------
+    ' Pigmentfluss
+    '---------------------------------
+
+    Private pigmentFlowVertexShader As ID3D11VertexShader
+    Private pigmentFlowPixelShader As ID3D11PixelShader
+
+    '---------------------------------
     ' Wasser-Initializer
     '---------------------------------
 
@@ -334,6 +341,9 @@ Friend Class D3DRenderer
         Dim pigmentInitializerVertexShaderCode() As Byte
         Dim pigmentInitializerPixelShaderCode() As Byte
 
+        Dim pigmentFlowVertexShaderCode() As Byte
+        Dim pigmentFlowPixelShaderCode() As Byte
+
         Dim waterInitializerVertexShaderCode() As Byte
         Dim waterInitializerPixelShaderCode() As Byte
 
@@ -349,6 +359,9 @@ Friend Class D3DRenderer
         pigmentInitializerVertexShaderCode = LadeShaderBytecode("PigmentInitializerShaderVS.cso")
         pigmentInitializerPixelShaderCode = LadeShaderBytecode("PigmentInitializerShaderPS.cso")
 
+        pigmentFlowVertexShaderCode = LadeShaderBytecode("PigmentFlowShaderVS.cso")
+        pigmentFlowPixelShaderCode = LadeShaderBytecode("PigmentFlowShaderPS.cso")
+
         waterInitializerVertexShaderCode = LadeShaderBytecode("WaterInitializerShaderVS.cso")
         waterInitializerPixelShaderCode = LadeShaderBytecode("WaterInitializerShaderPS.cso")
 
@@ -363,6 +376,9 @@ Friend Class D3DRenderer
 
         pigmentInitializerVertexShader = renderDevice.CreateVertexShader(pigmentInitializerVertexShaderCode)
         pigmentInitializerPixelShader = renderDevice.CreatePixelShader(pigmentInitializerPixelShaderCode)
+
+        pigmentFlowVertexShader = renderDevice.CreateVertexShader(pigmentFlowVertexShaderCode)
+        pigmentFlowPixelShader = renderDevice.CreatePixelShader(pigmentFlowPixelShaderCode)
 
         waterInitializerVertexShader = renderDevice.CreateVertexShader(waterInitializerVertexShaderCode)
         waterInitializerPixelShader = renderDevice.CreatePixelShader(waterInitializerPixelShaderCode)
@@ -392,6 +408,14 @@ Friend Class D3DRenderer
 
         If pigmentInitializerPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der PigmentInitializer-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentFlowVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentFlow-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If pigmentFlowPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentFlow-PixelShader konnte nicht erzeugt werden.")
         End If
 
         If waterInitializerVertexShader Is Nothing Then
@@ -470,7 +494,8 @@ Friend Class D3DRenderer
 
 #Region "Simulation"
 
-    Private Sub SimuliereWasser(viskositaet As Single, iterationen As Integer)
+    Private Sub SimuliereWasserUndPigmente(viskositaet As Single,
+                                      iterationen As Integer)
 
         Dim parameter As WaterFlowConstants
 
@@ -491,48 +516,79 @@ Friend Class D3DRenderer
         parameter.reserve3 = 0.0F
 
         renderContext.UpdateSubresource(parameter, waterFlowConstantBuffer)
+
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
-        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
+        renderContext.RSSetViewport(
+        New Viewport(
+            0.0F,
+            0.0F,
+            CSng(renderBreite),
+            CSng(renderHoehe),
+            0.0F,
+            1.0F))
+
         renderContext.OMSetBlendState(Nothing)
-        renderContext.VSSetShader(waterFlowVertexShader)
-        renderContext.PSSetShader(waterFlowPixelShader)
-        renderContext.PSSetConstantBuffer(0UI, waterFlowConstantBuffer)
+
 
         For i = 0 To iterationen - 1
 
-            '---------------------------------------------------------
-            ' Aktueller Wasserzustand:
+            ' ============================================================
+            ' WASSER
+            ' ============================================================
             '
-            ' sourceWaterView
-            '
-            ' Neuer Wasserzustand:
-            '
-            ' targetWaterTargetView
-            '---------------------------------------------------------
+            ' sourceWater -> targetWater
+            ' ============================================================
 
             renderContext.OMSetRenderTargets(targetWaterTargetView)
+            renderContext.VSSetShader(waterFlowVertexShader)
+            renderContext.PSSetShader(waterFlowPixelShader)
+            renderContext.PSSetConstantBuffer(0UI, waterFlowConstantBuffer)
             renderContext.PSSetShaderResource(0UI, sourceWaterView)
 
             renderContext.Draw(3UI, 0UI)
 
-            '---------------------------------------------------------
-            ' Ganz wichtig:
-            '
-            ' Die Texture darf beim nächsten Durchlauf nicht noch als
-            ' ShaderResource gebunden sein, wenn sie ihre Rolle als
-            ' RenderTarget übernimmt.
-            '---------------------------------------------------------
-
             renderContext.PSSetShaderResource(0UI, Nothing)
             D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-            '---------------------------------------------------------
-            ' Ping-Pong:
+
+            ' ============================================================
+            ' PIGMENT
+            ' ============================================================
             '
-            ' KEINE Texture kopieren.
+            ' sourcePigment + sourceWater -> targetPigment
             '
-            ' Nur die Rollen vertauschen.
-            '---------------------------------------------------------
+            ' WICHTIG:
+            '
+            ' Wir benutzen hier bewusst noch sourceWater.
+            '
+            ' Damit bewegen sich Wasser und Pigment innerhalb derselben
+            ' Simulationszeitscheibe aus demselben Ausgangszustand.
+            '
+            ' Erst DANACH werden beide Paare gemeinsam vertauscht.
+            ' ============================================================
+
+            renderContext.OMSetRenderTargets(targetPigmentTargetView)
+            renderContext.VSSetShader(pigmentFlowVertexShader)
+            renderContext.PSSetShader(pigmentFlowPixelShader)
+            renderContext.PSSetConstantBuffer(0UI, Nothing)
+            renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+            renderContext.PSSetShaderResource(1UI, sourceWaterView)
+
+            renderContext.Draw(3UI, 0UI)
+
+            ' ============================================================
+            ' SRVs lösen
+            ' ============================================================
+
+            renderContext.PSSetShaderResource(0UI, Nothing)
+            renderContext.PSSetShaderResource(1UI, Nothing)
+            D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+
+            ' ============================================================
+            ' WASSER PING-PONG
+            ' ============================================================
 
             tempTexture = sourceWaterTexture
             sourceWaterTexture = targetWaterTexture
@@ -546,11 +602,39 @@ Friend Class D3DRenderer
             sourceWaterTargetView = targetWaterTargetView
             targetWaterTargetView = tempTargetView
 
+
+            ' ============================================================
+            ' PIGMENT PING-PONG
+            ' ============================================================
+
+            tempTexture = sourcePigmentTexture
+            sourcePigmentTexture = targetPigmentTexture
+            targetPigmentTexture = tempTexture
+
+            tempView = sourcePigmentView
+            sourcePigmentView = targetPigmentView
+            targetPigmentView = tempView
+
+            tempTargetView = sourcePigmentTargetView
+            sourcePigmentTargetView = targetPigmentTargetView
+            targetPigmentTargetView = tempTargetView
+
         Next
 
+
+        ' ================================================================
+        ' Pipeline sauber verlassen
+        ' ================================================================
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+
         renderContext.PSSetConstantBuffer(0UI, Nothing)
+
         renderContext.PSSetShader(Nothing)
         renderContext.VSSetShader(Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
     End Sub
 
@@ -737,18 +821,11 @@ Friend Class D3DRenderer
         '         Viskosität
         ' ============================================================
 
-        SimuliereWasser(TEST_VISKOSITAET, TEST_ITERATIONEN)
+        SimuliereWasserUndPigmente(TEST_VISKOSITAET, TEST_ITERATIONEN)
 
         ' ============================================================
         ' PASS V Testing:
-        ' Wasser nach Flow unten rechts
-        ' ============================================================
-        '
-        ' SimuliereWasser() hat am Ende die WaterFlow-Shader bewusst
-        ' wieder gelöst.
-        '
-        ' Für die reine Darstellung des aktuellen Wasserzustands
-        ' schalten wir deshalb wieder auf unseren Copy-Shader um.
+        ' Pigmente nach Wassertransport unten rechts
         ' ============================================================
 
         renderContext.OMSetRenderTargets(renderTargetView)
@@ -758,7 +835,7 @@ Friend Class D3DRenderer
         renderContext.OMSetBlendState(Nothing)
         renderContext.VSSetShader(copyVertexShader)
         renderContext.PSSetShader(copyPixelShader)
-        renderContext.PSSetShaderResource(0UI, sourceWaterView)
+        renderContext.PSSetShaderResource(0UI, sourcePigmentView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
@@ -992,10 +1069,50 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(renderTargetView)
 
         '---------------------------------
+        ' Shader Resource Views
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(sourceView)
+
+        Direct3DRessourceHandler.GebeFrei(kuwaharaView)
+
+        Direct3DRessourceHandler.GebeFrei(sourceWaterView)
+        Direct3DRessourceHandler.GebeFrei(targetWaterView)
+
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentView)
+
+
+        '---------------------------------
+        ' Render Target Views
+        '---------------------------------
+
+        Direct3DRessourceHandler.GebeFrei(renderTargetView)
+
+        Direct3DRessourceHandler.GebeFrei(kuwaharaTargetView)
+
+        Direct3DRessourceHandler.GebeFrei(sourceWaterTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetWaterTargetView)
+
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentTargetView)
+
+
+        '---------------------------------
         ' Texturen
         '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(stagingTexture)
         Direct3DRessourceHandler.GebeFrei(renderTargetTexture)
+
+        Direct3DRessourceHandler.GebeFrei(kuwaharaTexture)
+
+        Direct3DRessourceHandler.GebeFrei(sourceWaterTexture)
+        Direct3DRessourceHandler.GebeFrei(targetWaterTexture)
+
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentTexture)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentTexture)
+
         Direct3DRessourceHandler.GebeFrei(sourceTexture)
 
         '---------------------------------
@@ -1019,6 +1136,9 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(waterFlowConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(waterFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(waterFlowVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pigmentFlowPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pigmentFlowVertexShader)
 
         '---------------------------------
         ' Context

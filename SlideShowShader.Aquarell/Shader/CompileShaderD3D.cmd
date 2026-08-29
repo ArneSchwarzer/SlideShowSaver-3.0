@@ -18,6 +18,9 @@ del /Q WaterInitializerShaderPS.cso 2>nul
 del /Q WaterFlowShaderVS.cso 2>nul
 del /Q WaterFlowShaderPS.cso 2>nul
 
+del /Q PigmentFlowShaderVS.cso 2>nul
+del /Q PigmentFlowShaderPS.cso 2>nul
+
 "%FXC%" /T vs_5_0 /E VSMain /Fo AquarellCopyShaderVS.cso AquarellCopyShader.hlsl
 if errorlevel 1 goto error
 
@@ -46,6 +49,12 @@ if errorlevel 1 goto error
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo WaterFlowShaderPS.cso WaterFlowShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo PigmentFlowShaderVS.cso PigmentFlowShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo PigmentFlowShaderPS.cso PigmentFlowShader.hlsl
 if errorlevel 1 goto error
 
 
