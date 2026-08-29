@@ -977,6 +977,7 @@ Friend Class D3DRenderer
         renderContext.PSSetShader(pigmentDisplayPixelShader)
         renderContext.PSSetConstantBuffer(0UI, pigmentDisplayConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+        renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 

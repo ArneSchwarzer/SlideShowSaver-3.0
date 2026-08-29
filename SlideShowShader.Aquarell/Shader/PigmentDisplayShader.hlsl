@@ -1,19 +1,17 @@
 // ============================================================================
 // PigmentDisplayShader.hlsl
 //
-// Wandelt den internen Pigmentzustand in das tatsächlich sichtbare
+// Wandelt den internen Pigmentzustand in das sichtbar ausgegebene
 // Aquarellbild um.
 //
 // PigmentTexture:
 //     RGB = premultiplizierte Pigmentfarbe
 //     A   = Pigmentmenge
 //
-// Die Pigmentmenge ist ausdrücklich KEIN Ausgabe-Alpha.
+// Dünn pigmentierte Bereiche werden mit der vom SlideShowSaver
+// vorgegebenen Hintergrundfarbe aufgefüllt.
 //
-// Dünn pigmentierte Bereiche geben stattdessen die vom SlideShowSaver
-// vorgegebene Hintergrundfarbe frei.
-//
-// Das Ergebnis dieses Shaders ist anschließend immer vollständig opak.
+// Das Ausgabe-Alpha ist immer 1.0.
 // ============================================================================
 
 
@@ -35,7 +33,14 @@ Texture2D<float4> pigmentTexture : register(t0);
 
 
 // ============================================================================
-// Vertex Shader
+// Sampler
+// ============================================================================
+
+SamplerState pigmentSampler : register(s0);
+
+
+// ============================================================================
+// Vertex-Ausgabe
 // ============================================================================
 
 struct VS_OUTPUT
@@ -45,30 +50,43 @@ struct VS_OUTPUT
 };
 
 
+// ============================================================================
+// Vertex Shader
+//
+// Gleiche Fullscreen-Triangle-Geometrie wie beim Copy-Shader.
+//
+// Entscheidend:
+// Die Texturkoordinaten laufen unabhängig von der Position des Viewports
+// sauber über die vollständige Quelltexture.
+// ============================================================================
+
 VS_OUTPUT VSMain(uint vertexId : SV_VertexID)
 {
     VS_OUTPUT output;
 
-    float2 position;
-    float2 texCoord;
+    float2 positions[3] =
+    {
+        float2(-1.0F, -1.0F),
+        float2(-1.0F, 3.0F),
+        float2(3.0F, -1.0F)
+    };
 
-    position = float2(
-        (vertexId == 2) ? 3.0F : -1.0F,
-        (vertexId == 1) ? 3.0F : -1.0F
-    );
+    float2 texCoords[3] =
+    {
+        float2(0.0F, 1.0F),
+        float2(0.0F, -1.0F),
+        float2(2.0F, 1.0F)
+    };
 
-    texCoord = float2(
-        (vertexId == 2) ? 2.0F : 0.0F,
-        (vertexId == 1) ? -1.0F : 1.0F
-    );
+    output.position =
+        float4(
+            positions[vertexId],
+            0.0F,
+            1.0F
+        );
 
-    output.position = float4(
-        position,
-        0.0F,
-        1.0F
-    );
-
-    output.texCoord = texCoord;
+    output.texCoord =
+        texCoords[vertexId];
 
     return output;
 }
@@ -87,26 +105,57 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET
     float3 pigmentColor;
     float3 resultColor;
 
-    pigment = pigmentTexture.Load(
-        int3(int2(input.position.xy), 0)
-    );
 
-    pigmentAmount = saturate(pigment.a);
+    // ------------------------------------------------------------------------
+    // WICHTIG:
+    //
+    // NICHT input.position.xy verwenden!
+    //
+    // SV_POSITION enthält absolute RenderTarget-Koordinaten und würde beim
+    // Rendering in einen Teil-Viewport nur einen Ausschnitt der Pigmenttexture
+    // adressieren.
+    //
+    // texCoord läuft dagegen immer über das vollständige Quellbild.
+    // ------------------------------------------------------------------------
 
-    // RGB der PigmentTexture ist bereits mit der Pigmentmenge gewichtet.
-    pigmentColor = pigment.rgb;
+    pigment =
+        pigmentTexture.Sample(
+            pigmentSampler,
+            input.texCoord
+        );
 
-    // Fehlende Pigmentmenge wird mit der Saver-Hintergrundfarbe aufgefüllt.
+
+    // ------------------------------------------------------------------------
+    // Pigmentmenge begrenzen.
+    // ------------------------------------------------------------------------
+
+    pigmentAmount =
+        saturate(
+            pigment.a
+        );
+
+
+    // ------------------------------------------------------------------------
+    // RGB enthält bereits die mit der Pigmentmenge gewichtete Farbe.
+    // ------------------------------------------------------------------------
+
+    pigmentColor =
+        pigment.rgb;
+
+
+    // ------------------------------------------------------------------------
+    // Fehlende Pigmentmenge mit HintergrundFarbeSaver auffüllen.
+    // ------------------------------------------------------------------------
+
     resultColor =
         pigmentColor +
-        backgroundColor.rgb * (1.0F - pigmentAmount);
+        backgroundColor.rgb *
+        (1.0F - pigmentAmount);
 
-    // Ganz wichtig:
-    //
-    // Das Alpha der PigmentTexture ist Simulationsinformation.
-    // Es darf NICHT nach außen an wpfModulMain gelangen.
-    //
-    // Das fertige Aquarellbild ist vollständig opak.
+
+    // ------------------------------------------------------------------------
+    // Ausgabe vollständig opak.
+    // ------------------------------------------------------------------------
 
     return float4(
         saturate(resultColor),
