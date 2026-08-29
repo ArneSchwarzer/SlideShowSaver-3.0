@@ -100,65 +100,106 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET
 {
     float4 pigment;
 
-    float pigmentAmount;
+    float pigmentMass;
+    float coverage;
 
     float3 pigmentColor;
     float3 resultColor;
 
 
     // ------------------------------------------------------------------------
+    // Simulationszustand lesen.
+    //
+    // RGB = premultiplizierte Pigmentfarbmasse
+    // A   = Pigmentmasse
+    // ------------------------------------------------------------------------
+
+    pigment = pigmentTexture.Sample(pigmentSampler, input.texCoord);
+
+
+    // ------------------------------------------------------------------------
+    // Pigmentmasse.
+    //
+    // Anders als früher wird diese NICHT auf 0 ... 1 begrenzt.
+    // ------------------------------------------------------------------------
+
+    pigmentMass = max(pigment.a, 0.0F);
+
+
+    // ------------------------------------------------------------------------
+    // Eigentliche Pigmentfarbe aus der premultiplizierten Farbmasse
+    // zurückgewinnen.
+    //
+    // Beispiel:
+    //
+    //      RGB = 0.4 * Rot
+    //      A   = 0.4
+    //
+    // ergibt wieder:
+    //
+    //      Pigmentfarbe = Rot
+    //
+    // Bei praktisch pigmentfreien Pixeln verwenden wir Schwarz als
+    // bedeutungslosen Fallback; wegen coverage = 0 wird dieser Wert ohnehin
+    // nicht sichtbar.
+    // ------------------------------------------------------------------------
+
+    if (pigmentMass > 0.00001F)
+    {
+        pigmentColor = pigment.rgb / pigmentMass;
+    }
+    else
+    {
+        pigmentColor = float3(0.0F, 0.0F, 0.0F);
+    }
+
+
+    // ------------------------------------------------------------------------
+    // Pigmentmasse -> sichtbare Deckung.
+    //
+    // V0.x:
+    //
+    // Für den ersten Diagnosetest verwenden wir bewusst die einfachste
+    // mögliche Abbildung.
+    //
+    //      Masse 0.0 -> 0 % Deckung
+    //      Masse 0.5 -> 50 % Deckung
+    //      Masse 1.0 -> 100 % Deckung
+    //      Masse >1  -> weiterhin 100 % Deckung
+    //
     // WICHTIG:
     //
-    // NICHT input.position.xy verwenden!
+    // Pigmentmasse > 1.0 bleibt INTERN vollständig erhalten.
+    // Lediglich die sichtbare Deckung sättigt bei 1.0.
     //
-    // SV_POSITION enthält absolute RenderTarget-Koordinaten und würde beim
-    // Rendering in einen Teil-Viewport nur einen Ausschnitt der Pigmenttexture
-    // adressieren.
+    // Dadurch kann akkumuliertes Pigment in späteren Iterationen wieder
+    // weitertransportiert werden.
+    // ------------------------------------------------------------------------
+
+    coverage = saturate(pigmentMass);
+
+
+    // ------------------------------------------------------------------------
+    // Sichtbare Pigmentfarbe über HintergrundFarbeSaver komponieren.
     //
-    // texCoord läuft dagegen immer über das vollständige Quellbild.
+    // Kein Alpha-Blending mit einem eventuell noch hinter dem Shader
+    // sichtbaren alten SSS-Bild.
+    //
+    // Das Resultat wird deshalb explizit vollständig aus:
+    //
+    //      Pigmentfarbe
+    //      +
+    //      HintergrundFarbeSaver
+    //
+    // aufgebaut.
     // ------------------------------------------------------------------------
 
-    pigment =
-        pigmentTexture.Sample(
-            pigmentSampler,
-            input.texCoord
-        );
-
-
-    // ------------------------------------------------------------------------
-    // Pigmentmenge begrenzen.
-    // ------------------------------------------------------------------------
-
-    pigmentAmount =
-        saturate(
-            pigment.a
-        );
-
-
-    // ------------------------------------------------------------------------
-    // RGB enthält bereits die mit der Pigmentmenge gewichtete Farbe.
-    // ------------------------------------------------------------------------
-
-    pigmentColor =
-        pigment.rgb;
-
-
-    // ------------------------------------------------------------------------
-    // Fehlende Pigmentmenge mit HintergrundFarbeSaver auffüllen.
-    // ------------------------------------------------------------------------
-
-    resultColor =
-        pigmentColor +
-        backgroundColor.rgb *
-        (1.0F - pigmentAmount);
+    resultColor = pigmentColor * coverage + backgroundColor.rgb * (1.0F - coverage);
 
 
     // ------------------------------------------------------------------------
     // Ausgabe vollständig opak.
     // ------------------------------------------------------------------------
 
-    return float4(
-        saturate(resultColor),
-        1.0F
-    );
+    return float4(saturate(resultColor), 1.0F);
 }

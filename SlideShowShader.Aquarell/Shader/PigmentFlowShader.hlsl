@@ -5,8 +5,21 @@
 //
 // Datenmodell:
 //
-//      RGB = premultiplizierte Pigmentfarbe
-//      A   = Pigmentmenge / Deckung
+//      RGB = premultiplizierte Pigmentfarbmasse
+//      A   = Pigmentmasse
+//
+// WICHTIG:
+//
+// A ist KEINE sichtbare Deckung.
+//
+// Die Pigmentmasse darf deshalb:
+//
+//      < 1.0   sein   -> Pigment wurde abtransportiert
+//      = 1.0   sein   -> ursprüngliche Pigmentmenge
+//      > 1.0   sein   -> Pigment hat sich angesammelt
+//
+// Die Umrechnung von Pigmentmasse in sichtbare Deckung erfolgt erst im
+// PigmentDisplayShader.
 //
 // WICHTIG:
 //
@@ -129,9 +142,7 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 
     float4 remainingPigment;
     float4 resultPigment;
-
-    float resultAmount;
-
+    
 
     // ------------------------------------------------------------------------
     // Texturgröße bestimmen.
@@ -166,10 +177,10 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 
     waterCenter = ReadWater(pixelPosition, textureSize);
 
-    waterNorth =  ReadWater(pixelPosition + int2(0, -flowDistance), textureSize);
-    waterEast =   ReadWater(pixelPosition + int2(flowDistance, 0), textureSize);
-    waterSouth =  ReadWater(pixelPosition + int2(0, flowDistance), textureSize);
-    waterWest =   ReadWater(pixelPosition + int2(-flowDistance, 0), textureSize);
+    waterNorth = ReadWater(pixelPosition + int2(0, -flowDistance), textureSize);
+    waterEast = ReadWater(pixelPosition + int2(flowDistance, 0), textureSize);
+    waterSouth = ReadWater(pixelPosition + int2(0, flowDistance), textureSize);
+    waterWest = ReadWater(pixelPosition + int2(-flowDistance, 0), textureSize);
     
     // ------------------------------------------------------------------------
     // Pigmente lesen.
@@ -177,10 +188,10 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
 
     pigmentCenter = ReadPigment(pixelPosition, textureSize);
 
-    pigmentNorth =  ReadPigment(pixelPosition + int2(0, -flowDistance), textureSize);
-    pigmentEast =   ReadPigment(pixelPosition + int2(flowDistance, 0), textureSize);
-    pigmentSouth =  ReadPigment(pixelPosition + int2(0, flowDistance), textureSize);
-    pigmentWest =   ReadPigment(pixelPosition + int2(-flowDistance, 0), textureSize);
+    pigmentNorth = ReadPigment(pixelPosition + int2(0, -flowDistance), textureSize);
+    pigmentEast = ReadPigment(pixelPosition + int2(flowDistance, 0), textureSize);
+    pigmentSouth = ReadPigment(pixelPosition + int2(0, flowDistance), textureSize);
+    pigmentWest = ReadPigment(pixelPosition + int2(-flowDistance, 0), textureSize);
 
     // ------------------------------------------------------------------------
     // HEREINKOMMENDER Transport.
@@ -191,9 +202,9 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
     // ------------------------------------------------------------------------
 
     incomingNorth = max(0.0F, waterNorth - waterCenter);
-    incomingEast =  max(0.0F, waterEast -  waterCenter);
+    incomingEast = max(0.0F, waterEast - waterCenter);
     incomingSouth = max(0.0F, waterSouth - waterCenter);
-    incomingWest =  max(0.0F, waterWest - waterCenter);
+    incomingWest = max(0.0F, waterWest - waterCenter);
 
     totalIncomingFlow = incomingNorth + incomingEast + incomingSouth + incomingWest;
     
@@ -208,9 +219,9 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
     // ------------------------------------------------------------------------
 
     outgoingNorth = max(0.0F, waterCenter - waterNorth);
-    outgoingEast =  max(0.0F, waterCenter -  waterEast);
+    outgoingEast = max(0.0F, waterCenter - waterEast);
     outgoingSouth = max(0.0F, waterCenter - waterSouth);
-    outgoingWest =  max(0.0F, waterCenter - waterWest);
+    outgoingWest = max(0.0F, waterCenter - waterWest);
 
     totalOutgoingFlow = outgoingNorth + outgoingEast + outgoingSouth + outgoingWest;
     
@@ -252,34 +263,39 @@ float4 PSMain(float4 position : SV_POSITION) : SV_TARGET
     
     // ------------------------------------------------------------------------
     // Verbleibendes + hereinkommendes Pigment.
+    //
+    // WICHTIG:
+    //
+    // Ab jetzt gilt:
+    //
+    //      RGB = premultiplizierte PigmentFARBmasse
+    //      A   = PigmentMASSE
+    //
+    // A ist ausdrücklich KEINE sichtbare Deckung mehr.
+    //
+    // Deshalb darf die Pigmentmasse auch größer als 1.0 werden.
+    //
+    // Beispiel:
+    //
+    //      A = 0.4   dünn pigmentiert
+    //      A = 1.0   ursprüngliche Pigmentmenge
+    //      A = 1.8   Pigmentakkumulation
+    //
+    // Wie diese Masse später sichtbar wird, entscheidet ausschließlich
+    // PigmentDisplayShader.hlsl.
     // ------------------------------------------------------------------------
 
     resultPigment = remainingPigment + incomingPigment;
+
+
+    // ------------------------------------------------------------------------
+    // Negative Masse darf natürlich nicht entstehen.
+    //
+    // Nach oben wird dagegen bewusst NICHT begrenzt.
+    // ------------------------------------------------------------------------
+
+    resultPigment = max(resultPigment, float4(0.0F, 0.0F, 0.0F, 0.0F));
     
-    // ------------------------------------------------------------------------
-    // Pigmentmenge begrenzen.
-    //
-    // Für V0.x erlauben wir maximal vollständige Deckung.
-    //
-    // Falls wir später echte Pigmentakkumulation darstellen wollen,
-    // können wir dieses Clamp bewusst wieder entfernen bzw. erweitern.
-    // ------------------------------------------------------------------------
-
-    resultAmount = saturate(resultPigment.a);
-    
-    // ------------------------------------------------------------------------
-    // Premultiplizierte Farbe konsistent halten.
-    //
-    // Normalerweise sollte resultPigment.rgb bereits zur Pigmentmenge passen.
-    //
-    // Wegen unserer vereinfachten, nicht exakt massenerhaltenden Approximation
-    // verhindern wir hier jedoch RGB-Werte oberhalb der Pigmentmenge.
-    // ------------------------------------------------------------------------
-
-    resultPigment.rgb = min(resultPigment.rgb, resultAmount.xxx);
-
-    resultPigment.a = resultAmount;
-
     return resultPigment;
 }
 
