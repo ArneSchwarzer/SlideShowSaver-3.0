@@ -23,7 +23,7 @@ Friend Class D3DRenderer
     Const TEST_VISKOSITAET As Single = 1.0F
     Const TEST_ITERATIONEN As Integer = 16
 
-    Private Const TEST_PIGMENT_TRANSPORT_STRENGTH As Single = 16.0F
+    Private Const TEST_PIGMENT_TRANSPORT_STRENGTH As Single = 2.0F
 
 #End Region
 
