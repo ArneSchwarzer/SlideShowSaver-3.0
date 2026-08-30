@@ -933,15 +933,29 @@ Friend Class D3DRenderer
 
     Friend Function RenderBild() As Bitmap
 
-        Dim clearColor As Color4
-
-        Dim quadrantBreite As Integer
-        Dim quadrantHoehe As Integer
-
         Dim ergebnis As Bitmap
 
-
         ergebnis = Nothing
+
+        PruefeRenderBereitschaft()
+
+        InitialisiereBildzustand()
+        InitialisierePigmentzustand()
+        InitialisiereWasserzustand()
+
+        InitialisiereKontrollansicht()
+
+        SimuliereWasserUndPigmente(TEST_VISKOSITAET, TEST_ITERATIONEN)
+
+        ZeigeSimulationsergebnis()
+
+        ergebnis = ErzeugeAusgabebild()
+
+        Return ergebnis
+
+    End Function
+
+    Private Sub PruefeRenderBereitschaft()
 
         If wurdeBereinigt Then
             Throw New ObjectDisposedException(NameOf(D3DRenderer))
@@ -951,16 +965,22 @@ Friend Class D3DRenderer
             Throw New InvalidOperationException("Der D3DRenderer wurde noch nicht initialisiert.")
         End If
 
-#Region "Initialisierung der Shader"
+    End Sub
 
-        ' ============================================================
-        ' PASS II Initialisierung: Classic Kuwahara, volle Auflösung
-        ' ============================================================
+    Private Sub InitialisiereBildzustand()
+
+        BerechneKuwahara()
+
+    End Sub
+
+    Private Sub BerechneKuwahara()
 
         renderContext.OMSetRenderTargets(kuwaharaTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
+
         renderContext.VSSetShader(kuwaharaVertexShader)
         renderContext.PSSetShader(kuwaharaPixelShader)
         renderContext.PSSetShaderResource(0UI, sourceView)
@@ -969,226 +989,249 @@ Friend Class D3DRenderer
         renderContext.Draw(3UI, 0UI)
 
         renderContext.PSSetShaderResource(0UI, Nothing)
+
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-        ' ============================================================
-        ' PASS III Initialisierung: Pigmente initialisieren
-        ' ============================================================
-        '
-        ' Das fertige Kuwahara-Bild wird als Ausgangsfarbverteilung
-        ' in die mobile Pigment-Texture geschrieben.
-        '
-        ' RGB = farbige Pigmentmasse
-        ' A   = Pigmentmenge
-        '
-        ' Für V0.1 startet die Pigmentmenge überall mit 1.0.
-        ' ============================================================
+    End Sub
+
+    Private Sub InitialisierePigmentzustand()
+
+        InitialisierePigmentSuspension()
+
+    End Sub
+
+    Private Sub InitialisierePigmentSuspension()
+
         renderContext.OMSetRenderTargets(sourcePigmentSuspensionTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
         renderContext.VSSetShader(pigmentInitializerVertexShader)
         renderContext.PSSetShader(pigmentInitializerPixelShader)
+
         renderContext.PSSetShaderResource(0UI, kuwaharaView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 
         renderContext.PSSetShaderResource(0UI, Nothing)
+
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-        ' ============================================================
-        ' PASS IV Initialisierung: Wasser aus Kuwahara erzeugen
-        ' ============================================================
-        '
-        ' Das bereits vereinfachte Kuwahara-Bild dient nun als Grundlage
-        ' für die WaterMap.
-        '
-        ' Große homogene Farbflächen bleiben weitgehend ruhig.
-        '
-        ' Deutliche Kuwahara-Farbgrenzen erzeugen leichte Senken im
-        ' Wasserfeld. Damit ersetzen wir für den aktuellen PoC bewusst
-        ' einen Teil der noch nicht vorhandenen Pigmentablagerungs- und
-        ' Verdunstungsphysik.
-        ' ============================================================
+    End Sub
+
+    Private Sub InitialisiereWasserzustand()
 
         renderContext.OMSetRenderTargets(sourceWaterTargetView)
+
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
         renderContext.VSSetShader(waterInitializerVertexShader)
         renderContext.PSSetShader(waterInitializerPixelShader)
+
         renderContext.PSSetShaderResource(0UI, kuwaharaView)
 
         renderContext.Draw(3UI, 0UI)
 
-        ' Kuwahara-SRV unbedingt wieder lösen.
-        '
-        ' Für den WaterInitializer selbst wäre das anschließende Ping-Pong
-        ' zwar noch kein Konflikt, aber wir verlassen jeden Pass weiterhin
-        ' mit sauberer D3D-Pipeline.
-
         renderContext.PSSetShaderResource(0UI, Nothing)
+
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-#End Region
+    End Sub
 
-        ' ============================================================
-        ' TEST V0.2 
-        ' ============================================================
-        ' Pass I Testing: Copy-Pass Originalbild
-        ' ============================================================
-        '
-        ' Das vollständige RenderTarget besitzt weiterhin exakt die
-        ' Dimensionen des Originalbildes.
-        '
-        ' Wir reduzieren lediglich den Viewport auf das linke obere
-        ' Viertel.
-        '
-        ' Unser Fullscreen-Triangle füllt damit nicht den gesamten
-        ' RenderTarget, sondern ausschließlich diesen Viewport.
-        '
-        ' Das ist bereits exakt die Geometrie, die wir später für die
-        ' vier Vergleichsfelder benötigen.
-        ' ============================================================
+    Private Sub InitialisiereKontrollansicht()
+
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, renderTargetView, 0.0F, 0.0F, 0.0F, 1.0F)
+
+        ZeigeOriginal()
+        ZeigeKuwahara()
+        ZeigeKontrollmonitor()
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub ZeigeOriginal()
+
+        Dim quadrantBreite As Integer
+        Dim quadrantHoehe As Integer
 
         quadrantBreite = Math.Max(1, renderBreite \ 2)
         quadrantHoehe = Math.Max(1, renderHoehe \ 2)
 
-        ' Erst das gesamte private RenderTarget schwarz löschen.
-
-        clearColor = New Color4(0.0F, 0.0F, 0.0F, 1.0F)
-
-        D3D11InteropHelper.ClearRenderTargetView(renderContext, renderTargetView, 0.0F, 0.0F, 0.0F, 1.0F)
-
-        ' Privates RenderTarget aktivieren.
+        ' ============================================================
+        ' Originalbild oben links
+        ' ============================================================
 
         renderContext.OMSetRenderTargets(renderTargetView)
 
-        ' Nur links oben rendern.
+        renderContext.RSSetViewport(
+        New Viewport(
+            0.0F,
+            0.0F,
+            CSng(quadrantBreite),
+            CSng(quadrantHoehe),
+            0.0F,
+            1.0F))
 
-        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(quadrantBreite), CSng(quadrantHoehe), 0.0F, 1.0F))
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
+
         renderContext.VSSetShader(copyVertexShader)
         renderContext.PSSetShader(copyPixelShader)
+
         renderContext.PSSetShaderResource(0UI, sourceView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
-        ' Fullscreen-Triangle.
-        '
-        ' Es existiert bewusst kein VertexBuffer.
-        ' Die drei Positionen entstehen über SV_VertexID direkt im
-        ' VertexShader.
-
         renderContext.Draw(3UI, 0UI)
 
+        renderContext.PSSetShaderResource(0UI, Nothing)
+
+    End Sub
+
+    Private Sub ZeigeKuwahara()
+
+        Dim quadrantBreite As Integer
+        Dim quadrantHoehe As Integer
+
+        quadrantBreite = Math.Max(1, renderBreite \ 2)
+        quadrantHoehe = Math.Max(1, renderHoehe \ 2)
+
         ' ============================================================
-        ' PASS II Testing: Kuwahara unten links
-        '
-        ' Erzeugt ist er ja bereits, daher nur per Copy-Shader in die
-        ' linke untere Ecke platzieren
+        ' Kuwahara unten links
         ' ============================================================
-        renderContext.RSSetViewport(New Viewport(0.0F, CSng(quadrantHoehe), CSng(quadrantBreite),
-                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
+
+        renderContext.OMSetRenderTargets(renderTargetView)
+
+        renderContext.RSSetViewport(
+        New Viewport(
+            0.0F,
+            CSng(quadrantHoehe),
+            CSng(quadrantBreite),
+            CSng(quadrantHoehe),
+            0.0F,
+            1.0F))
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
 
         renderContext.VSSetShader(copyVertexShader)
         renderContext.PSSetShader(copyPixelShader)
+
         renderContext.PSSetShaderResource(0UI, kuwaharaView)
+        renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 
-        '' ============================================================
-        '' Pass III Testing: Pigment Initialisierung unten rechts
-        '' ============================================================
-        'renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
-        '                                         CSng(quadrantHoehe), 0.0F, 1.0F))
-        'renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
-
-        'renderContext.Draw(3UI, 0UI)
-
-        ' ============================================================
-        ' Pass IV Testing: Water Initialisierung oben rechts
-        ' ============================================================
-        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), 0.0F, CSng(quadrantBreite),
-                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
-        renderContext.PSSetShaderResource(0UI, sourceWaterView)
-
-        renderContext.Draw(3UI, 0UI)
-
-        'Vor Beginn der Simulation noch einmal SRV lösen
         renderContext.PSSetShaderResource(0UI, Nothing)
-        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub ZeigeKontrollmonitor()
+
+        Dim quadrantBreite As Integer
+        Dim quadrantHoehe As Integer
+
+        quadrantBreite = Math.Max(1, renderBreite \ 2)
+        quadrantHoehe = Math.Max(1, renderHoehe \ 2)
 
         ' ============================================================
-        ' PASS V: Wasserfluss-Simulation mit konstanten Iterationen &
-        '         Viskosität
-        ' ============================================================
-
-        SimuliereWasserUndPigmente(TEST_VISKOSITAET, TEST_ITERATIONEN)
-
-        ' ============================================================
-        ' PASS VI Testing:
-        ' Pigmente nach Wassertransport unten rechts darstellen
-        ' ============================================================
+        ' Kontrollmonitor oben rechts
         '
-        ' WICHTIG:
+        ' Aktuell:
+        ' Legacy-Wasserzustand
         '
-        ' sourcePigmentSuspensionView enthält den INTERNEN Simulationszustand:
+        ' Später kann diese Methode beliebige Simulationsressourcen
+        ' darstellen.
+        ' ============================================================
+
+        renderContext.OMSetRenderTargets(renderTargetView)
+
+        renderContext.RSSetViewport(
+        New Viewport(
+            CSng(quadrantBreite),
+            0.0F,
+            CSng(quadrantBreite),
+            CSng(quadrantHoehe),
+            0.0F,
+            1.0F))
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(copyVertexShader)
+        renderContext.PSSetShader(copyPixelShader)
+
+        renderContext.PSSetShaderResource(0UI, sourceWaterView)
+        renderContext.PSSetSampler(0UI, renderSampler)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+
+    End Sub
+
+    Private Sub ZeigeSimulationsergebnis()
+
+        Dim quadrantBreite As Integer
+        Dim quadrantHoehe As Integer
+
+        quadrantBreite = Math.Max(1, renderBreite \ 2)
+        quadrantHoehe = Math.Max(1, renderHoehe \ 2)
+
+        ' ============================================================
+        ' Simulationsergebnis unten rechts
+        '
+        ' sourcePigmentSuspensionView enthält:
         '
         ' RGB = premultiplizierte Pigmentfarbe
         ' A   = Pigmentmenge
         '
-        ' Der PigmentDisplayShader komponiert daraus ein vollständig
-        ' opakes Bild über HintergrundFarbeSaver.
+        ' Der PigmentDisplayShader erzeugt daraus die sichtbare,
+        ' vollständig opake Darstellung.
         ' ============================================================
 
         AktualisierePigmentDisplayConstantBuffer()
 
         renderContext.OMSetRenderTargets(renderTargetView)
-        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
-                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
+
+        renderContext.RSSetViewport(
+        New Viewport(
+            CSng(quadrantBreite),
+            CSng(quadrantHoehe),
+            CSng(quadrantBreite),
+            CSng(quadrantHoehe),
+            0.0F,
+            1.0F))
+
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
+
         renderContext.VSSetShader(pigmentDisplayVertexShader)
         renderContext.PSSetShader(pigmentDisplayPixelShader)
+
         renderContext.PSSetConstantBuffer(0UI, pigmentDisplayConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
+
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 
-        ' ============================================================
-        ' SRV wieder lösen.
-        '
-        ' Das wird später bei Multipass besonders wichtig, weil dieselbe
-        ' Texture niemals gleichzeitig als Input und Output gebunden
-        ' bleiben darf.
-        ' ============================================================
+        ' Pipeline sauber verlassen.
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-        ' ============================================================
-        ' READBACK
-        ' ============================================================
-        '
-        ' Erst nachdem das Bild vollständig im privaten RenderTarget
-        ' aufgebaut wurde, kopieren wir es in die CPU-lesbare
-        ' Staging-Texture.
-        '
-        ' Es existiert damit auch hier zu keinem Zeitpunkt ein
-        ' "halbfertiges veröffentlichtes Bild".
+    End Sub
+
+    Private Function ErzeugeAusgabebild() As Bitmap
+
+        Dim ergebnis As Bitmap
+
+        ergebnis = Nothing
 
         renderContext.CopyResource(stagingTexture, renderTargetTexture)
-
-        ' Bei diesem statischen Roundtrip wäre Map(Read) bereits eine
-        ' Synchronisationsstelle.
-        '
-        ' Wir behalten Flush() zunächst trotzdem ausdrücklich bei.
-        '
-        ' Erstens entspricht dies unserer bewährten D3D11-Diagnostik,
-        ' zweitens wollen wir für V0.1 keinerlei Unsicherheit darüber,
-        ' wann der Copy-Befehl tatsächlich an den Treiber übergeben
-        ' wurde.
 
         renderContext.Flush()
 
