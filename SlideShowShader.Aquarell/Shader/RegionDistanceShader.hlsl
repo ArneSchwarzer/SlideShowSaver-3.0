@@ -695,37 +695,172 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // ========================================================================
     // MODE 4
     // Seed-Koordinate -> echte Pixeldistanz
+    //
+    // Diagnose:
+    //
+    //      -1.0 = Zu diesem Pixel ist KEIN gültiger Grenz-Seed gelangt.
+    //
+    // regionDistanceTexture ist R32_FLOAT. Deshalb speichern wir hier
+    // bewusst keinen RGB-Testfarbwert. Die eigentliche Warnfarbe wird
+    // erst im MODE_DISPLAY aus diesem Sentinel erzeugt.
     // ========================================================================
 
-    if (!IsValidSeed(currentSeed))
+    if (mode == MODE_FINALIZE)
     {
-    // KNALLMAGENTA = KEIN Seed angekommen
-        return float4(1.0F, 0.0F, 1.0F, 1.0F);
+        currentSeed =
+            sourceSeedTexture.Load(
+                int3(
+                    pixelPosition,
+                    0));
+
+
+        if (!IsValidSeed(currentSeed))
+        {
+            return
+                float4(
+                    -1.0F,
+                    0.0F,
+                    0.0F,
+                    1.0F);
+        }
+
+
+        finalDistance =
+            length(
+                pixelPositionFloat -
+                currentSeed);
+
+
+        return
+            float4(
+                finalDistance,
+                0.0F,
+                0.0F,
+                1.0F);
     }
-
-    finalDistance = length(pixelPositionFloat - currentSeed);
-
-// gültige Distanz normal weitergeben
-    return float4(finalDistance, 0.0F, 0.0F, 1.0F);
 
 
     // ========================================================================
     // MODE 5
-    // Debug-Darstellung
+    // Diagnose-/Kontrollansicht
+    //
+    // Farbcode:
+    //
+    //      MAGENTA
+    //          Kein gültiger Distance-Seed angekommen.
+    //          regionDistanceTexture enthält -1.0.
+    //
+    //      CYAN
+    //          Exakter Grenzpixel bzw. praktisch Distanz 0.
+    //
+    //      GRAUSTUFEN
+    //          Gültige Distanz.
+    //          Schwarz = nahe an der Grenze
+    //          Weiß    = weit von der Grenze entfernt
+    //
+    // Falls ein unbekannter Mode ankommt:
+    //
+    //      GELB
     // ========================================================================
 
-    uint displayWidth;
-    uint displayHeight;
+    if (mode == MODE_DISPLAY)
+    {
+        uint displayWidth;
+        uint displayHeight;
 
-    int2 displayPixelPosition;
-    
-    regionDistanceTexture.GetDimensions(displayWidth, displayHeight);
-    
-    displayPixelPosition = int2(saturate(input.texCoord) * float2(displayWidth - 1, displayHeight - 1));
-    
-    finalDistance = regionDistanceTexture.Load(int3(displayPixelPosition, 0));
-    
-    displayValue = saturate(finalDistance / max(displayDistanceScale, 1.0F));
-    
-    return float4(displayValue, displayValue, displayValue, 1.0F);
+        int2 displayPixelPosition;
+
+
+        regionDistanceTexture.GetDimensions(
+            displayWidth,
+            displayHeight);
+
+
+        displayPixelPosition =
+            int2(
+                saturate(input.texCoord) *
+                float2(
+                    displayWidth - 1,
+                    displayHeight - 1));
+
+
+        finalDistance =
+            regionDistanceTexture.Load(
+                int3(
+                    displayPixelPosition,
+                    0));
+
+
+        // ------------------------------------------------------------
+        // MAGENTA:
+        // Kein gültiger Seed hat dieses Pixel erreicht.
+        // ------------------------------------------------------------
+
+        if (finalDistance < 0.0F)
+        {
+            return
+                float4(
+                    1.0F,
+                    0.0F,
+                    1.0F,
+                    1.0F);
+        }
+
+
+        // ------------------------------------------------------------
+        // CYAN:
+        // Grenzpixel / Distanz praktisch Null.
+        //
+        // Damit sehen wir sofort, wo die tatsächlich erzeugten Seeds
+        // liegen und können sie von normalen dunklen Gradienten
+        // unterscheiden.
+        // ------------------------------------------------------------
+
+        if (finalDistance <= 0.5F)
+        {
+            return
+                float4(
+                    0.0F,
+                    1.0F,
+                    1.0F,
+                    1.0F);
+        }
+
+
+        // ------------------------------------------------------------
+        // Gültige Distanz:
+        // normale Graustufenanzeige.
+        // ------------------------------------------------------------
+
+        displayValue =
+            saturate(
+                finalDistance /
+                max(
+                    displayDistanceScale,
+                    1.0F));
+
+
+        return
+            float4(
+                displayValue,
+                displayValue,
+                displayValue,
+                1.0F);
+    }
+
+
+    // ========================================================================
+    // Sicherheitsnetz
+    //
+    // GELB bedeutet:
+    // Ein unbekannter oder falsch gesetzter mode hat PSMain erreicht.
+    // Dieser Fall darf regulär niemals auftreten.
+    // ========================================================================
+
+    return
+        float4(
+            1.0F,
+            1.0F,
+            0.0F,
+            1.0F);
 }
