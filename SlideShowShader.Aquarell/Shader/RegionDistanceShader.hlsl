@@ -466,19 +466,46 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     int step;
 
+// ------------------------------------------------------------------------
+// Pixelposition bestimmen.
+// ------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
-    // Dimensionen bestimmen.
-    // ------------------------------------------------------------------------
-
-    kuwaharaTexture.GetDimensions(textureWidth, textureHeight);
-
-    textureSize = uint2(textureWidth, textureHeight);
-    
     pixelPosition = int2(input.position.xy);
 
     pixelPositionFloat = float2(pixelPosition);
 
+
+// ------------------------------------------------------------------------
+// Texturdimensionen bestimmen.
+//
+// WICHTIG:
+//
+// Nicht jeder Shader-Modus hat kuwaharaTexture auf t0 gebunden.
+//
+// MODE_PROPAGATE arbeitet ausschließlich mit sourceSeedTexture auf t1.
+// Deshalb müssen dort die Dimensionen aus sourceSeedTexture gelesen
+// werden.
+//
+// MODE_DISPLAY arbeitet mit regionDistanceTexture auf t2.
+//
+// Die übrigen Modi verwenden kuwaharaTexture auf t0.
+// ------------------------------------------------------------------------
+
+    if (mode == MODE_PROPAGATE)
+    {
+        sourceSeedTexture.GetDimensions(textureWidth, textureHeight);
+    }
+    else if (mode == MODE_DISPLAY)
+    {
+        regionDistanceTexture.GetDimensions(textureWidth, textureHeight);
+    }
+    else
+    {
+        kuwaharaTexture.GetDimensions(textureWidth, textureHeight);
+    }
+
+
+    textureSize = uint2(textureWidth, textureHeight);
 
     // ========================================================================
     // MODE 0
