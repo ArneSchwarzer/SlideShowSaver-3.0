@@ -170,6 +170,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SaverMain.vb" />
+    <Compile Include="TransitionHostWindow.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="frmFallbackSaver.resx">

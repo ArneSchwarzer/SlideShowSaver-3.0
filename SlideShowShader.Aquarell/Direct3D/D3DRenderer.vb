@@ -35,10 +35,6 @@ Friend Class D3DRenderer
 
     Private Const REGION_DISTANCE_COLOR_THRESHOLD As Single = 0.05F
 
-    ' Nur für die Kontrollmonitor-Darstellung.
-    ' 256 Pixel Entfernung werden als Weiß dargestellt.
-    Private Const REGION_DISTANCE_DISPLAY_SCALE As Single = 256.0F
-
     ' Reine Notbremse.
     ' KEIN reguläres Abbruchkriterium.
     Private Const REGION_DISTANCE_MAX_SAFETY_PASSES As Integer = 8192
@@ -842,8 +838,8 @@ Friend Class D3DRenderer
         regionDistanceParameter.mode = mode
         regionDistanceParameter.jumpStep = jumpStep
         regionDistanceParameter.regionColorThreshold = REGION_DISTANCE_COLOR_THRESHOLD
-        regionDistanceParameter.displayDistanceScale = REGION_DISTANCE_DISPLAY_SCALE
-
+        regionDistanceParameter.displayDistanceScale = Math.Max(1.0F, CSng(Math.Min(renderBreite, renderHoehe)) *
+                                                                0.5F)
 
         renderContext.UpdateSubresource(regionDistanceParameter, regionDistanceConstantBuffer)
 

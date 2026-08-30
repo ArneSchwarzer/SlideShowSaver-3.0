@@ -133,35 +133,40 @@ RWStructuredBuffer<uint> changedCounter : register(u1);
 struct VSOutput
 {
     float4 position : SV_POSITION;
+    float2 texCoord : TEXCOORD0;
 };
-
 
 VSOutput VSMain(uint vertexId : SV_VertexID)
 {
     VSOutput output;
 
     float2 position;
+    float2 texCoord;
 
 
     if (vertexId == 0)
     {
         position = float2(-1.0F, -1.0F);
+        texCoord = float2(0.0F, 1.0F);
     }
     else if (vertexId == 1)
     {
         position = float2(-1.0F, 3.0F);
+        texCoord = float2(0.0F, -1.0F);
     }
     else
     {
         position = float2(3.0F, -1.0F);
+        texCoord = float2(2.0F, 1.0F);
     }
 
 
     output.position = float4(position, 0.0F, 1.0F);
 
+    output.texCoord = texCoord;
+
     return output;
 }
-
 
 // ============================================================================
 // Allgemeine Hilfsfunktionen
@@ -714,8 +719,17 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // Debug-Darstellung
     // ========================================================================
 
-    finalDistance = regionDistanceTexture.Load(int3(pixelPosition, 0));
+    uint displayWidth;
+    uint displayHeight;
 
+    int2 displayPixelPosition;
+    
+    regionDistanceTexture.GetDimensions(displayWidth, displayHeight);
+    
+    displayPixelPosition = int2(saturate(input.texCoord) * float2(displayWidth - 1, displayHeight - 1));
+    
+    finalDistance = regionDistanceTexture.Load(int3(displayPixelPosition, 0));
+    
     displayValue = saturate(finalDistance / max(displayDistanceScale, 1.0F));
     
     return float4(displayValue, displayValue, displayValue, 1.0F);

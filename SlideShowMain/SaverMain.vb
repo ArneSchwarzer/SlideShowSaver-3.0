@@ -1336,7 +1336,7 @@ Module SaverMain
 
             LogHandling.LogDebug("TransitionHostVorbereiten(): Neuer WPF-Host wird erzeugt.")
 
-            transitionHost = New SW.Window()
+            transitionHost = New TransitionHostWindow()
 
             transitionHost.WindowStyle = SW.WindowStyle.None
             transitionHost.ResizeMode = SW.ResizeMode.NoResize
