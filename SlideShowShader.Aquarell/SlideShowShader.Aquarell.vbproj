@@ -199,6 +199,8 @@
     <EmbeddedResource Include="Shader\PigmentDisplayShaderVS.cso" />
     <EmbeddedResource Include="Shader\PaperInitializerShaderPS.cso" />
     <EmbeddedResource Include="Shader\PaperInitializerShaderVS.cso" />
+    <EmbeddedResource Include="Shader\RegionDistanceShaderPS.cso" />
+    <EmbeddedResource Include="Shader\RegionDistanceShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -230,6 +232,7 @@
     <Content Include="Shader\PigmentDisplayShader.hlsl" />
     <Content Include="Shader\PigmentFlowShader.hlsl" />
     <Content Include="Shader\PigmentInitializerShader.hlsl" />
+    <Content Include="Shader\RegionDistanceShader.hlsl" />
     <Content Include="Shader\WaterFlowShader.hlsl" />
     <Content Include="Shader\WaterInitializerShader.hlsl" />
     <EmbeddedResource Include="Shader\KuwaharaShader.hlsl" />

@@ -25,6 +25,21 @@ Friend Class D3DRenderer
 
     Private Const TEST_PIGMENT_TRANSPORT_STRENGTH As Single = 2.0F
 
+    Private Const REGION_DISTANCE_MODE_INITIALIZE As UInteger = 0UI
+    Private Const REGION_DISTANCE_MODE_PROPAGATE As UInteger = 1UI
+    Private Const REGION_DISTANCE_MODE_FINALIZE As UInteger = 2UI
+    Private Const REGION_DISTANCE_MODE_DISPLAY As UInteger = 3UI
+
+    Private Const REGION_DISTANCE_COLOR_THRESHOLD As Single = 0.05F
+
+    ' Nur für die Kontrollmonitor-Darstellung.
+    ' 256 Pixel Entfernung werden als Weiß dargestellt.
+    Private Const REGION_DISTANCE_DISPLAY_SCALE As Single = 256.0F
+
+    ' Reine Notbremse.
+    ' KEIN reguläres Abbruchkriterium.
+    Private Const REGION_DISTANCE_MAX_SAFETY_PASSES As Integer = 8192
+
 #End Region
 
 #Region "Variablen"
@@ -167,6 +182,24 @@ Friend Class D3DRenderer
     Private paperInitializerPixelShader As ID3D11PixelShader
 
     '---------------------------------
+    ' Region Distance Shader
+    '---------------------------------
+    Private regionDistanceVertexShader As ID3D11VertexShader
+    Private regionDistancePixelShader As ID3D11PixelShader
+
+    Private regionDistanceConstantBuffer As ID3D11Buffer
+
+
+    '---------------------------------
+    ' Region Distance Changed Counter
+    '---------------------------------
+
+    Private regionDistanceChangedCounterBuffer As ID3D11Buffer
+    Private regionDistanceChangedCounterView As ID3D11UnorderedAccessView
+
+    Private regionDistanceChangedCounterStagingBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Pigment Initializer Shader
     '---------------------------------
     Private pigmentInitializerVertexShader As ID3D11VertexShader
@@ -225,6 +258,17 @@ Friend Class D3DRenderer
 #End Region
 
 #Region "Stuctures & Enums"
+
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure RegionDistanceConstants
+
+        Public mode As UInteger
+        Public jumpStep As UInteger
+
+        Public regionColorThreshold As Single
+        Public displayDistanceScale As Single
+
+    End Structure
 
     <StructLayout(LayoutKind.Sequential)>
     Private Structure WaterFlowConstants
@@ -288,6 +332,7 @@ Friend Class D3DRenderer
         InitialisiereTexturen(baseImage)
         InitialisiereShader()
         InitialisiereSampler()
+        InitialisiereRegionDistanceConstantBuffer()
         InitialisiereWaterFlowConstantBuffer()
         InitialisierePigmentFlowConstantBuffer()
         InitialisierePigmentDisplayConstantBuffer()
@@ -383,9 +428,11 @@ Friend Class D3DRenderer
 
     Private Sub InitialisiereRegionDistanceRessourcen()
 
+        Dim counterViewDescription As UnorderedAccessViewDescription
+
         ' Ergebnis der Distance Transformation.
         InitialisiereSimulationsRessource(regionDistanceTexture, regionDistanceView, regionDistanceTargetView,
-                                          Format.R16_Float)
+                                          Format.R32_Float)
 
         ' Ping-Pong-Arbeitsfelder des Jump-Flood-Algorithmus.
         '
@@ -398,6 +445,26 @@ Friend Class D3DRenderer
 
         InitialisiereSimulationsRessource(targetRegionSeedTexture, targetRegionSeedView,
                                           targetRegionSeedTargetView, Format.R32G32_Float)
+
+        regionDistanceChangedCounterBuffer = Direct3DRessourceHandler.ErstelleStructuredCounterBuffer(renderDevice)
+
+        regionDistanceChangedCounterStagingBuffer =
+            Direct3DRessourceHandler.ErstelleStagingCounterBuffer(renderDevice)
+
+        counterViewDescription =
+            New UnorderedAccessViewDescription(
+                regionDistanceChangedCounterBuffer,
+                Format.Unknown,
+                0UI,
+                1UI,
+                BufferUnorderedAccessViewFlags.None)
+
+        regionDistanceChangedCounterView =
+            renderDevice.CreateUnorderedAccessView(regionDistanceChangedCounterBuffer, counterViewDescription)
+
+        If regionDistanceChangedCounterView Is Nothing Then
+            Throw New InvalidOperationException("Die RegionDistance-ChangedCounter-UAV konnte nicht erzeugt werden.")
+        End If
 
     End Sub
 
@@ -514,6 +581,9 @@ Friend Class D3DRenderer
         Dim paperInitializerVertexShaderCode() As Byte
         Dim paperInitializerPixelShaderCode() As Byte
 
+        Dim regionDistanceVertexShaderCode() As Byte
+        Dim regionDistancePixelShaderCode() As Byte
+
         Dim pigmentInitializerVertexShaderCode() As Byte
         Dim pigmentInitializerPixelShaderCode() As Byte
 
@@ -538,6 +608,9 @@ Friend Class D3DRenderer
         paperInitializerVertexShaderCode = LadeShaderBytecode("PaperInitializerShaderVS.cso")
         paperInitializerPixelShaderCode = LadeShaderBytecode("PaperInitializerShaderPS.cso")
 
+        regionDistanceVertexShaderCode = LadeShaderBytecode("RegionDistanceShaderVS.cso")
+        regionDistancePixelShaderCode = LadeShaderBytecode("RegionDistanceShaderPS.cso")
+
         pigmentInitializerVertexShaderCode = LadeShaderBytecode("PigmentInitializerShaderVS.cso")
         pigmentInitializerPixelShaderCode = LadeShaderBytecode("PigmentInitializerShaderPS.cso")
 
@@ -561,6 +634,9 @@ Friend Class D3DRenderer
 
         paperInitializerVertexShader = renderDevice.CreateVertexShader(paperInitializerVertexShaderCode)
         paperInitializerPixelShader = renderDevice.CreatePixelShader(paperInitializerPixelShaderCode)
+
+        regionDistanceVertexShader = renderDevice.CreateVertexShader(regionDistanceVertexShaderCode)
+        regionDistancePixelShader = renderDevice.CreatePixelShader(regionDistancePixelShaderCode)
 
         pigmentInitializerVertexShader = renderDevice.CreateVertexShader(pigmentInitializerVertexShaderCode)
         pigmentInitializerPixelShader = renderDevice.CreatePixelShader(pigmentInitializerPixelShaderCode)
@@ -599,6 +675,14 @@ Friend Class D3DRenderer
 
         If paperInitializerPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der Papier-Initialisierungs-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If regionDistanceVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der RegionDistance-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If regionDistancePixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der RegionDistance-PixelShader konnte nicht erzeugt werden.")
         End If
 
         If pigmentInitializerVertexShader Is Nothing Then
@@ -704,6 +788,310 @@ Friend Class D3DRenderer
         End If
 
     End Sub
+
+#Region "RegionDistance"
+
+    Private Sub InitialisiereRegionDistanceConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+        bufferGroesse = Marshal.SizeOf(GetType(RegionDistanceConstants))
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("RegionDistanceConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        regionDistanceConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+
+        If regionDistanceConstantBuffer Is Nothing Then
+            Throw New InvalidOperationException("Der RegionDistance-ConstantBuffer konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub AktualisiereRegionDistanceConstantBuffer(mode As UInteger, jumpStep As UInteger)
+
+        Dim regionDistanceParameter As RegionDistanceConstants
+
+
+        regionDistanceParameter.mode = mode
+        regionDistanceParameter.jumpStep = jumpStep
+        regionDistanceParameter.regionColorThreshold = REGION_DISTANCE_COLOR_THRESHOLD
+        regionDistanceParameter.displayDistanceScale = REGION_DISTANCE_DISPLAY_SCALE
+
+
+        renderContext.UpdateSubresource(regionDistanceParameter, regionDistanceConstantBuffer)
+
+    End Sub
+
+    Private Sub SetzeRegionDistanceChangedCounterZurueck()
+
+        Dim zeroValue As UInteger
+
+        zeroValue = 0UI
+
+        renderContext.UpdateSubresource(zeroValue, regionDistanceChangedCounterBuffer)
+
+    End Sub
+
+    Private Function LeseRegionDistanceChangedCounter() As UInteger
+
+        Dim mappedResource As MappedSubresource
+        Dim changedCount As UInteger
+
+        changedCount = 0UI
+
+        renderContext.CopyResource(regionDistanceChangedCounterStagingBuffer, regionDistanceChangedCounterBuffer)
+
+        mappedResource = renderContext.Map(regionDistanceChangedCounterStagingBuffer, 0UI, MapMode.Read,
+                                           Vortice.Direct3D11.MapFlags.None)
+
+
+        Try
+
+            changedCount = CUInt(Marshal.ReadInt32(mappedResource.DataPointer))
+
+        Finally
+
+            renderContext.Unmap(regionDistanceChangedCounterStagingBuffer, 0UI)
+
+        End Try
+
+
+        Return changedCount
+
+    End Function
+
+    Private Sub TauscheRegionSeedRessourcen()
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+
+        tempTexture = sourceRegionSeedTexture
+        sourceRegionSeedTexture = targetRegionSeedTexture
+        targetRegionSeedTexture = tempTexture
+
+
+        tempView = sourceRegionSeedView
+        sourceRegionSeedView = targetRegionSeedView
+        targetRegionSeedView = tempView
+
+        tempTargetView = sourceRegionSeedTargetView
+        sourceRegionSeedTargetView = targetRegionSeedTargetView
+        targetRegionSeedTargetView = tempTargetView
+
+    End Sub
+
+    Private Function FuehreRegionDistancePropagationsPassAus(jumpStep As UInteger, changedCountLesen As Boolean) _
+        As UInteger
+
+        Dim changedCount As UInteger
+
+
+        changedCount = 0UI
+
+
+        SetzeRegionDistanceChangedCounterZurueck()
+        AktualisiereRegionDistanceConstantBuffer(REGION_DISTANCE_MODE_PROPAGATE, jumpStep)
+
+        renderContext.OMSetRenderTargets(targetRegionSeedTargetView)
+
+        ' Ein RTV liegt auf Output-Slot 0.
+        '
+        ' Deshalb liegt unsere UAV auf Slot 1
+        ' und der HLSL-Counter entsprechend auf register(u1).
+
+        renderContext.OMSetUnorderedAccessView(1UI, regionDistanceChangedCounterView)
+
+        renderContext.RSSetViewport(
+        New Viewport(
+            0.0F,
+            0.0F,
+            CSng(renderBreite),
+            CSng(renderHoehe),
+            0.0F,
+            1.0F))
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(regionDistanceVertexShader)
+        renderContext.PSSetShader(regionDistancePixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, regionDistanceConstantBuffer)
+        renderContext.PSSetShaderResource(1UI, sourceRegionSeedView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+        renderContext.OMSetUnorderedAccessView(1UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+
+        If changedCountLesen Then
+
+            changedCount = LeseRegionDistanceChangedCounter()
+
+        End If
+
+
+        TauscheRegionSeedRessourcen()
+
+
+        Return changedCount
+
+    End Function
+
+    Private Sub BerechneRegionDistance()
+
+        Dim maxDimension As Integer
+        Dim jumpStep As Integer
+        Dim changedCount As UInteger
+        Dim refinementPasses As Integer
+
+        maxDimension = Math.Max(renderBreite, renderHoehe)
+
+        ' ========================================================================
+        ' 1. Grenz-Seeds initialisieren
+        ' ========================================================================
+
+        AktualisiereRegionDistanceConstantBuffer(REGION_DISTANCE_MODE_INITIALIZE, 0UI)
+
+        renderContext.OMSetRenderTargets(sourceRegionSeedTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(regionDistanceVertexShader)
+        renderContext.PSSetShader(regionDistancePixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, regionDistanceConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, kuwaharaView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+
+        ' ========================================================================
+        ' 2. Größte sinnvolle Jump-Flood-Sprungweite bestimmen
+        ' ========================================================================
+
+        jumpStep = 1
+
+        Do While jumpStep < maxDimension
+
+            jumpStep *= 2
+
+        Loop
+
+        jumpStep \= 2
+
+        If jumpStep < 1 Then
+            jumpStep = 1
+        End If
+
+
+        ' ========================================================================
+        ' 3. Jump Flood
+        '
+        ' Noch KEIN CPU-Readback des Counters.
+        ' Die Sprungfolge ist mathematisch vorgegeben.
+        ' ========================================================================
+
+        Do While jumpStep > 1
+
+            FuehreRegionDistancePropagationsPassAus(CUInt(jumpStep), False)
+
+            jumpStep \= 2
+
+        Loop
+
+
+        ' ========================================================================
+        ' 4. Letzter JFA-Pass mit jumpStep = 1
+        '
+        ' Ab jetzt übernimmt ChangedCount.
+        ' ========================================================================
+
+        changedCount = FuehreRegionDistancePropagationsPassAus(1UI, True)
+
+        refinementPasses = 1
+
+
+        ' ========================================================================
+        ' 5. Exakte lokale Relaxation bis keine Verbesserung mehr stattfindet
+        ' ========================================================================
+
+        Do While changedCount > 0UI
+
+            If refinementPasses >= REGION_DISTANCE_MAX_SAFETY_PASSES Then
+
+                Throw New InvalidOperationException("RegionDistance erreichte die Sicherheitsgrenze von " &
+                                                    REGION_DISTANCE_MAX_SAFETY_PASSES.ToString() &
+                                                    " Relaxationspässen. Der Algorithmus konvergiert nicht.")
+
+            End If
+
+            changedCount = FuehreRegionDistancePropagationsPassAus(1UI, True)
+
+            refinementPasses += 1
+
+        Loop
+
+
+        ' ========================================================================
+        ' 6. Seed-Koordinaten -> echte Pixeldistanz
+        ' ========================================================================
+
+        AktualisiereRegionDistanceConstantBuffer(REGION_DISTANCE_MODE_FINALIZE, 0UI)
+
+        renderContext.OMSetRenderTargets(regionDistanceTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
+        renderContext.VSSetShader(regionDistanceVertexShader)
+        renderContext.PSSetShader(regionDistancePixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, regionDistanceConstantBuffer)
+        renderContext.PSSetShaderResource(1UI, sourceRegionSeedView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+
+        LogHandling.LogDebug("Aquarell D3D: RegionDistance abgeschlossen. " & "Refinement-Pässe: " &
+                             refinementPasses.ToString())
+
+    End Sub
+
+#End Region
 
     Private Sub InitialisiereWaterFlowConstantBuffer()
 
@@ -992,6 +1380,7 @@ Friend Class D3DRenderer
     Private Sub InitialisiereBildzustand()
 
         BerechneKuwahara()
+        BerechneRegionDistance()
 
     End Sub
 
@@ -1185,42 +1574,35 @@ Friend Class D3DRenderer
         Dim quadrantBreite As Integer
         Dim quadrantHoehe As Integer
 
+
         quadrantBreite = Math.Max(1, renderBreite \ 2)
         quadrantHoehe = Math.Max(1, renderHoehe \ 2)
 
-        ' ============================================================
-        ' Kontrollmonitor oben rechts
-        '
-        ' Aktuell:
-        ' PaperInitializerShader
-        '
-        ' Später kann diese Methode beliebige Simulationsressourcen
-        ' darstellen.
-        ' ============================================================
+        AktualisiereRegionDistanceConstantBuffer(REGION_DISTANCE_MODE_DISPLAY, 0UI)
 
         renderContext.OMSetRenderTargets(renderTargetView)
-
         renderContext.RSSetViewport(
-        New Viewport(
-            CSng(quadrantBreite),
-            0.0F,
-            CSng(quadrantBreite),
-            CSng(quadrantHoehe),
-            0.0F,
-            1.0F))
+            New Viewport(
+                CSng(quadrantBreite),
+                0.0F,
+                CSng(quadrantBreite),
+                CSng(quadrantHoehe),
+                0.0F,
+                1.0F))
 
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
 
-        renderContext.VSSetShader(copyVertexShader)
-        renderContext.PSSetShader(copyPixelShader)
+        renderContext.VSSetShader(regionDistanceVertexShader)
+        renderContext.PSSetShader(regionDistancePixelShader)
 
-        renderContext.PSSetShaderResource(0UI, paperView)
-        renderContext.PSSetSampler(0UI, renderSampler)
+        renderContext.PSSetConstantBuffer(0UI, regionDistanceConstantBuffer)
+        renderContext.PSSetShaderResource(2UI, regionDistanceView)
 
         renderContext.Draw(3UI, 0UI)
 
-        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(2UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
 
     End Sub
 
@@ -1525,6 +1907,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(targetRegionSeedView)
         Direct3DRessourceHandler.GebeFrei(targetRegionSeedTexture)
 
+        Direct3DRessourceHandler.GebeFrei(regionDistanceChangedCounterView)
+        Direct3DRessourceHandler.GebeFrei(regionDistanceChangedCounterStagingBuffer)
+        Direct3DRessourceHandler.GebeFrei(regionDistanceChangedCounterBuffer)
+
     End Sub
 
     Private Sub GebePapierressourcenFrei()
@@ -1626,6 +2012,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(regionDistanceConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(regionDistancePixelShader)
+        Direct3DRessourceHandler.GebeFrei(regionDistanceVertexShader)
 
     End Sub
 

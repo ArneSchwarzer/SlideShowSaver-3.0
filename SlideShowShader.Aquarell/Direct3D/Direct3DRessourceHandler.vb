@@ -258,6 +258,70 @@ Friend NotInheritable Class Direct3DRessourceHandler
 
 #End Region
 
+#Region "Buffer"
+
+    Friend Shared Function ErstelleStructuredCounterBuffer(renderDevice As ID3D11Device) As ID3D11Buffer
+
+        Dim bufferDescription As BufferDescription
+        Dim buffer As ID3D11Buffer
+
+        buffer = Nothing
+
+        If renderDevice Is Nothing Then
+            Throw New ArgumentNullException(NameOf(renderDevice))
+        End If
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = 4UI
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.UnorderedAccess
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.BufferStructured
+        bufferDescription.StructureByteStride = 4UI
+
+        buffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If buffer Is Nothing Then
+            Throw New InvalidOperationException("Der D3D11-Structured-CounterBuffer konnte nicht erzeugt werden.")
+        End If
+
+        Return buffer
+
+    End Function
+
+    Friend Shared Function ErstelleStagingCounterBuffer(renderDevice As ID3D11Device) As ID3D11Buffer
+
+        Dim bufferDescription As BufferDescription
+        Dim buffer As ID3D11Buffer
+
+        buffer = Nothing
+
+        If renderDevice Is Nothing Then
+            Throw New ArgumentNullException(NameOf(renderDevice))
+        End If
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = 4UI
+        bufferDescription.Usage = ResourceUsage.Staging
+        bufferDescription.BindFlags = BindFlags.None
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.Read
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        buffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If buffer Is Nothing Then
+            Throw New InvalidOperationException("Der D3D11-Counter-StagingBuffer konnte nicht erzeugt werden.")
+        End If
+
+        Return buffer
+
+    End Function
+
+#End Region
+
 #Region "Ressourcenfreigabe"
 
     Friend Shared Sub GebeFrei(ByRef resource As IDisposable)
