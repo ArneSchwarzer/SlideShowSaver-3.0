@@ -142,9 +142,67 @@ Friend Class D3DRenderer
     Private stagingTexture As ID3D11Texture2D
 
     '---------------------------------
-    'Shader allgemein
+    ' Shader allgemein
     '---------------------------------
     Private renderSampler As ID3D11SamplerState
+
+
+    '---------------------------------
+    ' Copy Shader
+    '---------------------------------
+    Private copyVertexShader As ID3D11VertexShader
+    Private copyPixelShader As ID3D11PixelShader
+
+
+    '---------------------------------
+    ' Kuwahara Shader
+    '---------------------------------
+    Private kuwaharaVertexShader As ID3D11VertexShader
+    Private kuwaharaPixelShader As ID3D11PixelShader
+
+
+    '---------------------------------
+    ' Pigment Initializer Shader
+    '---------------------------------
+    Private pigmentInitializerVertexShader As ID3D11VertexShader
+    Private pigmentInitializerPixelShader As ID3D11PixelShader
+
+
+    '---------------------------------
+    ' Water Initializer Shader
+    '
+    ' LEGACY - nach Umbau von RenderBild entfernen
+    '---------------------------------
+    Private waterInitializerVertexShader As ID3D11VertexShader
+    Private waterInitializerPixelShader As ID3D11PixelShader
+
+
+    '---------------------------------
+    ' Water Flow Shader
+    '
+    ' LEGACY - nach Umbau von RenderBild entfernen
+    '---------------------------------
+    Private waterFlowVertexShader As ID3D11VertexShader
+    Private waterFlowPixelShader As ID3D11PixelShader
+    Private waterFlowConstantBuffer As ID3D11Buffer
+
+
+    '---------------------------------
+    ' Pigment Flow Shader
+    '
+    ' LEGACY - wird beim Umbau der Pigmentsimulation ersetzt
+    '---------------------------------
+    Private pigmentFlowVertexShader As ID3D11VertexShader
+    Private pigmentFlowPixelShader As ID3D11PixelShader
+    Private pigmentFlowConstantBuffer As ID3D11Buffer
+
+
+    '---------------------------------
+    ' Pigment Display Shader
+    '---------------------------------
+    Private pigmentDisplayVertexShader As ID3D11VertexShader
+    Private pigmentDisplayPixelShader As ID3D11PixelShader
+    Private pigmentDisplayConstantBuffer As ID3D11Buffer
 
     '---------------------------------
     ' Dimensionen
