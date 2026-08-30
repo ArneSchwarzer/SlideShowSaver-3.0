@@ -12,6 +12,9 @@ del /Q PigmentInitializerShaderPS.cso 2>nul
 del /Q KuwaharaShaderVS.cso 2>nul
 del /Q KuwaharaShaderPS.cso 2>nul
 
+del /Q PaperInitializerShaderVS.cso 2>nul
+del /Q PaperInitializerShaderPS.cso 2>nul
+
 del /Q WaterInitializerShaderVS.cso 2>nul
 del /Q WaterInitializerShaderPS.cso 2>nul
 
@@ -41,6 +44,12 @@ if errorlevel 1 goto error
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo KuwaharaShaderPS.cso KuwaharaShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo PaperInitializerShaderVS.cso PaperInitializerShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo PaperInitializerShaderPS.cso PaperInitializerShader.hlsl
 if errorlevel 1 goto error
 
 "%FXC%" /T vs_5_0 /E VSMain /Fo WaterInitializerShaderVS.cso WaterInitializerShader.hlsl

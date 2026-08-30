@@ -197,6 +197,8 @@
     <EmbeddedResource Include="Shader\PigmentFlowShaderVS.cso" />
     <EmbeddedResource Include="Shader\PigmentDisplayShaderPS.cso" />
     <EmbeddedResource Include="Shader\PigmentDisplayShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PaperInitializerShaderPS.cso" />
+    <EmbeddedResource Include="Shader\PaperInitializerShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -224,6 +226,7 @@
     <Content Include="Shader\Historisch &amp; Testing\AniKuwaharaShader.hlsl" />
     <Content Include="Shader\AquarellCopyShader.hlsl" />
     <Content Include="Shader\Historisch &amp; Testing\BilateralShader.hlsl" />
+    <Content Include="Shader\PaperInitializerShader.hlsl" />
     <Content Include="Shader\PigmentDisplayShader.hlsl" />
     <Content Include="Shader\PigmentFlowShader.hlsl" />
     <Content Include="Shader\PigmentInitializerShader.hlsl" />

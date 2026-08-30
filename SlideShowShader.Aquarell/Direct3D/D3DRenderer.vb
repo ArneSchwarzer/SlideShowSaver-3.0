@@ -160,6 +160,11 @@ Friend Class D3DRenderer
     Private kuwaharaVertexShader As ID3D11VertexShader
     Private kuwaharaPixelShader As ID3D11PixelShader
 
+    '---------------------------------
+    ' Paper Initializer Shader
+    '---------------------------------
+    Private paperInitializerVertexShader As ID3D11VertexShader
+    Private paperInitializerPixelShader As ID3D11PixelShader
 
     '---------------------------------
     ' Pigment Initializer Shader
@@ -506,6 +511,9 @@ Friend Class D3DRenderer
         Dim kuwaharaVertexShaderCode() As Byte
         Dim kuwaharaPixelShaderCode() As Byte
 
+        Dim paperInitializerVertexShaderCode() As Byte
+        Dim paperInitializerPixelShaderCode() As Byte
+
         Dim pigmentInitializerVertexShaderCode() As Byte
         Dim pigmentInitializerPixelShaderCode() As Byte
 
@@ -527,6 +535,9 @@ Friend Class D3DRenderer
         kuwaharaVertexShaderCode = LadeShaderBytecode("KuwaharaShaderVS.cso")
         kuwaharaPixelShaderCode = LadeShaderBytecode("KuwaharaShaderPS.cso")
 
+        paperInitializerVertexShaderCode = LadeShaderBytecode("PaperInitializerShaderVS.cso")
+        paperInitializerPixelShaderCode = LadeShaderBytecode("PaperInitializerShaderPS.cso")
+
         pigmentInitializerVertexShaderCode = LadeShaderBytecode("PigmentInitializerShaderVS.cso")
         pigmentInitializerPixelShaderCode = LadeShaderBytecode("PigmentInitializerShaderPS.cso")
 
@@ -547,6 +558,9 @@ Friend Class D3DRenderer
 
         kuwaharaVertexShader = renderDevice.CreateVertexShader(kuwaharaVertexShaderCode)
         kuwaharaPixelShader = renderDevice.CreatePixelShader(kuwaharaPixelShaderCode)
+
+        paperInitializerVertexShader = renderDevice.CreateVertexShader(paperInitializerVertexShaderCode)
+        paperInitializerPixelShader = renderDevice.CreatePixelShader(paperInitializerPixelShaderCode)
 
         pigmentInitializerVertexShader = renderDevice.CreateVertexShader(pigmentInitializerVertexShaderCode)
         pigmentInitializerPixelShader = renderDevice.CreatePixelShader(pigmentInitializerPixelShaderCode)
@@ -577,6 +591,14 @@ Friend Class D3DRenderer
 
         If kuwaharaPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der Kuwahara-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+        If paperInitializerVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der Papier-Initialisierungs-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If paperInitializerPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der Papier-Initialisierungs-PixelShader konnte nicht erzeugt werden.")
         End If
 
         If pigmentInitializerVertexShader Is Nothing Then
@@ -1021,9 +1043,41 @@ Friend Class D3DRenderer
 
     Private Sub InitialisiereWasserzustand()
 
+        InitialisierePapier()
+
+        InitialisiereLegacyWasserzustand()
+
+    End Sub
+
+    Private Sub InitialisierePapier()
+
+        renderContext.OMSetRenderTargets(paperTargetView)
+        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(paperInitializerVertexShader)
+        renderContext.PSSetShader(paperInitializerPixelShader)
+
+        renderContext.Draw(3UI, 0UI)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub InitialisiereLegacyWasserzustand()
+
         renderContext.OMSetRenderTargets(sourceWaterTargetView)
 
-        renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
+        renderContext.RSSetViewport(
+            New Viewport(
+                0.0F,
+                0.0F,
+                CSng(renderBreite),
+                CSng(renderHoehe),
+                0.0F,
+                1.0F))
 
         renderContext.VSSetShader(waterInitializerVertexShader)
         renderContext.PSSetShader(waterInitializerPixelShader)
@@ -1138,7 +1192,7 @@ Friend Class D3DRenderer
         ' Kontrollmonitor oben rechts
         '
         ' Aktuell:
-        ' Legacy-Wasserzustand
+        ' PaperInitializerShader
         '
         ' Später kann diese Methode beliebige Simulationsressourcen
         ' darstellen.
@@ -1161,7 +1215,7 @@ Friend Class D3DRenderer
         renderContext.VSSetShader(copyVertexShader)
         renderContext.PSSetShader(copyPixelShader)
 
-        renderContext.PSSetShaderResource(0UI, sourceWaterView)
+        renderContext.PSSetShaderResource(0UI, paperView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
@@ -1551,6 +1605,9 @@ Friend Class D3DRenderer
 
         Direct3DRessourceHandler.GebeFrei(kuwaharaPixelShader)
         Direct3DRessourceHandler.GebeFrei(kuwaharaVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(paperInitializerPixelShader)
+        Direct3DRessourceHandler.GebeFrei(paperInitializerVertexShader)
 
         Direct3DRessourceHandler.GebeFrei(pigmentInitializerPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentInitializerVertexShader)
