@@ -697,21 +697,16 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // Seed-Koordinate -> echte Pixeldistanz
     // ========================================================================
 
-    if (mode == MODE_FINALIZE)
+    if (!IsValidSeed(currentSeed))
     {
-        currentSeed = sourceSeedTexture.Load(int3(pixelPosition, 0));
-        
-        if (!IsValidSeed(currentSeed))
-        {
-            finalDistance = 65535.0F;
-        }
-        else
-        {
-            finalDistance = length(pixelPositionFloat - currentSeed);
-        }
-        
-        return float4(finalDistance, 0.0F, 0.0F, 1.0F);
+    // KNALLMAGENTA = KEIN Seed angekommen
+        return float4(1.0F, 0.0F, 1.0F, 1.0F);
     }
+
+    finalDistance = length(pixelPositionFloat - currentSeed);
+
+// gültige Distanz normal weitergeben
+    return float4(finalDistance, 0.0F, 0.0F, 1.0F);
 
 
     // ========================================================================
