@@ -1,50 +1,47 @@
 // ============================================================================
 // WaterInitializerShader.hlsl
-// ============================================================================
 //
 // SlideShowSaver 3.0
 // Shader: Aquarell
 //
+// V0.x - Multi-Scale-Distance-WaterMap
+//
 // Aufgabe:
 //
-// Aus dem bereits durch Classic Kuwahara vereinfachten Bild wird das
-// initiale Wasserfeld für die Aquarell-Simulation erzeugt.
+// Aus dem bereits durch Classic Kuwahara vereinfachten Bild wird ein
+// Wasserpotential erzeugt.
+//
+// Anders als die bisherige WaterMap erzeugt diese Version NICHT nur ein
+// breiteres Band um Kuwahara-Kanten.
+//
+// Stattdessen wird für jedes Pixel näherungsweise bestimmt:
+//
+//      Wie weit kann ich mich vom Pixel entfernen,
+//      bevor ich auf eine deutlich andere Kuwahara-Farbfläche treffe?
+//
+// Daraus entsteht:
+//
+//      nahe an einer Grenze
+//          -> niedriger Wasserstand
+//
+//      weit im Inneren einer Fläche
+//          -> hoher Wasserstand
+//
+// Der PigmentFlowShader kann dadurch Pigmente aus den Zentren großer
+// Kuwahara-Flächen in Richtung ihrer Grenzen transportieren.
 //
 // WICHTIG:
 //
-// Diese WaterMap ist ausdrücklich KEINE physikalisch vollständige
-// Beschreibung einer realen Wasseroberfläche.
+// Diese WaterMap ist weiterhin KEINE physikalisch korrekte Simulation.
+// Sie ist ein bewusst künstlerisch konstruiertes Potentialfeld.
 //
-// Für die aktuelle frühe Simulationsstufe soll sie vor allem:
+// Für diesen Test gibt es ausdrücklich:
 //
-//      - zum Bild passende räumliche Strukturen besitzen
-//      - große homogene Kuwahara-Flächen weitgehend ruhig lassen
-//      - an Kuwahara-Farbgrenzen leichte Senken erzeugen
-//      - eine kleine natürliche Grundvariation besitzen
+//      KEIN Sinusfeld
+//      KEIN Rauschen
+//      KEINE Papierstruktur
 //
-// Warum SENKEN an Kanten?
-//
-// Unsere aktuelle Simulation kennt noch:
-//
-//      KEINE Verdunstung
-//      KEINE Kapillarwirkung
-//      KEINE Pigmentablagerung
-//      KEINE Papierabsorption
-//
-// Würden wir die Kanten jetzt erhöhen, würde der WaterFlowShader Pigmente
-// tendenziell von diesen Kanten wegtransportieren.
-//
-// Deshalb verwenden wir für V0.x bewusst eine künstlerisch motivierte
-// Ersatzregel:
-//
-//      Kuwahara-Kante -> leichte Wassersenke
-//
-// Dadurch werden Pigmente in der späteren Transportphase eher zu den
-// Farbgrenzen hingezogen.
-//
-// Sobald echte Pigmentablagerung und Verdunstung existieren, darf dieses
-// Modell erneut überprüft und physikalisch sinnvoller aufgebaut werden.
-//
+// Damit lässt sich die Wirkung der Distanz-WaterMap isoliert beurteilen.
 // ============================================================================
 
 
@@ -71,14 +68,14 @@ VertexOutput VSMain(uint vertexId : SV_VertexID)
 
     float2 positions[3] =
     {
-        float2(-1.0, -1.0),
-        float2(-1.0, 3.0),
-        float2(3.0, -1.0)
+        float2(-1.0F, -1.0F),
+        float2(-1.0F, 3.0F),
+        float2(3.0F, -1.0F)
     };
 
 
-    output.position = float4(positions[vertexId], 0.0, 1.0);
-    
+    output.position = float4(positions[vertexId], 0.0F, 1.0F);
+
     return output;
 }
 
@@ -86,22 +83,28 @@ VertexOutput VSMain(uint vertexId : SV_VertexID)
 // ============================================================================
 // Kuwahara-Farbe lesen
 // ============================================================================
-//
-// Wir verwenden bewusst Load().
-//
-// Die WaterMap soll nicht auf interpolierten Farben beruhen, sondern auf den
-// tatsächlich vorhandenen Kuwahara-Texeln.
-//
-// Randkoordinaten werden geklemmt.
-// ============================================================================
 
-float3 ReadKuwaharaColor(int2 pixelPosition, int2 textureSize)
+float3 ReadKuwaharaColor(
+    int2 pixelPosition,
+    int2 textureSize)
 {
     int2 clampedPosition;
-    
-    clampedPosition = clamp(pixelPosition, int2(0, 0), textureSize - int2(1, 1));
-    
-    return kuwaharaTexture.Load(int3(clampedPosition, 0)).rgb;
+
+
+    clampedPosition =
+        clamp(
+            pixelPosition,
+            int2(0, 0),
+            textureSize - int2(1, 1)
+        );
+
+
+    return kuwaharaTexture.Load(
+        int3(
+            clampedPosition,
+            0
+        )
+    ).rgb;
 }
 
 
@@ -109,125 +112,219 @@ float3 ReadKuwaharaColor(int2 pixelPosition, int2 textureSize)
 // Farbdifferenz
 // ============================================================================
 //
-// Länge des RGB-Differenzvektors.
-//
-// Da RGB-Komponenten zwischen 0 und 1 liegen, beträgt die theoretische
-// Maximallänge:
-//
-//      sqrt(3)
-//
-// Durch Division mit sqrt(3) erhalten wir ungefähr einen Bereich:
+// RGB-Abstand normiert ungefähr auf:
 //
 //      0.0 ... 1.0
 //
 // ============================================================================
 
-float CalculateColorDifference(float3 colorA, float3 colorB)
+float CalculateColorDifference(
+    float3 colorA,
+    float3 colorB)
 {
-    const float inverseMaxRgbDistance = 0.57735026919;
-    
-    return length(colorA - colorB) * inverseMaxRgbDistance;
+    const float inverseMaximumRgbDistance = 0.57735026919F;
+
+
+    return
+        length(colorA - colorB)
+        * inverseMaximumRgbDistance;
 }
 
 
 // ============================================================================
-// Niedrigfrequente Grundvariation
+// Maximale Farbdifferenz in acht Richtungen
 // ============================================================================
 //
-// Ein echter Maler verteilt Wasser nicht mathematisch perfekt gleichmäßig.
+// Es werden nicht nur Nord/Ost/Süd/West geprüft, sondern zusätzlich die
+// vier Diagonalen.
 //
-// Wir wollen deshalb eine SEHR leichte räumliche Variation erzeugen.
-//
-// Noch verwenden wir dafür bewusst kein FBM.
-//
-// Das hier ist lediglich eine billige deterministische Approximation aus zwei
-// Sinusfeldern.
-//
-// Wichtig:
-//
-// Die Variation bleibt klein gegenüber den eigentlichen Kuwahara-Strukturen.
-// Sie soll das Wasser lediglich etwas "lebendig" machen.
+// Dadurch ist die Distanzsuche weniger abhängig von der Orientierung einer
+// Kuwahara-Grenze.
 //
 // ============================================================================
 
-float CalculateWaterVariation(int2 pixelPosition)
+float CalculateMaximumDifferenceAtDistance(
+    int2 pixelPosition,
+    int2 textureSize,
+    float3 centerColor,
+    int sampleDistance)
 {
-    float x;
-    float y;
+    float differenceNorth;
+    float differenceNorthEast;
+    float differenceEast;
+    float differenceSouthEast;
+    float differenceSouth;
+    float differenceSouthWest;
+    float differenceWest;
+    float differenceNorthWest;
 
-    float variationA;
-    float variationB;
-
-    float variation;
+    float maximumDifference;
 
 
-    x = (float) pixelPosition.x;
-    y = (float) pixelPosition.y;
+    differenceNorth =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(0, -sampleDistance),
+                textureSize
+            )
+        );
 
 
-    // ------------------------------------------------------------------------
-    // Zwei unterschiedlich große Wellenlängen verhindern ein zu deutlich
-    // sichtbares regelmäßiges Muster.
-    // ------------------------------------------------------------------------
+    differenceNorthEast =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(sampleDistance, -sampleDistance),
+                textureSize
+            )
+        );
 
-    variationA = sin(x / 71.0) * sin(y / 89.0);
-    variationB = sin((x + y) / 137.0) * sin((x - y) / 113.0);
-    
-    variation = variationA * 0.65 + variationB * 0.35;
-    
-    // Ergebnis ungefähr -1 ... +1.
 
-    return variation;
+    differenceEast =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(sampleDistance, 0),
+                textureSize
+            )
+        );
+
+
+    differenceSouthEast =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(sampleDistance, sampleDistance),
+                textureSize
+            )
+        );
+
+
+    differenceSouth =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(0, sampleDistance),
+                textureSize
+            )
+        );
+
+
+    differenceSouthWest =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(-sampleDistance, sampleDistance),
+                textureSize
+            )
+        );
+
+
+    differenceWest =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(-sampleDistance, 0),
+                textureSize
+            )
+        );
+
+
+    differenceNorthWest =
+        CalculateColorDifference(
+            centerColor,
+            ReadKuwaharaColor(
+                pixelPosition + int2(-sampleDistance, -sampleDistance),
+                textureSize
+            )
+        );
+
+
+    maximumDifference =
+        max(
+            max(
+                max(differenceNorth, differenceNorthEast),
+                max(differenceEast, differenceSouthEast)
+            ),
+            max(
+                max(differenceSouth, differenceSouthWest),
+                max(differenceWest, differenceNorthWest)
+            )
+        );
+
+
+    return maximumDifference;
 }
 
 
 // ============================================================================
-// PixelShader
+// Kantenprüfung für eine Entfernung
+// ============================================================================
+//
+// Sobald der Farbunterschied den Schwellwert überschreitet, behandeln wir
+// diese Entfernung als:
+//
+//      "Hier wurde erstmals eine andere Kuwahara-Fläche erreicht."
+//
+// ============================================================================
+
+bool EdgeFoundAtDistance(
+    int2 pixelPosition,
+    int2 textureSize,
+    float3 centerColor,
+    int sampleDistance,
+    float edgeThreshold)
+{
+    float maximumDifference;
+
+
+    maximumDifference =
+        CalculateMaximumDifferenceAtDistance(
+            pixelPosition,
+            textureSize,
+            centerColor,
+            sampleDistance
+        );
+
+
+    return maximumDifference >= edgeThreshold;
+}
+
+
+// ============================================================================
+// Pixel Shader
 // ============================================================================
 
 float PSMain(VertexOutput input) : SV_TARGET
 {
-    // ------------------------------------------------------------------------
-    // Die Werte hier sind ausdrücklich erste PoC-Werte.
+    // ========================================================================
+    // TESTPARAMETER
+    // ========================================================================
     //
-    // baseWater
-    //      Mittlerer Wasserstand.
+    // baseWaterEdge
     //
-    // variationStrength
-    //      Kleine natürliche Grundvariation.
+    //      Wasserstand unmittelbar an einer Kuwahara-Grenze.
     //
-    // edgeDepth
-    //      Maximale zusätzliche Absenkung an einer Kuwahara-Kante.
     //
-    // edgeSampleDistance
-    //      Abstand, in dem nach Farbunterschieden gesucht wird.
+    // baseWaterInterior
     //
-    // 8 Pixel entsprechen bewusst ungefähr der derzeitigen räumlichen
-    // Reichweite unseres WaterFlowShader.
-    // ------------------------------------------------------------------------
-
-    const float baseWater = 0.22;
-
-    const float variationStrength = 0.025;
-
-    const float edgeDepth = 0.06;
-
-    const int edgeSampleDistance = 8;
-
-
-    // ------------------------------------------------------------------------
-    // Schwellwerte für die EdgeMask.
+    //      Wasserstand in sehr großen Flächen, bei denen selbst in 512 Pixel
+    //      Entfernung keine deutlich andere Kuwahara-Farbe gefunden wurde.
     //
-    // Kleine Farbunterschiede innerhalb einer Kuwahara-Fläche sollen
-    // ignoriert werden.
     //
-    // Erst deutlichere Farbwechsel sollen eine relevante Wassersenke
-    // erzeugen.
-    // ------------------------------------------------------------------------
+    // edgeThreshold
+    //
+    //      Wie groß muss ein Farbunterschied sein, damit er als Übergang zu
+    //      einer anderen Kuwahara-Fläche gilt?
+    //
+    // ========================================================================
 
-    const float edgeThresholdLow = 0.025;
+    const float baseWaterEdge = 0.12F;
 
-    const float edgeThresholdHigh = 0.15;
+    const float baseWaterInterior = 0.30F;
+
+    const float edgeThreshold = 0.055F;
 
 
     uint textureWidth;
@@ -236,25 +333,9 @@ float PSMain(VertexOutput input) : SV_TARGET
     int2 textureSize;
     int2 pixelPosition;
 
+    float3 centerColor;
 
-    float3 colorCenter;
-
-    float3 colorNorth;
-    float3 colorEast;
-    float3 colorSouth;
-    float3 colorWest;
-
-
-    float differenceNorth;
-    float differenceEast;
-    float differenceSouth;
-    float differenceWest;
-
-    float maximumDifference;
-
-    float edgeMask;
-
-    float waterVariation;
+    float distanceFactor;
 
     float water;
 
@@ -263,84 +344,182 @@ float PSMain(VertexOutput input) : SV_TARGET
     // Texturdimensionen
     // ========================================================================
 
-    kuwaharaTexture.GetDimensions(textureWidth, textureHeight);
-    
-    textureSize = int2(textureWidth, textureHeight);
-    
-    pixelPosition = int2(input.position.xy);
+    kuwaharaTexture.GetDimensions(
+        textureWidth,
+        textureHeight
+    );
+
+
+    textureSize =
+        int2(
+            textureWidth,
+            textureHeight
+        );
+
+
+    pixelPosition =
+        int2(
+            input.position.xy
+        );
 
 
     // ========================================================================
-    // Kuwahara-Farben lesen
+    // Ausgangsfarbe
     // ========================================================================
 
-    colorCenter = ReadKuwaharaColor(pixelPosition, textureSize);
-    
-    colorNorth =  ReadKuwaharaColor(pixelPosition + int2(0, -edgeSampleDistance), textureSize);
-    colorEast =   ReadKuwaharaColor(pixelPosition + int2(edgeSampleDistance, 0), textureSize);
-    colorSouth =  ReadKuwaharaColor(pixelPosition + int2(0, edgeSampleDistance), textureSize);
-    colorWest =   ReadKuwaharaColor(pixelPosition + int2(-edgeSampleDistance, 0), textureSize);
-
-    // ========================================================================
-    // Lokale Farbunterschiede bestimmen
-    // ========================================================================
-
-    differenceNorth = CalculateColorDifference(colorCenter, colorNorth);
-    differenceEast =  CalculateColorDifference(colorCenter, colorEast);
-    differenceSouth = CalculateColorDifference(colorCenter, colorSouth);
-    differenceWest =  CalculateColorDifference(colorCenter, colorWest);
-    
-    // ------------------------------------------------------------------------
-    // Uns interessiert zunächst die stärkste lokale Grenze.
-    //
-    // Dadurch reagiert die WaterMap auch dann deutlich, wenn beispielsweise
-    // nur östlich des Pixels eine Kuwahara-Farbgrenze liegt.
-    // ------------------------------------------------------------------------
-
-    maximumDifference = max(max(differenceNorth, differenceEast), max(differenceSouth, differenceWest));
+    centerColor =
+        ReadKuwaharaColor(
+            pixelPosition,
+            textureSize
+        );
 
 
     // ========================================================================
-    // EdgeMask
-    // ========================================================================
-
-    edgeMask = smoothstep(edgeThresholdLow, edgeThresholdHigh, maximumDifference);
-
-
-    // ========================================================================
-    // Natürliche Grundvariation
-    // ========================================================================
-
-    waterVariation = CalculateWaterVariation(pixelPosition);
-
-
-    // ========================================================================
-    // Initialer Wasserstand
+    // Multi-Scale-Distanzsuche
     // ========================================================================
     //
-    //             Grundwasser
+    // WICHTIG:
     //
-    //                 +
+    // Die Reihenfolge ist Teil des Algorithmus.
     //
-    //         kleine räumliche Variation
+    // Sobald eine Grenze gefunden wurde, werden größere Entfernungen NICHT
+    // mehr berücksichtigt.
     //
-    //                 -
+    // Dadurch gilt:
     //
-    //          Senke an Kuwahara-Kanten
+    //      once edge, always edge
+    //
+    // und nicht mehr:
+    //
+    //      "Bei 32 Pixeln war eine Grenze,
+    //       aber bei 64 Pixeln sieht es zufällig wieder ähnlich aus."
+    //
+    //
+    // distanceFactor:
+    //
+    //      0.00 -> direkt an Grenze
+    //      ...
+    //      1.00 -> sehr tief innerhalb einer großen Fläche
     //
     // ========================================================================
 
-    water = baseWater + waterVariation * variationStrength - edgeMask * edgeDepth;
+    if (EdgeFoundAtDistance(
+            pixelPosition,
+            textureSize,
+            centerColor,
+            8,
+            edgeThreshold))
+    {
+        distanceFactor = 0.00F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 16,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.12F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 32,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.25F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 64,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.40F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 128,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.58F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 256,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.78F;
+    }
+    else if (EdgeFoundAtDistance(
+                 pixelPosition,
+                 textureSize,
+                 centerColor,
+                 512,
+                 edgeThreshold))
+    {
+        distanceFactor = 0.92F;
+    }
+    else
+    {
+        distanceFactor = 1.00F;
+    }
 
 
-    // ------------------------------------------------------------------------
-    // Sicherheitsgurt.
+    // ========================================================================
+    // Distanz -> Wasserpotential
+    // ========================================================================
     //
-    // Negative Wassermengen wollen wir selbstverständlich nicht erzeugen.
-    // Nach oben ist derzeit keine künstliche Begrenzung notwendig.
-    // ------------------------------------------------------------------------
+    // Große Kuwahara-Fläche:
+    //
+    //              hoher Wasserstand
+    //
+    //                      |
+    //                      v
+    //
+    //      Zentrum ---------------------- Zentrum
+    //                 \              /
+    //                  \            /
+    //                   \          /
+    //                    \        /
+    //                     \      /
+    //                      Kante
+    //
+    //
+    // Der PigmentFlowShader soll dadurch von den Flächenzentren in Richtung
+    // der Grenzen transportieren.
+    //
+    // smoothstep sorgt dafür, dass die ohnehin nur grob geschätzten
+    // Distanzstufen nicht vollständig linear in Wasserhöhe übersetzt werden.
+    // ========================================================================
 
-    water = max(water, 0.0);
+    distanceFactor =
+        smoothstep(
+            0.0F,
+            1.0F,
+            distanceFactor
+        );
+
+
+    water =
+        lerp(
+            baseWaterEdge,
+            baseWaterInterior,
+            distanceFactor
+        );
+
+
+    // ========================================================================
+    // Sicherheitsgurt
+    // ========================================================================
+
+    water = max(water, 0.0F);
 
 
     return water;

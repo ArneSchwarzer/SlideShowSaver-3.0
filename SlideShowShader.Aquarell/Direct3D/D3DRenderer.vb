@@ -32,88 +32,98 @@ Friend Class D3DRenderer
     '---------------------------------
     ' D3D11-Grundsystem
     '---------------------------------
-
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext
     Private renderFeatureLevel As FeatureLevel
 
     '---------------------------------
-    ' Quellbild
+    ' Eingabebild
     '---------------------------------
-
     Private sourceTexture As ID3D11Texture2D
     Private sourceView As ID3D11ShaderResourceView
 
-    '---------------------------------
-    ' Privates RenderTarget
-    '---------------------------------
-
-    Private renderTargetTexture As ID3D11Texture2D
-    Private renderTargetView As ID3D11RenderTargetView
 
     '---------------------------------
-    ' CPU-Readback
+    ' Kuwahara
     '---------------------------------
+    Private kuwaharaTexture As ID3D11Texture2D
+    Private kuwaharaView As ID3D11ShaderResourceView
+    Private kuwaharaTargetView As ID3D11RenderTargetView
 
-    Private stagingTexture As ID3D11Texture2D
-
-    '---------------------------------
-    ' Copy-Shader
-    '---------------------------------
-
-    Private copyVertexShader As ID3D11VertexShader
-    Private copyPixelShader As ID3D11PixelShader
 
     '---------------------------------
-    ' Kuwahara-Shader
+    ' Region Distance
     '---------------------------------
+    Private regionDistanceTexture As ID3D11Texture2D
+    Private regionDistanceView As ID3D11ShaderResourceView
+    Private regionDistanceTargetView As ID3D11RenderTargetView
 
-    Private kuwaharaVertexShader As ID3D11VertexShader
-    Private kuwaharaPixelShader As ID3D11PixelShader
+    Private sourceRegionSeedTexture As ID3D11Texture2D
+    Private sourceRegionSeedView As ID3D11ShaderResourceView
+    Private sourceRegionSeedTargetView As ID3D11RenderTargetView
 
-    '---------------------------------
-    ' Pigment-Initializer
-    '---------------------------------
+    Private targetRegionSeedTexture As ID3D11Texture2D
+    Private targetRegionSeedView As ID3D11ShaderResourceView
+    Private targetRegionSeedTargetView As ID3D11RenderTargetView
 
-    Private pigmentInitializerVertexShader As ID3D11VertexShader
-    Private pigmentInitializerPixelShader As ID3D11PixelShader
-
-    '---------------------------------
-    ' Pigmentfluss
-    '---------------------------------
-
-    Private pigmentFlowVertexShader As ID3D11VertexShader
-    Private pigmentFlowPixelShader As ID3D11PixelShader
-
-    Private pigmentFlowConstantBuffer As ID3D11Buffer
 
     '---------------------------------
-    ' Pigmentdarstellung
+    ' Papierzustand
     '---------------------------------
+    Private paperTexture As ID3D11Texture2D
+    Private paperView As ID3D11ShaderResourceView
+    Private paperTargetView As ID3D11RenderTargetView
 
-    Private pigmentDisplayVertexShader As ID3D11VertexShader
-    Private pigmentDisplayPixelShader As ID3D11PixelShader
-
-    Private pigmentDisplayConstantBuffer As ID3D11Buffer
-
-    '---------------------------------
-    ' Wasser-Initializer
-    '---------------------------------
-
-    Private waterInitializerVertexShader As ID3D11VertexShader
-    Private waterInitializerPixelShader As ID3D11PixelShader
 
     '---------------------------------
-    ' Wasserfluss
+    ' Wasserzustand - Pressure
     '---------------------------------
+    Private sourcePressureTexture As ID3D11Texture2D
+    Private sourcePressureView As ID3D11ShaderResourceView
+    Private sourcePressureTargetView As ID3D11RenderTargetView
 
-    Private waterFlowVertexShader As ID3D11VertexShader
-    Private waterFlowPixelShader As ID3D11PixelShader
+    Private targetPressureTexture As ID3D11Texture2D
+    Private targetPressureView As ID3D11ShaderResourceView
+    Private targetPressureTargetView As ID3D11RenderTargetView
 
-    Private waterFlowConstantBuffer As ID3D11Buffer
 
     '---------------------------------
-    ' Texturen für Simulation
+    ' Wasserzustand - Velocity
+    '---------------------------------
+    Private sourceVelocityTexture As ID3D11Texture2D
+    Private sourceVelocityView As ID3D11ShaderResourceView
+    Private sourceVelocityTargetView As ID3D11RenderTargetView
+
+    Private targetVelocityTexture As ID3D11Texture2D
+    Private targetVelocityView As ID3D11ShaderResourceView
+    Private targetVelocityTargetView As ID3D11RenderTargetView
+
+
+    '---------------------------------
+    ' Pigmentzustand - Suspension
+    '---------------------------------
+    Private sourcePigmentSuspensionTexture As ID3D11Texture2D
+    Private sourcePigmentSuspensionView As ID3D11ShaderResourceView
+    Private sourcePigmentSuspensionTargetView As ID3D11RenderTargetView
+
+    Private targetPigmentSuspensionTexture As ID3D11Texture2D
+    Private targetPigmentSuspensionView As ID3D11ShaderResourceView
+    Private targetPigmentSuspensionTargetView As ID3D11RenderTargetView
+
+
+    '---------------------------------
+    ' Pigmentzustand - Deposit
+    '---------------------------------
+    Private sourcePigmentDepositTexture As ID3D11Texture2D
+    Private sourcePigmentDepositView As ID3D11ShaderResourceView
+    Private sourcePigmentDepositTargetView As ID3D11RenderTargetView
+
+    Private targetPigmentDepositTexture As ID3D11Texture2D
+    Private targetPigmentDepositView As ID3D11ShaderResourceView
+    Private targetPigmentDepositTargetView As ID3D11RenderTargetView
+
+    '---------------------------------
+    ' LEGACY - nach Umbau von RenderBild entfernen
     '---------------------------------
     Private sourceWaterTexture As ID3D11Texture2D
     Private sourceWaterView As ID3D11ShaderResourceView
@@ -123,35 +133,28 @@ Friend Class D3DRenderer
     Private targetWaterView As ID3D11ShaderResourceView
     Private targetWaterTargetView As ID3D11RenderTargetView
 
-    Private sourcePigmentTexture As ID3D11Texture2D
-    Private sourcePigmentView As ID3D11ShaderResourceView
-    Private sourcePigmentTargetView As ID3D11RenderTargetView
+    '---------------------------------
+    ' Ausgabe
+    '---------------------------------
+    Private renderTargetTexture As ID3D11Texture2D
+    Private renderTargetView As ID3D11RenderTargetView
 
-    Private targetPigmentTexture As ID3D11Texture2D
-    Private targetPigmentView As ID3D11ShaderResourceView
-    Private targetPigmentTargetView As ID3D11RenderTargetView
-
-    Private kuwaharaTexture As ID3D11Texture2D
-    Private kuwaharaView As ID3D11ShaderResourceView
-    Private kuwaharaTargetView As ID3D11RenderTargetView
+    Private stagingTexture As ID3D11Texture2D
 
     '---------------------------------
     'Shader allgemein
     '---------------------------------
-
     Private renderSampler As ID3D11SamplerState
 
     '---------------------------------
     ' Dimensionen
     '---------------------------------
-
     Private renderBreite As Integer
     Private renderHoehe As Integer
 
     '---------------------------------
     ' Lifecycle
     '---------------------------------
-
     Private wurdeBereinigt As Boolean
     Private istInitialisiert As Boolean
 
@@ -279,88 +282,161 @@ Friend Class D3DRenderer
 
     Private Sub InitialisiereTexturen(baseImage As Image)
 
+        InitialisiereBildressourcen(baseImage)
+
+        InitialisiereRegionDistanceRessourcen()
+        InitialisierePapierressourcen()
+
+        InitialisiereWasserressourcen()
+        InitialisierePigmentressourcen()
+
+        InitialisiereAusgaberessourcen()
+
+        ' Nur während des Umbaus erforderlich.
+        InitialisiereLegacyWaterRessourcen()
+
+    End Sub
+
+    Private Sub InitialisiereBildressourcen(baseImage As Image)
+
         sourceTexture = Direct3DRessourceHandler.ErstelleTextureAusImage(renderDevice, baseImage)
+
+        If sourceTexture Is Nothing Then
+            Throw New InvalidOperationException(
+            "Die Source-Texture konnte nicht erzeugt werden.")
+        End If
 
         sourceView = renderDevice.CreateShaderResourceView(sourceTexture)
 
-        kuwaharaTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
+        If sourceView Is Nothing Then
+            Throw New InvalidOperationException(
+            "Die Source-SRV konnte nicht erzeugt werden.")
+        End If
+
+
+        InitialisiereSimulationsRessource(kuwaharaTexture, kuwaharaView, kuwaharaTargetView, Format.B8G8R8A8_UNorm)
+
+    End Sub
+
+    Private Sub InitialisiereRegionDistanceRessourcen()
+
+        ' Ergebnis der Distance Transformation.
+        InitialisiereSimulationsRessource(regionDistanceTexture, regionDistanceView, regionDistanceTargetView,
+                                          Format.R16_Float)
+
+        ' Ping-Pong-Arbeitsfelder des Jump-Flood-Algorithmus.
+        '
+        ' R32G32_Float ist hier bewusst gewählt:
+        ' Wir speichern Pixelkoordinaten und wollen auch bei 4K keine
+        ' Half-Float-Quantisierung der Seed-Positionen.
+
+        InitialisiereSimulationsRessource(sourceRegionSeedTexture, sourceRegionSeedView,
+                                          sourceRegionSeedTargetView, Format.R32G32_Float)
+
+        InitialisiereSimulationsRessource(targetRegionSeedTexture, targetRegionSeedView,
+                                          targetRegionSeedTargetView, Format.R32G32_Float)
+
+    End Sub
+
+    Private Sub InitialisierePapierressourcen()
+
+        InitialisiereSimulationsRessource(paperTexture, paperView, paperTargetView, Format.R16_Float)
+
+    End Sub
+
+    Private Sub InitialisiereWasserressourcen()
+
+        '---------------------------------
+        ' Pressure p
+        '---------------------------------
+
+        InitialisiereSimulationsRessource(sourcePressureTexture, sourcePressureView, sourcePressureTargetView,
+                                          Format.R16_Float)
+
+        InitialisiereSimulationsRessource(targetPressureTexture, targetPressureView, targetPressureTargetView,
+                                          Format.R16_Float)
+
+        '---------------------------------
+        ' Velocity (u,v)
+        '---------------------------------
+
+        InitialisiereSimulationsRessource(sourceVelocityTexture, sourceVelocityView, sourceVelocityTargetView,
+                                          Format.R16G16_Float)
+
+        InitialisiereSimulationsRessource(targetVelocityTexture, targetVelocityView, targetVelocityTargetView,
+                                          Format.R16G16_Float)
+
+    End Sub
+
+    Private Sub InitialisierePigmentressourcen()
+
+        '---------------------------------
+        ' Suspension g
+        '---------------------------------
+
+        InitialisiereSimulationsRessource(sourcePigmentSuspensionTexture, sourcePigmentSuspensionView,
+                                          sourcePigmentSuspensionTargetView, Format.R16G16B16A16_Float)
+
+        InitialisiereSimulationsRessource(targetPigmentSuspensionTexture, targetPigmentSuspensionView,
+                                          targetPigmentSuspensionTargetView, Format.R16G16B16A16_Float)
+
+
+        '---------------------------------
+        ' Deposit d
+        '---------------------------------
+
+        InitialisiereSimulationsRessource(sourcePigmentDepositTexture, sourcePigmentDepositView,
+                                          sourcePigmentDepositTargetView, Format.R16G16B16A16_Float)
+
+        InitialisiereSimulationsRessource(targetPigmentDepositTexture, targetPigmentDepositView,
+                                          targetPigmentDepositTargetView, Format.R16G16B16A16_Float)
+
+    End Sub
+
+    Private Sub InitialisiereAusgaberessourcen()
+
+        renderTargetTexture =
+        Direct3DRessourceHandler.ErstelleRenderTargetTexture(
             renderDevice,
             renderBreite,
-            renderHoehe,
-            Format.B8G8R8A8_UNorm)
+            renderHoehe)
 
-        kuwaharaView = renderDevice.CreateShaderResourceView(kuwaharaTexture)
-        kuwaharaTargetView = renderDevice.CreateRenderTargetView(kuwaharaTexture)
-
-        sourceWaterTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
-            renderDevice,
-            renderBreite,
-            renderHoehe,
-            Format.R16_Float)
-
-        sourceWaterView = renderDevice.CreateShaderResourceView(sourceWaterTexture)
-        sourceWaterTargetView = renderDevice.CreateRenderTargetView(sourceWaterTexture)
-
-        targetWaterTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
-            renderDevice,
-            renderBreite,
-            renderHoehe,
-            Format.R16_Float)
-
-        targetWaterView = renderDevice.CreateShaderResourceView(targetWaterTexture)
-        targetWaterTargetView = renderDevice.CreateRenderTargetView(targetWaterTexture)
-
-        sourcePigmentTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
-            renderDevice,
-            renderBreite,
-            renderHoehe,
-            Format.R16G16B16A16_Float)
-
-        sourcePigmentView = renderDevice.CreateShaderResourceView(sourcePigmentTexture)
-        sourcePigmentTargetView = renderDevice.CreateRenderTargetView(sourcePigmentTexture)
-
-        targetPigmentTexture = Direct3DRessourceHandler.ErstelleSimulationsTexture(
-            renderDevice,
-            renderBreite,
-            renderHoehe,
-            Format.R16G16B16A16_Float)
-
-        targetPigmentView = renderDevice.CreateShaderResourceView(targetPigmentTexture)
-        targetPigmentTargetView = renderDevice.CreateRenderTargetView(targetPigmentTexture)
-
-        renderTargetTexture = Direct3DRessourceHandler.ErstelleRenderTargetTexture(renderDevice, renderBreite, renderHoehe)
+        If renderTargetTexture Is Nothing Then
+            Throw New InvalidOperationException("Die RenderTarget-Texture konnte nicht erzeugt werden.")
+        End If
 
         renderTargetView = renderDevice.CreateRenderTargetView(renderTargetTexture)
-
-        stagingTexture = Direct3DRessourceHandler.ErstelleStagingTexture(renderDevice, renderBreite, renderHoehe)
-
-        If kuwaharaView Is Nothing Then
-            Throw New InvalidOperationException("Der Kuwahara-View konnte nicht erzeugt werden.")
-        End If
-
-        If sourceWaterView Is Nothing Then
-            Throw New InvalidOperationException("Der SourceWater-View konnte nicht erzeugt werden.")
-        End If
-
-        If targetWaterView Is Nothing Then
-            Throw New InvalidOperationException("Der TargetWater-View konnte nicht erzeugt werden.")
-        End If
-
-        If sourcePigmentView Is Nothing Then
-            Throw New InvalidOperationException("Der SourcePigment-View konnte nicht erzeugt werden.")
-        End If
-
-        If targetPigmentView Is Nothing Then
-            Throw New InvalidOperationException("Der TargetPigment-View konnte nicht erzeugt werden.")
-        End If
-
-        If sourceView Is Nothing Then
-            Throw New InvalidOperationException("Die Source-SRV konnte nicht erzeugt werden.")
-        End If
 
         If renderTargetView Is Nothing Then
             Throw New InvalidOperationException("Die RenderTargetView konnte nicht erzeugt werden.")
         End If
+
+
+        stagingTexture =
+        Direct3DRessourceHandler.ErstelleStagingTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe)
+
+        If stagingTexture Is Nothing Then
+            Throw New InvalidOperationException("Die Staging-Texture konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereLegacyWaterRessourcen()
+
+        InitialisiereSimulationsRessource(
+        sourceWaterTexture,
+        sourceWaterView,
+        sourceWaterTargetView,
+        Format.R16_Float)
+
+        InitialisiereSimulationsRessource(
+        targetWaterTexture,
+        targetWaterView,
+        targetWaterTargetView,
+        Format.R16_Float)
 
     End Sub
 
@@ -483,6 +559,45 @@ Friend Class D3DRenderer
 
         If waterFlowPixelShader Is Nothing Then
             Throw New InvalidOperationException("Der WaterFlow-PixelShader konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub InitialisiereSimulationsRessource(ByRef texture As ID3D11Texture2D,
+                                              ByRef view As ID3D11ShaderResourceView,
+                                              ByRef targetView As ID3D11RenderTargetView,
+                                              format As Format)
+
+        texture =
+        Direct3DRessourceHandler.ErstelleSimulationsTexture(
+            renderDevice,
+            renderBreite,
+            renderHoehe,
+            format)
+
+        If texture Is Nothing Then
+            Throw New InvalidOperationException(
+            "Eine Simulations-Texture im Format " &
+            format.ToString() &
+            " konnte nicht erzeugt werden.")
+        End If
+
+        view = renderDevice.CreateShaderResourceView(texture)
+
+        If view Is Nothing Then
+            Throw New InvalidOperationException(
+            "Die ShaderResourceView einer Simulations-Texture im Format " &
+            format.ToString() &
+            " konnte nicht erzeugt werden.")
+        End If
+
+        targetView = renderDevice.CreateRenderTargetView(texture)
+
+        If targetView Is Nothing Then
+            Throw New InvalidOperationException(
+            "Die RenderTargetView einer Simulations-Texture im Format " &
+            format.ToString() &
+            " konnte nicht erzeugt werden.")
         End If
 
     End Sub
@@ -668,11 +783,11 @@ Friend Class D3DRenderer
             ' Erst DANACH werden beide Paare gemeinsam vertauscht.
             ' ============================================================
 
-            renderContext.OMSetRenderTargets(targetPigmentTargetView)
+            renderContext.OMSetRenderTargets(targetPigmentSuspensionTargetView)
             renderContext.VSSetShader(pigmentFlowVertexShader)
             renderContext.PSSetShader(pigmentFlowPixelShader)
             renderContext.PSSetConstantBuffer(0UI, pigmentFlowConstantBuffer)
-            renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+            renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
             renderContext.PSSetShaderResource(1UI, sourceWaterView)
 
             renderContext.Draw(3UI, 0UI)
@@ -707,17 +822,17 @@ Friend Class D3DRenderer
             ' PIGMENT PING-PONG
             ' ============================================================
 
-            tempTexture = sourcePigmentTexture
-            sourcePigmentTexture = targetPigmentTexture
-            targetPigmentTexture = tempTexture
+            tempTexture = sourcePigmentSuspensionTexture
+            sourcePigmentSuspensionTexture = targetPigmentSuspensionTexture
+            targetPigmentSuspensionTexture = tempTexture
 
-            tempView = sourcePigmentView
-            sourcePigmentView = targetPigmentView
-            targetPigmentView = tempView
+            tempView = sourcePigmentSuspensionView
+            sourcePigmentSuspensionView = targetPigmentSuspensionView
+            targetPigmentSuspensionView = tempView
 
-            tempTargetView = sourcePigmentTargetView
-            sourcePigmentTargetView = targetPigmentTargetView
-            targetPigmentTargetView = tempTargetView
+            tempTargetView = sourcePigmentSuspensionTargetView
+            sourcePigmentSuspensionTargetView = targetPigmentSuspensionTargetView
+            targetPigmentSuspensionTargetView = tempTargetView
 
         Next
 
@@ -758,7 +873,7 @@ Friend Class D3DRenderer
 
     End Sub
 
-    Friend Function RenderTestbild() As Bitmap
+    Friend Function RenderBild() As Bitmap
 
         Dim clearColor As Color4
 
@@ -810,7 +925,7 @@ Friend Class D3DRenderer
         '
         ' Für V0.1 startet die Pigmentmenge überall mit 1.0.
         ' ============================================================
-        renderContext.OMSetRenderTargets(sourcePigmentTargetView)
+        renderContext.OMSetRenderTargets(sourcePigmentSuspensionTargetView)
         renderContext.RSSetViewport(New Viewport(0.0F, 0.0F, CSng(renderBreite), CSng(renderHoehe), 0.0F, 1.0F))
         renderContext.VSSetShader(pigmentInitializerVertexShader)
         renderContext.PSSetShader(pigmentInitializerPixelShader)
@@ -926,7 +1041,7 @@ Friend Class D3DRenderer
         '' ============================================================
         'renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
         '                                         CSng(quadrantHoehe), 0.0F, 1.0F))
-        'renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+        'renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
 
         'renderContext.Draw(3UI, 0UI)
 
@@ -957,7 +1072,7 @@ Friend Class D3DRenderer
         '
         ' WICHTIG:
         '
-        ' sourcePigmentView enthält den INTERNEN Simulationszustand:
+        ' sourcePigmentSuspensionView enthält den INTERNEN Simulationszustand:
         '
         ' RGB = premultiplizierte Pigmentfarbe
         ' A   = Pigmentmenge
@@ -976,7 +1091,7 @@ Friend Class D3DRenderer
         renderContext.VSSetShader(pigmentDisplayVertexShader)
         renderContext.PSSetShader(pigmentDisplayPixelShader)
         renderContext.PSSetConstantBuffer(0UI, pigmentDisplayConstantBuffer)
-        renderContext.PSSetShaderResource(0UI, sourcePigmentView)
+        renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
@@ -1187,8 +1302,6 @@ Friend Class D3DRenderer
         renderBreite = 0
         renderHoehe = 0
 
-        ' Alle Bindings entfernen, bevor Ressourcen freigegeben werden.
-
         If renderContext IsNot Nothing Then
 
             renderContext.ClearState()
@@ -1196,71 +1309,142 @@ Friend Class D3DRenderer
 
         End If
 
-        '---------------------------------
-        ' Sampler
-        '---------------------------------
+
         Direct3DRessourceHandler.GebeFrei(renderSampler)
 
-        '---------------------------------
-        ' Shader Resource Views
-        '---------------------------------
-        Direct3DRessourceHandler.GebeFrei(sourceView)
+        GebeBildressourcenFrei()
+        GebeRegionDistanceRessourcenFrei()
+        GebePapierressourcenFrei()
+        GebeWasserressourcenFrei()
+        GebePigmentressourcenFrei()
+        GebeAusgaberessourcenFrei()
 
-        '---------------------------------
-        ' RenderTargetView
-        '---------------------------------
-        Direct3DRessourceHandler.GebeFrei(renderTargetView)
+        GebeLegacyWaterRessourcenFrei()
 
-        '---------------------------------
-        ' Shader Resource Views
-        '---------------------------------
-
-        Direct3DRessourceHandler.GebeFrei(sourceView)
-
-        Direct3DRessourceHandler.GebeFrei(kuwaharaView)
-
-        Direct3DRessourceHandler.GebeFrei(sourceWaterView)
-        Direct3DRessourceHandler.GebeFrei(targetWaterView)
-
-        Direct3DRessourceHandler.GebeFrei(sourcePigmentView)
-        Direct3DRessourceHandler.GebeFrei(targetPigmentView)
+        GebeShaderRessourcenFrei()
 
 
-        '---------------------------------
-        ' Render Target Views
-        '---------------------------------
+        If renderContext IsNot Nothing Then
 
-        Direct3DRessourceHandler.GebeFrei(renderTargetView)
+            renderContext.ClearState()
+            renderContext.Flush()
+
+            renderContext.Dispose()
+            renderContext = Nothing
+
+        End If
+
+
+        If renderDevice IsNot Nothing Then
+
+            renderDevice.Dispose()
+            renderDevice = Nothing
+
+        End If
+
+    End Sub
+
+    Private Sub GebeBildressourcenFrei()
 
         Direct3DRessourceHandler.GebeFrei(kuwaharaTargetView)
+        Direct3DRessourceHandler.GebeFrei(kuwaharaView)
 
-        Direct3DRessourceHandler.GebeFrei(sourceWaterTargetView)
-        Direct3DRessourceHandler.GebeFrei(targetWaterTargetView)
+        Direct3DRessourceHandler.GebeFrei(kuwaharaTexture)
 
-        Direct3DRessourceHandler.GebeFrei(sourcePigmentTargetView)
-        Direct3DRessourceHandler.GebeFrei(targetPigmentTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourceView)
+        Direct3DRessourceHandler.GebeFrei(sourceTexture)
+
+    End Sub
+
+    Private Sub GebeRegionDistanceRessourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(regionDistanceTargetView)
+        Direct3DRessourceHandler.GebeFrei(regionDistanceView)
+        Direct3DRessourceHandler.GebeFrei(regionDistanceTexture)
+
+        Direct3DRessourceHandler.GebeFrei(sourceRegionSeedTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourceRegionSeedView)
+        Direct3DRessourceHandler.GebeFrei(sourceRegionSeedTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetRegionSeedTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetRegionSeedView)
+        Direct3DRessourceHandler.GebeFrei(targetRegionSeedTexture)
+
+    End Sub
+
+    Private Sub GebePapierressourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(paperTargetView)
+        Direct3DRessourceHandler.GebeFrei(paperView)
+        Direct3DRessourceHandler.GebeFrei(paperTexture)
+
+    End Sub
+
+    Private Sub GebeWasserressourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(sourcePressureTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourcePressureView)
+        Direct3DRessourceHandler.GebeFrei(sourcePressureTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetPressureTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetPressureView)
+        Direct3DRessourceHandler.GebeFrei(targetPressureTexture)
 
 
-        '---------------------------------
-        ' Texturen
-        '---------------------------------
+        Direct3DRessourceHandler.GebeFrei(sourceVelocityTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourceVelocityView)
+        Direct3DRessourceHandler.GebeFrei(sourceVelocityTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetVelocityTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetVelocityView)
+        Direct3DRessourceHandler.GebeFrei(targetVelocityTexture)
+
+    End Sub
+
+    Private Sub GebePigmentressourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentSuspensionTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentSuspensionView)
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentSuspensionTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetPigmentSuspensionTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentSuspensionView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentSuspensionTexture)
+
+
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentDepositTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentDepositView)
+        Direct3DRessourceHandler.GebeFrei(sourcePigmentDepositTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetPigmentDepositTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentDepositView)
+        Direct3DRessourceHandler.GebeFrei(targetPigmentDepositTexture)
+
+    End Sub
+
+    Private Sub GebeAusgaberessourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(renderTargetView)
 
         Direct3DRessourceHandler.GebeFrei(stagingTexture)
         Direct3DRessourceHandler.GebeFrei(renderTargetTexture)
 
-        Direct3DRessourceHandler.GebeFrei(kuwaharaTexture)
+    End Sub
 
+    Private Sub GebeLegacyWaterRessourcenFrei()
+
+        Direct3DRessourceHandler.GebeFrei(sourceWaterTargetView)
+        Direct3DRessourceHandler.GebeFrei(sourceWaterView)
         Direct3DRessourceHandler.GebeFrei(sourceWaterTexture)
+
+        Direct3DRessourceHandler.GebeFrei(targetWaterTargetView)
+        Direct3DRessourceHandler.GebeFrei(targetWaterView)
         Direct3DRessourceHandler.GebeFrei(targetWaterTexture)
 
-        Direct3DRessourceHandler.GebeFrei(sourcePigmentTexture)
-        Direct3DRessourceHandler.GebeFrei(targetPigmentTexture)
+    End Sub
 
-        Direct3DRessourceHandler.GebeFrei(sourceTexture)
+    Private Sub GebeShaderRessourcenFrei()
 
-        '---------------------------------
-        ' Shader
-        '---------------------------------
         Direct3DRessourceHandler.GebeFrei(copyPixelShader)
         Direct3DRessourceHandler.GebeFrei(copyVertexShader)
 
@@ -1273,9 +1457,6 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(waterInitializerPixelShader)
         Direct3DRessourceHandler.GebeFrei(waterInitializerVertexShader)
 
-        '---------------------------------
-        ' Simulation
-        ' --------------------------------
         Direct3DRessourceHandler.GebeFrei(waterFlowConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(waterFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(waterFlowVertexShader)
@@ -1287,30 +1468,6 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentDisplayVertexShader)
-
-        '---------------------------------
-        ' Context
-        '---------------------------------
-        If renderContext IsNot Nothing Then
-
-            renderContext.ClearState()
-            renderContext.Flush()
-
-            renderContext.Dispose()
-            renderContext = Nothing
-
-        End If
-
-        '---------------------------------
-        ' Device
-        '---------------------------------
-
-        If renderDevice IsNot Nothing Then
-
-            renderDevice.Dispose()
-            renderDevice = Nothing
-
-        End If
 
     End Sub
 
