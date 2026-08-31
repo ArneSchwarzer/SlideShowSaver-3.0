@@ -29,12 +29,11 @@ Friend Class D3DRenderer
     Private Const REGION_DISTANCE_MODE_PROPAGATE As UInteger = 1UI
     Private Const REGION_DISTANCE_MODE_FINALIZE As UInteger = 2UI
     Private Const REGION_DISTANCE_MODE_DISPLAY As UInteger = 3UI
-
     Private Const REGION_DISTANCE_COLOR_THRESHOLD As Single = 0.15F
-
-    ' Reine Notbremse.
-    ' KEIN reguläres Abbruchkriterium.
+    ' Reine Notbremse. KEIN reguläres Abbruchkriterium.
     Private Const REGION_DISTANCE_MAX_SAFETY_PASSES As Integer = 8192
+
+    Private Const PRESSURE_DISTANCE_SCALE As Single = 64.0F
 
 #End Region
 
@@ -46,6 +45,8 @@ Friend Class D3DRenderer
     Private renderDevice As ID3D11Device
     Private renderContext As ID3D11DeviceContext
     Private renderFeatureLevel As FeatureLevel
+
+#Region "Texturen, Views und TargetViews"
 
     '---------------------------------
     ' Eingabebild
@@ -145,6 +146,10 @@ Friend Class D3DRenderer
 
     Private stagingTexture As ID3D11Texture2D
 
+#End Region
+
+#Region "Shader & Buffer"
+
     '---------------------------------
     ' Shader allgemein
     '---------------------------------
@@ -185,6 +190,14 @@ Friend Class D3DRenderer
     Private regionDistanceChangedCounterStagingBuffer As ID3D11Buffer
 
     '---------------------------------
+    ' Pressure Initializer Shader
+    '---------------------------------
+    Private pressureInitializerVertexShader As ID3D11VertexShader
+    Private pressureInitializerPixelShader As ID3D11PixelShader
+
+    Private pressureInitializerConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Pigment Initializer Shader
     '---------------------------------
     Private pigmentInitializerVertexShader As ID3D11VertexShader
@@ -223,6 +236,8 @@ Friend Class D3DRenderer
     Private pigmentDisplayPixelShader As ID3D11PixelShader
     Private pigmentDisplayConstantBuffer As ID3D11Buffer
 
+#End Region
+
     '---------------------------------
     ' Dimensionen
     '---------------------------------
@@ -247,6 +262,17 @@ Friend Class D3DRenderer
 
         Public regionColorThreshold As Single
         Public displayDistanceScale As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure PressureInitializerConstants
+
+        Public pressureDistanceScale As Single
+
+        Public reserve1 As Single
+        Public reserve2 As Single
+        Public reserve3 As Single
 
     End Structure
 
@@ -313,6 +339,7 @@ Friend Class D3DRenderer
         InitialisiereShader()
         InitialisiereSampler()
         InitialisiereRegionDistanceConstantBuffer()
+        InitialisierePressureInitializerConstantBuffer()
         InitialisiereWaterFlowConstantBuffer()
         InitialisierePigmentFlowConstantBuffer()
         InitialisierePigmentDisplayConstantBuffer()
@@ -522,6 +549,9 @@ Friend Class D3DRenderer
         Dim regionDistanceVertexShaderCode() As Byte
         Dim regionDistancePixelShaderCode() As Byte
 
+        Dim pressureInitializerVertexShaderCode() As Byte
+        Dim pressureInitializerPixelShaderCode() As Byte
+
         Dim pigmentInitializerVertexShaderCode() As Byte
         Dim pigmentInitializerPixelShaderCode() As Byte
 
@@ -549,6 +579,9 @@ Friend Class D3DRenderer
         regionDistanceVertexShaderCode = LadeShaderBytecode("RegionDistanceShaderVS.cso")
         regionDistancePixelShaderCode = LadeShaderBytecode("RegionDistanceShaderPS.cso")
 
+        pressureInitializerVertexShaderCode = LadeShaderBytecode("PressureInitializerShaderVS.cso")
+        pressureInitializerPixelShaderCode = LadeShaderBytecode("PressureInitializerShaderPS.cso")
+
         pigmentInitializerVertexShaderCode = LadeShaderBytecode("PigmentInitializerShaderVS.cso")
         pigmentInitializerPixelShaderCode = LadeShaderBytecode("PigmentInitializerShaderPS.cso")
 
@@ -575,6 +608,9 @@ Friend Class D3DRenderer
 
         regionDistanceVertexShader = renderDevice.CreateVertexShader(regionDistanceVertexShaderCode)
         regionDistancePixelShader = renderDevice.CreatePixelShader(regionDistancePixelShaderCode)
+
+        pressureInitializerVertexShader = renderDevice.CreateVertexShader(pressureInitializerVertexShaderCode)
+        pressureInitializerPixelShader = renderDevice.CreatePixelShader(pressureInitializerPixelShaderCode)
 
         pigmentInitializerVertexShader = renderDevice.CreateVertexShader(pigmentInitializerVertexShaderCode)
         pigmentInitializerPixelShader = renderDevice.CreatePixelShader(pigmentInitializerPixelShaderCode)
@@ -622,6 +658,15 @@ Friend Class D3DRenderer
         If regionDistancePixelShader Is Nothing Then
             Throw New InvalidOperationException("Der RegionDistance-PixelShader konnte nicht erzeugt werden.")
         End If
+
+        If pressureInitializerVertexShader Is Nothing Then
+            Throw New InvalidOperationException("Der Pressure-Initialisierungs-VertexShader konnte nicht erzeugt werden.")
+        End If
+
+        If pressureInitializerPixelShader Is Nothing Then
+            Throw New InvalidOperationException("Der Pressure-Initialisierungs-PixelShader konnte nicht erzeugt werden.")
+        End If
+
 
         If pigmentInitializerVertexShader Is Nothing Then
             Throw New InvalidOperationException("Der PigmentInitializer-VertexShader konnte nicht erzeugt werden.")
@@ -1100,6 +1145,60 @@ Friend Class D3DRenderer
 
 #End Region
 
+    Private Sub InitialisierePressureInitializerConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+
+        bufferGroesse = Marshal.SizeOf(GetType(PressureInitializerConstants))
+
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("PressureInitializerConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        pressureInitializerConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If pressureInitializerConstantBuffer Is Nothing Then
+
+            Throw New InvalidOperationException(
+            "Der PressureInitializer-ConstantBuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub AktualisierePressureInitializerConstantBuffer()
+
+        Dim pressureInitializerParameter As PressureInitializerConstants
+
+
+        pressureInitializerParameter.pressureDistanceScale = PRESSURE_DISTANCE_SCALE
+
+        pressureInitializerParameter.reserve1 = 0.0F
+        pressureInitializerParameter.reserve2 = 0.0F
+        pressureInitializerParameter.reserve3 = 0.0F
+
+
+        renderContext.UpdateSubresource(pressureInitializerParameter, pressureInitializerConstantBuffer)
+
+    End Sub
+
     Private Sub InitialisiereWaterFlowConstantBuffer()
 
         Dim bufferDescription As BufferDescription
@@ -1458,7 +1557,8 @@ Friend Class D3DRenderer
 
         InitialisierePapier()
 
-        InitialisiereLegacyWasserzustand()
+        InitialisierePressure()
+        InitialisiereVelocity()
 
     End Sub
 
@@ -1476,6 +1576,40 @@ Friend Class D3DRenderer
         renderContext.Draw(3UI, 0UI)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub InitialisierePressure()
+
+        AktualisierePressureInitializerConstantBuffer()
+
+        renderContext.OMSetRenderTargets(sourcePressureTargetView)
+
+        SetzeVollbildViewport()
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(pressureInitializerVertexShader)
+        renderContext.PSSetShader(pressureInitializerPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, pressureInitializerConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, regionDistanceView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub InitialisiereVelocity()
+
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, sourceVelocityTargetView, 0.0F, 0.0F, 0.0F, 0.0F)
+
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, targetVelocityTargetView, 0.0F, 0.0F, 0.0F, 0.0F)
 
     End Sub
 
@@ -1788,7 +1922,7 @@ Friend Class D3DRenderer
 
 #End Region
 
-#Region "Shader-Ressourcen"
+#Region "Shader Helperfunktionen"
 
     Private Shared Function LadeShaderBytecode(dateiname As String) As Byte()
 
@@ -1842,6 +1976,44 @@ Friend Class D3DRenderer
         Return daten
 
     End Function
+
+    Private Sub initialisiereShaderHelper(ByRef shadername As ID3D11VertexShader, shaderfilename As String, vertexGeneriren As Boolean, pixelGenerieren As Boolean, computeGenerieren As Boolean)
+
+        Dim vertexShaderCode() As Byte
+        Dim pixelShaderCode() As Byte
+        Dim computeShaderCode() As Byte
+
+        If vertexGeneriren Then
+            vertexShaderCode = LadeShaderBytecode(shaderfilename & "VS.cso")
+            shadername = renderDevice.CreateVertexShader(vertexShaderCode)
+
+            If copyVertexShader Is Nothing Then
+                Throw New InvalidOperationException("Der " & shaderfilename & "-VertexShader konnte nicht erzeugt werden.")
+            End If
+
+        End If
+
+        If pixelGenerieren Then
+            pixelShaderCode = LadeShaderBytecode(shaderfilename & "PS.cso")
+            shadername = renderDevice.CreateVertexShader(pixelShaderCode)
+
+            If copyVertexShader Is Nothing Then
+                Throw New InvalidOperationException("Der " & shaderfilename & "-PixelShader konnte nicht erzeugt werden.")
+            End If
+
+        End If
+
+        If computeGenerieren Then
+            computeShaderCode = LadeShaderBytecode(shaderfilename & "CS.cso")
+            shadername = renderDevice.CreateVertexShader(computeShaderCode)
+
+            If copyVertexShader Is Nothing Then
+                Throw New InvalidOperationException("Der " & shaderfilename & "-ComputeShader konnte nicht erzeugt werden.")
+            End If
+
+        End If
+
+    End Sub
 
 #End Region
 
@@ -2031,6 +2203,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(regionDistanceConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(regionDistancePixelShader)
         Direct3DRessourceHandler.GebeFrei(regionDistanceVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pressureInitializerConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(pressureInitializerPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pressureInitializerVertexShader)
 
     End Sub
 

@@ -18,6 +18,9 @@ del /Q PaperInitializerShaderPS.cso 2>nul
 del /Q RegionDistanceShaderVS.cso 2>nul
 del /Q RegionDistanceShaderPS.cso 2>nul
 
+del /Q PressureInitializerShaderVS.cso 2>nul
+del /Q PressureInitializerShaderPS.cso 2>nul
+
 del /Q WaterInitializerShaderVS.cso 2>nul
 del /Q WaterInitializerShaderPS.cso 2>nul
 
@@ -59,6 +62,12 @@ if errorlevel 1 goto error
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo RegionDistanceShaderPS.cso RegionDistanceShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo PressureInitializerShaderVS.cso PressureInitializerShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo PressureInitializerShaderPS.cso PressureInitializerShader.hlsl
 if errorlevel 1 goto error
 
 "%FXC%" /T vs_5_0 /E VSMain /Fo WaterInitializerShaderVS.cso WaterInitializerShader.hlsl

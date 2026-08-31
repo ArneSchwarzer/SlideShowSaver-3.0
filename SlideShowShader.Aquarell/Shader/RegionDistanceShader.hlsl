@@ -7,11 +7,13 @@
 //      Aus dem Kuwahara-Ergebnis eine geometrische Distanzkarte erzeugen,
 //      die später als Grundlage für die initiale WaterPressureMap dient.
 //
-// Neue Pipeline:
+// Pipeline:
 //
 //      Kuwahara
 //          |
 //      relevante Farbgrenzen erkennen
+//          |
+//      Non-Maximum-Surpression
 //          |
 //      Boundary Seeds
 //          |
