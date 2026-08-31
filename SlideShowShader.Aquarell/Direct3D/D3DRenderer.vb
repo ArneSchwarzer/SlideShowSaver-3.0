@@ -1977,41 +1977,41 @@ Friend Class D3DRenderer
 
     End Function
 
-    Private Sub initialisiereShaderHelper(ByRef shadername As ID3D11VertexShader, shaderfilename As String, vertexGeneriren As Boolean, pixelGenerieren As Boolean, computeGenerieren As Boolean)
+    Private Function InitialisiereShaderHelper(Of T As Class)(shaderFilename As String, shaderSuffix As String,
+                                                              shaderTypName As String,
+                                                              shaderErzeugen As Func(Of Byte(), T)) As T
 
-        Dim vertexShaderCode() As Byte
-        Dim pixelShaderCode() As Byte
-        Dim computeShaderCode() As Byte
+        Dim shaderCode() As Byte
+        Dim shader As T
 
-        If vertexGeneriren Then
-            vertexShaderCode = LadeShaderBytecode(shaderfilename & "VS.cso")
-            shadername = renderDevice.CreateVertexShader(vertexShaderCode)
+        shaderCode = LadeShaderBytecode(shaderFilename & shaderSuffix & ".cso")
 
-            If copyVertexShader Is Nothing Then
-                Throw New InvalidOperationException("Der " & shaderfilename & "-VertexShader konnte nicht erzeugt werden.")
-            End If
+        shader = shaderErzeugen(shaderCode)
 
-        End If
+        If shader Is Nothing Then
 
-        If pixelGenerieren Then
-            pixelShaderCode = LadeShaderBytecode(shaderfilename & "PS.cso")
-            shadername = renderDevice.CreateVertexShader(pixelShaderCode)
-
-            If copyVertexShader Is Nothing Then
-                Throw New InvalidOperationException("Der " & shaderfilename & "-PixelShader konnte nicht erzeugt werden.")
-            End If
+            Throw New InvalidOperationException("Der " & shaderFilename & "-" & shaderTypName &
+                                                " konnte nicht erzeugt werden.")
 
         End If
 
-        If computeGenerieren Then
-            computeShaderCode = LadeShaderBytecode(shaderfilename & "CS.cso")
-            shadername = renderDevice.CreateVertexShader(computeShaderCode)
+        Return shader
 
-            If copyVertexShader Is Nothing Then
-                Throw New InvalidOperationException("Der " & shaderfilename & "-ComputeShader konnte nicht erzeugt werden.")
-            End If
+    End Function
 
-        End If
+    Private Sub InitialisiereVertexPixelShader(shaderFilename As String, ByRef vertexShader As ID3D11VertexShader,
+                                               ByRef pixelShader As ID3D11PixelShader)
+
+        vertexShader = InitialisiereShaderHelper(shaderFilename, "VS", "VertexShader",
+            Function(shaderCode)
+                Return renderDevice.CreateVertexShader(shaderCode)
+            End Function)
+
+
+        pixelShader = InitialisiereShaderHelper(shaderFilename, "PS", "PixelShader",
+            Function(shaderCode)
+                Return renderDevice.CreatePixelShader(shaderCode)
+            End Function)
 
     End Sub
 
