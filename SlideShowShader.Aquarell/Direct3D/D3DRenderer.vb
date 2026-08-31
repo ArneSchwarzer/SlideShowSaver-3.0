@@ -33,7 +33,7 @@ Friend Class D3DRenderer
     Private Const REGION_DISTANCE_MODE_FINALIZE As UInteger = 4UI
     Private Const REGION_DISTANCE_MODE_DISPLAY As UInteger = 5UI
 
-    Private Const REGION_DISTANCE_COLOR_THRESHOLD As Single = 0.01F
+    Private Const REGION_DISTANCE_COLOR_THRESHOLD As Single = 0.15F
 
     ' Reine Notbremse.
     ' KEIN reguläres Abbruchkriterium.

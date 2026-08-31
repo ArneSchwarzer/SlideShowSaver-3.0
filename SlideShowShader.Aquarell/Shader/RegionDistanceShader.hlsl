@@ -2,57 +2,66 @@
 // RegionDistanceShader.hlsl
 // ============================================================================
 //
-// Erzeugt aus dem Kuwahara-Bild echte zusammenhängende Farbregionen
-// und berechnet anschließend für jedes Pixel die Entfernung zur nächsten
-// Regionsgrenze.
+// Aufgabe:
 //
-// Pipeline:
+//      Aus dem Kuwahara-Ergebnis eine geometrische Distanzkarte erzeugen,
+//      die später als Grundlage für die initiale WaterPressureMap dient.
 //
-//      MODE_REGION_INITIALIZE = 0
-//          Jedes Pixel startet als eigene Region.
+// Neue Pipeline:
 //
-//      MODE_REGION_GROW = 1
-//          Regionen wachsen deterministisch zusammen.
-//          Verglichen wird gegen den Repräsentanten der Kandidatenregion,
-//          NICHT bloß gegen den direkten Nachbarpixel.
-//
-//      MODE_BOUNDARY = 2
-//          Aus den stabilen Regions-Labels werden echte Grenz-Seeds erzeugt.
-//
-//      MODE_PROPAGATE = 3
-//          Jump-Flood / Relaxationsschritt der Distance Transformation.
-//
-//      MODE_FINALIZE = 4
-//          Seed-Koordinate in echte Pixeldistanz umwandeln.
-//
-//      MODE_DISPLAY = 5
-//          RegionDistanceMap als Graustufenbild visualisieren.
+//      Kuwahara
+//          |
+//      relevante Farbgrenzen erkennen
+//          |
+//      Boundary Seeds
+//          |
+//      Jump Flood / lokale Relaxation
+//          |
+//      echte Pixeldistanz zur nächsten Grenze
 //
 // ---------------------------------------------------------------------------
-// Region-Label-Texturen:
+// WICHTIG:
 //
-//      RG = Pixelkoordinate des Regionsrepräsentanten.
+// Die frühere iterative Regionssegmentierung über Region-Labels wird für
+// die eigentliche Grenzerkennung NICHT mehr verwendet.
+//
+// Stattdessen analysiert MODE_BOUNDARY das Kuwahara-Bild unmittelbar.
+//
+// Die Grenzerkennung arbeitet mehrskalig:
+//
+//      kleine Distanz  -> lokale Struktur
+//      mittlere Distanz -> eigentliche Kuwahara-Fläche
+//      große Distanz   -> stabile größere Farbgrenze
+//
+// Dadurch soll nicht jede kleine interne Kuwahara-Abstufung automatisch
+// eine neue Region erzeugen.
 //
 // ---------------------------------------------------------------------------
-// Seed-Texturen:
+// Diagnosefarben in MODE_DISPLAY:
 //
-//      RG = Pixelkoordinate des aktuell nächsten bekannten Grenzpixels.
+//      CYAN
+//          echter Boundary-Seed / Distanz praktisch 0
 //
-// Ungültiger Distance-Seed:
+//      MAGENTA
+//          kein gültiger Boundary-Seed angekommen
 //
-//      (-1, -1)
+//      GRAUSTUFEN
+//          gültige DistanceMap
 //
-// ---------------------------------------------------------------------------
-// ChangedCounter:
+//      GELB
+//          ungültiger/unbekannter Shader-Modus
 //
-//      RWStructuredBuffer<uint> auf register(u1)
-//
-// Wird sowohl für REGION_GROW als auch für PROPAGATE benutzt.
 // ============================================================================
 
 
 // ============================================================================
-// Konstanten
+// Modi
+// ============================================================================
+//
+// MODE_REGION_INITIALIZE und MODE_REGION_GROW bleiben vorerst erhalten,
+// damit die bestehende VB-Seite unverändert weiterarbeiten kann.
+//
+// Für die neue Boundary-Erkennung sind ihre Ergebnisse bedeutungslos.
 // ============================================================================
 
 static const uint MODE_REGION_INITIALIZE = 0;
@@ -62,7 +71,36 @@ static const uint MODE_PROPAGATE = 3;
 static const uint MODE_FINALIZE = 4;
 static const uint MODE_DISPLAY = 5;
 
+
+// ============================================================================
+// Allgemeine Konstanten
+// ============================================================================
+
 static const float INVALID_SEED = -1.0F;
+
+
+// ============================================================================
+// Boundary-Erkennung
+// ============================================================================
+//
+// Wir prüfen drei räumliche Skalen.
+//
+// Für natives 4K sind 4 / 8 / 16 Pixel zunächst ein sinnvoller
+// Ausgangspunkt.
+//
+// Die Gewichte bevorzugen die mittlere und große Skala.
+//
+// Das ist ABSICHTLICH keine physikalische Größe.
+// Wir wollen relevante gemalte Farbflächen aus Kuwahara erkennen.
+// ============================================================================
+
+static const int BOUNDARY_RADIUS_SMALL = 4;
+static const int BOUNDARY_RADIUS_MEDIUM = 8;
+static const int BOUNDARY_RADIUS_LARGE = 16;
+
+static const float BOUNDARY_WEIGHT_SMALL = 0.20F;
+static const float BOUNDARY_WEIGHT_MEDIUM = 0.35F;
+static const float BOUNDARY_WEIGHT_LARGE = 0.45F;
 
 
 // ============================================================================
@@ -75,15 +113,18 @@ static const float INVALID_SEED = -1.0F;
 //      Betriebsmodus.
 //
 // jumpStep
-//      Sprungweite der Distance-Propagation.
-//      Für Region-Growing derzeit unbenutzt.
+//      Sprungweite für Jump Flood / Relaxation.
 //
 // regionColorThreshold
-//      Maximale Farbdistanz zwischen einem Pixel und dem
-//      Repräsentanten einer Kandidatenregion.
+//      Jetzt:
+//
+//      Schwellenwert für die relevante mehrskalige Farbgradientenstärke.
+//
+//      Der Name bleibt vorerst erhalten, damit die VB-Seite nicht
+//      gleichzeitig geändert werden muss.
 //
 // displayDistanceScale
-//      Distanz, die auf dem Kontrollmonitor als Weiß dargestellt wird.
+//      Pixeldistanz, die im Kontrollmonitor Weiß ergibt.
 // ============================================================================
 
 cbuffer RegionDistanceConstants : register(b0)
@@ -109,9 +150,11 @@ Texture2D<float2> sourceSeedTexture : register(t1);
 // Fertige rohe Distanzkarte.
 Texture2D<float> regionDistanceTexture : register(t2);
 
-// Aktueller Region-Label-Zustand.
+// Legacy Region-Label-Zustand.
 //
-// RG = Pixelkoordinate des Regionsrepräsentanten.
+// Wird von der neuen Boundary-Erkennung nicht mehr benötigt.
+// Bleibt vorerst registriert, damit wir die VB-Seite erst nach erfolgreichem
+// Test aufräumen.
 Texture2D<float2> sourceRegionLabelTexture : register(t3);
 
 
@@ -119,8 +162,9 @@ Texture2D<float2> sourceRegionLabelTexture : register(t3);
 // Atomic Changed Counter
 // ============================================================================
 //
-// Da gleichzeitig EIN RenderTarget auf OM-Slot 0 gebunden ist,
-// beginnt der Pixelshader-UAV bei Slot 1.
+// Wird weiterhin für MODE_PROPAGATE benutzt.
+//
+// MODE_REGION_GROW erhöht ihn im Kompatibilitätsbetrieb NICHT mehr.
 // ============================================================================
 
 RWStructuredBuffer<uint> changedCounter : register(u1);
@@ -135,6 +179,7 @@ struct VSOutput
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD0;
 };
+
 
 VSOutput VSMain(uint vertexId : SV_VertexID)
 {
@@ -165,14 +210,16 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 
     output.texCoord = texCoord;
 
+
     return output;
 }
+
 
 // ============================================================================
 // Allgemeine Hilfsfunktionen
 // ============================================================================
 
-bool IsInsideTexture(int2 pixelPosition, int2 textureSize)
+bool IsInsideTexture(int2 pixelPosition, uint2 textureSize)
 {
     if (pixelPosition.x < 0)
     {
@@ -194,190 +241,377 @@ bool IsInsideTexture(int2 pixelPosition, int2 textureSize)
         return false;
     }
 
+
     return true;
 }
 
 
-float3 ReadKuwaharaColor(int2 pixelPosition)
+// ============================================================================
+// Kuwahara-Hilfsfunktionen
+// ============================================================================
+
+int2 ClampPixelPosition(int2 pixelPosition, uint2 textureSize)
 {
-    return kuwaharaTexture.Load(int3(pixelPosition, 0)).rgb;
+    int2 maximumPosition;
+    
+    maximumPosition = int2(int(textureSize.x) - 1, int(textureSize.y) - 1);
+
+    return clamp(pixelPosition, int2(0, 0), maximumPosition);
 }
 
 
-float CalculateColorDistanceSquared(float3 colorA, float3 colorB)
+float3 ReadKuwaharaColor(int2 pixelPosition, int2 textureSize)
+{
+    int2 clampedPosition;
+    
+    clampedPosition = ClampPixelPosition(pixelPosition, textureSize);
+
+
+    return kuwaharaTexture.Load(int3(clampedPosition, 0)).rgb;
+}
+
+
+float CalculateColorDistance(float3 colorA, float3 colorB)
 {
     float3 difference;
-
+    
     difference = colorA - colorB;
 
-    return dot(difference, difference);
+
+    return sqrt(dot(difference, difference));
 }
 
 
 // ============================================================================
-// Region-Label-Hilfsfunktionen
+// Boundary-Analyse einer einzelnen räumlichen Skala
+// ============================================================================
+//
+// Neben der Gradientenstärke bestimmen wir eine grobe Gradientenrichtung.
+//
+// Richtungen:
+//
+//      0 = horizontaler Gradient
+//          -> Grenze verläuft ungefähr vertikal
+//
+//      1 = vertikaler Gradient
+//          -> Grenze verläuft ungefähr horizontal
+//
+//      2 = Diagonale links-oben -> rechts-unten
+//
+//      3 = Diagonale rechts-oben -> links-unten
+//
+// Für die Non-Maximum Suppression genügt diese Quantisierung vollkommen.
+// Wir brauchen keine exakte Winkelbestimmung.
 // ============================================================================
 
-float2 ReadRegionLabel(int2 pixelPosition)
+struct BoundaryGradient
 {
-    return sourceRegionLabelTexture.Load(int3(pixelPosition, 0));
-}
+    float strength;
+    uint direction;
+};
 
 
-bool IsSameRegion(float2 regionA, float2 regionB)
+BoundaryGradient CalculateBoundaryGradientAtRadius(int2 pixelPosition, uint2 textureSize, int radius)
 {
-    return
-        regionA.x == regionB.x &&
-        regionA.y == regionB.y;
-}
+    BoundaryGradient result;
+
+    float3 colorLeft;
+    float3 colorRight;
+
+    float3 colorUp;
+    float3 colorDown;
+
+    float3 colorUpperLeft;
+    float3 colorUpperRight;
+
+    float3 colorLowerLeft;
+    float3 colorLowerRight;
+
+    float horizontalGradient;
+    float verticalGradient;
+
+    float diagonalGradientA;
+    float diagonalGradientB;
 
 
-// Deterministische Priorität.
-//
-// Der lexikographisch kleinere Regionsrepräsentant gewinnt:
-//
-//      zuerst kleineres Y,
-//      bei gleichem Y kleineres X.
-//
-// Dadurch kann der Region-Grow-Pass nicht zwischen gleichwertigen
-// Kandidaten hin- und herspringen.
+    colorLeft =       ReadKuwaharaColor(pixelPosition + int2(-radius, 0), textureSize);
+    colorRight =      ReadKuwaharaColor(pixelPosition + int2(radius, 0), textureSize);
+    colorUp =         ReadKuwaharaColor(pixelPosition + int2(0, -radius), textureSize);
+    colorDown =       ReadKuwaharaColor(pixelPosition + int2(0, radius), textureSize);
+    colorUpperLeft =  ReadKuwaharaColor(pixelPosition + int2(-radius, -radius), textureSize);
+    colorUpperRight = ReadKuwaharaColor(pixelPosition + int2(radius, -radius), textureSize);
+    colorLowerLeft =  ReadKuwaharaColor(pixelPosition + int2(-radius, radius), textureSize);
+    colorLowerRight = ReadKuwaharaColor(pixelPosition + int2(radius, radius), textureSize);
+    
+    horizontalGradient = CalculateColorDistance(colorLeft, colorRight);    
+    verticalGradient =   CalculateColorDistance(colorUp, colorDown);
+    diagonalGradientA =  CalculateColorDistance(colorUpperLeft, colorLowerRight);
+    diagonalGradientB =  CalculateColorDistance(colorUpperRight, colorLowerLeft);
 
-bool IsRegionSeedSmaller(float2 candidateSeed, float2 currentSeed)
-{
-    if (candidateSeed.y < currentSeed.y)
+
+    // ------------------------------------------------------------------------
+    // Stärkste Richtung bestimmen.
+    // ------------------------------------------------------------------------
+
+    result.strength = horizontalGradient;
+    result.direction = 0;
+
+
+    if (verticalGradient > result.strength)
     {
-        return true;
+        result.strength = verticalGradient;
+        result.direction = 1;
     }
 
-    if (candidateSeed.y > currentSeed.y)
+
+    if (diagonalGradientA > result.strength)
+    {
+        result.strength = diagonalGradientA;
+        result.direction = 2;
+    }
+
+
+    if (diagonalGradientB > result.strength)
+    {
+        result.strength = diagonalGradientB;
+        result.direction = 3;
+    }
+
+
+    return result;
+}
+
+
+// ============================================================================
+// Mehrskalige Boundary-Analyse
+// ============================================================================
+//
+// Die Stärke wird wie bisher aus drei räumlichen Skalen kombiniert.
+//
+// Für die NMS-Richtung verwenden wir diejenige einzelne Skala, die den
+// stärksten gewichteten Beitrag liefert.
+//
+// Dadurch richtet sich die Unterdrückung vorzugsweise nach der optisch
+// dominantesten Struktur.
+// ============================================================================
+
+BoundaryGradient CalculateMultiscaleBoundaryGradient(int2 pixelPosition, uint2 textureSize)
+{
+    BoundaryGradient gradientSmall;
+    BoundaryGradient gradientMedium;
+    BoundaryGradient gradientLarge;
+
+    BoundaryGradient result;
+
+    float weightedSmall;
+    float weightedMedium;
+    float weightedLarge;
+
+
+    gradientSmall =  CalculateBoundaryGradientAtRadius(pixelPosition, textureSize, BOUNDARY_RADIUS_SMALL);
+    gradientMedium = CalculateBoundaryGradientAtRadius(pixelPosition, textureSize, BOUNDARY_RADIUS_MEDIUM);
+    gradientLarge =  CalculateBoundaryGradientAtRadius(pixelPosition, textureSize, BOUNDARY_RADIUS_LARGE);
+    
+    weightedSmall =  gradientSmall.strength * BOUNDARY_WEIGHT_SMALL;
+    weightedMedium = gradientMedium.strength * BOUNDARY_WEIGHT_MEDIUM;
+    weightedLarge =  gradientLarge.strength * BOUNDARY_WEIGHT_LARGE;
+
+
+    // ------------------------------------------------------------------------
+    // Gesamtstärke bleibt die gewichtete Summe.
+    // ------------------------------------------------------------------------
+
+    result.strength = weightedSmall + weightedMedium + weightedLarge;
+
+
+    // ------------------------------------------------------------------------
+    // Richtung vom stärksten gewichteten Einzelbeitrag übernehmen.
+    // ------------------------------------------------------------------------
+
+    result.direction = gradientSmall.direction;
+
+
+    if (weightedMedium > weightedSmall)
+    {
+        result.direction = gradientMedium.direction;
+    }
+    
+    if (weightedLarge > max(weightedSmall, weightedMedium))
+    {
+        result.direction = gradientLarge.direction;
+    }
+
+
+    return result;
+}
+
+
+// ============================================================================
+// Nur Boundary-Stärke liefern
+//
+// Hilfsfunktion für die Non-Maximum Suppression.
+// ============================================================================
+
+float CalculateMultiscaleBoundaryStrength(int2 pixelPosition, uint2 textureSize)
+{
+    BoundaryGradient gradient;
+    
+    gradient = CalculateMultiscaleBoundaryGradient(pixelPosition, textureSize);
+    
+    return gradient.strength;
+}
+
+
+// ============================================================================
+// Non-Maximum Suppression
+// ============================================================================
+//
+// Problem der bisherigen Fassung:
+//
+// Eine starke Farbgrenze wird von vielen Pixeln gleichzeitig "gesehen".
+//
+// Beispiel:
+//
+//      0.08  0.16  0.31  0.48  0.55  0.44  0.26  0.11
+//
+// Bei Threshold 0.1 wurden daraus mehrere Boundary-Seeds:
+//
+//            X     X     X     X     X     X
+//
+// NMS behält nur das lokale Maximum entlang der Gradientenrichtung:
+//
+//                        X
+//
+// Dadurch wird aus einem breiten Cyan-Band eine dünne Boundary-Linie.
+// ============================================================================
+
+bool IsLocalBoundaryMaximum(int2 pixelPosition, uint2 textureSize,  BoundaryGradient centerGradient)
+{
+    int2 directionOffset;
+
+    int2 neighborPositionA;
+    int2 neighborPositionB;
+
+    float neighborStrengthA;
+    float neighborStrengthB;
+
+
+    // ------------------------------------------------------------------------
+    // Quantisierte Gradientenrichtung in Pixeloffset übersetzen.
+    // ------------------------------------------------------------------------
+
+    if (centerGradient.direction == 0)
+    {
+        directionOffset = int2(1, 0);
+    }
+    else if (centerGradient.direction == 1)
+    {
+        directionOffset = int2(0, 1);
+    }
+    else if (centerGradient.direction == 2)
+    {
+        directionOffset = int2(1, 1);
+    }
+    else
+    {
+        directionOffset = int2(1, -1);
+    }
+
+
+    neighborPositionA = pixelPosition - directionOffset;
+    neighborPositionB = pixelPosition + directionOffset;
+
+
+    // ------------------------------------------------------------------------
+    // Am Bildrand fehlt ggf. ein Nachbar.
+    //
+    // Dort behandeln wir die fehlende Seite als Stärke 0.
+    // ------------------------------------------------------------------------
+
+    neighborStrengthA = 0.0F;
+    neighborStrengthB = 0.0F;
+
+
+    if (IsInsideTexture(neighborPositionA, textureSize))
+    {
+        neighborStrengthA = CalculateMultiscaleBoundaryStrength(neighborPositionA, textureSize);
+    }
+
+
+    if (IsInsideTexture(neighborPositionB, textureSize))
+    {
+        neighborStrengthB = CalculateMultiscaleBoundaryStrength(neighborPositionB, textureSize);
+    }
+
+
+    // ------------------------------------------------------------------------
+    // Ein echtes lokales Maximum muss mindestens so stark sein wie beide
+    // Nachbarn entlang der Gradientenrichtung.
+    //
+    // Ein kleiner Epsilon-Versatz verhindert unnötige Instabilität bei
+    // nahezu identischen Float-Werten.
+    // ------------------------------------------------------------------------
+
+    return
+        centerGradient.strength + 0.000001F >= neighborStrengthA &&
+        centerGradient.strength + 0.000001F >= neighborStrengthB;
+}
+
+
+// ============================================================================
+// Finale Kuwahara-Boundary-Entscheidung
+// ============================================================================
+//
+// Reihenfolge:
+//
+//      1. Multiscale Gradient berechnen
+//      2. Threshold prüfen
+//      3. Non-Maximum Suppression
+//
+// WICHTIG:
+//
+// Der Threshold entscheidet weiterhin:
+//
+//      "Ist dieser Farbwechsel überhaupt relevant?"
+//
+// Die NMS entscheidet anschließend:
+//
+//      "Welcher Pixel innerhalb dieses Übergangs ist die eigentliche Grenze?"
+//
+// Damit müssen wir den Threshold NICHT künstlich erhöhen, nur um dicke
+// Boundary-Bänder loszuwerden.
+// ============================================================================
+
+bool IsKuwaharaBoundary(
+    int2 pixelPosition,
+    uint2 textureSize)
+{
+    BoundaryGradient centerGradient;
+    
+    centerGradient = CalculateMultiscaleBoundaryGradient(pixelPosition, textureSize);
+
+
+    // ------------------------------------------------------------------------
+    // Erst Relevanz prüfen.
+    // ------------------------------------------------------------------------
+
+    if (centerGradient.strength < regionColorThreshold)
     {
         return false;
     }
 
-    return candidateSeed.x < currentSeed.x;
-}
 
+    // ------------------------------------------------------------------------
+    // Danach dickes Band auf lokales Maximum ausdünnen.
+    // ------------------------------------------------------------------------
 
-// Prüft, ob ein benachbarter Regionsrepräsentant für das aktuelle
-// Pixel übernommen werden darf.
-
-void EvaluateRegionCandidate(int2 neighborPosition, uint2 textureSize, float3 currentPixelColor, 
-                             float thresholdSquared, inout float2 bestRegionSeed)
-{
-    float2 candidateRegionSeed;
-    int2 candidateRegionPosition;
-    float3 candidateRegionColor;
-    float colorDistanceSquared;
-    
-    if (!IsInsideTexture(neighborPosition, textureSize))
+    if (!IsLocalBoundaryMaximum(pixelPosition, textureSize, centerGradient))
     {
-        return;
+        return false;
     }
 
 
-    candidateRegionSeed = ReadRegionLabel(neighborPosition);
-    
-    // ------------------------------------------------------------
-    // Nur Kandidaten betrachten, die nach unserer deterministischen
-    // Ordnung überhaupt "kleiner" sind als die bisher beste Region.
-    // ------------------------------------------------------------
-
-    if (!IsRegionSeedSmaller(candidateRegionSeed, bestRegionSeed))
-    {
-        return;
-    }
-
-
-    candidateRegionPosition = int2(candidateRegionSeed);
-
-
-    if (!IsInsideTexture(candidateRegionPosition, textureSize))
-    {
-        return;
-    }
-
-
-    // ------------------------------------------------------------
-    // WICHTIG:
-    //
-    // Wir vergleichen NICHT:
-    //
-    //      aktueller Pixel <-> Nachbarpixel
-    //
-    // sondern:
-    //
-    //      aktueller Pixel <-> Repräsentant der Kandidatenregion
-    //
-    // Dadurch verhindern wir das schleichende Color-Chaining über
-    // viele kleine lokale Farbunterschiede.
-    // ------------------------------------------------------------
-
-    candidateRegionColor = ReadKuwaharaColor(candidateRegionPosition);
-
-    colorDistanceSquared = CalculateColorDistanceSquared(currentPixelColor, candidateRegionColor);
-    
-    if (colorDistanceSquared <= thresholdSquared)
-    {
-        bestRegionSeed = candidateRegionSeed;
-    }
-}
-
-
-// ============================================================================
-// Echte Regionsgrenze erkennen
-// ============================================================================
-//
-// Anders als die alte Version wird hier KEIN Farbunterschied mehr geprüft.
-//
-// Ein Pixel ist genau dann Regionsgrenze, wenn mindestens ein direkter
-// Nachbar zu einer anderen stabilen Region gehört.
-//
-// Auch der äußere Bildrand gilt als Grenze.
-// ============================================================================
-
-bool IsRegionBoundary(int2 pixelPosition, uint2 textureSize)
-{
-    float2 myRegion;
-    float2 neighborRegion;
-
-    int2 neighborPosition;
-
-    static const int2 neighborOffsets[8] =
-    {
-        int2(-1, -1),
-        int2(0, -1),
-        int2(1, -1),
-
-        int2(-1, 0),
-        int2(1, 0),
-
-        int2(-1, 1),
-        int2(0, 1),
-        int2(1, 1)
-    };
-
-
-    myRegion = ReadRegionLabel(pixelPosition);
-    
-    [unroll]
-    for (int neighborIndex = 0; neighborIndex < 8; neighborIndex++)
-    {
-        neighborPosition = pixelPosition + neighborOffsets[neighborIndex];
-        
-        if (!IsInsideTexture(neighborPosition, textureSize))
-        {
-            return true;
-        }
-        
-        neighborRegion = ReadRegionLabel(neighborPosition);
-        
-        if (!IsSameRegion(myRegion, neighborRegion))
-        {
-            return true;
-        }
-    }
-    
-    return false;
+    return true;
 }
 
 
@@ -387,9 +621,7 @@ bool IsRegionBoundary(int2 pixelPosition, uint2 textureSize)
 
 bool IsValidSeed(float2 seed)
 {
-    return
-        seed.x >= 0.0F &&
-        seed.y >= 0.0F;
+    return seed.x >= 0.0F && seed.y >= 0.0F;
 }
 
 
@@ -397,7 +629,9 @@ float CalculateSeedDistanceSquared(float2 pixelPosition, float2 seed)
 {
     float2 difference;
 
+
     difference = pixelPosition - seed;
+
 
     return dot(difference, difference);
 }
@@ -408,20 +642,24 @@ void EvaluateSeedCandidate(int2 candidatePosition, uint2 textureSize, float2 pix
 {
     float2 candidateSeed;
     float candidateDistanceSquared;
-    
+
+
     if (!IsInsideTexture(candidatePosition, textureSize))
     {
         return;
     }
-    
+
+
     candidateSeed = sourceSeedTexture.Load(int3(candidatePosition, 0));
 
     if (!IsValidSeed(candidateSeed))
     {
         return;
     }
-    
+
+
     candidateDistanceSquared = CalculateSeedDistanceSquared(pixelPosition, candidateSeed);
+
 
     if (candidateDistanceSquared < bestDistanceSquared)
     {
@@ -446,13 +684,6 @@ float4 PSMain(VSOutput input) : SV_TARGET
     int2 pixelPosition;
     float2 pixelPositionFloat;
 
-    float3 currentPixelColor;
-
-    float2 currentRegionSeed;
-    float2 bestRegionSeed;
-
-    float thresholdSquared;
-
     float2 currentSeed;
     float2 bestSeed;
 
@@ -466,32 +697,24 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     int step;
 
-// ------------------------------------------------------------------------
-// Pixelposition bestimmen.
-// ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // Pixelposition bestimmen.
+    // ------------------------------------------------------------------------
 
     pixelPosition = int2(input.position.xy);
-
+    
     pixelPositionFloat = float2(pixelPosition);
 
 
-// ------------------------------------------------------------------------
-// Texturdimensionen bestimmen.
-//
-// WICHTIG:
-//
-// Nicht jeder Shader-Modus hat kuwaharaTexture auf t0 gebunden.
-//
-// MODE_PROPAGATE arbeitet ausschließlich mit sourceSeedTexture auf t1.
-// Deshalb müssen dort die Dimensionen aus sourceSeedTexture gelesen
-// werden.
-//
-// MODE_DISPLAY arbeitet mit regionDistanceTexture auf t2.
-//
-// Die übrigen Modi verwenden kuwaharaTexture auf t0.
-// ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // Texturdimensionen bestimmen.
+    //
+    // Jeder Modus fragt genau die Ressource ab, die in diesem Modus
+    // tatsächlich gebunden ist.
+    // ------------------------------------------------------------------------
 
-    if (mode == MODE_PROPAGATE)
+    if (mode == MODE_PROPAGATE || mode == MODE_FINALIZE)
     {
         sourceSeedTexture.GetDimensions(textureWidth, textureHeight);
     }
@@ -507,12 +730,15 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     textureSize = uint2(textureWidth, textureHeight);
 
+
     // ========================================================================
     // MODE 0
-    // Region Labels initialisieren
+    // Legacy-Kompatibilität
     //
-    // Jedes Pixel startet als eigene Region.
-    // Der Repräsentant ist zunächst die eigene Pixelkoordinate.
+    // Die VB-Seite initialisiert momentan weiterhin Region-Labels.
+    // Diese Labels werden von der neuen Boundary-Erkennung nicht mehr benutzt.
+    //
+    // Wir schreiben deshalb weiterhin die eigene Pixelposition hinein.
     // ========================================================================
 
     if (mode == MODE_REGION_INITIALIZE)
@@ -523,102 +749,31 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     // ========================================================================
     // MODE 1
-    // Regionen wachsen lassen
+    // Legacy-Kompatibilität
+    //
+    // Kein Region-Growing mehr.
+    //
+    // Wir geben lediglich die eigene Pixelposition zurück und erhöhen
+    // ChangedCount NICHT.
+    //
+    // Dadurch beendet die bestehende VB-Schleife das Region-Growing nach
+    // genau einem Durchlauf.
     // ========================================================================
 
     if (mode == MODE_REGION_GROW)
     {
-        currentPixelColor = ReadKuwaharaColor(pixelPosition);
-
-        currentRegionSeed = ReadRegionLabel(pixelPosition);
-        
-        bestRegionSeed = currentRegionSeed;
-        
-        thresholdSquared = regionColorThreshold * regionColorThreshold;
-
-
-        // ------------------------------------------------------------
-        // Acht direkte Nachbarn prüfen.
-        // ------------------------------------------------------------
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(-1, -1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(0, -1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(1, -1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-        
-        EvaluateRegionCandidate(
-            pixelPosition + int2(-1, 0),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(1, 0),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-        
-        EvaluateRegionCandidate(
-            pixelPosition + int2(-1, 1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(0, 1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-        EvaluateRegionCandidate(
-            pixelPosition + int2(1, 1),
-            textureSize,
-            currentPixelColor,
-            thresholdSquared,
-            bestRegionSeed);
-
-
-        // ------------------------------------------------------------
-        // Nur bei echter Regionsänderung ChangedCount erhöhen.
-        // ------------------------------------------------------------
-
-        if (!IsSameRegion(bestRegionSeed, currentRegionSeed))
-        {
-            InterlockedAdd(changedCounter[0], 1, previousCounterValue);
-        }
-        
-        return float4(bestRegionSeed, 0.0F, 1.0F);
+        return float4(pixelPositionFloat, 0.0F, 1.0F);
     }
 
 
     // ========================================================================
     // MODE 2
-    // Aus den stabilen Regionen echte Boundary-Seeds erzeugen
+    // Relevante Kuwahara-Grenzen direkt in Boundary-Seeds umwandeln
     // ========================================================================
 
     if (mode == MODE_BOUNDARY)
     {
-        if (IsRegionBoundary(pixelPosition, textureSize))
+        if (IsKuwaharaBoundary(pixelPosition, textureSize))
         {
             return float4(pixelPositionFloat, 0.0F, 1.0F);
         }
@@ -630,7 +785,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     // ========================================================================
     // MODE 3
-    // Jump Flood / Relaxation
+    // Jump Flood / lokale Relaxation
     // ========================================================================
 
     if (mode == MODE_PROPAGATE)
@@ -638,22 +793,23 @@ float4 PSMain(VSOutput input) : SV_TARGET
         currentSeed = sourceSeedTexture.Load(int3(pixelPosition, 0));
         
         bestSeed = currentSeed;
-        
+
+
         if (IsValidSeed(currentSeed))
         {
             currentDistanceSquared = CalculateSeedDistanceSquared(pixelPositionFloat, currentSeed);
-
             bestDistanceSquared = currentDistanceSquared;
         }
         else
         {
             currentDistanceSquared = 3.402823466E+38F;
-
-            bestDistanceSquared = 3.402823466E+38F;
+            bestDistanceSquared =    3.402823466E+38F;
         }
-        
+
+
         step = max(int(jumpStep), 1);
-        
+
+
         EvaluateSeedCandidate(
             pixelPosition + int2(-step, -step),
             textureSize,
@@ -709,12 +865,14 @@ float4 PSMain(VSOutput input) : SV_TARGET
             pixelPositionFloat,
             bestSeed,
             bestDistanceSquared);
-        
+
+
         if (bestDistanceSquared + 0.0001F < currentDistanceSquared)
         {
             InterlockedAdd(changedCounter[0], 1, previousCounterValue);
         }
-        
+
+
         return float4(bestSeed, 0.0F, 1.0F);
     }
 
@@ -723,71 +881,30 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // MODE 4
     // Seed-Koordinate -> echte Pixeldistanz
     //
-    // Diagnose:
-    //
-    //      -1.0 = Zu diesem Pixel ist KEIN gültiger Grenz-Seed gelangt.
-    //
-    // regionDistanceTexture ist R32_FLOAT. Deshalb speichern wir hier
-    // bewusst keinen RGB-Testfarbwert. Die eigentliche Warnfarbe wird
-    // erst im MODE_DISPLAY aus diesem Sentinel erzeugt.
+    // -1 bedeutet:
+    // Kein gültiger Boundary-Seed hat dieses Pixel erreicht.
     // ========================================================================
 
     if (mode == MODE_FINALIZE)
     {
-        currentSeed =
-            sourceSeedTexture.Load(
-                int3(
-                    pixelPosition,
-                    0));
-
-
+        currentSeed = sourceSeedTexture.Load(int3(pixelPosition, 0));
+        
         if (!IsValidSeed(currentSeed))
         {
-            return
-                float4(
-                    -1.0F,
-                    0.0F,
-                    0.0F,
-                    1.0F);
+            return float4(-1.0F, 0.0F, 0.0F, 1.0F);
         }
 
 
-        finalDistance =
-            length(
-                pixelPositionFloat -
-                currentSeed);
+        finalDistance = length(pixelPositionFloat - currentSeed);
 
 
-        return
-            float4(
-                finalDistance,
-                0.0F,
-                0.0F,
-                1.0F);
+        return float4(finalDistance, 0.0F, 0.0F, 1.0F);
     }
 
 
     // ========================================================================
     // MODE 5
     // Diagnose-/Kontrollansicht
-    //
-    // Farbcode:
-    //
-    //      MAGENTA
-    //          Kein gültiger Distance-Seed angekommen.
-    //          regionDistanceTexture enthält -1.0.
-    //
-    //      CYAN
-    //          Exakter Grenzpixel bzw. praktisch Distanz 0.
-    //
-    //      GRAUSTUFEN
-    //          Gültige Distanz.
-    //          Schwarz = nahe an der Grenze
-    //          Weiß    = weit von der Grenze entfernt
-    //
-    // Falls ein unbekannter Mode ankommt:
-    //
-    //      GELB
     // ========================================================================
 
     if (mode == MODE_DISPLAY)
@@ -798,96 +915,30 @@ float4 PSMain(VSOutput input) : SV_TARGET
         int2 displayPixelPosition;
 
 
-        regionDistanceTexture.GetDimensions(
-            displayWidth,
-            displayHeight);
+        regionDistanceTexture.GetDimensions(displayWidth, displayHeight);
+        
+        displayPixelPosition = int2(saturate(input.texCoord) * float2(displayWidth - 1, displayHeight - 1));
+        
+        finalDistance = regionDistanceTexture.Load(int3(displayPixelPosition, 0));
 
 
-        displayPixelPosition =
-            int2(
-                saturate(input.texCoord) *
-                float2(
-                    displayWidth - 1,
-                    displayHeight - 1));
-
-
-        finalDistance =
-            regionDistanceTexture.Load(
-                int3(
-                    displayPixelPosition,
-                    0));
-
-
-        // ------------------------------------------------------------
-        // MAGENTA:
-        // Kein gültiger Seed hat dieses Pixel erreicht.
-        // ------------------------------------------------------------
-
-        if (finalDistance < 0.0F)
-        {
-            return
-                float4(
-                    1.0F,
-                    0.0F,
-                    1.0F,
-                    1.0F);
-        }
-
-
-        // ------------------------------------------------------------
-        // CYAN:
-        // Grenzpixel / Distanz praktisch Null.
-        //
-        // Damit sehen wir sofort, wo die tatsächlich erzeugten Seeds
-        // liegen und können sie von normalen dunklen Gradienten
-        // unterscheiden.
-        // ------------------------------------------------------------
-
-        if (finalDistance <= 0.5F)
-        {
-            return
-                float4(
-                    0.0F,
-                    1.0F,
-                    1.0F,
-                    1.0F);
-        }
-
-
-        // ------------------------------------------------------------
+        
+        // --------------------------------------------------------------------
         // Gültige Distanz:
-        // normale Graustufenanzeige.
-        // ------------------------------------------------------------
+        // Schwarz nahe der Grenze -> heller zum Flächeninneren.
+        // --------------------------------------------------------------------
 
-        displayValue =
-            saturate(
-                finalDistance /
-                max(
-                    displayDistanceScale,
-                    1.0F));
-
-
-        return
-            float4(
-                displayValue,
-                displayValue,
-                displayValue,
-                1.0F);
+        displayValue = saturate(finalDistance / max(displayDistanceScale, 1.0F));
+        
+        return float4(displayValue, displayValue, displayValue, 1.0F);
     }
 
 
     // ========================================================================
     // Sicherheitsnetz
     //
-    // GELB bedeutet:
-    // Ein unbekannter oder falsch gesetzter mode hat PSMain erreicht.
-    // Dieser Fall darf regulär niemals auftreten.
+    // GELB darf im regulären Betrieb niemals erscheinen.
     // ========================================================================
 
-    return
-        float4(
-            1.0F,
-            1.0F,
-            0.0F,
-            1.0F);
+    return float4(1.0F, 1.0F, 0.0F, 1.0F);
 }
