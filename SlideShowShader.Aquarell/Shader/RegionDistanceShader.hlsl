@@ -39,12 +39,6 @@
 // ---------------------------------------------------------------------------
 // Diagnosefarben in MODE_DISPLAY:
 //
-//      CYAN
-//          echter Boundary-Seed / Distanz praktisch 0
-//
-//      MAGENTA
-//          kein gültiger Boundary-Seed angekommen
-//
 //      GRAUSTUFEN
 //          gültige DistanceMap
 //
@@ -57,20 +51,11 @@
 // ============================================================================
 // Modi
 // ============================================================================
-//
-// MODE_REGION_INITIALIZE und MODE_REGION_GROW bleiben vorerst erhalten,
-// damit die bestehende VB-Seite unverändert weiterarbeiten kann.
-//
-// Für die neue Boundary-Erkennung sind ihre Ergebnisse bedeutungslos.
-// ============================================================================
 
-static const uint MODE_REGION_INITIALIZE = 0;
-static const uint MODE_REGION_GROW = 1;
-static const uint MODE_BOUNDARY = 2;
-static const uint MODE_PROPAGATE = 3;
-static const uint MODE_FINALIZE = 4;
-static const uint MODE_DISPLAY = 5;
-
+static const uint MODE_BOUNDARY = 0;
+static const uint MODE_PROPAGATE = 1;
+static const uint MODE_FINALIZE = 2;
+static const uint MODE_DISPLAY = 3;
 
 // ============================================================================
 // Allgemeine Konstanten
@@ -150,21 +135,12 @@ Texture2D<float2> sourceSeedTexture : register(t1);
 // Fertige rohe Distanzkarte.
 Texture2D<float> regionDistanceTexture : register(t2);
 
-// Legacy Region-Label-Zustand.
-//
-// Wird von der neuen Boundary-Erkennung nicht mehr benötigt.
-// Bleibt vorerst registriert, damit wir die VB-Seite erst nach erfolgreichem
-// Test aufräumen.
-Texture2D<float2> sourceRegionLabelTexture : register(t3);
-
-
 // ============================================================================
 // Atomic Changed Counter
 // ============================================================================
 //
-// Wird weiterhin für MODE_PROPAGATE benutzt.
-//
-// MODE_REGION_GROW erhöht ihn im Kompatibilitätsbetrieb NICHT mehr.
+// Wird von MODE_PROPAGATE verwendet, um während der lokalen
+// Relaxation festzustellen, ob noch Seed-Verbesserungen stattfinden.
 // ============================================================================
 
 RWStructuredBuffer<uint> changedCounter : register(u1);
@@ -582,9 +558,7 @@ bool IsLocalBoundaryMaximum(int2 pixelPosition, uint2 textureSize,  BoundaryGrad
 // Boundary-Bänder loszuwerden.
 // ============================================================================
 
-bool IsKuwaharaBoundary(
-    int2 pixelPosition,
-    uint2 textureSize)
+bool IsKuwaharaBoundary(int2 pixelPosition, uint2 textureSize)
 {
     BoundaryGradient centerGradient;
     
@@ -730,44 +704,9 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     textureSize = uint2(textureWidth, textureHeight);
 
-
+    
     // ========================================================================
     // MODE 0
-    // Legacy-Kompatibilität
-    //
-    // Die VB-Seite initialisiert momentan weiterhin Region-Labels.
-    // Diese Labels werden von der neuen Boundary-Erkennung nicht mehr benutzt.
-    //
-    // Wir schreiben deshalb weiterhin die eigene Pixelposition hinein.
-    // ========================================================================
-
-    if (mode == MODE_REGION_INITIALIZE)
-    {
-        return float4(pixelPositionFloat, 0.0F, 1.0F);
-    }
-
-
-    // ========================================================================
-    // MODE 1
-    // Legacy-Kompatibilität
-    //
-    // Kein Region-Growing mehr.
-    //
-    // Wir geben lediglich die eigene Pixelposition zurück und erhöhen
-    // ChangedCount NICHT.
-    //
-    // Dadurch beendet die bestehende VB-Schleife das Region-Growing nach
-    // genau einem Durchlauf.
-    // ========================================================================
-
-    if (mode == MODE_REGION_GROW)
-    {
-        return float4(pixelPositionFloat, 0.0F, 1.0F);
-    }
-
-
-    // ========================================================================
-    // MODE 2
     // Relevante Kuwahara-Grenzen direkt in Boundary-Seeds umwandeln
     // ========================================================================
 
@@ -784,7 +723,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
 
     // ========================================================================
-    // MODE 3
+    // MODE 1
     // Jump Flood / lokale Relaxation
     // ========================================================================
 
@@ -878,7 +817,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
 
     // ========================================================================
-    // MODE 4
+    // MODE 2
     // Seed-Koordinate -> echte Pixeldistanz
     //
     // -1 bedeutet:
@@ -903,7 +842,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
 
     // ========================================================================
-    // MODE 5
+    // MODE 3
     // Diagnose-/Kontrollansicht
     // ========================================================================
 
