@@ -58,6 +58,7 @@ Friend Class D3DRenderer
 
     Private Const PIGMENT_TRANSPORT_TIME_STEP As Single = 0.2F
     Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
+    Private Const PIGMENT_TRANSPORT_MIN_PRESSURE As Single = 0.0001F
 
 #End Region
 
@@ -357,9 +358,8 @@ Friend Class D3DRenderer
 
         Public timeStep As Single
         Public transportStrength As Single
-
+        Public minimumPressure As Single
         Public reserve1 As Single
-        Public reserve2 As Single
 
     End Structure
 
@@ -1291,9 +1291,8 @@ Friend Class D3DRenderer
 
         pigmentTransportParameter.timeStep = PIGMENT_TRANSPORT_TIME_STEP
         pigmentTransportParameter.transportStrength = PIGMENT_TRANSPORT_STRENGTH
+        pigmentTransportParameter.minimumPressure = PIGMENT_TRANSPORT_MIN_PRESSURE
         pigmentTransportParameter.reserve1 = 0.0F
-        pigmentTransportParameter.reserve2 = 0.0F
-
 
         renderContext.UpdateSubresource(pigmentTransportParameter, pigmentTransportConstantBuffer)
 
@@ -1410,33 +1409,69 @@ Friend Class D3DRenderer
 
         Dim i As Integer
 
-
         If iterationen <= 0 Then
             Exit Sub
         End If
 
-
         For i = 0 To iterationen - 1
 
             ' ============================================================
-            ' 1. Druck erzeugt Geschwindigkeit
+            ' 1. Druckgradient erzeugt Geschwindigkeit
+            '
+            ' sourcePressure
+            '        ↓
+            ' sourceVelocity
+            '
+            ' BerechneVelocityAusPressure() führt weiterhin seinen eigenen
+            ' Velocity-Ping-Pong durch.
             ' ============================================================
 
             BerechneVelocityAusPressure()
 
+
             ' ============================================================
-            ' 2. Geschwindigkeit transportiert Wasser / Pressure
+            ' 2. Wassertransport
+            '
+            ' sourcePressure + sourceVelocity
+            '                  ↓
+            '             targetPressure
+            '
+            ' Noch KEIN Swap.
             ' ============================================================
 
             BerechnePressureAusVelocity()
 
+
             ' ============================================================
-            ' 3. Dieselbe Geschwindigkeit transportiert Pigment
+            ' 3. Wassergekoppelter Pigmenttransport
+            '
+            ' sourcePigmentSuspension
+            ' sourceVelocity
+            ' sourcePressure
+            ' targetPressure
+            '
+            '          ↓
+            '
+            ' targetPigmentSuspension
+            '
+            ' Noch KEIN Swap.
             ' ============================================================
 
             BerechnePigmentTransport()
 
+
+            ' ============================================================
+            ' 4. Gemeinsamer Abschluss der Simulationszeitscheibe
+            '
+            ' Wasser und Pigment wechseln JETZT gleichzeitig von
+            ' Zustand n nach Zustand n + 1.
+            ' ============================================================
+
+            TauschePressureRessourcen()
+            TauschePigmentSuspensionRessourcen()
+
         Next
+
 
         ' ================================================================
         ' Pipeline sauber verlassen
@@ -1444,7 +1479,11 @@ Friend Class D3DRenderer
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetShaderResource(2UI, Nothing)
+        renderContext.PSSetShaderResource(3UI, Nothing)
+
         renderContext.PSSetConstantBuffer(0UI, Nothing)
+
         renderContext.PSSetShader(Nothing)
         renderContext.VSSetShader(Nothing)
 
@@ -1705,11 +1744,22 @@ Friend Class D3DRenderer
 
         AktualisierePressureFlowConstantBuffer(PRESSURE_FLOW_MODE_UPDATE)
 
-
         ' ================================================================
         ' sourcePressure + sourceVelocity
         '                  ↓
         '             targetPressure
+        '
+        ' WICHTIG:
+        '
+        ' Noch KEIN Pressure-Swap.
+        '
+        ' Der unmittelbar folgende Pigmenttransport benötigt gleichzeitig:
+        '
+        '     sourcePressure = Wasserzustand vor dem Transport
+        '     targetPressure = Wasserzustand nach dem Transport
+        '
+        ' Erst nachdem auch das Pigment berechnet wurde, werden Pressure
+        ' und Pigment gemeinsam vertauscht.
         ' ================================================================
 
         renderContext.OMSetRenderTargets(targetPressureTargetView)
@@ -1732,9 +1782,13 @@ Friend Class D3DRenderer
         renderContext.PSSetShaderResource(1UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
 
+
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-        TauschePressureRessourcen()
+
+        ' ================================================================
+        ' KEIN TauschePressureRessourcen() an dieser Stelle!
+        ' ================================================================
 
     End Sub
 
@@ -1765,9 +1819,25 @@ Friend Class D3DRenderer
 
 
         ' ================================================================
-        ' sourcePigmentSuspension + sourceVelocity
-        '                  ↓
-        '       targetPigmentSuspension
+        ' Wassergekoppelter Pigmenttransport
+        '
+        ' Eingaben:
+        '
+        '     sourcePigmentSuspension = Pigmentkonzentration vor Transport
+        '     sourceVelocity          = aktuelles Geschwindigkeitsfeld
+        '     sourcePressure          = Wasserhöhe vor Transport
+        '     targetPressure          = Wasserhöhe nach Transport
+        '
+        '                           ↓
+        '
+        '     targetPigmentSuspension = Pigmentkonzentration nach Transport
+        '
+        ' WICHTIG:
+        '
+        ' Noch KEIN Pigment-Swap.
+        '
+        ' Pressure und Pigment werden erst nach Abschluss beider
+        ' Transportgleichungen gemeinsam vertauscht.
         ' ================================================================
 
         renderContext.OMSetRenderTargets(targetPigmentSuspensionTargetView)
@@ -1783,20 +1853,27 @@ Friend Class D3DRenderer
         renderContext.PSSetConstantBuffer(0UI, pigmentTransportConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
         renderContext.PSSetShaderResource(1UI, sourceVelocityView)
+        renderContext.PSSetShaderResource(2UI, sourcePressureView)
+        renderContext.PSSetShaderResource(3UI, targetPressureView)
 
         renderContext.Draw(3UI, 0UI)
 
         ' ================================================================
-        ' Pipeline lösen
+        ' Pipeline vollständig lösen
         ' ================================================================
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetShaderResource(2UI, Nothing)
+        renderContext.PSSetShaderResource(3UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
-        TauschePigmentSuspensionRessourcen()
+
+        ' ================================================================
+        ' KEIN TauschePigmentSuspensionRessourcen() hier!
+        ' ================================================================
 
     End Sub
 
