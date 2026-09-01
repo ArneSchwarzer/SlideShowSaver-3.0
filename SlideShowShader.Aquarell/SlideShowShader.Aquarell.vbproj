@@ -207,6 +207,8 @@
     <EmbeddedResource Include="Shader\VelocityShaderVS.cso" />
     <EmbeddedResource Include="Shader\PressureFlowShaderPS.cso" />
     <EmbeddedResource Include="Shader\PressureFlowShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PigmentTransportShaderPS.cso" />
+    <EmbeddedResource Include="Shader\PigmentTransportShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
@@ -241,6 +243,7 @@
     <Content Include="Shader\PressureFlowShader.hlsl" />
     <Content Include="Shader\PressureInitializerShader.hlsl" />
     <Content Include="Shader\RegionDistanceShader.hlsl" />
+    <Content Include="Shader\PigmentTransportShader.hlsl" />
     <Content Include="Shader\VelocityShader.hlsl" />
     <Content Include="Shader\WaterFlowShader.hlsl" />
     <Content Include="Shader\WaterInitializerShader.hlsl" />

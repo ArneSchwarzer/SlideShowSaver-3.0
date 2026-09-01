@@ -49,7 +49,10 @@ Friend Class D3DRenderer
     Private Const PRESSURE_FLOW_MAX_PRESSURE As Single = 2.0F
     Private Const PRESSURE_FLOW_DISPLAY_SCALE As Single = 1.0F
 
-    Private Const TEST_CURTIS_ITERATIONEN As Integer = 128
+    Private Const TEST_CURTIS_ITERATIONEN As Integer = 16
+
+    Private Const PIGMENT_TRANSPORT_TIME_STEP As Single = 0.2F
+    Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
 
 #End Region
 
@@ -230,6 +233,14 @@ Friend Class D3DRenderer
     Private pressureFlowConstantBuffer As ID3D11Buffer
 
     '---------------------------------
+    ' Pigment Transport Shader
+    '---------------------------------
+    Private pigmentTransportVertexShader As ID3D11VertexShader
+    Private pigmentTransportPixelShader As ID3D11PixelShader
+
+    Private pigmentTransportConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Pigment Initializer Shader
     '---------------------------------
     Private pigmentInitializerVertexShader As ID3D11VertexShader
@@ -331,6 +342,17 @@ Friend Class D3DRenderer
     End Structure
 
     <StructLayout(LayoutKind.Sequential)>
+    Private Structure PigmentTransportConstants
+
+        Public timeStep As Single
+        Public transportStrength As Single
+
+        Public reserve1 As Single
+        Public reserve2 As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
     Private Structure WaterFlowConstants
 
         Public viscosity As Single
@@ -397,6 +419,9 @@ Friend Class D3DRenderer
         InitialisierePressureInitializerConstantBuffer()
         InitialisiereVelocityConstantBuffer()
         InitialisierePressureFlowConstantBuffer()
+        InitialisierePigmentTransportConstantBuffer()
+
+        'Legacy
         InitialisiereWaterFlowConstantBuffer()
         InitialisierePigmentFlowConstantBuffer()
         InitialisierePigmentDisplayConstantBuffer()
@@ -601,6 +626,9 @@ Friend Class D3DRenderer
         InitialisiereVertexPixelShader("PressureInitializerShader", pressureInitializerVertexShader, pressureInitializerPixelShader)
         InitialisiereVertexPixelShader("VelocityShader", velocityVertexShader, velocityPixelShader)
         InitialisiereVertexPixelShader("PressureFlowShader", pressureFlowVertexShader, pressureFlowPixelShader)
+        InitialisiereVertexPixelShader("PigmentTransportShader", pigmentTransportVertexShader, pigmentTransportPixelShader)
+
+        'Legacy
         InitialisiereVertexPixelShader("PigmentInitializerShader", pigmentInitializerVertexShader, pigmentInitializerPixelShader)
         InitialisiereVertexPixelShader("WaterInitializerShader", waterInitializerVertexShader, waterInitializerPixelShader)
         InitialisiereVertexPixelShader("WaterFlowShader", waterFlowVertexShader, waterFlowPixelShader)
@@ -1202,6 +1230,57 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub InitialisierePigmentTransportConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+
+        bufferGroesse = Marshal.SizeOf(GetType(PigmentTransportConstants))
+
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("PigmentTransportConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        pigmentTransportConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+
+        If pigmentTransportConstantBuffer Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentTransport-ConstantBuffer konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub AktualisierePigmentTransportConstantBuffer()
+
+        Dim pigmentTransportParameter As PigmentTransportConstants
+
+
+        pigmentTransportParameter.timeStep = PIGMENT_TRANSPORT_TIME_STEP
+        pigmentTransportParameter.transportStrength = PIGMENT_TRANSPORT_STRENGTH
+        pigmentTransportParameter.reserve1 = 0.0F
+        pigmentTransportParameter.reserve2 = 0.0F
+
+
+        renderContext.UpdateSubresource(pigmentTransportParameter, pigmentTransportConstantBuffer)
+
+    End Sub
+
     Private Sub InitialisiereWaterFlowConstantBuffer()
 
         Dim bufferDescription As BufferDescription
@@ -1327,15 +1406,19 @@ Friend Class D3DRenderer
 
             BerechneVelocityAusPressure()
 
-
             ' ============================================================
             ' 2. Geschwindigkeit transportiert Wasser / Pressure
             ' ============================================================
 
             BerechnePressureAusVelocity()
 
-        Next
+            ' ============================================================
+            ' 3. Dieselbe Geschwindigkeit transportiert Pigment
+            ' ============================================================
 
+            BerechnePigmentTransport()
+
+        Next
 
         ' ================================================================
         ' Pipeline sauber verlassen
@@ -1615,6 +1698,67 @@ Friend Class D3DRenderer
         tempTargetView = sourcePressureTargetView
         sourcePressureTargetView = targetPressureTargetView
         targetPressureTargetView = tempTargetView
+
+    End Sub
+
+    Private Sub BerechnePigmentTransport()
+
+        AktualisierePigmentTransportConstantBuffer()
+
+
+        ' ================================================================
+        ' sourcePigmentSuspension + sourceVelocity
+        '                  ↓
+        '       targetPigmentSuspension
+        ' ================================================================
+
+        renderContext.OMSetRenderTargets(targetPigmentSuspensionTargetView)
+
+        SetzeVollbildViewport()
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(pigmentTransportVertexShader)
+        renderContext.PSSetShader(pigmentTransportPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, pigmentTransportConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
+        renderContext.PSSetShaderResource(1UI, sourceVelocityView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        ' ================================================================
+        ' Pipeline lösen
+        ' ================================================================
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+        TauschePigmentSuspensionRessourcen()
+
+    End Sub
+
+    Private Sub TauschePigmentSuspensionRessourcen()
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+        tempTexture = sourcePigmentSuspensionTexture
+        sourcePigmentSuspensionTexture = targetPigmentSuspensionTexture
+        targetPigmentSuspensionTexture = tempTexture
+
+        tempView = sourcePigmentSuspensionView
+        sourcePigmentSuspensionView = targetPigmentSuspensionView
+        targetPigmentSuspensionView = tempView
+
+        tempTargetView = sourcePigmentSuspensionTargetView
+        sourcePigmentSuspensionTargetView = targetPigmentSuspensionTargetView
+        targetPigmentSuspensionTargetView = tempTargetView
 
     End Sub
 
@@ -2388,6 +2532,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pressureFlowConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pressureFlowPixelShader)
         Direct3DRessourceHandler.GebeFrei(pressureFlowVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pigmentTransportConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(pigmentTransportPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pigmentTransportVertexShader)
 
     End Sub
 
