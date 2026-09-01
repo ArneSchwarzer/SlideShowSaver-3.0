@@ -42,6 +42,11 @@ Friend Class D3DRenderer
     Private Const VELOCITY_MAX As Single = 1.0F
     Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
 
+    Private Const VELOCITY_BASE_DAMPING As Single = 0.96F
+
+    Private Const VELOCITY_MIN_VISCOSITY As Single = 0.1F
+    Private Const VELOCITY_MAX_VISCOSITY As Single = 10000.0F
+
     Private Const PRESSURE_FLOW_MODE_UPDATE As UInteger = 0UI
     Private Const PRESSURE_FLOW_MODE_DISPLAY As UInteger = 1UI
 
@@ -327,6 +332,12 @@ Friend Class D3DRenderer
         Public pressureGradientStrength As Single
         Public maxVelocity As Single
         Public displayVelocityScale As Single
+
+        Public damping As Single
+        Public viscosity As Single
+
+        Public reserve1 As Single
+        Public reserve2 As Single
 
     End Structure
 
@@ -1137,10 +1148,10 @@ Friend Class D3DRenderer
         bufferGroesse = Marshal.SizeOf(GetType(VelocityConstants))
 
 
-        If bufferGroesse <> 16 Then
+        If bufferGroesse <> 32 Then
 
             Throw New InvalidOperationException("VelocityConstants besitzt eine unerwartete Größe. " &
-                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                "Erwartet: 32 Byte, tatsächlich: " & bufferGroesse.ToString() &
                                                 " Byte.")
 
         End If
@@ -1165,15 +1176,22 @@ Friend Class D3DRenderer
 
     End Sub
 
-    Private Sub AktualisiereVelocityConstantBuffer(mode As UInteger)
+    Private Sub AktualisiereVelocityConstantBuffer(mode As UInteger, viskositaet As Single)
 
         Dim velocityParameter As VelocityConstants
+        Dim damping As Single
 
+
+        damping = BerechneVelocityDamping(viskositaet)
 
         velocityParameter.mode = mode
         velocityParameter.pressureGradientStrength = VELOCITY_PRESSURE_GRADIENT_STRENGTH
         velocityParameter.maxVelocity = VELOCITY_MAX
         velocityParameter.displayVelocityScale = VELOCITY_DISPLAY_SCALE
+        velocityParameter.damping = damping
+        velocityParameter.viscosity = viskositaet
+        velocityParameter.reserve1 = 0.0F
+        velocityParameter.reserve2 = 0.0F
 
         renderContext.UpdateSubresource(velocityParameter, velocityConstantBuffer)
 
@@ -1575,8 +1593,7 @@ Friend Class D3DRenderer
 
     Private Sub BerechneVelocityAusPressure()
 
-        AktualisiereVelocityConstantBuffer(VELOCITY_MODE_UPDATE)
-
+        AktualisiereVelocityConstantBuffer(VELOCITY_MODE_UPDATE, TEST_VISKOSITAET)
 
         ' ================================================================
         ' sourcePressure + sourceVelocity
@@ -1621,6 +1638,47 @@ Friend Class D3DRenderer
         TauscheVelocityRessourcen()
 
     End Sub
+
+    Private Function BerechneVelocityDamping(viskositaet As Single) As Single
+
+        Dim begrenzteViskositaet As Single
+        Dim logViscosity As Single
+        Dim logMinimum As Single
+        Dim logMaximum As Single
+        Dim normierteViskositaet As Single
+
+        Dim damping As Single
+
+
+        begrenzteViskositaet = Math.Max(VELOCITY_MIN_VISCOSITY, Math.Min(VELOCITY_MAX_VISCOSITY, viskositaet))
+
+        logViscosity = CSng(Math.Log10(begrenzteViskositaet))
+
+        logMinimum = CSng(Math.Log10(VELOCITY_MIN_VISCOSITY))
+
+        logMaximum = CSng(Math.Log10(VELOCITY_MAX_VISCOSITY))
+
+
+        normierteViskositaet = (logViscosity - logMinimum) / (logMaximum - logMinimum)
+
+
+        ' ================================================================
+        ' Dünnflüssig:
+        '     wenig zusätzliche Dämpfung
+        '
+        ' Dickflüssig:
+        '     deutlich stärkere Dämpfung
+        '
+        ' Bereich ungefähr:
+        '
+        '     0.985 ... 0.82
+        ' ================================================================
+
+        damping = 0.985F - normierteViskositaet * 0.165F
+
+        Return damping
+
+    End Function
 
     Private Sub TauscheVelocityRessourcen()
 

@@ -56,6 +56,12 @@ cbuffer VelocityConstants : register(b0)
     float pressureGradientStrength;
     float maxVelocity;
     float displayVelocityScale;
+
+    float damping;
+    float viscosity;
+
+    float reserve1;
+    float reserve2;
 };
 
 
@@ -199,8 +205,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
         //     Wasser bewegt sich vom hohen zum niedrigeren Druck.
         // --------------------------------------------------------------------
 
-        newVelocity = oldVelocity - pressureGradient * pressureGradientStrength;
-
+        newVelocity = oldVelocity * damping - pressureGradient * pressureGradientStrength;
 
         // --------------------------------------------------------------------
         // Notbremse für den ersten Curtis-PoC.
