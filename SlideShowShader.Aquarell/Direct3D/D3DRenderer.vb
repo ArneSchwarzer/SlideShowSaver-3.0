@@ -49,7 +49,7 @@ Friend Class D3DRenderer
     Private Const PRESSURE_FLOW_MAX_PRESSURE As Single = 2.0F
     Private Const PRESSURE_FLOW_DISPLAY_SCALE As Single = 1.0F
 
-    Private Const TEST_CURTIS_ITERATIONEN As Integer = 8
+    Private Const TEST_CURTIS_ITERATIONEN As Integer = 128
 
 #End Region
 

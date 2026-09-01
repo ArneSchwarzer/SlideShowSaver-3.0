@@ -205,8 +205,8 @@
     <EmbeddedResource Include="Shader\PressureInitializerShaderVS.cso" />
     <EmbeddedResource Include="Shader\VelocityShaderPS.cso" />
     <EmbeddedResource Include="Shader\VelocityShaderVS.cso" />
-    <Compile Include="Shader\PressureFlowShaderPS.cso" />
-    <Compile Include="Shader\PressureFlowShaderVS.cso" />
+    <EmbeddedResource Include="Shader\PressureFlowShaderPS.cso" />
+    <EmbeddedResource Include="Shader\PressureFlowShaderVS.cso" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideShowDirect3DInterop\SlideShowDirect3DInterop.csproj">
