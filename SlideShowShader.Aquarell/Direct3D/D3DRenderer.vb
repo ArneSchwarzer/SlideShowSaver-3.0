@@ -35,6 +35,22 @@ Friend Class D3DRenderer
 
     Private Const PRESSURE_DISTANCE_SCALE As Single = 64.0F
 
+    Private Const VELOCITY_MODE_UPDATE As UInteger = 0UI
+    Private Const VELOCITY_MODE_DISPLAY As UInteger = 1UI
+
+    Private Const VELOCITY_PRESSURE_GRADIENT_STRENGTH As Single = 8.0F
+    Private Const VELOCITY_MAX As Single = 1.0F
+    Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
+
+    Private Const PRESSURE_FLOW_MODE_UPDATE As UInteger = 0UI
+    Private Const PRESSURE_FLOW_MODE_DISPLAY As UInteger = 1UI
+
+    Private Const PRESSURE_FLOW_TIME_STEP As Single = 0.2F
+    Private Const PRESSURE_FLOW_MAX_PRESSURE As Single = 2.0F
+    Private Const PRESSURE_FLOW_DISPLAY_SCALE As Single = 1.0F
+
+    Private Const TEST_CURTIS_ITERATIONEN As Integer = 8
+
 #End Region
 
 #Region "Variablen"
@@ -198,6 +214,22 @@ Friend Class D3DRenderer
     Private pressureInitializerConstantBuffer As ID3D11Buffer
 
     '---------------------------------
+    ' Velocity Shader
+    '---------------------------------
+    Private velocityVertexShader As ID3D11VertexShader
+    Private velocityPixelShader As ID3D11PixelShader
+
+    Private velocityConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
+    ' Pressure Flow Shader
+    '---------------------------------
+    Private pressureFlowVertexShader As ID3D11VertexShader
+    Private pressureFlowPixelShader As ID3D11PixelShader
+
+    Private pressureFlowConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Pigment Initializer Shader
     '---------------------------------
     Private pigmentInitializerVertexShader As ID3D11VertexShader
@@ -277,6 +309,28 @@ Friend Class D3DRenderer
     End Structure
 
     <StructLayout(LayoutKind.Sequential)>
+    Private Structure VelocityConstants
+
+        Public mode As UInteger
+
+        Public pressureGradientStrength As Single
+        Public maxVelocity As Single
+        Public displayVelocityScale As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
+    Private Structure PressureFlowConstants
+
+        Public mode As UInteger
+
+        Public timeStep As Single
+        Public maxPressure As Single
+        Public displayPressureScale As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
     Private Structure WaterFlowConstants
 
         Public viscosity As Single
@@ -338,8 +392,11 @@ Friend Class D3DRenderer
         InitialisiereTexturen(baseImage)
         InitialisiereShader()
         InitialisiereSampler()
+
         InitialisiereRegionDistanceConstantBuffer()
         InitialisierePressureInitializerConstantBuffer()
+        InitialisiereVelocityConstantBuffer()
+        InitialisierePressureFlowConstantBuffer()
         InitialisiereWaterFlowConstantBuffer()
         InitialisierePigmentFlowConstantBuffer()
         InitialisierePigmentDisplayConstantBuffer()
@@ -542,6 +599,8 @@ Friend Class D3DRenderer
         InitialisiereVertexPixelShader("PaperInitializerShader", paperInitializerVertexShader, paperInitializerPixelShader)
         InitialisiereVertexPixelShader("RegionDistanceShader", regionDistanceVertexShader, regionDistancePixelShader)
         InitialisiereVertexPixelShader("PressureInitializerShader", pressureInitializerVertexShader, pressureInitializerPixelShader)
+        InitialisiereVertexPixelShader("VelocityShader", velocityVertexShader, velocityPixelShader)
+        InitialisiereVertexPixelShader("PressureFlowShader", pressureFlowVertexShader, pressureFlowPixelShader)
         InitialisiereVertexPixelShader("PigmentInitializerShader", pigmentInitializerVertexShader, pigmentInitializerPixelShader)
         InitialisiereVertexPixelShader("WaterInitializerShader", waterInitializerVertexShader, waterInitializerPixelShader)
         InitialisiereVertexPixelShader("WaterFlowShader", waterFlowVertexShader, waterFlowPixelShader)
@@ -671,55 +730,6 @@ Friend Class D3DRenderer
             "Die RegionDistance-ChangedCounter-UAV konnte nicht erzeugt werden.")
 
         End If
-
-    End Sub
-
-    Private Sub InitialisiereRegionDistanceConstantBuffer()
-
-        Dim bufferDescription As BufferDescription
-        Dim bufferGroesse As Integer
-
-        bufferGroesse = Marshal.SizeOf(GetType(RegionDistanceConstants))
-
-        If bufferGroesse <> 16 Then
-
-            Throw New InvalidOperationException("RegionDistanceConstants besitzt eine unerwartete Größe. " &
-                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
-                                                " Byte.")
-
-        End If
-
-
-        bufferDescription = New BufferDescription()
-
-        bufferDescription.ByteWidth = CUInt(bufferGroesse)
-        bufferDescription.Usage = ResourceUsage.Default
-        bufferDescription.BindFlags = BindFlags.ConstantBuffer
-        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
-        bufferDescription.MiscFlags = ResourceOptionFlags.None
-        bufferDescription.StructureByteStride = 0UI
-
-        regionDistanceConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
-
-
-        If regionDistanceConstantBuffer Is Nothing Then
-            Throw New InvalidOperationException("Der RegionDistance-ConstantBuffer konnte nicht erzeugt werden.")
-        End If
-
-    End Sub
-
-    Private Sub AktualisiereRegionDistanceConstantBuffer(mode As UInteger, jumpStep As UInteger)
-
-        Dim regionDistanceParameter As RegionDistanceConstants
-
-
-        regionDistanceParameter.mode = mode
-        regionDistanceParameter.jumpStep = jumpStep
-        regionDistanceParameter.regionColorThreshold = REGION_DISTANCE_COLOR_THRESHOLD
-        regionDistanceParameter.displayDistanceScale = Math.Max(1.0F, CSng(Math.Min(renderBreite, renderHoehe)) *
-                                                                0.5F)
-
-        renderContext.UpdateSubresource(regionDistanceParameter, regionDistanceConstantBuffer)
 
     End Sub
 
@@ -985,6 +995,57 @@ Friend Class D3DRenderer
 
 #End Region
 
+#Region "Buffer"
+
+    Private Sub InitialisiereRegionDistanceConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+        bufferGroesse = Marshal.SizeOf(GetType(RegionDistanceConstants))
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("RegionDistanceConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        regionDistanceConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+
+        If regionDistanceConstantBuffer Is Nothing Then
+            Throw New InvalidOperationException("Der RegionDistance-ConstantBuffer konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub AktualisiereRegionDistanceConstantBuffer(mode As UInteger, jumpStep As UInteger)
+
+        Dim regionDistanceParameter As RegionDistanceConstants
+
+
+        regionDistanceParameter.mode = mode
+        regionDistanceParameter.jumpStep = jumpStep
+        regionDistanceParameter.regionColorThreshold = REGION_DISTANCE_COLOR_THRESHOLD
+        regionDistanceParameter.displayDistanceScale = Math.Max(1.0F, CSng(Math.Min(renderBreite, renderHoehe)) *
+                                                                0.5F)
+
+        renderContext.UpdateSubresource(regionDistanceParameter, regionDistanceConstantBuffer)
+
+    End Sub
+
     Private Sub InitialisierePressureInitializerConstantBuffer()
 
         Dim bufferDescription As BufferDescription
@@ -1036,6 +1097,108 @@ Friend Class D3DRenderer
 
 
         renderContext.UpdateSubresource(pressureInitializerParameter, pressureInitializerConstantBuffer)
+
+    End Sub
+
+    Private Sub InitialisiereVelocityConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+
+        bufferGroesse = Marshal.SizeOf(GetType(VelocityConstants))
+
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("VelocityConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        velocityConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If velocityConstantBuffer Is Nothing Then
+
+            Throw New InvalidOperationException("Der Velocity-ConstantBuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub AktualisiereVelocityConstantBuffer(mode As UInteger)
+
+        Dim velocityParameter As VelocityConstants
+
+
+        velocityParameter.mode = mode
+        velocityParameter.pressureGradientStrength = VELOCITY_PRESSURE_GRADIENT_STRENGTH
+        velocityParameter.maxVelocity = VELOCITY_MAX
+        velocityParameter.displayVelocityScale = VELOCITY_DISPLAY_SCALE
+
+        renderContext.UpdateSubresource(velocityParameter, velocityConstantBuffer)
+
+    End Sub
+
+    Private Sub InitialisierePressureFlowConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+
+        bufferGroesse = Marshal.SizeOf(GetType(PressureFlowConstants))
+
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("PressureFlowConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        pressureFlowConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+
+        If pressureFlowConstantBuffer Is Nothing Then
+
+            Throw New InvalidOperationException("Der PressureFlow-ConstantBuffer konnte nicht erzeugt werden.")
+
+        End If
+
+    End Sub
+
+    Private Sub AktualisierePressureFlowConstantBuffer(mode As UInteger)
+
+        Dim pressureFlowParameter As PressureFlowConstants
+
+        pressureFlowParameter.mode = mode
+        pressureFlowParameter.timeStep = PRESSURE_FLOW_TIME_STEP
+        pressureFlowParameter.maxPressure = PRESSURE_FLOW_MAX_PRESSURE
+        pressureFlowParameter.displayPressureScale = PRESSURE_FLOW_DISPLAY_SCALE
+
+        renderContext.UpdateSubresource(pressureFlowParameter, pressureFlowConstantBuffer)
 
     End Sub
 
@@ -1124,9 +1287,69 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub AktualisierePigmentDisplayConstantBuffer()
+
+        Dim hintergrundFarbe As System.Drawing.Color
+        Dim pigmentDisplayParameter As PigmentDisplayConstants
+
+        hintergrundFarbe = SlideShowTools.SharedDataHandling.HintergrundFarbeSaver
+
+        pigmentDisplayParameter.backgroundRed = hintergrundFarbe.R / 255.0F
+        pigmentDisplayParameter.backgroundGreen = hintergrundFarbe.G / 255.0F
+        pigmentDisplayParameter.backgroundBlue = hintergrundFarbe.B / 255.0F
+        pigmentDisplayParameter.backgroundAlpha = 1.0F
+
+        renderContext.UpdateSubresource(pigmentDisplayParameter, pigmentDisplayConstantBuffer)
+
+    End Sub
+
+#End Region
+
 #End Region
 
 #Region "Simulation"
+
+    Private Sub SimuliereCurtisWasser(iterationen As Integer)
+
+        Dim i As Integer
+
+
+        If iterationen <= 0 Then
+            Exit Sub
+        End If
+
+
+        For i = 0 To iterationen - 1
+
+            ' ============================================================
+            ' 1. Druck erzeugt Geschwindigkeit
+            ' ============================================================
+
+            BerechneVelocityAusPressure()
+
+
+            ' ============================================================
+            ' 2. Geschwindigkeit transportiert Wasser / Pressure
+            ' ============================================================
+
+            BerechnePressureAusVelocity()
+
+        Next
+
+
+        ' ================================================================
+        ' Pipeline sauber verlassen
+        ' ================================================================
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+        renderContext.PSSetShader(Nothing)
+        renderContext.VSSetShader(Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
 
     Private Sub SimuliereWasserUndPigmente(viskositaet As Single,
                                       iterationen As Integer)
@@ -1267,6 +1490,134 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub BerechneVelocityAusPressure()
+
+        AktualisiereVelocityConstantBuffer(VELOCITY_MODE_UPDATE)
+
+
+        ' ================================================================
+        ' sourcePressure + sourceVelocity
+        '                  ↓
+        '             targetVelocity
+        ' ================================================================
+
+        renderContext.OMSetRenderTargets(targetVelocityTargetView)
+
+        SetzeVollbildViewport()
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(velocityVertexShader)
+        renderContext.PSSetShader(velocityPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, velocityConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, sourcePressureView)
+        renderContext.PSSetShaderResource(1UI, sourceVelocityView)
+
+        renderContext.Draw(3UI, 0UI)
+
+
+        ' ================================================================
+        ' Pipeline lösen
+        ' ================================================================
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+        ' ================================================================
+        ' Velocity Ping-Pong
+        '
+        ' targetVelocity enthält jetzt den neuen Zustand.
+        ' Er wird zum neuen sourceVelocity.
+        ' ================================================================
+
+        TauscheVelocityRessourcen()
+
+    End Sub
+
+    Private Sub TauscheVelocityRessourcen()
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+
+        tempTexture = sourceVelocityTexture
+        sourceVelocityTexture = targetVelocityTexture
+        targetVelocityTexture = tempTexture
+
+        tempView = sourceVelocityView
+        sourceVelocityView = targetVelocityView
+        targetVelocityView = tempView
+
+        tempTargetView = sourceVelocityTargetView
+        sourceVelocityTargetView = targetVelocityTargetView
+        targetVelocityTargetView = tempTargetView
+
+    End Sub
+
+    Private Sub BerechnePressureAusVelocity()
+
+        AktualisierePressureFlowConstantBuffer(PRESSURE_FLOW_MODE_UPDATE)
+
+
+        ' ================================================================
+        ' sourcePressure + sourceVelocity
+        '                  ↓
+        '             targetPressure
+        ' ================================================================
+
+        renderContext.OMSetRenderTargets(targetPressureTargetView)
+
+        SetzeVollbildViewport()
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(pressureFlowVertexShader)
+        renderContext.PSSetShader(pressureFlowPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, pressureFlowConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, sourcePressureView)
+        renderContext.PSSetShaderResource(1UI, sourceVelocityView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+        TauschePressureRessourcen()
+
+    End Sub
+
+    Private Sub TauschePressureRessourcen()
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+
+        tempTexture = sourcePressureTexture
+        sourcePressureTexture = targetPressureTexture
+        targetPressureTexture = tempTexture
+
+        tempView = sourcePressureView
+        sourcePressureView = targetPressureView
+        targetPressureView = tempView
+
+        tempTargetView = sourcePressureTargetView
+        sourcePressureTargetView = targetPressureTargetView
+        targetPressureTargetView = tempTargetView
+
+    End Sub
+
 #End Region
 
 #Region "Rendering Helpers"
@@ -1288,22 +1639,6 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Private Sub AktualisierePigmentDisplayConstantBuffer()
-
-        Dim hintergrundFarbe As System.Drawing.Color
-        Dim pigmentDisplayParameter As PigmentDisplayConstants
-
-        hintergrundFarbe = SlideShowTools.SharedDataHandling.HintergrundFarbeSaver
-
-        pigmentDisplayParameter.backgroundRed = hintergrundFarbe.R / 255.0F
-        pigmentDisplayParameter.backgroundGreen = hintergrundFarbe.G / 255.0F
-        pigmentDisplayParameter.backgroundBlue = hintergrundFarbe.B / 255.0F
-        pigmentDisplayParameter.backgroundAlpha = 1.0F
-
-        renderContext.UpdateSubresource(pigmentDisplayParameter, pigmentDisplayConstantBuffer)
-
-    End Sub
-
     Friend Function RenderBild() As Bitmap
 
         Dim ergebnis As Bitmap
@@ -1316,9 +1651,9 @@ Friend Class D3DRenderer
         InitialisierePigmentzustand()
         InitialisiereWasserzustand()
 
-        InitialisiereKontrollansicht()
+        SimuliereCurtisWasser(TEST_CURTIS_ITERATIONEN)
 
-        SimuliereWasserUndPigmente(TEST_VISKOSITAET, TEST_ITERATIONEN)
+        InitialisiereKontrollansicht()
 
         ZeigeSimulationsergebnis()
 
@@ -1572,26 +1907,31 @@ Friend Class D3DRenderer
         Dim quadrantBreite As Integer
         Dim quadrantHoehe As Integer
 
-
         quadrantBreite = Math.Max(1, renderBreite \ 2)
         quadrantHoehe = Math.Max(1, renderHoehe \ 2)
 
-        AktualisiereRegionDistanceConstantBuffer(REGION_DISTANCE_MODE_DISPLAY, 0UI)
+
+        AktualisierePressureFlowConstantBuffer(PRESSURE_FLOW_MODE_DISPLAY)
 
         renderContext.OMSetRenderTargets(renderTargetView)
         renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), 0.0F, CSng(quadrantBreite),
                                                  CSng(quadrantHoehe), 0.0F, 1.0F))
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
-        renderContext.VSSetShader(regionDistanceVertexShader)
-        renderContext.PSSetShader(regionDistancePixelShader)
-        renderContext.PSSetConstantBuffer(0UI, regionDistanceConstantBuffer)
-        renderContext.PSSetShaderResource(2UI, regionDistanceView)
+
+        renderContext.VSSetShader(pressureFlowVertexShader)
+        renderContext.PSSetShader(pressureFlowPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, pressureFlowConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, sourcePressureView)
 
         renderContext.Draw(3UI, 0UI)
 
-        renderContext.PSSetShaderResource(2UI, Nothing)
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
     End Sub
 
@@ -1618,15 +1958,8 @@ Friend Class D3DRenderer
         AktualisierePigmentDisplayConstantBuffer()
 
         renderContext.OMSetRenderTargets(renderTargetView)
-
-        renderContext.RSSetViewport(
-        New Viewport(
-            CSng(quadrantBreite),
-            CSng(quadrantHoehe),
-            CSng(quadrantBreite),
-            CSng(quadrantHoehe),
-            0.0F,
-            1.0F))
+        renderContext.RSSetViewport(New Viewport(CSng(quadrantBreite), CSng(quadrantHoehe), CSng(quadrantBreite),
+                                                 CSng(quadrantHoehe), 0.0F, 1.0F))
 
         renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
         renderContext.OMSetBlendState(Nothing)
@@ -2047,6 +2380,14 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pressureInitializerConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pressureInitializerPixelShader)
         Direct3DRessourceHandler.GebeFrei(pressureInitializerVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(velocityConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(velocityPixelShader)
+        Direct3DRessourceHandler.GebeFrei(velocityVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pressureFlowConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(pressureFlowPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pressureFlowVertexShader)
 
     End Sub
 

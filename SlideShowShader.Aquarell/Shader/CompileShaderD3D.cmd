@@ -21,6 +21,12 @@ del /Q RegionDistanceShaderPS.cso 2>nul
 del /Q PressureInitializerShaderVS.cso 2>nul
 del /Q PressureInitializerShaderPS.cso 2>nul
 
+del /Q VelocityShaderVS.cso 2>nul
+del /Q VelocityShaderPS.cso 2>nul
+
+del /Q PressureFlowShaderVS.cso 2>nul
+del /Q PressureFlowShaderPS.cso 2>nul
+
 del /Q WaterInitializerShaderVS.cso 2>nul
 del /Q WaterInitializerShaderPS.cso 2>nul
 
@@ -69,6 +75,19 @@ if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo PressureInitializerShaderPS.cso PressureInitializerShader.hlsl
 if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo VelocityShaderVS.cso VelocityShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo VelocityShaderPS.cso VelocityShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo PressureFlowShaderVS.cso PressureFlowShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo PressureFlowShaderPS.cso PressureFlowShader.hlsl
+if errorlevel 1 goto error
+
 
 "%FXC%" /T vs_5_0 /E VSMain /Fo WaterInitializerShaderVS.cso WaterInitializerShader.hlsl
 if errorlevel 1 goto error
