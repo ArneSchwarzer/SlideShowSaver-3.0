@@ -38,7 +38,7 @@ Friend Class D3DRenderer
     Private Const VELOCITY_MODE_UPDATE As UInteger = 0UI
     Private Const VELOCITY_MODE_DISPLAY As UInteger = 1UI
 
-    Private Const VELOCITY_PRESSURE_GRADIENT_STRENGTH As Single = 16.0F
+    Private Const VELOCITY_PRESSURE_GRADIENT_STRENGTH As Single = 24.0F
     Private Const VELOCITY_MAX As Single = 1.0F
     Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
 
@@ -55,7 +55,7 @@ Friend Class D3DRenderer
     Private Const PRESSURE_FLOW_MAX_PRESSURE As Single = 2.0F
     Private Const PRESSURE_FLOW_DISPLAY_SCALE As Single = 1.0F
 
-    Private Const TEST_CURTIS_ITERATIONEN As Integer = 1024
+    Private Const TEST_CURTIS_ITERATIONEN As Integer = 128
 
     Private Const PIGMENT_TRANSPORT_TIME_STEP As Single = 0.2F
     Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
