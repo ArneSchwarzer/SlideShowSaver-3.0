@@ -6,24 +6,73 @@
 //
 //      Erzeugt aus der RegionDistanceMap den initialen Wasserdruck p.
 //
-//      RegionDistance:
-//          0       = Regionsgrenze
-//          grˆﬂer  = weiter im Inneren einer Region
+// RegionDistance:
 //
-//      Pressure:
-//          0       = kein Druck / keine Wasserhˆhe an der Grenze
-//          1       = maximale initiale Wasserhˆhe
+//      0       = Regionsgrenze
+//      grˆﬂer  = weiter im Inneren einer Region
 //
-// F¸r V1.0 zun‰chst bewusst simpel:
+// Pressure:
 //
-//      p = saturate(distance / pressureDistanceScale)
+//      0       = kein initialer Druck an der Regionsgrenze
+//      nahe 1  = hohe initiale Wasserhˆhe im Regionsinneren
 //
-// Sp‰terer Anflanschpunkt:
+// ----------------------------------------------------------------------------
+// Problem der fr¸heren linearen Abbildung
+// ----------------------------------------------------------------------------
+//
+// Fr¸here Formel:
+//
+//      pressure = distance / pressureDistanceScale
+//
+// Dadurch hing die erreichbare Wasserhˆhe unmittelbar von der absoluten
+// Grˆﬂe einer Region ab.
+//
+// Beispiel bei scale = 64:
+//
+//      kleine Region, maxDistance = 8
+//          -> maxPressure = 0.125
+//
+//      groﬂe Region, maxDistance = 64
+//          -> maxPressure = 1.0
+//
+// Groﬂe Regionen erhielten damit systematisch sehr viel st‰rkere
+// Druckreservoirs als kleine Regionen.
+//
+// ----------------------------------------------------------------------------
+// Neue s‰ttigende Abbildung
+// ----------------------------------------------------------------------------
+//
+//      pressure = 1 - exp(-distance / scale)
+//
+// Die Funktion steigt anfangs relativ schnell an und n‰hert sich anschlieﬂend
+// asymptotisch dem Wert 1.
+//
+// Dadurch:
+//
+//      - erhalten kleine Regionen deutlich mehr Anfangsdruck
+//      - bleiben Regionsgrenzen weiterhin exakt bei 0
+//      - werden groﬂe Regionen nicht zus‰tzlich bestraft
+//      - verlieren sehr groﬂe Regionen ihren proportionalen Grˆﬂenvorteil
+//
+// Diese N‰herung ersetzt noch KEINE echte regionsweise Normalisierung.
+//
+// Eine sp‰tere vollst‰ndig geometrisch normierte Variante kˆnnte lauten:
+//
+//      normalizedDistance =
+//          distanceToBoundary / maximumDistanceOfRegion
+//
+// Daf¸r m¸sste RegionDistance jedoch zus‰tzlich pro Region den maximalen
+// Distanzwert kennen.
+//
+// F¸r den aktuellen Aquarell-Shader ist die s‰ttigende N‰herung bewusst
+// einfacher und ausreichend.
+//
+// Sp‰tere Anflanschpunkte:
 //
 //      - PaperMap
 //      - lokale Wassermenge
 //      - zuf‰llige Wash-Variation
-//      - ggf. nichtlineare Druckkurve
+//      - weitere nichtlineare Druckkurven
 //
 // ============================================================================
 
@@ -88,9 +137,14 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
     }
 
 
-    output.position = float4(position, 0.0F, 1.0F);
+    output.position =
+        float4(
+            position,
+            0.0F,
+            1.0F);
 
-    output.texCoord = texCoord;
+    output.texCoord =
+        texCoord;
 
 
     return output;
@@ -106,30 +160,77 @@ float PSMain(VSOutput input) : SV_TARGET
     int2 pixelPosition;
 
     float regionDistance;
+    float safeScale;
+
     float pressure;
 
 
-    pixelPosition = int2(input.position.xy);
-    
-    regionDistance = regionDistanceTexture.Load(int3(pixelPosition, 0));
+    pixelPosition =
+        int2(
+            input.position.xy);
 
 
-    // ------------------------------------------------------------------------
-    // Sicherheitsnetz.
+    regionDistance =
+        regionDistanceTexture.Load(
+            int3(
+                pixelPosition,
+                0));
+
+
+    // ========================================================================
+    // Sicherheitsnetz
     //
     // RegionDistance sollte regul‰r niemals negativ sein.
-    // ------------------------------------------------------------------------
+    // ========================================================================
 
-    regionDistance = max(regionDistance, 0.0F);
+    regionDistance =
+        max(
+            regionDistance,
+            0.0F);
 
 
-    // ------------------------------------------------------------------------
-    // Distanz -> initialer Wasserdruck.
+    safeScale =
+        max(
+            pressureDistanceScale,
+            0.0001F);
+
+
+    // ========================================================================
+    // Distanz -> initialer Wasserdruck
     //
-    // Noch bewusst linear.
-    // ------------------------------------------------------------------------
+    // Neue s‰ttigende Kurve:
+    //
+    //      p = 1 - exp(-d / scale)
+    //
+    // Eigenschaften:
+    //
+    //      d = 0
+    //          -> p = 0
+    //
+    //      d steigt
+    //          -> p steigt schnell
+    //
+    //      d wird sehr groﬂ
+    //          -> p n‰hert sich 1
+    //
+    // Dadurch bekommen kleine Regionen relativ deutlich mehr Anfangsdruck,
+    // w‰hrend groﬂe Regionen nicht mehr proportional immer m‰chtiger werden.
+    // ========================================================================
 
-    pressure = saturate(regionDistance / max(pressureDistanceScale, 1.0F));
+    pressure =
+        1.0F -
+        exp(
+            -regionDistance /
+            safeScale);
+
+
+    // ========================================================================
+    // Numerisches Sicherheitsnetz
+    // ========================================================================
+
+    pressure =
+        saturate(
+            pressure);
 
 
     return pressure;

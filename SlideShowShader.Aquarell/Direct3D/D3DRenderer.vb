@@ -33,16 +33,17 @@ Friend Class D3DRenderer
     ' Reine Notbremse. KEIN reguläres Abbruchkriterium.
     Private Const REGION_DISTANCE_MAX_SAFETY_PASSES As Integer = 8192
 
-    Private Const PRESSURE_DISTANCE_SCALE As Single = 64.0F
+    Private Const PRESSURE_DISTANCE_SCALE As Single = 16.0F
 
     Private Const VELOCITY_MODE_UPDATE As UInteger = 0UI
     Private Const VELOCITY_MODE_DISPLAY As UInteger = 1UI
 
-    Private Const VELOCITY_PRESSURE_GRADIENT_STRENGTH As Single = 8.0F
+    Private Const VELOCITY_PRESSURE_GRADIENT_STRENGTH As Single = 16.0F
     Private Const VELOCITY_MAX As Single = 1.0F
     Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
 
-    Private Const VELOCITY_BASE_DAMPING As Single = 0.96F
+    Private Const VELOCITY_DAMPING_THIN As Single = 0.997F
+    Private Const VELOCITY_DAMPING_THICK As Single = 0.9F
 
     Private Const VELOCITY_MIN_VISCOSITY As Single = 0.1F
     Private Const VELOCITY_MAX_VISCOSITY As Single = 10000.0F
@@ -54,7 +55,7 @@ Friend Class D3DRenderer
     Private Const PRESSURE_FLOW_MAX_PRESSURE As Single = 2.0F
     Private Const PRESSURE_FLOW_DISPLAY_SCALE As Single = 1.0F
 
-    Private Const TEST_CURTIS_ITERATIONEN As Integer = 16
+    Private Const TEST_CURTIS_ITERATIONEN As Integer = 1024
 
     Private Const PIGMENT_TRANSPORT_TIME_STEP As Single = 0.2F
     Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
@@ -1681,39 +1682,61 @@ Friend Class D3DRenderer
     Private Function BerechneVelocityDamping(viskositaet As Single) As Single
 
         Dim begrenzteViskositaet As Single
-        Dim logViscosity As Single
+
+        Dim logViskositaet As Single
         Dim logMinimum As Single
         Dim logMaximum As Single
+
         Dim normierteViskositaet As Single
 
         Dim damping As Single
 
 
+        ' ================================================================
+        ' Die Benutzer-Viskosität läuft logarithmisch über:
+        '
+        '     0.1 ... 10000 mPa/s
+        '
+        ' Eine lineare Interpolation auf diesem Zahlenbereich wäre
+        ' praktisch unbrauchbar.
+        ' ================================================================
+
         begrenzteViskositaet = Math.Max(VELOCITY_MIN_VISCOSITY, Math.Min(VELOCITY_MAX_VISCOSITY, viskositaet))
 
-        logViscosity = CSng(Math.Log10(begrenzteViskositaet))
+        logViskositaet = CSng(Math.Log10(begrenzteViskositaet))
 
         logMinimum = CSng(Math.Log10(VELOCITY_MIN_VISCOSITY))
 
         logMaximum = CSng(Math.Log10(VELOCITY_MAX_VISCOSITY))
 
 
-        normierteViskositaet = (logViscosity - logMinimum) / (logMaximum - logMinimum)
+        normierteViskositaet = (logViskositaet - logMinimum) / (logMaximum - logMinimum)
 
 
         ' ================================================================
+        ' Velocity-Dämpfung
+        '
         ' Dünnflüssig:
-        '     wenig zusätzliche Dämpfung
+        '
+        '     Velocity bleibt sehr lange erhalten.
         '
         ' Dickflüssig:
-        '     deutlich stärkere Dämpfung
         '
-        ' Bereich ungefähr:
+        '     Velocity wird deutlich schneller abgebaut.
         '
-        '     0.985 ... 0.82
+        ' Wichtig:
+        '
+        '     Ein Damping-Wert nahe 1.0 bedeutet WENIG Dämpfung.
+        '
+        '     1.0  = keine Dämpfung
+        '     0.9  = 10 % Velocity-Verlust pro Iteration
+        '
+        ' Die Bandbreite ist absichtlich wesentlich weniger aggressiv als
+        ' im bisherigen PoC.
         ' ================================================================
 
-        damping = 0.985F - normierteViskositaet * 0.165F
+        damping = VELOCITY_DAMPING_THIN - normierteViskositaet * (VELOCITY_DAMPING_THIN - VELOCITY_DAMPING_THICK)
+
 
         Return damping
 
