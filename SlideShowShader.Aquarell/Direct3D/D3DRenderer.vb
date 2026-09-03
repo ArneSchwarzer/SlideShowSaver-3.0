@@ -42,7 +42,7 @@ Friend Class D3DRenderer
     Private Const VELOCITY_MAX As Single = 1.0F
     Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
 
-    Private Const PAPER_HEIGHT_INFLUENCE As Single = 5.25F
+    Private Const PAPER_HEIGHT_INFLUENCE As Single = 1.0F
 
     Private Const VELOCITY_DAMPING_THIN As Single = 0.997F
     Private Const VELOCITY_DAMPING_THICK As Single = 0.9F

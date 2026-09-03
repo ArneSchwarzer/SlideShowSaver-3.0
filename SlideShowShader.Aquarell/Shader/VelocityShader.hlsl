@@ -205,8 +205,7 @@ float ReadHydraulicHead(int2 pixelPosition, uint2 textureSize)
     // ------------------------------------------------------------------------
 
     hydraulicHead = pressure + paperHeight * paperHeightInfluence;
-
-
+    
     return hydraulicHead;
 }
 
