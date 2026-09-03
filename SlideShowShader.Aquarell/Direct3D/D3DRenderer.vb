@@ -42,6 +42,8 @@ Friend Class D3DRenderer
     Private Const VELOCITY_MAX As Single = 1.0F
     Private Const VELOCITY_DISPLAY_SCALE As Single = 8.0F
 
+    Private Const PAPER_HEIGHT_INFLUENCE As Single = 5.25F
+
     Private Const VELOCITY_DAMPING_THIN As Single = 0.997F
     Private Const VELOCITY_DAMPING_THICK As Single = 0.9F
 
@@ -338,8 +340,8 @@ Friend Class D3DRenderer
         Public damping As Single
         Public viscosity As Single
 
+        Public paperHeightInfluence As Single
         Public reserve1 As Single
-        Public reserve2 As Single
 
     End Structure
 
@@ -1191,8 +1193,8 @@ Friend Class D3DRenderer
         velocityParameter.displayVelocityScale = VELOCITY_DISPLAY_SCALE
         velocityParameter.damping = damping
         velocityParameter.viscosity = viskositaet
+        velocityParameter.paperHeightInfluence = PAPER_HEIGHT_INFLUENCE
         velocityParameter.reserve1 = 0.0F
-        velocityParameter.reserve2 = 0.0F
 
         renderContext.UpdateSubresource(velocityParameter, velocityConstantBuffer)
 
@@ -1635,10 +1637,16 @@ Friend Class D3DRenderer
 
         AktualisiereVelocityConstantBuffer(VELOCITY_MODE_UPDATE, TEST_VISKOSITAET)
 
+
         ' ================================================================
-        ' sourcePressure + sourceVelocity
-        '                  ↓
-        '             targetVelocity
+        ' sourcePressure
+        ' sourceVelocity
+        ' paperTexture
+        '
+        '        ↓
+        '
+        ' targetVelocity
+        '
         ' ================================================================
 
         renderContext.OMSetRenderTargets(targetVelocityTargetView)
@@ -1654,9 +1662,9 @@ Friend Class D3DRenderer
         renderContext.PSSetConstantBuffer(0UI, velocityConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePressureView)
         renderContext.PSSetShaderResource(1UI, sourceVelocityView)
+        renderContext.PSSetShaderResource(2UI, paperView)
 
         renderContext.Draw(3UI, 0UI)
-
 
         ' ================================================================
         ' Pipeline lösen
@@ -1664,15 +1672,13 @@ Friend Class D3DRenderer
 
         renderContext.PSSetShaderResource(0UI, Nothing)
         renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetShaderResource(2UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
         ' ================================================================
         ' Velocity Ping-Pong
-        '
-        ' targetVelocity enthält jetzt den neuen Zustand.
-        ' Er wird zum neuen sourceVelocity.
         ' ================================================================
 
         TauscheVelocityRessourcen()

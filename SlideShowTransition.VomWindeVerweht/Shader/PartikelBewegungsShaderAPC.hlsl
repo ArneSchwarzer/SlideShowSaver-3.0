@@ -46,6 +46,19 @@ cbuffer BewegungsParameter : register(b0)
 static const float WIND_KOPPLUNG = 2.5;
 static const float LUFTWIDERSTAND = 0.15;
 
+/*
+ * Z-Ebenen der Partikel.
+ *
+ * Ruhende Partikel liegen geschlossen auf derselben,
+ * untersten Ebene des Startbildes.
+ *
+ * Erst beim Ablösen erhält ein Partikel eine individuelle
+ * Tiefenlage. Dadurch kann ein bereits fliegender Partikel
+ * niemals hinter noch ruhenden Bildkacheln verschwinden.
+ */
+static const float PARTIKEL_Z_RUHEND = 0.0;
+static const float PARTIKEL_Z_AKTIV_MAX = 0.85;
+
 static const int STATUS_TOT = 0;
 static const int STATUS_RUHEND = 1;
 static const int STATUS_AKTIV = 2;
@@ -240,6 +253,16 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
         if (abloeseProgress < abloeseWert)
         {
+        /*
+         * Solange das Partikel Teil des noch geschlossenen
+         * Startbildes ist, liegt es garantiert auf der
+         * untersten Z-Ebene.
+         *
+         * Dadurch können bereits fliegende Partikel niemals
+         * hinter noch ruhende Kacheln geraten.
+         */
+                partikel.position.z = PARTIKEL_Z_RUHEND;
+
             PartikelBuffer[index] = partikel;
 
         /*
@@ -255,14 +278,29 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
         {
             partikel.status = STATUS_AKTIV;
 
-    /*
-     * Ab hier bleibt unser bestehender Code zur
-     * Initialisierung des fliegenden Partikels stehen.
-     */
-
-        /*
-         * Aktuelle lokale FlowField-Richtung.
-         */
+            /*
+             * ---------------------------------------------------------
+             * Individuelle Z-Ebene
+             * ---------------------------------------------------------
+             *
+             * Solange das Partikel ruhte, war es Teil der geschlossenen
+             * Bildfläche und lag deshalb auf Z = PARTIKEL_Z_RUHEND.
+             *
+             * Erst jetzt, beim tatsächlichen Ablösen durch die
+             * Abbruchkante, erhält es seine individuelle räumliche
+             * Tiefenlage.
+             *
+             * Die Verteilung ist deterministisch vom Partikelindex
+             * abhängig und bleibt damit über die gesamte Lebensdauer
+             * des Partikels stabil.
+             */
+            
+            partikel.position.z = lerp(0.001, PARTIKEL_Z_AKTIV_MAX, Hash01(index * 13 + 53));
+            
+    
+            /*
+             * Aktuelle lokale FlowField-Richtung.
+             */
 
             if (length(zielGeschwindigkeit) > 0.0001)
             {
@@ -273,20 +311,18 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
                 lokaleFlowRichtung = float2(0.0, 0.0);
             }
 
-        /*
-         * Individuelle Kornparameter.
-         */
+            /*
+             * Individuelle Kornparameter.
+             */
 
             randomRichtung = Hash01(index * 3 + 1);
-
             randomGeschwindigkeit = Hash01(index * 3 + 2);
-
             randomVertikal = Hash01(index * 3 + 3);
 
-        /*
-         * Individuelle aerodynamische Abweichung
-         * von +/- 30 Grad.
-         */
+            /*
+             * Individuelle aerodynamische Abweichung
+             * von +/- 30 Grad.
+             */
 
             randomWinkel = (randomRichtung * 2.0 - 1.0) * 0.523599;
 
@@ -296,20 +332,20 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
             individuelleRichtung.y = lokaleFlowRichtung.x * sin(randomWinkel) + lokaleFlowRichtung.y *
                                      cos(randomWinkel);
 
-        /*
-         * -----------------------------------------------------
-         * Startflugrichtung
-         * -----------------------------------------------------
-         *
-         * Das FlowField ist jetzt bewusst klar dominant.
-         *
-         * Der Nutzer soll optisch sofort lesen können:
-         *
-         * "Der Wind kommt von dort und trägt das Bild fort."
-         *
-         * Die Kornindividualität bricht die Bewegung lediglich
-         * leicht auf.
-         */
+            /*
+             * -----------------------------------------------------
+             * Startflugrichtung
+             * -----------------------------------------------------
+             *
+             * Das FlowField ist jetzt bewusst klar dominant.
+             *
+             * Der Nutzer soll optisch sofort lesen können:
+             *
+             * "Der Wind kommt von dort und trägt das Bild fort."
+             *
+             * Die Kornindividualität bricht die Bewegung lediglich
+             * leicht auf.
+             */
 
             startRichtung = lokaleFlowRichtung * 0.80 + individuelleRichtung * 0.20;
 
@@ -322,18 +358,18 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
                 startRichtung = lokaleFlowRichtung;
             }
 
-        /*
-         * Individuelle Startgeschwindigkeit.
-         */
+            /*
+             * Individuelle Startgeschwindigkeit.
+             */
 
             startGeschwindigkeit = length(zielGeschwindigkeit) * lerp(0.70, 1.45, randomGeschwindigkeit);
 
-        /*
-         * Gewicht:
-         *
-         * leichte Körner werden kräftiger mitgerissen,
-         * schwere starten träger.
-         */
+            /*
+             * Gewicht:
+             *
+             * leichte Körner werden kräftiger mitgerissen,
+             * schwere starten träger.
+             */
 
             startGewichtFaktor = 1.0 / max(partikel.gewicht, 0.1);
             startGewichtFaktor = clamp(startGewichtFaktor, 0.55, 2.0);
@@ -342,14 +378,15 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
 
             partikel.geschwindigkeit.xy = startRichtung * startGeschwindigkeit;
 
-        /*
-         * Kleine individuelle vertikale Abweichung.
-         */
+            /*
+             * Kleine individuelle vertikale Abweichung.
+             */
 
             partikel.geschwindigkeit.y += (randomVertikal * 2.0 - 1.0) * 45.0;
         }
         else
         {
+
         /*
          * Die Ablösefront ist bereits über dieses Partikel
          * hinweggezogen.
