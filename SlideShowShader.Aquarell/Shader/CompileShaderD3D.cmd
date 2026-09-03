@@ -30,6 +30,9 @@ del /Q PressureFlowShaderPS.cso 2>nul
 del /Q PigmentTransportShaderVS.cso 2>nul
 del /Q PigmentTransportShaderPS.cso 2>nul
 
+del /Q PigmentDepositShaderVS.cso 2>nul
+del /Q PigmentDepositShaderPS.cso 2>nul
+
 del /Q WaterInitializerShaderVS.cso 2>nul
 del /Q WaterInitializerShaderPS.cso 2>nul
 
@@ -95,6 +98,12 @@ if errorlevel 1 goto error
 if errorlevel 1 goto error
 
 "%FXC%" /T ps_5_0 /E PSMain /Fo PigmentTransportShaderPS.cso PigmentTransportShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T vs_5_0 /E VSMain /Fo PigmentDepositShaderVS.cso PigmentDepositShader.hlsl
+if errorlevel 1 goto error
+
+"%FXC%" /T ps_5_0 /E PSMain /Fo PigmentDepositShaderPS.cso PigmentDepositShader.hlsl
 if errorlevel 1 goto error
 
 "%FXC%" /T vs_5_0 /E VSMain /Fo WaterInitializerShaderVS.cso WaterInitializerShader.hlsl

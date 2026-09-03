@@ -63,6 +63,12 @@ Friend Class D3DRenderer
     Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
     Private Const PIGMENT_TRANSPORT_MIN_PRESSURE As Single = 0.0001F
 
+    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 128.0F
+    Private Const PIGMENT_DEPOSIT_DESORPTION_STRENGTH As Single = 0.0F
+
+    Private Const PIGMENT_DEPOSIT_MIN_PRESSURE As Single = 0.0001F
+    Private Const PIGMENT_DEPOSIT_REFERENCE_PRESSURE As Single = 1.0F
+
 #End Region
 
 #Region "Variablen"
@@ -250,6 +256,14 @@ Friend Class D3DRenderer
     Private pigmentTransportConstantBuffer As ID3D11Buffer
 
     '---------------------------------
+    ' Pigment Deposit Shader
+    '---------------------------------
+    Private pigmentDepositVertexShader As ID3D11VertexShader
+    Private pigmentDepositPixelShader As ID3D11PixelShader
+
+    Private pigmentDepositConstantBuffer As ID3D11Buffer
+
+    '---------------------------------
     ' Pigment Initializer Shader
     '---------------------------------
     Private pigmentInitializerVertexShader As ID3D11VertexShader
@@ -367,6 +381,17 @@ Friend Class D3DRenderer
     End Structure
 
     <StructLayout(LayoutKind.Sequential)>
+    Private Structure PigmentDepositConstants
+
+        Public adsorptionStrength As Single
+        Public desorptionStrength As Single
+
+        Public minimumPressure As Single
+        Public referencePressure As Single
+
+    End Structure
+
+    <StructLayout(LayoutKind.Sequential)>
     Private Structure WaterFlowConstants
 
         Public viscosity As Single
@@ -434,6 +459,7 @@ Friend Class D3DRenderer
         InitialisiereVelocityConstantBuffer()
         InitialisierePressureFlowConstantBuffer()
         InitialisierePigmentTransportConstantBuffer()
+        InitialisierePigmentDepositConstantBuffer()
 
         'Legacy
         InitialisiereWaterFlowConstantBuffer()
@@ -641,6 +667,7 @@ Friend Class D3DRenderer
         InitialisiereVertexPixelShader("VelocityShader", velocityVertexShader, velocityPixelShader)
         InitialisiereVertexPixelShader("PressureFlowShader", pressureFlowVertexShader, pressureFlowPixelShader)
         InitialisiereVertexPixelShader("PigmentTransportShader", pigmentTransportVertexShader, pigmentTransportPixelShader)
+        InitialisiereVertexPixelShader("PigmentDepositShader", pigmentDepositVertexShader, pigmentDepositPixelShader)
 
         'Legacy
         InitialisiereVertexPixelShader("PigmentInitializerShader", pigmentInitializerVertexShader, pigmentInitializerPixelShader)
@@ -1301,6 +1328,53 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub InitialisierePigmentDepositConstantBuffer()
+
+        Dim bufferDescription As BufferDescription
+        Dim bufferGroesse As Integer
+
+
+        bufferGroesse = Marshal.SizeOf(GetType(PigmentDepositConstants))
+
+
+        If bufferGroesse <> 16 Then
+
+            Throw New InvalidOperationException("PigmentDepositConstants besitzt eine unerwartete Größe. " &
+                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                                " Byte.")
+
+        End If
+
+        bufferDescription = New BufferDescription()
+
+        bufferDescription.ByteWidth = CUInt(bufferGroesse)
+        bufferDescription.Usage = ResourceUsage.Default
+        bufferDescription.BindFlags = BindFlags.ConstantBuffer
+        bufferDescription.CPUAccessFlags = CpuAccessFlags.None
+        bufferDescription.MiscFlags = ResourceOptionFlags.None
+        bufferDescription.StructureByteStride = 0UI
+
+        pigmentDepositConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
+
+        If pigmentDepositConstantBuffer Is Nothing Then
+            Throw New InvalidOperationException("Der PigmentDeposit-ConstantBuffer konnte nicht erzeugt werden.")
+        End If
+
+    End Sub
+
+    Private Sub AktualisierePigmentDepositConstantBuffer()
+
+        Dim pigmentDepositParameter As PigmentDepositConstants
+
+        pigmentDepositParameter.adsorptionStrength = PIGMENT_DEPOSIT_ADSORPTION_STRENGTH
+        pigmentDepositParameter.desorptionStrength = PIGMENT_DEPOSIT_DESORPTION_STRENGTH
+        pigmentDepositParameter.minimumPressure = PIGMENT_DEPOSIT_MIN_PRESSURE
+        pigmentDepositParameter.referencePressure = PIGMENT_DEPOSIT_REFERENCE_PRESSURE
+
+        renderContext.UpdateSubresource(pigmentDepositParameter, pigmentDepositConstantBuffer)
+
+    End Sub
+
     Private Sub InitialisiereWaterFlowConstantBuffer()
 
         Dim bufferDescription As BufferDescription
@@ -1420,13 +1494,6 @@ Friend Class D3DRenderer
 
             ' ============================================================
             ' 1. Druckgradient erzeugt Geschwindigkeit
-            '
-            ' sourcePressure
-            '        ↓
-            ' sourceVelocity
-            '
-            ' BerechneVelocityAusPressure() führt weiterhin seinen eigenen
-            ' Velocity-Ping-Pong durch.
             ' ============================================================
 
             BerechneVelocityAusPressure()
@@ -1435,11 +1502,12 @@ Friend Class D3DRenderer
             ' ============================================================
             ' 2. Wassertransport
             '
-            ' sourcePressure + sourceVelocity
-            '                  ↓
-            '             targetPressure
+            ' sourcePressure
+            ' sourceVelocity
             '
-            ' Noch KEIN Swap.
+            '       ↓
+            '
+            ' targetPressure
             ' ============================================================
 
             BerechnePressureAusVelocity()
@@ -1449,32 +1517,57 @@ Friend Class D3DRenderer
             ' 3. Wassergekoppelter Pigmenttransport
             '
             ' sourcePigmentSuspension
-            ' sourceVelocity
-            ' sourcePressure
-            ' targetPressure
             '
-            '          ↓
+            '       ↓
             '
             ' targetPigmentSuspension
-            '
-            ' Noch KEIN Swap.
             ' ============================================================
 
             BerechnePigmentTransport()
 
 
             ' ============================================================
-            ' 4. Gemeinsamer Abschluss der Simulationszeitscheibe
+            ' 4. Adsorption / Desorption
             '
-            ' Wasser und Pigment wechseln JETZT gleichzeitig von
-            ' Zustand n nach Zustand n + 1.
+            ' targetPigmentSuspension
+            ' sourcePigmentDeposit
+            ' targetPressure
+            '
+            '       ↓
+            '
+            ' sourcePigmentSuspension
+            ' targetPigmentDeposit
+            '
+            ' Die endgültige Suspension wird bewusst wieder nach
+            ' sourcePigmentSuspension geschrieben.
+            ' ============================================================
+
+            BerechnePigmentDeposit()
+
+
+            ' ============================================================
+            ' 5. Abschluss der Simulationszeitscheibe
+            '
+            ' Pressure:
+            '
+            '     target -> source
+            '
+            ' Deposit:
+            '
+            '     target -> source
+            '
+            ' Suspension:
+            '
+            '     KEIN Swap!
+            '
+            ' Sie liegt nach BerechnePigmentDeposit() bereits endgültig in
+            ' sourcePigmentSuspension.
             ' ============================================================
 
             TauschePressureRessourcen()
-            TauschePigmentSuspensionRessourcen()
+            TauschePigmentDepositRessourcen()
 
         Next
-
 
         ' ================================================================
         ' Pipeline sauber verlassen
@@ -1906,6 +1999,83 @@ Friend Class D3DRenderer
 
     End Sub
 
+    Private Sub BerechnePigmentDeposit()
+
+        Dim renderTargets() As ID3D11RenderTargetView
+
+
+        AktualisierePigmentDepositConstantBuffer()
+
+
+        ' ================================================================
+        ' Adsorption / Desorption
+        '
+        ' Eingaben:
+        '
+        '     targetPigmentSuspension
+        '         = bereits transportierte Suspension dieser Zeitscheibe
+        '
+        '     sourcePigmentDeposit
+        '         = bisher abgelagertes Pigment
+        '
+        '     targetPressure
+        '         = bereits transportierter Wasserzustand n + 1
+        '
+        '                         ↓
+        '
+        ' Ausgaben:
+        '
+        '     sourcePigmentSuspension
+        '         = endgültige Suspension n + 1
+        '
+        '     targetPigmentDeposit
+        '         = endgültiger Deposit n + 1
+        '
+        ' WICHTIG:
+        '
+        ' Wir schreiben die fertige Suspension bewusst zurück nach
+        ' sourcePigmentSuspension.
+        '
+        ' Dadurch benötigen wir keine dritte Suspension-Texture.
+        ' ================================================================
+
+        renderTargets =
+            New ID3D11RenderTargetView() {
+                sourcePigmentSuspensionTargetView,
+                targetPigmentDepositTargetView
+            }
+
+        renderContext.OMSetRenderTargets(renderTargets)
+
+        SetzeVollbildViewport()
+
+        renderContext.IASetPrimitiveTopology(PrimitiveTopology.TriangleList)
+        renderContext.OMSetBlendState(Nothing)
+
+        renderContext.VSSetShader(pigmentDepositVertexShader)
+        renderContext.PSSetShader(pigmentDepositPixelShader)
+
+        renderContext.PSSetConstantBuffer(0UI, pigmentDepositConstantBuffer)
+        renderContext.PSSetShaderResource(0UI, targetPigmentSuspensionView)
+        renderContext.PSSetShaderResource(1UI, sourcePigmentDepositView)
+        renderContext.PSSetShaderResource(2UI, targetPressureView)
+
+        renderContext.Draw(3UI, 0UI)
+
+        ' ================================================================
+        ' Pipeline vollständig lösen
+        ' ================================================================
+
+        renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
+        renderContext.PSSetShaderResource(2UI, Nothing)
+
+        renderContext.PSSetConstantBuffer(0UI, Nothing)
+
+        D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
     Private Sub TauschePigmentSuspensionRessourcen()
 
         Dim tempTexture As ID3D11Texture2D
@@ -1923,6 +2093,29 @@ Friend Class D3DRenderer
         tempTargetView = sourcePigmentSuspensionTargetView
         sourcePigmentSuspensionTargetView = targetPigmentSuspensionTargetView
         targetPigmentSuspensionTargetView = tempTargetView
+
+    End Sub
+
+    Private Sub TauschePigmentDepositRessourcen()
+
+        Dim tempTexture As ID3D11Texture2D
+        Dim tempView As ID3D11ShaderResourceView
+        Dim tempTargetView As ID3D11RenderTargetView
+
+
+        tempTexture = sourcePigmentDepositTexture
+        sourcePigmentDepositTexture = targetPigmentDepositTexture
+        targetPigmentDepositTexture = tempTexture
+
+
+        tempView = sourcePigmentDepositView
+        sourcePigmentDepositView = targetPigmentDepositView
+        targetPigmentDepositView = tempView
+
+
+        tempTargetView = sourcePigmentDepositTargetView
+        sourcePigmentDepositTargetView = targetPigmentDepositTargetView
+        targetPigmentDepositTargetView = tempTargetView
 
     End Sub
 
@@ -2014,6 +2207,7 @@ Friend Class D3DRenderer
     Private Sub InitialisierePigmentzustand()
 
         InitialisierePigmentSuspension()
+        InitialisierePigmentDeposit()
 
     End Sub
 
@@ -2033,6 +2227,16 @@ Friend Class D3DRenderer
         renderContext.PSSetShaderResource(0UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
+
+    End Sub
+
+    Private Sub InitialisierePigmentDeposit()
+
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, sourcePigmentDepositTargetView, 0.0F, 0.0F, 0.0F,
+                                                 0.0F)
+
+        D3D11InteropHelper.ClearRenderTargetView(renderContext, targetPigmentDepositTargetView, 0.0F, 0.0F, 0.0F,
+                                                 0.0F)
 
     End Sub
 
@@ -2277,6 +2481,7 @@ Friend Class D3DRenderer
 
         renderContext.PSSetConstantBuffer(0UI, pigmentDisplayConstantBuffer)
         renderContext.PSSetShaderResource(0UI, sourcePigmentSuspensionView)
+        renderContext.PSSetShaderResource(1UI, sourcePigmentDepositView)
 
         renderContext.PSSetSampler(0UI, renderSampler)
 
@@ -2285,6 +2490,7 @@ Friend Class D3DRenderer
         ' Pipeline sauber verlassen.
 
         renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
         renderContext.PSSetConstantBuffer(0UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
@@ -2700,6 +2906,10 @@ Friend Class D3DRenderer
         Direct3DRessourceHandler.GebeFrei(pigmentTransportConstantBuffer)
         Direct3DRessourceHandler.GebeFrei(pigmentTransportPixelShader)
         Direct3DRessourceHandler.GebeFrei(pigmentTransportVertexShader)
+
+        Direct3DRessourceHandler.GebeFrei(pigmentDepositConstantBuffer)
+        Direct3DRessourceHandler.GebeFrei(pigmentDepositPixelShader)
+        Direct3DRessourceHandler.GebeFrei(pigmentDepositVertexShader)
 
     End Sub
 

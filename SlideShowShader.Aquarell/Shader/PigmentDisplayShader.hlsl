@@ -29,8 +29,8 @@ cbuffer PigmentDisplayConstants : register(b0)
 // Shader Resources
 // ============================================================================
 
-Texture2D<float4> pigmentTexture : register(t0);
-
+Texture2D<float4> suspensionTexture : register(t0);
+Texture2D<float4> depositTexture : register(t1);
 
 // ============================================================================
 // Sampler
@@ -78,15 +78,9 @@ VS_OUTPUT VSMain(uint vertexId : SV_VertexID)
         float2(2.0F, 1.0F)
     };
 
-    output.position =
-        float4(
-            positions[vertexId],
-            0.0F,
-            1.0F
-        );
+    output.position = float4(positions[vertexId], 0.0F, 1.0F);
 
-    output.texCoord =
-        texCoords[vertexId];
+    output.texCoord = texCoords[vertexId];
 
     return output;
 }
@@ -114,8 +108,9 @@ float4 PSMain(VS_OUTPUT input) : SV_TARGET
     // A   = Pigmentmasse
     // ------------------------------------------------------------------------
 
-    pigment = pigmentTexture.Sample(pigmentSampler, input.texCoord);
-
+    pigment =
+        suspensionTexture.Sample(pigmentSampler, input.texCoord) +
+        depositTexture.Sample(pigmentSampler, input.texCoord);
 
     // ------------------------------------------------------------------------
     // Pigmentmasse.
