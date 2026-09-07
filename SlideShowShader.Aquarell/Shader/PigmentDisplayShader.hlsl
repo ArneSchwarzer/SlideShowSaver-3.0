@@ -1,200 +1,390 @@
 // ============================================================================
-// PigmentDisplayShader.hlsl
+// PigmentDepositShader.hlsl
+// ============================================================================
 //
-// Wandelt den internen Pigmentzustand in das sichtbar ausgegebene
-// Aquarellbild um.
+// Aufgabe:
 //
-// PigmentTexture:
-//     RGB = premultiplizierte Pigmentfarbe
-//     A   = Pigmentmenge
+//      Tauscht Pigment zwischen zwei Zuständen aus:
 //
-// Dünn pigmentierte Bereiche werden mit der vom SlideShowSaver
-// vorgegebenen Hintergrundfarbe aufgefüllt.
+//          Suspension  = Pigment, das im Wasser transportiert wird
+//          Deposit     = Pigment, das auf / im Papier abgelagert ist
 //
-// Das Ausgabe-Alpha ist immer 1.0.
+// Curtis-nahe Interpretation:
+//
+//      g^k = suspendierte Pigmentkonzentration
+//      d^k = auf dem Papier abgelagertes Pigment
+//
+// Modelliert:
+//
+//      Adsorption:
+//          Suspension -> Deposit
+//
+//      Desorption:
+//          Deposit -> Suspension
+//
+// WICHTIG:
+//
+//      Der Shader erzeugt oder vernichtet KEIN Pigment.
+//
+//      Was aus der Suspension entfernt wird,
+//      wird exakt dem Deposit hinzugefügt.
+//
+//      Was aus dem Deposit desorbiert wird,
+//      wird exakt der Suspension hinzugefügt.
+//
+// Damit gilt lokal:
+//
+//      PigmentGesamt_neu = PigmentGesamt_alt
+//
+// adsorptionStrength und desorptionStrength werden NICHT als direkter
+// Pigmentanteil pro Curtis-Iteration interpretiert.
+//
+// Stattdessen sind sie zeitabhängige Austauschraten.
+//
+// Aus einer Rate k und dem Zeitschritt dt wird der tatsächlich innerhalb
+// einer Curtis-Iteration ausgetauschte Anteil:
+//
+//      factor = 1 - exp(-k * dt)
+//
+// Diese Form besitzt zwei wichtige Eigenschaften:
+//
+//      1. factor liegt immer im Bereich 0 ... 1.
+//
+//      2. Die Wirkung hängt wesentlich weniger von der willkürlich
+//         gewählten Anzahl der Curtis-Iterationen ab.
+//
+// Für V1.0 besitzt das Papier noch KEINE eigene AbsorbencyMap.
+//
+// Die vorhandene PaperMap beschreibt ausschließlich die Papierhöhe
+// und beeinflusst bereits die Wasserströmung.
+//
+// Eine echte papierabhängige Adsorption / Desorption folgt später.
+//
 // ============================================================================
 
 
 // ============================================================================
 // Constant Buffer
+//
+// exakt 32 Byte
 // ============================================================================
 
-cbuffer PigmentDisplayConstants : register(b0)
+cbuffer PigmentDepositConstants : register(b0)
 {
-    float4 backgroundColor;
+    float adsorptionStrength;
+    float desorptionStrength;
+
+    float minimumPressure;
+    float referencePressure;
+
+    float timeStep;
+
+    float reserve1;
+    float reserve2;
+    float reserve3;
 };
 
 
 // ============================================================================
-// Shader Resources
+// Eingaben
+//
+// t0 = bereits transportierte Pigment-Suspension
+// t1 = bisheriger Pigment-Deposit
+// t2 = bereits berechneter Pressure zum Zeitpunkt n + 1
+//
+// WICHTIG:
+//
+// Der Deposit-Pass läuft NACH dem PigmentTransport.
+//
+// Deshalb enthält suspensionTexture bereits das Transportergebnis
+// derselben Curtis-Iteration.
 // ============================================================================
 
 Texture2D<float4> suspensionTexture : register(t0);
 Texture2D<float4> depositTexture : register(t1);
-
-// ============================================================================
-// Sampler
-// ============================================================================
-
-SamplerState pigmentSampler : register(s0);
+Texture2D<float> pressureTexture : register(t2);
 
 
 // ============================================================================
-// Vertex-Ausgabe
+// Vertex Shader
 // ============================================================================
 
-struct VS_OUTPUT
+struct VSOutput
 {
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD0;
 };
 
 
-// ============================================================================
-// Vertex Shader
-//
-// Gleiche Fullscreen-Triangle-Geometrie wie beim Copy-Shader.
-//
-// Entscheidend:
-// Die Texturkoordinaten laufen unabhängig von der Position des Viewports
-// sauber über die vollständige Quelltexture.
-// ============================================================================
-
-VS_OUTPUT VSMain(uint vertexId : SV_VertexID)
+VSOutput VSMain(uint vertexId : SV_VertexID)
 {
-    VS_OUTPUT output;
+    VSOutput output;
 
-    float2 positions[3] =
+    float2 position;
+    float2 texCoord;
+
+
+    if (vertexId == 0)
     {
-        float2(-1.0F, -1.0F),
-        float2(-1.0F, 3.0F),
-        float2(3.0F, -1.0F)
-    };
-
-    float2 texCoords[3] =
+        position = float2(-1.0F, -1.0F);
+        texCoord = float2(0.0F, 1.0F);
+    }
+    else if (vertexId == 1)
     {
-        float2(0.0F, 1.0F),
-        float2(0.0F, -1.0F),
-        float2(2.0F, 1.0F)
-    };
+        position = float2(-1.0F, 3.0F);
+        texCoord = float2(0.0F, -1.0F);
+    }
+    else
+    {
+        position = float2(3.0F, -1.0F);
+        texCoord = float2(2.0F, 1.0F);
+    }
 
-    output.position = float4(positions[vertexId], 0.0F, 1.0F);
 
-    output.texCoord = texCoords[vertexId];
+    output.position = float4(position, 0.0F, 1.0F);
+    output.texCoord = texCoord;
+
 
     return output;
 }
 
 
 // ============================================================================
+// MRT-Ausgabe
+//
+// Target 0 = neue Suspension
+// Target 1 = neuer Deposit
+// ============================================================================
+
+struct PigmentDepositOutput
+{
+    float4 suspension : SV_TARGET0;
+    float4 deposit : SV_TARGET1;
+};
+
+
+// ============================================================================
 // Pixel Shader
 // ============================================================================
 
-float4 PSMain(VS_OUTPUT input) : SV_TARGET
+PigmentDepositOutput PSMain(VSOutput input)
 {
-    float4 pigment;
+    PigmentDepositOutput output;
 
-    float pigmentMass;
-    float coverage;
+    uint textureWidth;
+    uint textureHeight;
 
-    float3 pigmentColor;
-    float3 resultColor;
+    int2 pixelPosition;
 
 
-    // ------------------------------------------------------------------------
-    // Simulationszustand lesen.
+    float4 oldSuspension;
+    float4 oldDeposit;
+
+    float pressure;
+    float normalizedPressure;
+
+    float dryness;
+
+    float adsorptionFactor;
+    float desorptionFactor;
+
+    float4 adsorbedPigment;
+    float4 desorbedPigment;
+
+    float4 newSuspension;
+    float4 newDeposit;
+
+
+    // ========================================================================
+    // Aktuelle Pixelposition
+    // ========================================================================
+
+    suspensionTexture.GetDimensions(textureWidth, textureHeight);
+
+    pixelPosition = int2(input.position.xy);
+
+    pixelPosition =
+        clamp(
+            pixelPosition,
+            int2(0, 0),
+            int2(int(textureWidth) - 1, int(textureHeight) - 1)
+        );
+
+
+    // ========================================================================
+    // Zustände lesen
+    // ========================================================================
+
+    oldSuspension =
+        max(
+            suspensionTexture.Load(int3(pixelPosition, 0)),
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
+
+    oldDeposit =
+        max(
+            depositTexture.Load(int3(pixelPosition, 0)),
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
+
+    pressure =
+        max(
+            pressureTexture.Load(int3(pixelPosition, 0)),
+            0.0F
+        );
+
+
+    // ========================================================================
+    // Pressure normieren
     //
-    // RGB = premultiplizierte Pigmentfarbmasse
-    // A   = Pigmentmasse
-    // ------------------------------------------------------------------------
-
-    pigment =
-        suspensionTexture.Sample(pigmentSampler, input.texCoord) +
-        depositTexture.Sample(pigmentSampler, input.texCoord);
-
-    // ------------------------------------------------------------------------
-    // Pigmentmasse.
+    // referencePressure bedeutet:
     //
-    // Anders als früher wird diese NICHT auf 0 ... 1 begrenzt.
-    // ------------------------------------------------------------------------
+    //      pressure >= referencePressure
+    //          -> vollständig "nass"
+    //
+    //      pressure == 0
+    //          -> vollständig "trocken"
+    //
+    // Die Normierung dient ausschließlich der Adsorptions-/
+    // Desorptionslogik.
+    //
+    // Der eigentliche Pressure-Zustand wird nicht verändert.
+    // ========================================================================
 
-    pigmentMass = max(pigment.a, 0.0F);
+    normalizedPressure = saturate(pressure / max(referencePressure, minimumPressure));
 
 
-    // ------------------------------------------------------------------------
-    // Eigentliche Pigmentfarbe aus der premultiplizierten Farbmasse
-    // zurückgewinnen.
+    // ========================================================================
+    // Trockenheit
     //
-    // Beispiel:
+    //      normalizedPressure = 1
+    //          -> dryness = 0
     //
-    //      RGB = 0.4 * Rot
-    //      A   = 0.4
+    //      normalizedPressure = 0
+    //          -> dryness = 1
     //
-    // ergibt wieder:
+    // Die quadratische Kennlinie sorgt dafür, dass Pigment in gut
+    // benetzten Bereichen länger mobil bleibt.
     //
-    //      Pigmentfarbe = Rot
+    // Erst mit zunehmender Austrocknung steigt die Adsorption deutlich an.
     //
-    // Bei praktisch pigmentfreien Pixeln verwenden wir Schwarz als
-    // bedeutungslosen Fallback; wegen coverage = 0 wird dieser Wert ohnehin
-    // nicht sichtbar.
-    // ------------------------------------------------------------------------
+    // Dies verhindert insbesondere, dass Pigment bereits während einer
+    // noch kräftigen Strömung sofort auf dem Papier festgesetzt wird.
+    // ========================================================================
 
-    if (pigmentMass > 0.00001F)
+    dryness = 1.0F - normalizedPressure;
+
+    dryness = dryness * dryness;
+
+
+    // ========================================================================
+    // Adsorption
+    //
+    // adsorptionStrength ist eine Rate und KEIN direkter Anteil.
+    //
+    // Die diskrete Austauschmenge ergibt sich aus:
+    //
+    //      factor = 1 - exp(-rate * dt)
+    //
+    // Zusätzlich wird die Rate durch die lokale Trockenheit gewichtet.
+    // ========================================================================
+
+    adsorptionFactor =
+        1.0F -
+        exp(
+            -max(adsorptionStrength, 0.0F)
+            * max(timeStep, 0.0F)
+            * dryness
+        );
+
+
+    // ========================================================================
+    // Desorption
+    //
+    // Deposit kann nur wieder mobilisiert werden, wenn Wasser vorhanden ist.
+    //
+    // Je stärker die Benetzung, desto größer die mögliche Desorption.
+    //
+    // Für den aktuellen Test bleibt desorptionStrength auf 0.
+    //
+    // Die vollständige Logik bleibt trotzdem bereits korrekt implementiert.
+    // ========================================================================
+
+    if (pressure > minimumPressure)
     {
-        pigmentColor = pigment.rgb / pigmentMass;
+        desorptionFactor =
+            1.0F -
+            exp(
+                -max(desorptionStrength, 0.0F)
+                * max(timeStep, 0.0F)
+                * normalizedPressure
+            );
     }
     else
     {
-        pigmentColor = float3(0.0F, 0.0F, 0.0F);
+        desorptionFactor = 0.0F;
     }
 
 
-    // ------------------------------------------------------------------------
-    // Pigmentmasse -> sichtbare Deckung.
+    // ========================================================================
+    // Tatsächlich ausgetauschte Pigmentmengen
     //
-    // V0.x:
+    // Beide Faktoren liegen mathematisch im Bereich 0 ... 1.
     //
-    // Für den ersten Diagnosetest verwenden wir bewusst die einfachste
-    // mögliche Abbildung.
-    //
-    //      Masse 0.0 -> 0 % Deckung
-    //      Masse 0.5 -> 50 % Deckung
-    //      Masse 1.0 -> 100 % Deckung
-    //      Masse >1  -> weiterhin 100 % Deckung
-    //
-    // WICHTIG:
-    //
-    // Pigmentmasse > 1.0 bleibt INTERN vollständig erhalten.
-    // Lediglich die sichtbare Deckung sättigt bei 1.0.
-    //
-    // Dadurch kann akkumuliertes Pigment in späteren Iterationen wieder
-    // weitertransportiert werden.
-    // ------------------------------------------------------------------------
+    // Deshalb kann niemals mehr Pigment aus einem Zustand entnommen werden,
+    // als dort tatsächlich vorhanden ist.
+    // ========================================================================
 
-    coverage = saturate(pigmentMass);
+    adsorbedPigment = oldSuspension * adsorptionFactor;
+    desorbedPigment = oldDeposit * desorptionFactor;
 
 
-    // ------------------------------------------------------------------------
-    // Sichtbare Pigmentfarbe über HintergrundFarbeSaver komponieren.
+    // ========================================================================
+    // Neue Zustände
     //
-    // Kein Alpha-Blending mit einem eventuell noch hinter dem Shader
-    // sichtbaren alten SSS-Bild.
+    // Massenerhaltend:
     //
-    // Das Resultat wird deshalb explizit vollständig aus:
+    // Suspension:
     //
-    //      Pigmentfarbe
-    //      +
-    //      HintergrundFarbeSaver
+    //      alt
+    //      - Adsorption
+    //      + Desorption
     //
-    // aufgebaut.
-    // ------------------------------------------------------------------------
+    // Deposit:
+    //
+    //      alt
+    //      + Adsorption
+    //      - Desorption
+    // ========================================================================
 
-    resultColor = pigmentColor * coverage + backgroundColor.rgb * (1.0F - coverage);
+    newSuspension = oldSuspension - adsorbedPigment  + desorbedPigment;
+    newDeposit = oldDeposit + adsorbedPigment - desorbedPigment;
 
 
-    // ------------------------------------------------------------------------
-    // Ausgabe vollständig opak.
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // Numerisches Sicherheitsnetz
+    // ========================================================================
 
-    return float4(saturate(resultColor), 1.0F);
+    newSuspension =
+        max(
+            newSuspension,
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
+
+    newDeposit =
+        max(
+            newDeposit,
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
+
+
+    // ========================================================================
+    // MRT-Ausgabe
+    // ========================================================================
+
+    output.suspension = newSuspension;
+    output.deposit = newDeposit;
+
+
+    return output;
 }

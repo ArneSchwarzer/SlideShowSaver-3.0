@@ -63,7 +63,9 @@ Friend Class D3DRenderer
     Private Const PIGMENT_TRANSPORT_STRENGTH As Single = 1.0F
     Private Const PIGMENT_TRANSPORT_MIN_PRESSURE As Single = 0.0001F
 
-    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 128.0F
+    Private Const PIGMENT_DEPOSIT_TIME_STEP As Single = 0.2F
+
+    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 0.1F
     Private Const PIGMENT_DEPOSIT_DESORPTION_STRENGTH As Single = 0.0F
 
     Private Const PIGMENT_DEPOSIT_MIN_PRESSURE As Single = 0.0001F
@@ -388,6 +390,12 @@ Friend Class D3DRenderer
 
         Public minimumPressure As Single
         Public referencePressure As Single
+
+        Public timeStep As Single
+
+        Public reserve1 As Single
+        Public reserve2 As Single
+        Public reserve3 As Single
 
     End Structure
 
@@ -1337,13 +1345,14 @@ Friend Class D3DRenderer
         bufferGroesse = Marshal.SizeOf(GetType(PigmentDepositConstants))
 
 
-        If bufferGroesse <> 16 Then
+        If bufferGroesse <> 32 Then
 
             Throw New InvalidOperationException("PigmentDepositConstants besitzt eine unerwartete Größe. " &
-                                                "Erwartet: 16 Byte, tatsächlich: " & bufferGroesse.ToString() &
-                                                " Byte.")
+                                            "Erwartet: 32 Byte, tatsächlich: " & bufferGroesse.ToString() &
+                                            " Byte.")
 
         End If
+
 
         bufferDescription = New BufferDescription()
 
@@ -1356,8 +1365,11 @@ Friend Class D3DRenderer
 
         pigmentDepositConstantBuffer = renderDevice.CreateBuffer(bufferDescription)
 
+
         If pigmentDepositConstantBuffer Is Nothing Then
+
             Throw New InvalidOperationException("Der PigmentDeposit-ConstantBuffer konnte nicht erzeugt werden.")
+
         End If
 
     End Sub
@@ -1366,10 +1378,19 @@ Friend Class D3DRenderer
 
         Dim pigmentDepositParameter As PigmentDepositConstants
 
+
         pigmentDepositParameter.adsorptionStrength = PIGMENT_DEPOSIT_ADSORPTION_STRENGTH
         pigmentDepositParameter.desorptionStrength = PIGMENT_DEPOSIT_DESORPTION_STRENGTH
+
         pigmentDepositParameter.minimumPressure = PIGMENT_DEPOSIT_MIN_PRESSURE
         pigmentDepositParameter.referencePressure = PIGMENT_DEPOSIT_REFERENCE_PRESSURE
+
+        pigmentDepositParameter.timeStep = PIGMENT_DEPOSIT_TIME_STEP
+
+        pigmentDepositParameter.reserve1 = 0.0F
+        pigmentDepositParameter.reserve2 = 0.0F
+        pigmentDepositParameter.reserve3 = 0.0F
+
 
         renderContext.UpdateSubresource(pigmentDepositParameter, pigmentDepositConstantBuffer)
 
