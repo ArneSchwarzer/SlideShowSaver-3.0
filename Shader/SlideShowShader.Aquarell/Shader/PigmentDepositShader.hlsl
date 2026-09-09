@@ -14,7 +14,7 @@
 //      g^k = suspendierte Pigmentkonzentration
 //      d^k = auf dem Papier abgelagertes Pigment
 //
-// Dieser erste Entwicklungsstand modelliert:
+// Dieser Entwicklungsstand modelliert:
 //
 //      Adsorption:
 //          Suspension -> Deposit
@@ -48,7 +48,9 @@
 // ============================================================================
 // Constant Buffer
 //
-// exakt 16 Byte
+// exakt 32 Byte
+//
+// Muss exakt PigmentDepositConstants auf VB-Seite entsprechen.
 // ============================================================================
 
 cbuffer PigmentDepositConstants : register(b0)
@@ -58,6 +60,12 @@ cbuffer PigmentDepositConstants : register(b0)
 
     float minimumPressure;
     float referencePressure;
+
+    float timeStep;
+
+    float reserve1;
+    float reserve2;
+    float reserve3;
 };
 
 
@@ -160,6 +168,9 @@ PigmentDepositOutput PSMain(VSOutput input)
     float normalizedPressure;
 
 
+    float adsorptionRate;
+    float desorptionRate;
+
     float adsorptionFactor;
     float desorptionFactor;
 
@@ -222,15 +233,21 @@ PigmentDepositOutput PSMain(VSOutput input)
     //      pressure == 0
     //          -> vollständig "trocken"
     //
-    // Die Normierung dient ausschließlich der Adsorptions-/Desorptionslogik.
+    // Die Normierung dient ausschließlich der Adsorptions-/
+    // Desorptionslogik.
+    //
     // Der eigentliche Pressure-Zustand wird nicht verändert.
     // ========================================================================
 
-    normalizedPressure = saturate(pressure / max(referencePressure, minimumPressure));
+    normalizedPressure =
+        saturate(
+            pressure /
+            max(referencePressure, minimumPressure)
+        );
 
 
     // ========================================================================
-    // Adsorption
+    // Adsorptionsrate
     //
     // Wenig Wasser:
     //
@@ -240,45 +257,77 @@ PigmentDepositOutput PSMain(VSOutput input)
     //
     //      Pigment bleibt eher in Suspension.
     //
-    // adsorptionStrength wird als Anteil pro Curtis-Iteration verstanden.
+    // adsorptionStrength beschreibt die Stärke der Adsorption pro
+    // Simulationseinheit.
+    //
+    // Erst durch Multiplikation mit timeStep wird daraus die tatsächlich
+    // in DIESER Curtis-Iteration wirksame Rate.
     // ========================================================================
 
-    adsorptionFactor = saturate(adsorptionStrength * (1.0F - normalizedPressure));
+    adsorptionRate =
+        adsorptionStrength *
+        (1.0F - normalizedPressure);
 
 
     // ========================================================================
-    // Desorption
+    // Desorptionsrate
     //
     // Deposit kann nur wieder mobilisiert werden, wenn überhaupt Wasser
     // vorhanden ist.
     //
     // Je stärker die Benetzung, desto größer die mögliche Desorption.
-    //
-    // Bei praktisch trockenem Papier:
-    //
-    //      desorptionFactor = 0
     // ========================================================================
 
     if (pressure > minimumPressure)
     {
-        desorptionFactor = saturate(desorptionStrength * normalizedPressure);
+        desorptionRate =
+            desorptionStrength *
+            normalizedPressure;
     }
     else
     {
-        desorptionFactor = 0.0F;
+        desorptionRate = 0.0F;
     }
+
+
+    // ========================================================================
+    // Rate -> Anteil dieser Curtis-Iteration
+    //
+    // timeStep koppelt Adsorption und Desorption an dieselbe zeitliche
+    // Diskretisierung wie die übrige Simulation.
+    //
+    // saturate stellt sicher:
+    //
+    //      0 <= Faktor <= 1
+    //
+    // Somit kann innerhalb einer Iteration niemals mehr Pigment übertragen
+    // werden, als im jeweiligen Zustand vorhanden ist.
+    // ========================================================================
+
+    adsorptionFactor =
+        saturate(
+            adsorptionRate *
+            max(timeStep, 0.0F)
+        );
+
+    desorptionFactor =
+        saturate(
+            desorptionRate *
+            max(timeStep, 0.0F)
+        );
 
 
     // ========================================================================
     // Tatsächlich ausgetauschte Pigmentmengen
-    //
-    // Da beide Faktoren auf 0 ... 1 begrenzt sind, kann niemals mehr
-    // Pigment entnommen werden, als im jeweiligen Zustand vorhanden ist.
     // ========================================================================
 
-    adsorbedPigment = oldSuspension * adsorptionFactor;
+    adsorbedPigment =
+        oldSuspension *
+        adsorptionFactor;
 
-    desorbedPigment = oldDeposit * desorptionFactor;
+    desorbedPigment =
+        oldDeposit *
+        desorptionFactor;
 
 
     // ========================================================================
@@ -297,20 +346,42 @@ PigmentDepositOutput PSMain(VSOutput input)
     //      alt
     //      + Adsorption
     //      - Desorption
+    //
+    // Dadurch gilt lokal weiterhin:
+    //
+    //      newSuspension + newDeposit
+    //
+    //          =
+    //
+    //      oldSuspension + oldDeposit
     // ========================================================================
 
-    newSuspension = oldSuspension - adsorbedPigment + desorbedPigment;
+    newSuspension =
+        oldSuspension
+        - adsorbedPigment
+        + desorbedPigment;
 
-    newDeposit = oldDeposit + adsorbedPigment - desorbedPigment;
+    newDeposit =
+        oldDeposit
+        + adsorbedPigment
+        - desorbedPigment;
 
 
     // ========================================================================
     // Numerisches Sicherheitsnetz
     // ========================================================================
 
-    newSuspension = max(newSuspension, float4(0.0F, 0.0F, 0.0F, 0.0F));
+    newSuspension =
+        max(
+            newSuspension,
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
 
-    newDeposit = max(newDeposit, float4(0.0F, 0.0F, 0.0F, 0.0F));
+    newDeposit =
+        max(
+            newDeposit,
+            float4(0.0F, 0.0F, 0.0F, 0.0F)
+        );
 
 
     // ========================================================================

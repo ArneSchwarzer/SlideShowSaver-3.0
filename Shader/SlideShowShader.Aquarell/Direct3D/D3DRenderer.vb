@@ -65,7 +65,7 @@ Friend Class D3DRenderer
 
     Private Const PIGMENT_DEPOSIT_TIME_STEP As Single = 0.2F
 
-    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 0.1F
+    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 1.0F
     Private Const PIGMENT_DEPOSIT_DESORPTION_STRENGTH As Single = 0.0F
 
     Private Const PIGMENT_DEPOSIT_MIN_PRESSURE As Single = 0.0001F
