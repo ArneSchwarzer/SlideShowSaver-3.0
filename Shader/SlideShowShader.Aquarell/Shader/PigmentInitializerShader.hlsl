@@ -193,7 +193,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // Die Konzentration wird NICHT persistent gespeichert.
     // ========================================================================
 
-    initialPigmentConcentration = 1.0F;
+    // initialPigmentConcentration = 1.0F;
 
 
     // ========================================================================
@@ -206,10 +206,42 @@ float4 PSMain(VSOutput input) : SV_TARGET
     //      m = p
     // ========================================================================
 
-    initialPigmentMass =
-        pressure *
-        initialPigmentConcentration;
+    // initialPigmentMass = pressure * initialPigmentConcentration;
 
+    // ========================================================================
+// DIAGNOSETEST:
+// Konstante initiale Pigmentmasse
+//
+// Bisher:
+//
+//      initialPigmentMass = pressure * initialPigmentConcentration
+//
+// Dadurch entstand an jeder Regionsgrenze zwangsläufig:
+//
+//      RegionDistance = 0
+//          -> Pressure = 0
+//          -> PigmentMass = 0
+//
+// Damit wurde bereits bei der Initialisierung ein pigmentfreier Graben
+// entlang jeder Kuwahara-Regionsgrenze erzeugt.
+//
+// Für diesen Test entkoppeln wir die anfängliche Pigmentmasse vollständig
+// vom Pressure:
+//
+//      initialPigmentMass = 1
+//
+// Pressure bleibt unverändert und steuert weiterhin die Wasserbewegung.
+// Nur die anfängliche Pigmentverteilung ist jetzt überall gleich.
+//
+// Wenn die weißen Halos dadurch deutlich schwächer werden oder
+// verschwinden, war ihre Hauptursache bereits die bisherige
+// Pigmentinitialisierung.
+// ========================================================================
+
+    initialPigmentConcentration = 1.0F;
+
+    initialPigmentMass = 1.0F;
+    
 
     // ========================================================================
     // Premultiplizierte Pigmentfarbe
