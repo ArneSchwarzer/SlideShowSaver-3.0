@@ -29,13 +29,16 @@ set "CONFIGURATION=Debug"
 set "BUILD=%PLATFORM%\%CONFIGURATION%"
 set "MAIN=%ROOT%\SlideShowMain\bin\%BUILD%"
 
+set "SOURCE_MODULE=%ROOT%\Module"
+set "SOURCE_TRANSITIONS=%ROOT%\Transitions"
+set "SOURCE_SHADER=%ROOT%\Shader"
+
 set "TARGET_MODULE=%MAIN%\Module"
 set "TARGET_TRANSITIONS=%MAIN%\Transitions"
 set "TARGET_SHADER=%MAIN%\Shader"
 set "TARGET_ORTE=%MAIN%\Orte"
 
 set "SOURCE_ORTE=%ROOT%\SlideShowTools\Orte"
-
 
 echo.
 echo ============================================================================
@@ -76,26 +79,25 @@ echo ===========================================================================
 echo.
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowWPFModul.Mandelbrot\bin\%BUILD%\SlideShowWPFModul.Mandelbrot.dll" ^
-    "%ROOT%\SlideShowWPFModul.Mandelbrot\bin\%BUILD%\SlideShowWPFModul.Mandelbrot.pdb" ^
+    "%SOURCE_MODULE%\SlideShowWPFModul.Mandelbrot\bin\%BUILD%\SlideShowWPFModul.Mandelbrot.dll" ^
+    "%SOURCE_MODULE%\SlideShowWPFModul.Mandelbrot\bin\%BUILD%\SlideShowWPFModul.Mandelbrot.pdb" ^
     "%TARGET_MODULE%\Mandelbrot.sssm" ^
     "%TARGET_MODULE%\Mandelbrot.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowModul.Matrix\bin\%BUILD%\SlideShowModul.Matrix.dll" ^
-    "%ROOT%\SlideShowModul.Matrix\bin\%BUILD%\SlideShowModul.Matrix.pdb" ^
+    "%SOURCE_MODULE%\SlideShowModul.Matrix\bin\%BUILD%\SlideShowModul.Matrix.dll" ^
+    "%SOURCE_MODULE%\SlideShowModul.Matrix\bin\%BUILD%\SlideShowModul.Matrix.pdb" ^
     "%TARGET_MODULE%\Matrix.sssm" ^
     "%TARGET_MODULE%\Matrix.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowWPFModul.SlideShowSaver 3.0\bin\%BUILD%\SlideShowWPFModul.SlideShowSaver 3.0.dll" ^
-    "%ROOT%\SlideShowWPFModul.SlideShowSaver 3.0\bin\%BUILD%\SlideShowWPFModul.SlideShowSaver 3.0.pdb" ^
+    "%SOURCE_MODULE%\SlideShowWPFModul.SlideShowSaver 3.0\bin\%BUILD%\SlideShowWPFModul.SlideShowSaver 3.0.dll" ^
+    "%SOURCE_MODULE%\SlideShowWPFModul.SlideShowSaver 3.0\bin\%BUILD%\SlideShowWPFModul.SlideShowSaver 3.0.pdb" ^
     "%TARGET_MODULE%\SlideShowSaver 3.0.sssm" ^
     "%TARGET_MODULE%\SlideShowSaver 3.0.pdb"
 if errorlevel 1 goto :Error
-
 
 :: ============================================================================
 :: TRANSITIONEN
@@ -108,50 +110,50 @@ echo ===========================================================================
 echo.
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowTransition.Cut\bin\%BUILD%\SlideShowTransition.Cut.dll" ^
-    "%ROOT%\SlideShowTransition.Cut\bin\%BUILD%\SlideShowTransition.Cut.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.Cut\bin\%BUILD%\SlideShowTransition.Cut.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.Cut\bin\%BUILD%\SlideShowTransition.Cut.pdb" ^
     "%TARGET_TRANSITIONS%\Direkter Uebergang.ssst" ^
     "%TARGET_TRANSITIONS%\Direkter Uebergang.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowWPFTransition.SchiebenWischen\bin\%BUILD%\SlideShowWPFTransition.SchiebenWischen.dll" ^
-    "%ROOT%\SlideShowWPFTransition.SchiebenWischen\bin\%BUILD%\SlideShowWPFTransition.SchiebenWischen.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowWPFTransition.SchiebenWischen\bin\%BUILD%\SlideShowWPFTransition.SchiebenWischen.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowWPFTransition.SchiebenWischen\bin\%BUILD%\SlideShowWPFTransition.SchiebenWischen.pdb" ^
     "%TARGET_TRANSITIONS%\Schieben und Wischen.ssst" ^
     "%TARGET_TRANSITIONS%\Schieben und Wischen.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowWPFTransition.Zoom\bin\%BUILD%\SlideShowWPFTransition.Zoom.dll" ^
-    "%ROOT%\SlideShowWPFTransition.Zoom\bin\%BUILD%\SlideShowWPFTransition.Zoom.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowWPFTransition.Zoom\bin\%BUILD%\SlideShowWPFTransition.Zoom.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowWPFTransition.Zoom\bin\%BUILD%\SlideShowWPFTransition.Zoom.pdb" ^
     "%TARGET_TRANSITIONS%\Zoom.ssst" ^
     "%TARGET_TRANSITIONS%\Zoom.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowTransition.BlendenUeberblenden\bin\%BUILD%\BlendenUeberblenden.dll" ^
-    "%ROOT%\SlideShowTransition.BlendenUeberblenden\bin\%BUILD%\BlendenUeberblenden.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.BlendenUeberblenden\bin\%BUILD%\BlendenUeberblenden.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.BlendenUeberblenden\bin\%BUILD%\BlendenUeberblenden.pdb" ^
     "%TARGET_TRANSITIONS%\Blenden und Ueberblenden.ssst" ^
     "%TARGET_TRANSITIONS%\Blenden und Ueberblenden.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowTransition.GradientWischen\bin\%BUILD%\SlideShowTransition.GradientWischen.dll" ^
-    "%ROOT%\SlideShowTransition.GradientWischen\bin\%BUILD%\SlideShowTransition.GradientWischen.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.GradientWischen\bin\%BUILD%\SlideShowTransition.GradientWischen.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.GradientWischen\bin\%BUILD%\SlideShowTransition.GradientWischen.pdb" ^
     "%TARGET_TRANSITIONS%\GradientWischen.ssst" ^
     "%TARGET_TRANSITIONS%\GradientWischen.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowTransition.BrennendesPapier\bin\%BUILD%\SlideShowTransition.BrennendesPapier.dll" ^
-    "%ROOT%\SlideShowTransition.BrennendesPapier\bin\%BUILD%\SlideShowTransition.BrennendesPapier.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.BrennendesPapier\bin\%BUILD%\SlideShowTransition.BrennendesPapier.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.BrennendesPapier\bin\%BUILD%\SlideShowTransition.BrennendesPapier.pdb" ^
     "%TARGET_TRANSITIONS%\Brennendes Papier.ssst" ^
     "%TARGET_TRANSITIONS%\Brennendes Papier.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.dll" ^
-    "%ROOT%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.pdb" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.dll" ^
+    "%SOURCE_TRANSITIONS%\SlideShowTransition.VomWindeVerweht\bin\%BUILD%\SlideShowTransition.VomWindeVerweht.pdb" ^
     "%TARGET_TRANSITIONS%\Vom Winde verweht.ssst" ^
     "%TARGET_TRANSITIONS%\Vom Winde verweht.pdb"
 if errorlevel 1 goto :Error
@@ -167,61 +169,67 @@ echo ===========================================================================
 echo.
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.dll" ^
-    "%ROOT%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.Aquarell\bin\%BUILD%\SlideShowShader.Aquarell.pdb" ^
     "%TARGET_SHADER%\Aquarell.ssss" ^
     "%TARGET_SHADER%\Aquarell.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.dll" ^
-    "%ROOT%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.Halftone\bin\%BUILD%\SlideShowShader.Halftone.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.Halftone\bin\%BUILD%\SlideShowShader.Halftone.pdb" ^
+    "%TARGET_SHADER%\Halftone.ssss" ^
+    "%TARGET_SHADER%\Halftone.pdb"
+if errorlevel 1 goto :Error
+
+call :ExportPlugin ^
+    "%SOURCE_SHADER%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.Invertieren\bin\%BUILD%\SlideShowShader.Invertieren.pdb" ^
     "%TARGET_SHADER%\Invertieren.ssss" ^
     "%TARGET_SHADER%\Invertieren.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.Nachtsicht\bin\%BUILD%\SlideShowShader.Nachtsicht.dll" ^
-    "%ROOT%\SlideShowShader.Nachtsicht\bin\%BUILD%\SlideShowShader.Nachtsicht.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.Nachtsicht\bin\%BUILD%\SlideShowShader.Nachtsicht.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.Nachtsicht\bin\%BUILD%\SlideShowShader.Nachtsicht.pdb" ^
     "%TARGET_SHADER%\Nachtsicht.ssss" ^
     "%TARGET_SHADER%\Nachtsicht.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.Originalbild\bin\%BUILD%\SlideShowShader.Originalbild.dll" ^
-    "%ROOT%\SlideShowShader.Originalbild\bin\%BUILD%\SlideShowShader.Originalbild.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.Originalbild\bin\%BUILD%\SlideShowShader.Originalbild.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.Originalbild\bin\%BUILD%\SlideShowShader.Originalbild.pdb" ^
     "%TARGET_SHADER%\Originalbild.ssss" ^
     "%TARGET_SHADER%\Originalbild.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.SchwarzWeiss\bin\%BUILD%\SlideShowShader.SchwarzWeiss.dll" ^
-    "%ROOT%\SlideShowShader.SchwarzWeiss\bin\%BUILD%\SlideShowShader.SchwarzWeiss.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.SchwarzWeiss\bin\%BUILD%\SlideShowShader.SchwarzWeiss.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.SchwarzWeiss\bin\%BUILD%\SlideShowShader.SchwarzWeiss.pdb" ^
     "%TARGET_SHADER%\Schwarz-Weiss.ssss" ^
     "%TARGET_SHADER%\Schwarz-Weiss.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.ToenenFaerben\bin\%BUILD%\SlideShowShader.ToenenFaerben.dll" ^
-    "%ROOT%\SlideShowShader.ToenenFaerben\bin\%BUILD%\SlideShowShader.ToenenFaerben.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.ToenenFaerben\bin\%BUILD%\SlideShowShader.ToenenFaerben.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.ToenenFaerben\bin\%BUILD%\SlideShowShader.ToenenFaerben.pdb" ^
     "%TARGET_SHADER%\Toenen und Faerben.ssss" ^
     "%TARGET_SHADER%\Toenen und Faerben.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.PixelArt\bin\%BUILD%\SlideShowShader.PixelArt.dll" ^
-    "%ROOT%\SlideShowShader.PixelArt\bin\%BUILD%\SlideShowShader.PixelArt.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.PixelArt\bin\%BUILD%\SlideShowShader.PixelArt.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.PixelArt\bin\%BUILD%\SlideShowShader.PixelArt.pdb" ^
     "%TARGET_SHADER%\PixelArt.ssss" ^
     "%TARGET_SHADER%\PixelArt.pdb"
 if errorlevel 1 goto :Error
 
 call :ExportPlugin ^
-    "%ROOT%\SlideShowShader.LUT\bin\%BUILD%\SlideShowShader.LUT.dll" ^
-    "%ROOT%\SlideShowShader.LUT\bin\%BUILD%\SlideShowShader.LUT.pdb" ^
+    "%SOURCE_SHADER%\SlideShowShader.LUT\bin\%BUILD%\SlideShowShader.LUT.dll" ^
+    "%SOURCE_SHADER%\SlideShowShader.LUT\bin\%BUILD%\SlideShowShader.LUT.pdb" ^
     "%TARGET_SHADER%\LUT.ssss" ^
     "%TARGET_SHADER%\LUT.pdb"
 if errorlevel 1 goto :Error
-
 
 :: ============================================================================
 :: ORTSDATEN
@@ -272,7 +280,7 @@ if errorlevel 1 goto :Error
 :: Direct3D / Vortice / SharpGen
 :: ============================================================================
 
-set "D3D_SOURCE=%ROOT%\SlideShowTransition.BrennendesPapier\bin\%BUILD%"
+set "D3D_SOURCE=%SOURCE_TRANSITIONS%\SlideShowTransition.BrennendesPapier\bin\%BUILD%"
 
 call :CopyRuntime ^
     "%D3D_SOURCE%\Vortice.Direct3D11.dll" ^
