@@ -2170,8 +2170,8 @@ Friend Class D3DRenderer
         PruefeRenderBereitschaft()
 
         InitialisiereBildzustand()
-        InitialisierePigmentzustand()
         InitialisiereWasserzustand()
+        InitialisierePigmentzustand()
 
         SimuliereCurtisWasser(TEST_CURTIS_ITERATIONEN)
 

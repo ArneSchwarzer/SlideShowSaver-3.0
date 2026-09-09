@@ -4,21 +4,46 @@
 //
 // Aufgabe:
 //
-//      Erzeugt aus
+//      Rendert den sichtbaren Pigmentzustand aus:
 //
-//          suspendiertem Pigment
-//          +
-//          abgelagertem Pigment
+//          - suspendierter Pigmentmasse
+//          - abgelagerter Pigmentmasse
+//          - Hintergrundfarbe
 //
-//      die sichtbare Aquarellfarbe.
+// Ab diesem Entwicklungsstand besitzen Suspension und Deposit dieselbe
+// Semantik:
 //
-// Pigmentdarstellung:
+//      RGB = premultiplizierte Pigmentfarbe / Pigmentmasse pro Fläche
+//      A   = Pigmentmasse pro Fläche
 //
-//      RGB = premultiplizierte Pigmentfarbe
-//      A   = Pigmentmenge
+// Deshalb können beide Zustände direkt addiert werden:
 //
-// Suspension und Deposit werden für die Anzeige wieder zu einer
-// Gesamtpigmentmenge vereinigt.
+//      totalPigmentMass
+//
+//          =
+//
+//      suspensionMass + depositMass
+//
+// Die eigentliche Pigmentfarbe ergibt sich anschließend aus:
+//
+//      pigmentColor
+//
+//          =
+//
+//      totalPremultipliedColor / totalPigmentAmount
+//
+// Die gesamte Pigmentmenge bestimmt die sichtbare Deckung gegenüber der
+// Hintergrundfarbe.
+//
+// WICHTIG:
+//
+// Pressure wird für die Darstellung NICHT mehr benötigt.
+//
+// Der Wasserzustand beeinflusst das Bild ausschließlich indirekt über:
+//
+//      - Pigmenttransport
+//      - Adsorption
+//      - Desorption
 //
 // ============================================================================
 
@@ -27,6 +52,8 @@
 // Constant Buffer
 //
 // exakt 16 Byte
+//
+// Muss PigmentDisplayConstants auf VB-Seite entsprechen.
 // ============================================================================
 
 cbuffer PigmentDisplayConstants : register(b0)
@@ -41,14 +68,22 @@ cbuffer PigmentDisplayConstants : register(b0)
 // ============================================================================
 // Eingaben
 //
-// t0 = suspendiertes Pigment
-// t1 = abgelagertes Pigment
+// t0 = suspendierte Pigmentmasse
+//
+//      RGB = premultiplizierte Pigmentfarbe / Masse
+//      A   = suspendierte Pigmentmasse
+//
+// t1 = abgelagerte Pigmentmasse
+//
+//      RGB = premultiplizierte Pigmentfarbe / Masse
+//      A   = abgelagerte Pigmentmasse
+//
 // ============================================================================
 
 Texture2D<float4> suspensionTexture : register(t0);
 Texture2D<float4> depositTexture : register(t1);
 
-SamplerState sourceSampler : register(s0);
+SamplerState linearSampler : register(s0);
 
 
 // ============================================================================
@@ -66,29 +101,29 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 {
     VSOutput output;
 
-    float2 positions[3] =
+    float2 position;
+    float2 texCoord;
+
+
+    if (vertexId == 0)
     {
-        float2(-1.0F, -1.0F),
-        float2(-1.0F, 3.0F),
-        float2(3.0F, -1.0F)
-    };
-
-    float2 texCoords[3] =
+        position = float2(-1.0F, -1.0F);
+        texCoord = float2(0.0F, 1.0F);
+    }
+    else if (vertexId == 1)
     {
-        float2(0.0F, 1.0F),
-        float2(0.0F, -1.0F),
-        float2(2.0F, 1.0F)
-    };
+        position = float2(-1.0F, 3.0F);
+        texCoord = float2(0.0F, -1.0F);
+    }
+    else
+    {
+        position = float2(3.0F, -1.0F);
+        texCoord = float2(2.0F, 1.0F);
+    }
 
 
-    output.position =
-        float4(
-            positions[vertexId],
-            0.0F,
-            1.0F
-        );
-
-    output.texCoord = texCoords[vertexId];
+    output.position = float4(position, 0.0F, 1.0F);
+    output.texCoord = texCoord;
 
 
     return output;
@@ -101,58 +136,111 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 
 float4 PSMain(VSOutput input) : SV_TARGET
 {
-    float4 suspension;
-    float4 deposit;
+    float4 suspensionMass;
+    float4 depositMass;
+
+    float4 totalPigmentMass;
 
     float3 totalPremultipliedColor;
     float totalPigmentAmount;
 
     float3 pigmentColor;
-    float3 backgroundColor;
 
     float visibleAmount;
+
+    float4 backgroundColor;
     float3 resultColor;
 
 
     // ========================================================================
     // Pigmentzustände lesen
+    //
+    // SampleLevel mit normalisierten Texturkoordinaten ist hier absichtlich
+    // gewählt.
+    //
+    // Der Shader kann dadurch auch in einem Teil-Viewport gerendert werden,
+    // ohne dass SV_POSITION fälschlich als absolute Position innerhalb der
+    // vollständigen Pigmenttexturen interpretiert wird.
     // ========================================================================
 
-    suspension =
+    suspensionMass =
         max(
-            suspensionTexture.SampleLevel(sourceSampler, input.texCoord, 0.0F),
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            suspensionTexture.SampleLevel(
+                linearSampler,
+                input.texCoord,
+                0.0F
+            ),
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
-    deposit =
+    depositMass =
         max(
-            depositTexture.SampleLevel(sourceSampler, input.texCoord, 0.0F),
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            depositTexture.SampleLevel(
+                linearSampler,
+                input.texCoord,
+                0.0F
+            ),
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
 
     // ========================================================================
     // Gesamtpigment
     //
-    // Beide Texturen speichern:
+    // Beide Zustände besitzen dieselbe Einheit:
     //
-    //      RGB = Farbe * Pigmentmenge
-    //      A   = Pigmentmenge
+    //      Pigmentmasse pro Fläche
     //
-    // Deshalb können beide Zustände direkt addiert werden.
+    // Deshalb ist die Addition jetzt unmittelbar korrekt.
     // ========================================================================
+
+    totalPigmentMass =
+        suspensionMass +
+        depositMass;
 
     totalPremultipliedColor =
-        suspension.rgb +
-        deposit.rgb;
+        totalPigmentMass.rgb;
 
     totalPigmentAmount =
-        suspension.a +
-        deposit.a;
+        max(
+            totalPigmentMass.a,
+            0.0F
+        );
 
 
     // ========================================================================
-    // Pigmentfarbe zurückgewinnen
+    // Hintergrundfarbe
+    // ========================================================================
+
+    backgroundColor =
+        float4(
+            backgroundRed,
+            backgroundGreen,
+            backgroundBlue,
+            backgroundAlpha
+        );
+
+
+    // ========================================================================
+    // Pigmentfarbe rekonstruieren
+    //
+    // RGB wurde mit der Pigmentmasse premultipliziert gespeichert.
+    //
+    // Deshalb:
+    //
+    //      color = premultipliedColor / amount
+    //
+    // Bei pigmentfreiem Pixel vermeiden wir die Division vollständig.
     // ========================================================================
 
     if (totalPigmentAmount > 0.000001F)
@@ -164,42 +252,47 @@ float4 PSMain(VSOutput input) : SV_TARGET
     else
     {
         pigmentColor =
-            float3(
-                backgroundRed,
-                backgroundGreen,
-                backgroundBlue
-            );
+            backgroundColor.rgb;
     }
 
 
     // ========================================================================
-    // Sichtbare Deckung
+    // Sichtbare Pigmentdeckung
     //
-    // Mehr als 1.0 Pigmentmenge bedeutet nicht mehr als vollständig deckend.
+    // Für V1 verwenden wir weiterhin die einfache lineare Abbildung:
     //
-    // Später können wir hier bei Bedarf eine optisch realistischere
-    // Pigment-/Papier-Übertragungsfunktion einsetzen.
+    //      Pigmentmasse 0 -> Hintergrund vollständig sichtbar
+    //      Pigmentmasse 1 -> Pigment vollständig sichtbar
+    //
+    // Pigmentmassen > 1 bleiben in der Simulation erhalten.
+    //
+    // Lediglich für die Darstellung wird die Deckung auf 1 begrenzt.
+    //
+    // Später kann diese Abbildung beispielsweise durch eine nichtlineare
+    // optische Dichte ersetzt werden.
     // ========================================================================
 
     visibleAmount =
-        saturate(totalPigmentAmount);
-
-
-    backgroundColor =
-        float3(
-            backgroundRed,
-            backgroundGreen,
-            backgroundBlue
+        saturate(
+            totalPigmentAmount
         );
 
 
+    // ========================================================================
+    // Darstellung
+    // ========================================================================
+
     resultColor =
         lerp(
-            backgroundColor,
+            backgroundColor.rgb,
             pigmentColor,
             visibleAmount
         );
 
 
-    return float4(resultColor, 1.0F);
+    return
+        float4(
+            saturate(resultColor),
+            backgroundColor.a
+        );
 }
