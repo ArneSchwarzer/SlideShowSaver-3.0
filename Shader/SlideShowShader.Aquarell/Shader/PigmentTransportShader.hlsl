@@ -4,56 +4,51 @@
 //
 // Aufgabe:
 //
-//      Transportiert suspendiertes Pigment zusammen mit dem Wasser.
+//      Transportiert suspendierte Pigmentmasse zusammen mit dem Wasser.
 //
 // Curtis-nahe Interpretation:
 //
 //      p   = lokale Wasserhöhe / Pressure
 //      g^k = Pigmentkonzentration im Wasser
 //
-// Die Pigmenttextur speichert derzeit:
+// Persistent gespeichert wird ab diesem Entwicklungsstand jedoch NICHT
+// mehr die Konzentration selbst.
 //
-//      RGB = premultiplizierte Pigmentfarbe / Konzentration
-//      A   = Pigmentkonzentration
+// Die PigmentSuspensionTexture enthält:
 //
-// Entscheidend:
+//      RGB = premultiplizierte suspendierte Pigmentmasse pro Fläche
+//      A   = suspendierte Pigmentmasse pro Fläche
 //
-//      Pigment wird NICHT unabhängig vom Wasser mit
+// Kurz:
 //
-//          velocity * pigment
+//      m_susp = p * g
 //
-//      transportiert.
+// Die für den Transport benötigte Konzentration wird ausschließlich
+// temporär berechnet:
 //
-// Stattdessen wird zuerst derselbe Wasserfluss bestimmt, der auch im
-// PressureFlowShader verwendet wird:
+//      g = m_susp / p
 //
-//          waterFlux = velocity * pressure
+// Der Pigmentfluss ergibt sich dann aus:
 //
-// und daran die Pigmentkonzentration gekoppelt:
+//      pigmentFlux
 //
-//          pigmentFlux = waterFlux * pigmentConcentration
+//          =
 //
-// Dadurch transportieren Wasser und Pigment dieselbe Flüssigkeitsmenge.
+//      waterFlux * pigmentConcentration
 //
-// Die konservierte Größe während des Transportes ist damit:
+// Dadurch wird genau die Pigmentmenge transportiert, die im tatsächlich
+// bewegten Wasser enthalten ist.
 //
-//          pigmentSurfaceMass = pressure * concentration
+// Der persistent gespeicherte Zustand bleibt dagegen durchgehend:
 //
-// Nach dem Transport wird aus:
+//      Pigmentmasse pro Fläche
 //
-//          neue Pigmentflächenmasse
-//          ------------------------
-//             neuer Pressure
+// Vorteile:
 //
-// wieder die lokale Pigmentkonzentration bestimmt.
-//
-// Für diesen Entwicklungsstand noch NICHT enthalten:
-//
-//      - PigmentDeposit
-//      - Adsorption
-//      - Desorption
-//      - Papierabhängige Granulation
-//      - Capillary Layer
+//      - keine Vermischung von Konzentration und Masse zwischen Shadern
+//      - kein künstlicher Trockenheits-Sonderfall
+//      - direkte Übergabe der Restmasse an PigmentDepositShader
+//      - Suspension und Deposit besitzen dieselbe physikalische Einheit
 //
 // ============================================================================
 
@@ -76,10 +71,20 @@ cbuffer PigmentTransportConstants : register(b0)
 // ============================================================================
 // Eingaben
 //
-// t0 = Pigmentkonzentration zum Zeitpunkt n
+// t0 = suspendierte Pigmentmasse zum Zeitpunkt n
 // t1 = Velocity für diese Simulationszeitscheibe
 // t2 = Pressure zum Zeitpunkt n
 // t3 = bereits berechneter Pressure zum Zeitpunkt n + 1
+//
+// WICHTIG:
+//
+// Die SuspensionTexture speichert ab jetzt MASSE und keine Konzentration.
+//
+// Die Konzentration wird aus:
+//
+//      suspensionMass / pressure
+//
+// nur temporär für die Flussberechnung rekonstruiert.
 // ============================================================================
 
 Texture2D<float4> pigmentTexture : register(t0);
@@ -125,7 +130,6 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 
 
     output.position = float4(position, 0.0F, 1.0F);
-
     output.texCoord = texCoord;
 
 
@@ -137,33 +141,142 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 // Hilfsfunktionen
 // ============================================================================
 
-int2 ClampPixelPosition( int2 pixelPosition, uint2 textureSize)
+int2 ClampPixelPosition(
+    int2 pixelPosition,
+    uint2 textureSize)
 {
-    return clamp(pixelPosition, int2(0, 0), int2(int(textureSize.x) - 1, int(textureSize.y) - 1));
+    return clamp(
+        pixelPosition,
+        int2(0, 0),
+        int2(
+            int(textureSize.x) - 1,
+            int(textureSize.y) - 1
+        )
+    );
 }
 
 
-float4 ReadPigment(int2 pixelPosition, uint2 textureSize)
+float4 ReadPigmentMass(
+    int2 pixelPosition,
+    uint2 textureSize)
 {
-    return pigmentTexture.Load(int3(ClampPixelPosition(pixelPosition, textureSize), 0));
+    return
+        max(
+            pigmentTexture.Load(
+                int3(
+                    ClampPixelPosition(
+                        pixelPosition,
+                        textureSize
+                    ),
+                    0
+                )
+            ),
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
+        );
 }
 
 
-float2 ReadVelocity(int2 pixelPosition, int2 textureSize)
+float2 ReadVelocity(
+    int2 pixelPosition,
+    uint2 textureSize)
 {
-    return velocityTexture.Load(int3(ClampPixelPosition(pixelPosition, textureSize), 0));
+    return
+        velocityTexture.Load(
+            int3(
+                ClampPixelPosition(
+                    pixelPosition,
+                    textureSize
+                ),
+                0
+            )
+        );
 }
 
 
-float ReadOldPressure(int2 pixelPosition, uint2 textureSize)
+float ReadOldPressure(
+    int2 pixelPosition,
+    uint2 textureSize)
 {
-    return oldPressureTexture.Load(int3(ClampPixelPosition(pixelPosition, textureSize), 0));
+    return
+        max(
+            oldPressureTexture.Load(
+                int3(
+                    ClampPixelPosition(
+                        pixelPosition,
+                        textureSize
+                    ),
+                    0
+                )
+            ),
+            0.0F
+        );
 }
 
 
-float ReadNewPressure(int2 pixelPosition, uint2 textureSize)
+float ReadNewPressure(
+    int2 pixelPosition,
+    uint2 textureSize)
 {
-    return newPressureTexture.Load(int3(ClampPixelPosition(pixelPosition, textureSize), 0));
+    return
+        max(
+            newPressureTexture.Load(
+                int3(
+                    ClampPixelPosition(
+                        pixelPosition,
+                        textureSize
+                    ),
+                    0
+                )
+            ),
+            0.0F
+        );
+}
+
+
+// ============================================================================
+// Konzentration aus Pigmentmasse und Wasserhöhe
+//
+//      g = m / p
+//
+// Bei praktisch trockenem Pixel existiert keine sinnvoll definierte
+// mobile Pigmentkonzentration.
+//
+// Deshalb gilt dort:
+//
+//      g = 0
+//
+// WICHTIG:
+//
+// Die eventuell noch vorhandene Pigmentmasse wird dadurch NICHT gelöscht.
+//
+// Sie bleibt persistent in der PigmentSuspensionTexture erhalten und kann
+// anschließend vom PigmentDepositShader auf das Papier übertragen werden.
+// ============================================================================
+
+float4 BerechnePigmentKonzentration(
+    float4 pigmentMass,
+    float pressure)
+{
+    if (pressure > minimumPressure)
+    {
+        return
+            pigmentMass /
+            pressure;
+    }
+
+
+    return
+        float4(
+            0.0F,
+            0.0F,
+            0.0F,
+            0.0F
+        );
 }
 
 
@@ -182,14 +295,27 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
 
     // ========================================================================
-    // Pigmentkonzentrationen
+    // Pigmentmassen
     // ========================================================================
 
-    float4 pigmentCenter;
-    float4 pigmentLeft;
-    float4 pigmentRight;
-    float4 pigmentUp;
-    float4 pigmentDown;
+    float4 pigmentMassCenter;
+    float4 pigmentMassLeft;
+    float4 pigmentMassRight;
+    float4 pigmentMassUp;
+    float4 pigmentMassDown;
+
+
+    // ========================================================================
+    // Pigmentkonzentrationen
+    //
+    // Werden ausschließlich temporär für die Flussberechnung benötigt.
+    // ========================================================================
+
+    float4 pigmentConcentrationCenter;
+    float4 pigmentConcentrationLeft;
+    float4 pigmentConcentrationRight;
+    float4 pigmentConcentrationUp;
+    float4 pigmentConcentrationDown;
 
 
     // ========================================================================
@@ -252,77 +378,229 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
 
     // ========================================================================
-    // Transportzustand
+    // Neuer Pigmentzustand
     // ========================================================================
 
-    float4 oldPigmentSurfaceMass;
     float4 pigmentFluxDivergence;
-    float4 newPigmentSurfaceMass;
-
-    float4 newPigmentConcentration;
+    float4 newPigmentMass;
 
 
     // ========================================================================
     // Texturgröße / aktuelle Pixelposition
     // ========================================================================
 
-    pigmentTexture.GetDimensions(textureWidth, textureHeight);
-    
-    textureSize = uint2(textureWidth, textureHeight);
+    pigmentTexture.GetDimensions(
+        textureWidth,
+        textureHeight
+    );
 
-    pixelPosition = int2(input.position.xy);
+    textureSize =
+        uint2(
+            textureWidth,
+            textureHeight
+        );
+
+    pixelPosition =
+        int2(
+            input.position.xy
+        );
 
 
     // ========================================================================
-    // Pigmentkonzentration zum Zeitpunkt n
+    // Suspendierte Pigmentmassen zum Zeitpunkt n
     // ========================================================================
 
-    pigmentCenter = ReadPigment(pixelPosition, textureSize);
-    pigmentLeft =   ReadPigment(pixelPosition + int2(-1, 0), textureSize);
-    pigmentRight =  ReadPigment(pixelPosition + int2(1, 0), textureSize);
-    pigmentUp =     ReadPigment(pixelPosition + int2(0, -1), textureSize);
-    pigmentDown =   ReadPigment(pixelPosition + int2(0, 1), textureSize);
+    pigmentMassCenter =
+        ReadPigmentMass(
+            pixelPosition,
+            textureSize
+        );
+
+    pigmentMassLeft =
+        ReadPigmentMass(
+            pixelPosition + int2(-1, 0),
+            textureSize
+        );
+
+    pigmentMassRight =
+        ReadPigmentMass(
+            pixelPosition + int2(1, 0),
+            textureSize
+        );
+
+    pigmentMassUp =
+        ReadPigmentMass(
+            pixelPosition + int2(0, -1),
+            textureSize
+        );
+
+    pigmentMassDown =
+        ReadPigmentMass(
+            pixelPosition + int2(0, 1),
+            textureSize
+        );
 
 
     // ========================================================================
     // Wasserhöhe / Pressure zum Zeitpunkt n
     // ========================================================================
 
-    pressureCenter = ReadOldPressure(pixelPosition, textureSize);
-    pressureLeft =   ReadOldPressure(pixelPosition + int2(-1, 0), textureSize);
-    pressureRight =  ReadOldPressure(pixelPosition + int2(1, 0), textureSize);
-    pressureUp =     ReadOldPressure(pixelPosition + int2(0, -1), textureSize);
-    pressureDown =   ReadOldPressure(pixelPosition + int2(0, 1), textureSize);
+    pressureCenter =
+        ReadOldPressure(
+            pixelPosition,
+            textureSize
+        );
+
+    pressureLeft =
+        ReadOldPressure(
+            pixelPosition + int2(-1, 0),
+            textureSize
+        );
+
+    pressureRight =
+        ReadOldPressure(
+            pixelPosition + int2(1, 0),
+            textureSize
+        );
+
+    pressureUp =
+        ReadOldPressure(
+            pixelPosition + int2(0, -1),
+            textureSize
+        );
+
+    pressureDown =
+        ReadOldPressure(
+            pixelPosition + int2(0, 1),
+            textureSize
+        );
 
 
     // ========================================================================
     // Bereits berechnete neue Wasserhöhe
+    //
+    // Für die persistente Pigmentmasse benötigen wir sie nicht mehr zur
+    // Rekonstruktion einer Konzentration.
+    //
+    // Sie wird trotzdem gelesen, weil sie den Wasserzustand n + 1 beschreibt
+    // und für Konsistenzkontrollen / spätere Erweiterungen bereitsteht.
     // ========================================================================
 
-    newPressureCenter = ReadNewPressure(pixelPosition, textureSize);
+    newPressureCenter =
+        ReadNewPressure(
+            pixelPosition,
+            textureSize
+        );
+
+
+    // ========================================================================
+    // Pigmentkonzentrationen rekonstruieren
+    //
+    //      g = m / p
+    //
+    // Nur diese Konzentrationen werden für den eigentlichen Pigmentfluss
+    // verwendet.
+    // ========================================================================
+
+    pigmentConcentrationCenter =
+        BerechnePigmentKonzentration(
+            pigmentMassCenter,
+            pressureCenter
+        );
+
+    pigmentConcentrationLeft =
+        BerechnePigmentKonzentration(
+            pigmentMassLeft,
+            pressureLeft
+        );
+
+    pigmentConcentrationRight =
+        BerechnePigmentKonzentration(
+            pigmentMassRight,
+            pressureRight
+        );
+
+    pigmentConcentrationUp =
+        BerechnePigmentKonzentration(
+            pigmentMassUp,
+            pressureUp
+        );
+
+    pigmentConcentrationDown =
+        BerechnePigmentKonzentration(
+            pigmentMassDown,
+            pressureDown
+        );
 
 
     // ========================================================================
     // Velocity
     // ========================================================================
 
-    velocityCenter = ReadVelocity(pixelPosition, textureSize);
-    velocityLeft =   ReadVelocity(pixelPosition + int2(-1, 0), textureSize);
-    velocityRight =  ReadVelocity(pixelPosition + int2(1, 0), textureSize);
-    velocityUp =     ReadVelocity(pixelPosition + int2(0, -1), textureSize);
-    velocityDown =   ReadVelocity(pixelPosition + int2(0, 1), textureSize);
+    velocityCenter =
+        ReadVelocity(
+            pixelPosition,
+            textureSize
+        );
+
+    velocityLeft =
+        ReadVelocity(
+            pixelPosition + int2(-1, 0),
+            textureSize
+        );
+
+    velocityRight =
+        ReadVelocity(
+            pixelPosition + int2(1, 0),
+            textureSize
+        );
+
+    velocityUp =
+        ReadVelocity(
+            pixelPosition + int2(0, -1),
+            textureSize
+        );
+
+    velocityDown =
+        ReadVelocity(
+            pixelPosition + int2(0, 1),
+            textureSize
+        );
 
 
     // ========================================================================
     // Geschwindigkeit an den Zellflächen
     //
-    // Exakt dieselbe Grundidee wie im PressureFlowShader.
+    // Dieselbe Grundidee wie im PressureFlowShader.
     // ========================================================================
 
-    velocityFaceLeft =  0.5F * (velocityLeft.x + velocityCenter.x);
-    velocityFaceRight = 0.5F * (velocityCenter.x + velocityRight.x);
-    velocityFaceUp =    0.5F * (velocityUp.y + velocityCenter.y);
-    velocityFaceDown =  0.5F * (velocityCenter.y + velocityDown.y);
+    velocityFaceLeft =
+        0.5F *
+        (
+            velocityLeft.x +
+            velocityCenter.x
+        );
+
+    velocityFaceRight =
+        0.5F *
+        (
+            velocityCenter.x +
+            velocityRight.x
+        );
+
+    velocityFaceUp =
+        0.5F *
+        (
+            velocityUp.y +
+            velocityCenter.y
+        );
+
+    velocityFaceDown =
+        0.5F *
+        (
+            velocityCenter.y +
+            velocityDown.y
+        );
 
 
     // ========================================================================
@@ -353,51 +631,65 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // ========================================================================
     // Wasserfluss
     //
-    // WICHTIG:
+    // Upwind-Schema:
     //
-    // Wie beim PressureFlowShader entscheidet die Flussrichtung,
-    // aus welcher Zelle die transportierte Wassermenge stammt.
-    //
-    // Dieser Wasserfluss ist die Grundlage des Pigmenttransportes.
+    // Die Flussrichtung entscheidet, aus welcher Zelle die tatsächlich
+    // transportierte Wassermenge stammt.
     // ========================================================================
 
     if (velocityFaceLeft >= 0.0F)
     {
-        waterFluxLeft = velocityFaceLeft * pressureLeft;
+        waterFluxLeft =
+            velocityFaceLeft *
+            pressureLeft;
     }
     else
     {
-        waterFluxLeft = velocityFaceLeft * pressureCenter;
+        waterFluxLeft =
+            velocityFaceLeft *
+            pressureCenter;
     }
 
 
     if (velocityFaceRight >= 0.0F)
     {
-        waterFluxRight = velocityFaceRight * pressureCenter;
+        waterFluxRight =
+            velocityFaceRight *
+            pressureCenter;
     }
     else
     {
-        waterFluxRight = velocityFaceRight * pressureRight;
+        waterFluxRight =
+            velocityFaceRight *
+            pressureRight;
     }
 
 
     if (velocityFaceUp >= 0.0F)
     {
-        waterFluxUp = velocityFaceUp * pressureUp;
+        waterFluxUp =
+            velocityFaceUp *
+            pressureUp;
     }
     else
     {
-        waterFluxUp = velocityFaceUp * pressureCenter;
+        waterFluxUp =
+            velocityFaceUp *
+            pressureCenter;
     }
 
 
     if (velocityFaceDown >= 0.0F)
     {
-        waterFluxDown = velocityFaceDown * pressureCenter;
+        waterFluxDown =
+            velocityFaceDown *
+            pressureCenter;
     }
     else
     {
-        waterFluxDown = velocityFaceDown * pressureDown;
+        waterFluxDown =
+            velocityFaceDown *
+            pressureDown;
     }
 
 
@@ -417,137 +709,140 @@ float4 PSMain(VSOutput input) : SV_TARGET
     // ========================================================================
     // Pigmentfluss
     //
-    // PigmentFlux =
+    //      pigmentFlux
     //
-    //      Wasserfluss
+    //          =
+    //
+    //      waterFlux
     //          *
-    //      Pigmentkonzentration der Upwind-Zelle
+    //      pigmentConcentration der Upwind-Zelle
     //
-    // Damit transportieren wir nicht mehr eine unabhängige Pigmentdichte,
-    // sondern die im tatsächlich bewegten Wasser enthaltene Pigmentmenge.
+    // Die Konzentration wird aus der gespeicherten Pigmentmasse und dem
+    // Pressure der jeweiligen Upwind-Zelle rekonstruiert.
     // ========================================================================
 
     if (waterFluxLeft >= 0.0F)
     {
-        pigmentFluxLeft = waterFluxLeft * pigmentLeft;
+        pigmentFluxLeft =
+            waterFluxLeft *
+            pigmentConcentrationLeft;
     }
     else
     {
-        pigmentFluxLeft = waterFluxLeft * pigmentCenter;
+        pigmentFluxLeft =
+            waterFluxLeft *
+            pigmentConcentrationCenter;
     }
 
 
     if (waterFluxRight >= 0.0F)
     {
-        pigmentFluxRight = waterFluxRight * pigmentCenter;
+        pigmentFluxRight =
+            waterFluxRight *
+            pigmentConcentrationCenter;
     }
     else
     {
-        pigmentFluxRight = waterFluxRight * pigmentRight;
+        pigmentFluxRight =
+            waterFluxRight *
+            pigmentConcentrationRight;
     }
 
 
     if (waterFluxUp >= 0.0F)
     {
-        pigmentFluxUp = waterFluxUp * pigmentUp;
+        pigmentFluxUp =
+            waterFluxUp *
+            pigmentConcentrationUp;
     }
     else
     {
-        pigmentFluxUp = waterFluxUp * pigmentCenter;
+        pigmentFluxUp =
+            waterFluxUp *
+            pigmentConcentrationCenter;
     }
 
 
     if (waterFluxDown >= 0.0F)
     {
-        pigmentFluxDown = waterFluxDown * pigmentCenter;
+        pigmentFluxDown =
+            waterFluxDown *
+            pigmentConcentrationCenter;
     }
     else
     {
-        pigmentFluxDown = waterFluxDown * pigmentDown;
+        pigmentFluxDown =
+            waterFluxDown *
+            pigmentConcentrationDown;
     }
-
-
-    // ========================================================================
-    // Alte Pigmentflächenmasse
-    //
-    // Konzentration allein ist NICHT die konservierte Größe.
-    //
-    //      Masse pro Fläche = Wasserhöhe * Konzentration
-    // ========================================================================
-
-    oldPigmentSurfaceMass = pigmentCenter * pressureCenter;
 
 
     // ========================================================================
     // Divergenz des Pigment-Massenflusses
     // ========================================================================
 
-    pigmentFluxDivergence = (pigmentFluxRight - pigmentFluxLeft) + (pigmentFluxDown - pigmentFluxUp);
+    pigmentFluxDivergence =
+        (pigmentFluxRight - pigmentFluxLeft)
+        +
+        (pigmentFluxDown - pigmentFluxUp);
 
 
     // ========================================================================
-    // Neue Pigmentflächenmasse
+    // Neue suspendierte Pigmentmasse
+    //
+    // Die PigmentSuspensionTexture speichert bereits die konservierte Größe.
+    //
+    // Deshalb ist KEINE anschließende Division durch newPressure mehr nötig.
+    //
+    // Das ist der entscheidende Unterschied zum bisherigen Shader.
     // ========================================================================
 
-    newPigmentSurfaceMass = oldPigmentSurfaceMass - timeStep * pigmentFluxDivergence;
+    newPigmentMass =
+        pigmentMassCenter
+        -
+        timeStep *
+        pigmentFluxDivergence;
 
 
     // ========================================================================
     // Numerisches Sicherheitsnetz
     //
     // Negative Pigmentmasse ist unmöglich.
-    // ========================================================================
-
-    newPigmentSurfaceMass = max(newPigmentSurfaceMass, float4(0.0F, 0.0F, 0.0F, 0.0F));
-
-
-    // ========================================================================
-    // Neue Konzentration rekonstruieren
-    //
-    //      g_neu = m_neu / p_neu
-    //
-    // Solange Wasser vorhanden ist, ergibt sich daraus wieder die
-    // Pigmentkonzentration.
-    //
-    // ------------------------------------------------------------------------
-    // Übergangsregel bis PigmentDeposit implementiert ist:
-    //
-    // Bei praktisch trockenem Pixel behalten wir den bisherigen
-    // Pigmentzustand.
-    //
-    // Warum?
-    //
-    // Im endgültigen Modell müsste dort suspendiertes Pigment in den
-    // Deposit-Zustand übergehen. Diesen Schritt besitzen wir noch nicht.
-    //
-    // Würden wir das Pigment jetzt stattdessen einfach löschen, würden
-    // künstlich pigmentfreie / hintergrundfarbene Linien entstehen.
-    //
-    // Diese Regel wird mit Einführung von Adsorption/Deposit wieder
-    // entfernt.
-    // ========================================================================
-
-    if (newPressureCenter > minimumPressure)
-    {
-        newPigmentConcentration = newPigmentSurfaceMass / newPressureCenter;
-    }
-    else
-    {
-        newPigmentConcentration = pigmentCenter;
-    }
-
-
-    // ========================================================================
-    // Auch die rekonstruierte Konzentration darf nicht negativ sein.
     //
     // Nach oben wird bewusst NICHT geklemmt.
     //
-    // Lokal erhöhte Konzentrationen sind erlaubt und später gerade für
-    // Pigmentablagerung / dunklere Aquarellsäume interessant.
+    // Lokale Pigmentakkumulation ist erlaubt und später insbesondere für
+    // dunklere Aquarellsäume und Granulation interessant.
     // ========================================================================
 
-    newPigmentConcentration = max(newPigmentConcentration, float4(0.0F, 0.0F, 0.0F, 0.0F));
+    newPigmentMass =
+        max(
+            newPigmentMass,
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
+        );
 
 
-    return newPigmentConcentration;
+    // ========================================================================
+    // Ausgabe
+    //
+    // KEINE Konzentrationsrekonstruktion.
+    // KEINE Trockenheits-Notlösung.
+    //
+    // Ausgegeben wird direkt:
+    //
+    //      suspendierte Pigmentmasse pro Fläche
+    //
+    // Selbst wenn newPressure praktisch 0 ist, bleibt eventuell vorhandene
+    // Pigmentmasse damit erhalten.
+    //
+    // Der anschließend laufende PigmentDepositShader entscheidet darüber,
+    // welcher Anteil davon auf dem Papier abgelagert wird.
+    // ========================================================================
+
+    return newPigmentMass;
 }

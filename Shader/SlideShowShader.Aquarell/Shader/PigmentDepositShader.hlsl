@@ -4,43 +4,63 @@
 //
 // Aufgabe:
 //
-//      Tauscht Pigment zwischen zwei Zuständen aus:
+//      Tauscht Pigment zwischen zwei massenbasierten Zuständen aus:
 //
-//          Suspension  = Pigment, das im Wasser transportiert wird
-//          Deposit     = Pigment, das auf / im Papier abgelagert ist
+//          Suspension
+//              = im Wasser bewegliche Pigmentmasse pro Fläche
+//
+//          Deposit
+//              = auf / im Papier abgelagerte Pigmentmasse pro Fläche
+//
+// Beide Zustände besitzen damit ab diesem Entwicklungsstand dieselbe
+// physikalische Bedeutung und dieselbe Einheit.
 //
 // Curtis-nahe Interpretation:
 //
-//      g^k = suspendierte Pigmentkonzentration
-//      d^k = auf dem Papier abgelagertes Pigment
+//      m_susp
+//          = suspendierte Pigmentmasse pro Fläche
 //
-// Dieser Entwicklungsstand modelliert:
+//      d
+//          = abgelagerte Pigmentmasse pro Fläche
 //
-//      Adsorption:
-//          Suspension -> Deposit
+//      p
+//          = lokale Wasserhöhe / Pressure
 //
-//      Desorption:
-//          Deposit -> Suspension
+// Die Pigmentkonzentration
 //
-// WICHTIG:
+//      g = m_susp / p
 //
-//      Der Shader erzeugt oder vernichtet KEIN Pigment.
+// wird für diesen Deposit-Pass NICHT benötigt.
 //
-//      Was aus der Suspension entfernt wird,
-//      wird exakt dem Deposit hinzugefügt.
+// Der Pressure bestimmt hier ausschließlich, wie stark Pigment adsorbiert
+// beziehungsweise wieder desorbiert wird.
 //
-//      Was aus dem Deposit desorbiert wird,
-//      wird exakt der Suspension hinzugefügt.
+// ---------------------------------------------------------------------------
 //
-// Damit gilt lokal:
+// Adsorption:
 //
-//      PigmentGesamt_neu = PigmentGesamt_alt
+//      Suspension -> Deposit
+//
+// Desorption:
+//
+//      Deposit -> Suspension
+//
+// Der Austausch ist lokal massenerhaltend:
+//
+//      m_susp_neu + d_neu
+//
+//          =
+//
+//      m_susp_alt + d_alt
+//
+// Es wird also weder Pigment erzeugt noch vernichtet.
 //
 // Für V1.0 besitzt das Papier noch KEINE eigene AbsorbencyMap.
-// Die vorhandene PaperMap beschreibt ausschließlich die Papierhöhe
-// und beeinflusst bereits die Wasserströmung.
 //
-// Eine echte papierabhängige Absorption folgt später.
+// Die vorhandene PaperMap beschreibt ausschließlich die Papierhöhe und
+// beeinflusst bereits die Wasserströmung.
+//
+// Eine papierabhängige Adsorption / Desorption kann später ergänzt werden.
 //
 // ============================================================================
 
@@ -72,16 +92,25 @@ cbuffer PigmentDepositConstants : register(b0)
 // ============================================================================
 // Eingaben
 //
-// t0 = bereits transportierte Pigment-Suspension
+// t0 = bereits transportierte suspendierte Pigmentmasse
+//
+//      RGB = premultiplizierte Pigmentfarbe / Pigmentmasse
+//      A   = suspendierte Pigmentmasse
+//
 // t1 = bisheriger Pigment-Deposit
+//
+//      RGB = premultiplizierte Pigmentfarbe / Pigmentmasse
+//      A   = abgelagerte Pigmentmasse
+//
 // t2 = bereits berechneter Pressure zum Zeitpunkt n + 1
 //
 // WICHTIG:
 //
 // Der Deposit-Pass läuft NACH dem PigmentTransport.
 //
-// Deshalb enthält suspensionTexture bereits das Transportergebnis
-// derselben Curtis-Iteration.
+// suspensionTexture enthält deshalb bereits die durch den Transport
+// berechnete neue suspendierte Pigmentmasse.
+//
 // ============================================================================
 
 Texture2D<float4> suspensionTexture : register(t0);
@@ -136,8 +165,8 @@ VSOutput VSMain(uint vertexId : SV_VertexID)
 // ============================================================================
 // MRT-Ausgabe
 //
-// Target 0 = neue Suspension
-// Target 1 = neuer Deposit
+// Target 0 = neue suspendierte Pigmentmasse
+// Target 1 = neuer Pigment-Deposit
 // ============================================================================
 
 struct PigmentDepositOutput
@@ -161,12 +190,20 @@ PigmentDepositOutput PSMain(VSOutput input)
     int2 pixelPosition;
 
 
-    float4 oldSuspension;
-    float4 oldDeposit;
+    // ------------------------------------------------------------------------
+    // Eingangszustände
+    // ------------------------------------------------------------------------
+
+    float4 oldSuspensionMass;
+    float4 oldDepositMass;
 
     float pressure;
     float normalizedPressure;
 
+
+    // ------------------------------------------------------------------------
+    // Austauschparameter
+    // ------------------------------------------------------------------------
 
     float adsorptionRate;
     float desorptionRate;
@@ -175,49 +212,95 @@ PigmentDepositOutput PSMain(VSOutput input)
     float desorptionFactor;
 
 
-    float4 adsorbedPigment;
-    float4 desorbedPigment;
+    // ------------------------------------------------------------------------
+    // Ausgetauschte Pigmentmassen
+    // ------------------------------------------------------------------------
+
+    float4 adsorbedPigmentMass;
+    float4 desorbedPigmentMass;
 
 
-    float4 newSuspension;
-    float4 newDeposit;
+    // ------------------------------------------------------------------------
+    // Neue Zustände
+    // ------------------------------------------------------------------------
+
+    float4 newSuspensionMass;
+    float4 newDepositMass;
 
 
     // ========================================================================
     // Aktuelle Pixelposition
     // ========================================================================
 
-    suspensionTexture.GetDimensions(textureWidth, textureHeight);
+    suspensionTexture.GetDimensions(
+        textureWidth,
+        textureHeight
+    );
 
-    pixelPosition = int2(input.position.xy);
+    pixelPosition =
+        int2(
+            input.position.xy
+        );
 
     pixelPosition =
         clamp(
             pixelPosition,
             int2(0, 0),
-            int2(int(textureWidth) - 1, int(textureHeight) - 1)
+            int2(
+                int(textureWidth) - 1,
+                int(textureHeight) - 1
+            )
         );
 
 
     // ========================================================================
     // Zustände lesen
+    //
+    // Beide Pigmenttexturen enthalten bereits PigmentMASSE pro Fläche.
+    //
+    // Es ist deshalb KEINE Umrechnung über Pressure notwendig.
     // ========================================================================
 
-    oldSuspension =
+    oldSuspensionMass =
         max(
-            suspensionTexture.Load(int3(pixelPosition, 0)),
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            suspensionTexture.Load(
+                int3(
+                    pixelPosition,
+                    0
+                )
+            ),
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
-    oldDeposit =
+    oldDepositMass =
         max(
-            depositTexture.Load(int3(pixelPosition, 0)),
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            depositTexture.Load(
+                int3(
+                    pixelPosition,
+                    0
+                )
+            ),
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
     pressure =
         max(
-            pressureTexture.Load(int3(pixelPosition, 0)),
+            pressureTexture.Load(
+                int3(
+                    pixelPosition,
+                    0
+                )
+            ),
             0.0F
         );
 
@@ -225,24 +308,27 @@ PigmentDepositOutput PSMain(VSOutput input)
     // ========================================================================
     // Pressure normieren
     //
-    // referencePressure bedeutet:
+    // referencePressure definiert den für die Austauschlogik als vollständig
+    // nass betrachteten Zustand:
+    //
+    //      pressure <= 0
+    //          -> normalizedPressure = 0
     //
     //      pressure >= referencePressure
-    //          -> vollständig "nass"
+    //          -> normalizedPressure = 1
     //
-    //      pressure == 0
-    //          -> vollständig "trocken"
+    // Pressure verändert NICHT die vorhandene Pigmentmasse.
     //
-    // Die Normierung dient ausschließlich der Adsorptions-/
-    // Desorptionslogik.
-    //
-    // Der eigentliche Pressure-Zustand wird nicht verändert.
+    // Er steuert ausschließlich die Stärke von Adsorption und Desorption.
     // ========================================================================
 
     normalizedPressure =
         saturate(
             pressure /
-            max(referencePressure, minimumPressure)
+            max(
+                referencePressure,
+                minimumPressure
+            )
         );
 
 
@@ -251,37 +337,47 @@ PigmentDepositOutput PSMain(VSOutput input)
     //
     // Wenig Wasser:
     //
-    //      Pigment wird eher auf dem Papier abgelagert.
+    //      stärkere Ablagerung auf dem Papier
     //
     // Viel Wasser:
     //
-    //      Pigment bleibt eher in Suspension.
+    //      Pigment bleibt stärker mobil
     //
-    // adsorptionStrength beschreibt die Stärke der Adsorption pro
-    // Simulationseinheit.
+    // Bei vollständig trockenem Zustand:
     //
-    // Erst durch Multiplikation mit timeStep wird daraus die tatsächlich
-    // in DIESER Curtis-Iteration wirksame Rate.
+    //      adsorptionRate = adsorptionStrength
+    //
+    // Bei referencePressure oder darüber:
+    //
+    //      adsorptionRate = 0
     // ========================================================================
 
     adsorptionRate =
-        adsorptionStrength *
+        max(
+            adsorptionStrength,
+            0.0F
+        )
+        *
         (1.0F - normalizedPressure);
 
 
     // ========================================================================
     // Desorptionsrate
     //
-    // Deposit kann nur wieder mobilisiert werden, wenn überhaupt Wasser
-    // vorhanden ist.
+    // Nur vorhandenes Wasser kann bereits abgelagertes Pigment wieder
+    // mobilisieren.
     //
-    // Je stärker die Benetzung, desto größer die mögliche Desorption.
+    // Deshalb steigt die Desorption mit normalizedPressure.
     // ========================================================================
 
     if (pressure > minimumPressure)
     {
         desorptionRate =
-            desorptionStrength *
+            max(
+                desorptionStrength,
+                0.0F
+            )
+            *
             normalizedPressure;
     }
     else
@@ -291,49 +387,58 @@ PigmentDepositOutput PSMain(VSOutput input)
 
 
     // ========================================================================
-    // Rate -> Anteil dieser Curtis-Iteration
+    // Austauschrate -> Anteil dieser Curtis-Iteration
     //
-    // timeStep koppelt Adsorption und Desorption an dieselbe zeitliche
-    // Diskretisierung wie die übrige Simulation.
+    // Für V1 verwenden wir bewusst:
     //
-    // saturate stellt sicher:
+    //      factor = rate * dt
     //
-    //      0 <= Faktor <= 1
+    // saturate garantiert:
     //
-    // Somit kann innerhalb einer Iteration niemals mehr Pigment übertragen
-    // werden, als im jeweiligen Zustand vorhanden ist.
+    //      0 <= factor <= 1
+    //
+    // Damit kann in einer einzelnen Iteration niemals mehr Pigment
+    // übertragen werden, als im jeweiligen Zustand vorhanden ist.
     // ========================================================================
 
     adsorptionFactor =
         saturate(
             adsorptionRate *
-            max(timeStep, 0.0F)
+            max(
+                timeStep,
+                0.0F
+            )
         );
 
     desorptionFactor =
         saturate(
             desorptionRate *
-            max(timeStep, 0.0F)
+            max(
+                timeStep,
+                0.0F
+            )
         );
 
 
     // ========================================================================
-    // Tatsächlich ausgetauschte Pigmentmengen
+    // Tatsächlich ausgetauschte Pigmentmassen
+    //
+    // Jetzt ist die Rechnung dimensionsmäßig sauber:
+    //
+    //      Masse * dimensionsloser Anteil = Masse
     // ========================================================================
 
-    adsorbedPigment =
-        oldSuspension *
+    adsorbedPigmentMass =
+        oldSuspensionMass *
         adsorptionFactor;
 
-    desorbedPigment =
-        oldDeposit *
+    desorbedPigmentMass =
+        oldDepositMass *
         desorptionFactor;
 
 
     // ========================================================================
     // Neue Zustände
-    //
-    // Massenerhaltend:
     //
     // Suspension:
     //
@@ -347,49 +452,69 @@ PigmentDepositOutput PSMain(VSOutput input)
     //      + Adsorption
     //      - Desorption
     //
-    // Dadurch gilt lokal weiterhin:
+    // Damit gilt lokal exakt:
     //
-    //      newSuspension + newDeposit
+    //      newSuspensionMass + newDepositMass
     //
     //          =
     //
-    //      oldSuspension + oldDeposit
+    //      oldSuspensionMass + oldDepositMass
     // ========================================================================
 
-    newSuspension =
-        oldSuspension
-        - adsorbedPigment
-        + desorbedPigment;
+    newSuspensionMass =
+        oldSuspensionMass
+        - adsorbedPigmentMass
+        + desorbedPigmentMass;
 
-    newDeposit =
-        oldDeposit
-        + adsorbedPigment
-        - desorbedPigment;
+    newDepositMass =
+        oldDepositMass
+        + adsorbedPigmentMass
+        - desorbedPigmentMass;
 
 
     // ========================================================================
     // Numerisches Sicherheitsnetz
+    //
+    // Negative Pigmentmassen sind unmöglich.
+    //
+    // Nach oben wird bewusst NICHT geklemmt.
     // ========================================================================
 
-    newSuspension =
+    newSuspensionMass =
         max(
-            newSuspension,
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            newSuspensionMass,
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
-    newDeposit =
+    newDepositMass =
         max(
-            newDeposit,
-            float4(0.0F, 0.0F, 0.0F, 0.0F)
+            newDepositMass,
+            float4(
+                0.0F,
+                0.0F,
+                0.0F,
+                0.0F
+            )
         );
 
 
     // ========================================================================
     // MRT-Ausgabe
+    //
+    // Beide Targets speichern dieselbe Art von Größe:
+    //
+    //      Pigmentmasse pro Fläche
+    //
+    // Es findet KEINE Konzentrationsrekonstruktion mehr statt.
     // ========================================================================
 
-    output.suspension = newSuspension;
-    output.deposit = newDeposit;
+    output.suspension = newSuspensionMass;
+    output.deposit = newDepositMass;
 
 
     return output;

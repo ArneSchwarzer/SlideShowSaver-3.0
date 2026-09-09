@@ -2241,11 +2241,13 @@ Friend Class D3DRenderer
         renderContext.PSSetShader(pigmentInitializerPixelShader)
 
         renderContext.PSSetShaderResource(0UI, kuwaharaView)
+        renderContext.PSSetShaderResource(1UI, sourcePressureView)
         renderContext.PSSetSampler(0UI, renderSampler)
 
         renderContext.Draw(3UI, 0UI)
 
         renderContext.PSSetShaderResource(0UI, Nothing)
+        renderContext.PSSetShaderResource(1UI, Nothing)
 
         D3D11InteropHelper.UnbindRenderTarget(renderContext)
 
