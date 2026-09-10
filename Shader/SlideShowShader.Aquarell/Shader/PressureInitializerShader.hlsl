@@ -13,8 +13,19 @@
 //
 // Pressure:
 //
-//      0       = kein initialer Druck an der Regionsgrenze
-//      nahe 1  = hohe initiale Wasserhöhe im Regionsinneren
+//      pressureMinimum
+//          = minimale Wasserhöhe an der Regionsgrenze
+//
+//      nahe 1
+//          = hohe initiale Wasserhöhe im Regionsinneren
+//
+// pressureMinimum macht die aus der Kuwahara-Geometrie abgeleiteten
+// Regionsgrenzen hydraulisch durchlässiger.
+//
+// Die Regionsgrenze bleibt weiterhin ein lokales Druckminimum und erzeugt
+// damit den für Edge-Darkening gewünschten Wassertransport zum Rand.
+//
+// Sie wird jedoch nicht mehr automatisch vollständig trocken.
 //
 // ----------------------------------------------------------------------------
 // Problem der früheren linearen Abbildung
@@ -87,10 +98,10 @@
 cbuffer PressureInitializerConstants : register(b0)
 {
     float pressureDistanceScale;
+    float pressureMinimum;
 
     float reserve1;
     float reserve2;
-    float reserve3;
 };
 
 
@@ -217,20 +228,14 @@ float PSMain(VSOutput input) : SV_TARGET
     // während große Regionen nicht mehr proportional immer mächtiger werden.
     // ========================================================================
 
-    pressure =
-        1.0F -
-        exp(
-            -regionDistance /
-            safeScale);
+    pressure = pressureMinimum + (1.0F - pressureMinimum) * (1.0F - exp(-regionDistance / safeScale));
 
 
     // ========================================================================
     // Numerisches Sicherheitsnetz
     // ========================================================================
 
-    pressure =
-        saturate(
-            pressure);
+    pressure = saturate(pressure);
 
 
     return pressure;

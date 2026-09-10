@@ -65,7 +65,7 @@ Friend Class D3DRenderer
 
     Private Const PIGMENT_DEPOSIT_TIME_STEP As Single = 0.2F
 
-    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 1.0F
+    Private Const PIGMENT_DEPOSIT_ADSORPTION_STRENGTH As Single = 0.5F
     Private Const PIGMENT_DEPOSIT_DESORPTION_STRENGTH As Single = 0.0F
 
     Private Const PIGMENT_DEPOSIT_MIN_PRESSURE As Single = 0.0001F
@@ -337,10 +337,10 @@ Friend Class D3DRenderer
     Private Structure PressureInitializerConstants
 
         Public pressureDistanceScale As Single
+        Public pressureMinimum As Single
 
         Public reserve1 As Single
         Public reserve2 As Single
-        Public reserve3 As Single
 
     End Structure
 
@@ -1161,16 +1161,16 @@ Friend Class D3DRenderer
 
     End Sub
 
-    Private Sub AktualisierePressureInitializerConstantBuffer()
+    Private Sub AktualisierePressureInitializerConstantBuffer(pressureMinimum As Single)
 
         Dim pressureInitializerParameter As PressureInitializerConstants
 
-
         pressureInitializerParameter.pressureDistanceScale = PRESSURE_DISTANCE_SCALE
+
+        pressureInitializerParameter.pressureMinimum = Math.Max(0.0F, Math.Min(1.0F, pressureMinimum))
 
         pressureInitializerParameter.reserve1 = 0.0F
         pressureInitializerParameter.reserve2 = 0.0F
-        pressureInitializerParameter.reserve3 = 0.0F
 
 
         renderContext.UpdateSubresource(pressureInitializerParameter, pressureInitializerConstantBuffer)
@@ -2161,7 +2161,7 @@ Friend Class D3DRenderer
 
 #Region "Rendering"
 
-    Friend Function RenderBild() As Bitmap
+    Friend Function RenderBild(Optional pressureMinimum As Single = 0.0F) As Bitmap
 
         Dim ergebnis As Bitmap
 
@@ -2170,7 +2170,7 @@ Friend Class D3DRenderer
         PruefeRenderBereitschaft()
 
         InitialisiereBildzustand()
-        InitialisiereWasserzustand()
+        InitialisiereWasserzustand(pressureMinimum)
         InitialisierePigmentzustand()
 
         SimuliereCurtisWasser(TEST_CURTIS_ITERATIONEN)
@@ -2263,11 +2263,11 @@ Friend Class D3DRenderer
 
     End Sub
 
-    Private Sub InitialisiereWasserzustand()
+    Private Sub InitialisiereWasserzustand(pressureMinimum As Single)
 
         InitialisierePapier()
 
-        InitialisierePressure()
+        InitialisierePressure(pressureMinimum)
         InitialisiereVelocity()
 
     End Sub
@@ -2289,9 +2289,9 @@ Friend Class D3DRenderer
 
     End Sub
 
-    Private Sub InitialisierePressure()
+    Private Sub InitialisierePressure(pressureMinimum As Single)
 
-        AktualisierePressureInitializerConstantBuffer()
+        AktualisierePressureInitializerConstantBuffer(pressureMinimum)
 
         renderContext.OMSetRenderTargets(sourcePressureTargetView)
 

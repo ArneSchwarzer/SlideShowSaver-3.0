@@ -88,7 +88,7 @@ Public Class ShaderMain
 
             renderer.Initialisiere(baseImage)
 
-            ergebnis = renderer.RenderBild()
+            ergebnis = renderer.RenderBild(0.4)
 
             Return ergebnis
 
