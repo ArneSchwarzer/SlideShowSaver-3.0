@@ -29,11 +29,16 @@ Partial Class frmMain
         btnFolderBrowserDialog = New Button()
         Label2 = New Label()
         lblModus = New Label()
-        lbErgebnisse = New ListBox()
         btnAnalyse = New Button()
         btnSynchronisation = New Button()
         btnBeenden = New Button()
         cbUnterschiede = New CheckBox()
+        DataGridView1 = New DataGridView()
+        colDatei = New DataGridViewTextBoxColumn()
+        colBridgeBewertung = New DataGridViewTextBoxColumn()
+        colWindowsBewertung = New DataGridViewTextBoxColumn()
+        colStatus = New DataGridViewTextBoxColumn()
+        CType(DataGridView1, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' cbUnterordner
@@ -90,14 +95,6 @@ Partial Class frmMain
         lblModus.TabIndex = 5
         lblModus.Text = "Analyse"
         ' 
-        ' lbErgebnisse
-        ' 
-        lbErgebnisse.FormattingEnabled = True
-        lbErgebnisse.Location = New Point(33, 255)
-        lbErgebnisse.Name = "lbErgebnisse"
-        lbErgebnisse.Size = New Size(928, 411)
-        lbErgebnisse.TabIndex = 6
-        ' 
         ' btnAnalyse
         ' 
         btnAnalyse.Location = New Point(493, 697)
@@ -109,6 +106,7 @@ Partial Class frmMain
         ' 
         ' btnSynchronisation
         ' 
+        btnSynchronisation.Enabled = False
         btnSynchronisation.Location = New Point(736, 697)
         btnSynchronisation.Name = "btnSynchronisation"
         btnSynchronisation.Size = New Size(225, 52)
@@ -135,24 +133,67 @@ Partial Class frmMain
         cbUnterschiede.Text = "Nur Unterschiede anzeigen"
         cbUnterschiede.UseVisualStyleBackColor = True
         ' 
-        ' frmBrideRatinSynchronizer
+        ' DataGridView1
+        ' 
+        DataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        DataGridView1.Columns.AddRange(New DataGridViewColumn() {colDatei, colBridgeBewertung, colWindowsBewertung, colStatus})
+        DataGridView1.Location = New Point(32, 266)
+        DataGridView1.Name = "DataGridView1"
+        DataGridView1.RowHeadersWidth = 92
+        DataGridView1.Size = New Size(929, 407)
+        DataGridView1.TabIndex = 11
+        ' 
+        ' colDatei
+        ' 
+        colDatei.Frozen = True
+        colDatei.HeaderText = "Datei"
+        colDatei.MinimumWidth = 11
+        colDatei.Name = "colDatei"
+        colDatei.Width = 225
+        ' 
+        ' colBridgeBewertung
+        ' 
+        colBridgeBewertung.Frozen = True
+        colBridgeBewertung.HeaderText = "Bridge"
+        colBridgeBewertung.MinimumWidth = 11
+        colBridgeBewertung.Name = "colBridgeBewertung"
+        colBridgeBewertung.Width = 225
+        ' 
+        ' colWindowsBewertung
+        ' 
+        colWindowsBewertung.Frozen = True
+        colWindowsBewertung.HeaderText = "Windows"
+        colWindowsBewertung.MinimumWidth = 11
+        colWindowsBewertung.Name = "colWindowsBewertung"
+        colWindowsBewertung.Width = 225
+        ' 
+        ' colStatus
+        ' 
+        colStatus.Frozen = True
+        colStatus.HeaderText = "Status"
+        colStatus.MinimumWidth = 11
+        colStatus.Name = "colStatus"
+        colStatus.Width = 225
+        ' 
+        ' frmMain
         ' 
         AutoScaleDimensions = New SizeF(15F, 37F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(990, 848)
+        Controls.Add(DataGridView1)
         Controls.Add(cbUnterschiede)
         Controls.Add(btnBeenden)
         Controls.Add(btnSynchronisation)
         Controls.Add(btnAnalyse)
-        Controls.Add(lbErgebnisse)
         Controls.Add(lblModus)
         Controls.Add(Label2)
         Controls.Add(btnFolderBrowserDialog)
         Controls.Add(tbOrdner)
         Controls.Add(Label1)
         Controls.Add(cbUnterordner)
-        Name = "frmBrideRatinSynchronizer"
+        Name = "frmMain"
         Text = "BridgeRatingSynchronizer"
+        CType(DataGridView1, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -164,10 +205,14 @@ Partial Class frmMain
     Friend WithEvents btnFolderBrowserDialog As Button
     Friend WithEvents Label2 As Label
     Friend WithEvents lblModus As Label
-    Friend WithEvents lbErgebnisse As ListBox
     Friend WithEvents btnAnalyse As Button
     Friend WithEvents btnSynchronisation As Button
     Friend WithEvents btnBeenden As Button
     Friend WithEvents cbUnterschiede As CheckBox
+    Friend WithEvents DataGridView1 As DataGridView
+    Friend WithEvents colDatei As DataGridViewTextBoxColumn
+    Friend WithEvents colBridgeBewertung As DataGridViewTextBoxColumn
+    Friend WithEvents colWindowsBewertung As DataGridViewTextBoxColumn
+    Friend WithEvents colStatus As DataGridViewTextBoxColumn
 
 End Class
