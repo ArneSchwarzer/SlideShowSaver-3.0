@@ -4,6 +4,8 @@ Imports MetadataExtractor
 Imports MetadataExtractor.Formats.Exif
 Imports MetadataExtractor.Formats.Iptc
 Imports MetadataExtractor.Formats.Xmp
+Imports System.Drawing
+Imports System.Drawing.Imaging
 
 Public Class MetaDataHandling
 
