@@ -74,6 +74,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowWPFTransition.Schi
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "SlideShowWPFTransition.Zoom", "Transitions\SlideShowWPFTransition.Zoom\SlideShowWPFTransition.Zoom.vbproj", "{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "BridgeRatingSyncronizer", "Tools\BridgeRatingSyncronizer\BridgeRatingSyncronizer.vbproj", "{F5D0247E-7613-4FB1-8411-F0F95228F615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -298,6 +300,14 @@ Global
 		{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D}.Release|x64.ActiveCfg = Release|x64
 		{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D}.Release|x64.Build.0 = Release|x64
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Debug|x64.Build.0 = Debug|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Release|x64.ActiveCfg = Release|Any CPU
+		{F5D0247E-7613-4FB1-8411-F0F95228F615}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -322,6 +332,7 @@ Global
 		{5DB70E48-66FF-4DFA-954A-4A6A151728C8} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{40FDB6FE-BD9E-4EBB-84C7-A07A2BCAF55A} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
 		{AFE3AAF8-85F5-446A-AA3E-9D3AA292C91D} = {675BFEBC-D14D-4E03-9AD5-BB7534E68261}
+		{F5D0247E-7613-4FB1-8411-F0F95228F615} = {21990C67-99A5-4E9A-8145-A8DDC96E2647}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {30992369-3D61-4821-9848-76A5250AE114}
